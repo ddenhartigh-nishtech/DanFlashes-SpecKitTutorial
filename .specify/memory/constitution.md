@@ -21,31 +21,41 @@ Dan Flashes.
 
 ### II. Complexity Is the Price (NON-NEGOTIABLE)
 
-The price of every shirt MUST come from its pattern complexity score through a single, documented,
-deterministic pricing function.
+Every shirt has a suggested MSRP that comes from its complexity score, and the store owner sets the
+final price.
 
-- The complexity score MUST be computed from measurable pattern attributes. The feature spec defines
-  them (e.g., distinct colors, motif count, layers, symmetry breaks).
-- The pricing function MUST be monotonic. A more complicated pattern MUST NEVER cost less.
+- The store owner assigns each shirt's complexity score in the catalog data. The owner's judgment
+  of how complicated a shirt is, is final.
+- The **MSRP algorithm** MUST be a single, documented, deterministic, exponential function of the
+  complexity score. It MUST live in exactly one place in the codebase.
+- The MSRP algorithm MUST be monotonic: a higher score MUST NEVER produce a lower MSRP. Its tuning
+  parameters (such as the starting price and how fast prices climb) MUST be owner-adjustable
+  settings, not code changes.
+- The owner MAY set a **final price** for any shirt in the catalog data. When none is set, the final
+  price is the MSRP. The final price is what the store displays and charges.
+- When a final price breaks the complexity order (a shirt costs less than a less complicated one),
+  the catalog check MUST warn the owner. It MUST NOT block the price. The owner may have reasons.
 - There is no price ceiling. More complicated means more expensive, forever.
-- The function MUST live in exactly one place in the codebase. Manual per-shirt price overrides are
-  prohibited.
 - Every displayed price MUST sit next to its complexity score, shown loudly and as a point of pride.
 
-Rationale: the shirts are expensive because the patterns are complicated. That's the whole brand.
+Rationale: the shirts are expensive because the patterns are complicated. The math suggests the
+price, and Dan decides it.
 
 ### III. Relentlessly Vibrant
 
-Every shirt MUST pass a measurable vibrancy standard defined in the catalog spec (e.g., minimum
-saturation and minimum number of distinct hues).
+Vibrancy is curated by the store owner, not measured by software. The catalog MUST be
+overwhelmingly loud.
 
-- The standard MUST be enforced automatically when a shirt enters the catalog. A shirt that fails is
-  rejected. It is not discounted.
-- Muted, pastel, monochrome, and earth-tone shirts are banned. Beige is for guys who've given up.
+- Muted, pastel, monochrome, and earth-tone shirts MAY appear only as **bland shirts**: explicit
+  foils, flagged as bland in the catalog data, that exist so the store can disparage them and steer
+  him toward something more complicated. Beige is for guys who've given up.
+- Bland shirts sit at the bottom of the price curve, below the starting price of a real Dan Flashes
+  shirt.
 - Product imagery is the hero. It MUST be high-resolution and zoomable so he can count every shape
   he's paying for.
 
-Rationale: a Dan Flashes shirt is recognizable from the far end of the food court.
+Rationale: a Dan Flashes shirt is recognizable from the far end of the food court. A bland shirt
+exists only to make that point louder.
 
 ### IV. Aggressively Upbeat, Shamelessly Manipulative
 
@@ -61,6 +71,10 @@ feature, and it is played completely straight:
   "Are you _sure_ sure?"
 - **Per diem drain.** The store tracks how much of his per diem is left and celebrates when it hits
   $0.
+- **Checkout gate.** He can build a cart as a guest, but he can't check out until he makes an
+  account.
+- **Bland-shirt shaming.** Buying a bland shirt means getting asked "You sure about that?" again and
+  again, with copy that disparages the kind of guy who wears basic attire.
 
 Every tactic MUST be its own named feature with an on/off switch, so it can be specced, tested, demoed,
 and turned up.
@@ -82,14 +96,17 @@ Rationale: the brand is literally called Dan _Flashes_.
 
 ### VI. Money Math Is Test-First (NON-NEGOTIABLE)
 
-The prices are ridiculous, but the math behind them MUST NOT be. Pricing, cart totals, add-ons, and
-checkout MUST be developed test-first: write the tests, watch them fail, then implement
-(Red → Green → Refactor).
+The prices are ridiculous, but the math behind them MUST NOT be. Pricing, cart totals, add-ons,
+Flash Credit balances, and checkout MUST be developed test-first: write the tests, watch them fail,
+then implement (Red → Green → Refactor).
 
-- The pricing function MUST have table-driven or property-based tests proving determinism and
-  monotonicity.
-- Checkout MUST have at least one end-to-end happy-path test that runs in the payment provider's test
-  mode.
+- The MSRP algorithm MUST have table-driven or property-based tests proving determinism and
+  monotonicity. Final-price resolution (owner price, else MSRP) and the complexity-order warning
+  MUST be tested.
+- Checkout MUST have at least one end-to-end happy-path test for each payment method (faux card and
+  Flash Credit).
+- Flash Credit MUST have tests proving that the balance always equals the sum of its ledger entries
+  and never goes below zero.
 - Other business logic MUST have unit tests. UI-only changes are tested at the author's discretion.
 
 Rationale: the joke only lands if the $1,400 shirt actually rings up at $1,400.
@@ -118,13 +135,15 @@ Rationale: the complexity goes in the product, never in the architecture.
 
 ## Commerce & Security Constraints
 
-- **Joke store, fake money.** Payments MUST run in the payment provider's test mode in every
-  environment. Live keys MUST NEVER exist in this project. The manipulation is the bit; real charges
-  are not.
-- **No raw card data.** Checkout goes through a hosted, tokenized payment provider. The app never
-  touches card numbers.
-- **Server-authoritative pricing.** At checkout the server MUST recompute every price from the
-  complexity score. Prices sent from the client MUST NEVER be trusted.
+- **Joke store, fake money.** The store MUST NOT integrate with any real payment processor. Every
+  payment is faux. The manipulation is the bit; real charges are not.
+- **Card numbers are props.** The faux card form checks only that a number is card-shaped (valid
+  format and checksum, a future expiry, a CVC). The full number and the CVC MUST NEVER be stored or
+  logged. Only the brand and last four digits are kept.
+- **Flash Credit is a ledger.** Every change to a balance (top-up, spend, refund) MUST be recorded as
+  an entry. The balance is derived from the entries and MUST NEVER go negative.
+- **Server-authoritative pricing.** At checkout the server MUST re-resolve every final price from
+  the catalog. Prices sent from the client MUST NEVER be trusted.
 - **Integer money.** Money MUST be stored and calculated as integer minor units (cents) with an
   explicit currency. Floating-point math on money is prohibited.
 - **Secrets stay out of git.** Secrets live in environment configuration. `.env.example` documents every
@@ -140,7 +159,7 @@ Rationale: the complexity goes in the product, never in the architecture.
 - **What before how.** `spec.md` covers what and why only. Technology choices belong in `plan.md`.
 - **Constitution Check gate.** Every `plan.md` MUST pass its Constitution Check before research and
   again after design. Any violation MUST be justified in Complexity Tracking.
-- **Analyze the money.** Features that touch pricing, cart, add-ons, or checkout MUST run
+- **Analyze the money.** Features that touch pricing, cart, add-ons, Flash Credit, or checkout MUST run
   `/speckit-analyze` before `/speckit-implement`, and every CRITICAL finding MUST be resolved.
 - **Branches and PRs.** Work happens on feature branches and merges to `main` by pull request. Each PR
   links its spec, and all tests MUST pass before merge.
@@ -161,4 +180,4 @@ Rationale: the complexity goes in the product, never in the architecture.
   and `/speckit-analyze`. A violation needs either a Complexity Tracking justification or an amendment.
 - Like every Dan Flashes sale, this constitution is final until amended.
 
-**Version**: 1.0.0 | **Ratified**: 2026-10-12 | **Last Amended**: 2026-10-12
+**Version**: 2.0.0 | **Ratified**: 2026-10-12 | **Last Amended**: 2026-10-12

@@ -120,8 +120,8 @@ the bio, and follow Exhibit A to the most expensive active shirt.
 ### Edge Cases
 
 - **Switch flipped mid-loop**: the store applies the setting in effect when a shirt would actually
-  be added. If shaming is turned off while the dialog is open, the next attempt to add the bland
-  shirt from the page succeeds.
+  be added. A page already open keeps the behavior it loaded with. Once shaming is turned off, the
+  bland shirt adds normally after the page is reloaded.
 - **A shirt re-tiered** (the owner moves BLAND's range): whether a shirt is bland is decided at the
   moment it would be added.
 - **Bland lines already in a cart** (added in 001, or while shaming was off): they stay and can be

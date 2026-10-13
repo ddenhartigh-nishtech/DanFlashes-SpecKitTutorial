@@ -46,8 +46,9 @@ See `specs/001-core-storefront/research.md`. Only the new decisions are recorded
   the gag hold even if the dialog is skipped. The ladder ordering reveals relative complexity, as
   the listing's "Most Complicated" sort already does, but never a number.
 - **Pure logic** (unit-tested) lives in `src/lib/shaming/loop.ts`:
-  - `buildLadder(shirts, tiers)`: active and non-bland, ascending complexity, mapped to shopper
-    shirts
+  - `buildLadder(shirts)`: takes catalog shirts, which already carry `tier.isBland`. Keeps active,
+    non-bland shirts in ascending complexity, one per distinct score so every step is strictly more
+    complicated, and maps them to shopper shirts.
   - `recommendationFor(round, ladder)`
   - `lineOrder(poolSize, random)`: a shuffled permutation, re-shuffled when exhausted, never
     repeating the previous line across the cycle boundary

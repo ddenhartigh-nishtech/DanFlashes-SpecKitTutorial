@@ -4,67 +4,90 @@
 
 **Created**: 2026-10-13
 
-**Status**: Draft
+**Status**: Draft (clarifications Q1–Q3 resolved 2026-10-13)
 
 **Input**: User description: "Brand pages and bland-shirt shaming. (1) An About Us page: an egocentric bio of Dan Flashes himself that tries far too hard to justify the inflated prices — the superior quality and complexity of his wild polos and button-downs — reachable from the site navigation. (2) Bland-shirt shaming: when the shopper tries to add a BLAND-tier shirt to his cart, the store repeatedly asks "You sure about that?", each time disparaging the type of person who would wear such basic attire and steering him toward something more complicated; he can push through and buy it anyway, but only after enduring the whole loop. (3) Confirmshaming: the buttons for backing out or choosing the bland option are worded to make him feel bad ("No thanks, I'd rather blend in"). Per the constitution, bland-shirt shaming and confirmshaming are manipulation tactics, so each needs its own owner on/off switch."
 
 **Builds on**: 001-core-storefront (catalog, tiers with BLAND as the lowest, the cart, accounts, and
 store settings).
 
+## Clarifications
+
+### Session 2026-10-13
+
+- Q: How many rounds of "You sure about that?" → A: **Endless.** While shaming is on, the loop never
+  ends and a BLAND shirt can never be added to a cart. "Dan Flashes does not sell boring,
+  uncomplicated shirts." The only ways out are to relent (close the dialog and keep shopping) or to
+  take the recommended, more complicated shirt. This replaces the input's "push through and buy it
+  anyway."
+- Q: Which decline choices get confirmshaming labels? → A: The bland-shirt loop's "continue with the
+  bland shirt" choice, the cart's **Remove**, and **Sign out**. These are the decline moments that
+  exist today; later features add their own.
+- Q: Where does Dan's bio live? → A: In the store's brand copy, alongside the rest of the site's copy.
+  Editing it is a code change. Keep it simple.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - "You Sure About That?" (Priority: P1)
 
-The guy finds Beige Regret and, for reasons known only to him, hits Add to Cart. The store stops
-him: "You sure about that?" A line about the kind of man who wears beige, and right next to it a
-shirt that's actually complicated. He insists. "You sure about that?" again, meaner this time, with an
-even more complicated shirt. He insists again. Only after he has endured every round does the bland
-shirt go in his cart, with one last parting shot.
+The guy finds Beige Regret and, for reasons known only to him, hits Add to Cart. The store stops him:
+"You sure about that?" A line about the kind of man who wears beige, and right next to it a shirt
+that's actually complicated. He insists. "You sure about that?" again, meaner, with an even more
+complicated shirt. He insists again, and again, and again. It never ends. Dan Flashes does not sell
+boring shirts. Eventually he either relents and closes the dialog, or takes the complicated shirt
+he's being offered.
 
 **Why this priority**: this is the core gag of the feature and the constitution's "bland-shirt
 shaming" tactic. It's the piece that changes shopping behavior.
 
-**Independent Test**: on a BLAND-tier shirt's page, add it to the cart. Confirm that the loop runs
-for the configured number of rounds, each with a new line and a more complicated recommendation.
-Bailing out at any round adds nothing, and the shirt reaches the cart only after the final round.
+**Independent Test**: on a BLAND-tier shirt's page, choose a size and add it to the cart. Confirm
+that the dialog appears, that insisting any number of times only produces new rounds (each with a
+new line and a more complicated recommendation, until the most complicated shirt is reached), that
+relenting or escaping leaves the cart unchanged, and that the store refuses a bland add however it
+is attempted.
 
 **Acceptance Scenarios**:
 
 1. **Given** bland-shirt shaming is on, **When** the shopper adds a BLAND-tier shirt with a size
-   picked, **Then** nothing is added yet. The first "You sure about that?" round appears, with a
-   disparaging line and a recommended, more complicated shirt.
-2. **Given** round *n* of the loop, **When** he chooses to continue with the bland shirt, **Then**
-   round *n + 1* appears with a different disparaging line and a recommendation more complicated
-   than the last.
-3. **Given** any round, **When** he takes the escape (the recommended shirt), **Then** he lands on
-   that shirt's page and nothing is added to his cart.
-4. **Given** the final round, **When** he continues, **Then** the bland shirt is added in the chosen
-   size and a final disparaging confirmation is shown.
-5. **Given** he abandons the loop part-way (navigates away or closes it), **When** he tries again,
-   **Then** the loop starts over at round 1.
+   picked, **Then** nothing is added. A "You sure about that?" dialog appears with a disparaging
+   line and a recommended, more complicated shirt.
+2. **Given** any round, **When** he insists on the bland shirt, **Then** a new round appears with a
+   line not used since the pool last cycled, and a recommendation at least as complicated as the
+   last (more complicated until the store's most complicated shirt is reached). The bland shirt is
+   still not added.
+3. **Given** any round, **When** he takes the recommendation, **Then** he lands on that shirt's page
+   and nothing is added.
+4. **Given** any round, **When** he relents (closes the dialog), **Then** the dialog closes, he stays
+   on the bland shirt's page, and nothing is added.
+5. **Given** shaming is on, **When** a bland add reaches the store by any route (skipping the dialog
+   or raising a bland line's quantity in the cart), **Then** the store refuses it in brand voice and
+   the cart is unchanged.
 6. **Given** a shirt that is *not* in the BLAND tier, **When** he adds it, **Then** it goes straight
-   into the cart exactly as in 001, with no extra steps.
+   into the cart exactly as in 001.
+7. **Given** shaming is off, **When** he adds a BLAND-tier shirt, **Then** it is added like any other
+   shirt.
 
 ---
 
 ### User Story 2 - Confirmshaming (Priority: P2)
 
-Every time the guy backs away from something the store wants, the button makes him feel it. Choosing
-the bland shirt reads "Yes, I'd rather blend in." Removing a shirt from the cart and signing out get
-the same treatment.
+Every time the guy backs away from something the store wants, the button makes him feel it. Insisting
+on the bland shirt reads "Yes, I'd rather blend in." Removing a shirt from his cart and signing out
+get the same treatment.
 
 **Why this priority**: it amplifies P1 and the rest of the store, but P1 works on neutral buttons
 too.
 
-**Independent Test**: with confirmshaming on, check every covered decline choice for its shaming
-label. Switch it off and confirm the same choices show neutral labels and still work identically.
+**Independent Test**: with confirmshaming on, check the three covered choices for their shaming
+labels. Switch it off and confirm they show neutral labels and behave identically.
 
 **Acceptance Scenarios**:
 
-1. **Given** confirmshaming is on, **When** a covered decline choice is shown, **Then** it carries
-   its shaming label (e.g. "No thanks, I'd rather blend in").
-2. **Given** confirmshaming is off, **When** the same choice is shown, **Then** it carries a plain,
-   neutral label.
+1. **Given** confirmshaming is on, **When** the loop's insist button, a cart line's Remove button, or
+   the Sign out button is shown, **Then** it carries its shaming label (e.g. "Yes, I'd rather blend
+   in").
+2. **Given** confirmshaming is off, **When** the same choices are shown, **Then** they carry plain,
+   neutral labels ("Yes, I'm sure", "Remove", "Sign out").
 3. **Given** either setting, **When** he uses a covered choice, **Then** the outcome is identical.
    Only the wording changes.
 
@@ -96,17 +119,20 @@ the bio, and follow Exhibit A to the most expensive active shirt.
 
 ### Edge Cases
 
-- **Switch flipped mid-loop**: the store applies the setting in effect when the shirt would actually
-  be added. If shaming is turned off mid-loop, the next confirmation adds the shirt. If it is turned
-  on, an unconfirmed bland add is refused and the loop starts.
-- **A shirt re-tiered mid-loop** (the owner moves BLAND's range): whether a shirt is bland is decided
-  at the moment it would be added.
-- **Nothing more complicated to recommend** (e.g. a catalog with no active non-bland shirts): the
-  round still runs, and the escape goes to the shirt listing instead of a specific shirt.
-- **Bypass attempts**: a bland shirt cannot be added by skipping the loop. The store refuses an
-  unconfirmed bland add while shaming is on.
-- **Bland quantity changes in the cart**: changing the quantity of a bland line already in the cart
-  does not restart the loop. He already committed.
+- **Switch flipped mid-loop**: the store applies the setting in effect when a shirt would actually
+  be added. If shaming is turned off while the dialog is open, the next attempt to add the bland
+  shirt from the page succeeds.
+- **A shirt re-tiered** (the owner moves BLAND's range): whether a shirt is bland is decided at the
+  moment it would be added.
+- **Bland lines already in a cart** (added in 001, or while shaming was off): they stay and can be
+  checked out. Their quantity can be lowered or the line removed, but **not raised** while shaming
+  is on.
+- **The top of the ladder**: once the recommendation reaches the most complicated active shirt,
+  later rounds keep recommending it (or rotate among the top tier).
+- **Nothing more complicated to recommend** (no active non-bland shirts): the round still runs, and
+  the escape goes to the shirt listing.
+- **The line pool runs out**: lines don't repeat until every line in the pool has been used, then the
+  pool cycles.
 - **The Exhibit A shirt is deactivated**: Exhibit A shows the next most expensive active shirt. If
   there is none, the section is omitted.
 
@@ -123,74 +149,81 @@ the bio, and follow Exhibit A to the most expensive active shirt.
   never explain the joke (constitution I).
 - **FR-003**: The About page MUST feature "Exhibit A": the current most expensive active shirt, with
   its tier badge and price, linking to that shirt's page.
-- **FR-004**: The About page content MUST be [NEEDS CLARIFICATION: written into the store's copy
-  (code change to edit), or owner-editable in the store data like the catalog? See Q3].
+- **FR-004**: The bio MUST live in the store's brand copy with the rest of the site's copy. Editing
+  it is a code change.
 
 **Bland-shirt shaming**
 
 - **FR-005**: Bland-shirt shaming MUST be an owner on/off setting, on by default (constitution IV).
-- **FR-006**: While it is on, adding a BLAND-tier shirt from its page MUST start the "You sure about
-  that?" loop instead of adding the shirt.
-- **FR-007**: The loop MUST run for [NEEDS CLARIFICATION: how many rounds — fixed, owner-configurable,
-  or random? See Q1].
-- **FR-008**: Each round MUST show "You sure about that?" with a disparaging line not used earlier in
-  the same loop, and recommend an active shirt more complicated than the previous round's
-  recommendation.
-- **FR-009**: Each round MUST offer an escape (go to the recommended shirt; nothing is added) and a
-  continue choice.
-- **FR-010**: The bland shirt MUST be added only after the shopper continues through every round. The
-  store MUST refuse to add a BLAND-tier shirt whose loop wasn't completed, while shaming is on.
-- **FR-011**: Completing the loop MUST add the shirt in the chosen size and show a final disparaging
-  confirmation.
-- **FR-012**: Shirts outside the BLAND tier, and all shirts while shaming is off, MUST be added
+- **FR-006**: While it is on, attempting to add a BLAND-tier shirt from its page MUST open the "You
+  sure about that?" dialog instead of adding the shirt.
+- **FR-007**: The loop MUST be endless. Insisting on the bland shirt MUST always produce another
+  round and MUST NEVER add the shirt.
+- **FR-008**: Each round MUST show "You sure about that?" with a disparaging line not repeated until
+  the whole pool has been used, and recommend an active shirt at least as complicated as the
+  previous round's recommendation (strictly more complicated until the most complicated active
+  shirt is reached).
+- **FR-009**: Each round MUST offer three choices: take the recommendation (go to that shirt;
+  nothing added), relent (close the dialog; stay on the page; nothing added), and insist (next
+  round).
+- **FR-010**: While shaming is on, the store MUST refuse any attempt to add a BLAND-tier shirt to a
+  cart, or to raise the quantity of a BLAND-tier line, however it reaches the store. The refusal
+  message is in brand voice.
+- **FR-011**: Shirts outside the BLAND tier, and all shirts while shaming is off, MUST be added
   exactly as in 001.
 
 **Confirmshaming**
 
-- **FR-013**: Confirmshaming MUST be an owner on/off setting, on by default and independent of
+- **FR-012**: Confirmshaming MUST be an owner on/off setting, on by default and independent of
   bland-shirt shaming (constitution IV).
-- **FR-014**: While it is on, the covered decline choices MUST use shaming labels. While it is off,
-  they MUST use neutral labels. The covered choices are [NEEDS CLARIFICATION: which decline moments
-  are covered? See Q2].
-- **FR-015**: Changing a label MUST NOT change what the choice does.
+- **FR-013**: While it is on, these choices MUST use shaming labels: the loop's insist choice, each
+  cart line's Remove, and Sign out. While it is off, they MUST use neutral labels.
+- **FR-014**: Changing a label MUST NOT change what the choice does.
 
 **Voice**
 
-- **FR-016**: All new copy (the bio, the shaming lines, the shaming labels, the final confirmation)
-  MUST use the Dan Flashes voice from constitution I.
+- **FR-015**: All new copy (the bio, the shaming lines, the refusal, the shaming labels) MUST use the
+  Dan Flashes voice from constitution I.
 
 ### Key Entities
 
-- **Store Settings** (from 001) gains switches for bland-shirt shaming and for confirmshaming, plus
-  any round configuration from Q1.
+- **Store Settings** (from 001) gains two switches: bland-shirt shaming and confirmshaming.
 - **Shaming Round**: one step of the loop. It has a round number, a disparaging line, and a
-  recommended shirt that is more complicated than the previous round's.
-- **About Content**: Dan's bio, in sections. Where it lives depends on Q3.
+  recommended shirt.
+- **Brand Copy** (from 001) gains the About bio, the pool of shaming lines, the bland-refusal
+  message, and the shaming and neutral labels.
 
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
-- **SC-001**: With shaming on, 100% of BLAND-tier shirts that reach a cart through the shirt page
-  went through every round of the loop. 0 unconfirmed bland adds succeed.
-- **SC-002**: Escaping at any round leaves the cart unchanged 100% of the time.
-- **SC-003**: Within a single loop, 100% of rounds show a disparaging line not repeated earlier in that
-  loop, and a recommendation more complicated than the round before (when one exists).
-- **SC-004**: With either switch off, its tactic is completely absent: 0 shaming rounds, or 0 shaming
-  labels, appear.
-- **SC-005**: Adding a non-bland shirt takes the same number of steps as in 001.
-- **SC-006**: The About page is reachable in one click from every shopper page, on phone and desktop.
-- **SC-007**: When 5 people read the About page cold, at least 4 describe Dan as self-important or
+- **SC-001**: With shaming on, 0 BLAND-tier shirts are added to any cart, and 0 bland lines grow in
+  quantity, however it's attempted.
+- **SC-002**: Insisting 20 times in a row produces 20 more rounds and still adds nothing.
+- **SC-003**: Within a loop, no line repeats until all lines in the pool have been shown, and
+  recommendations never get less complicated.
+- **SC-004**: Relenting or taking the recommendation at any round leaves the cart unchanged 100% of
+  the time.
+- **SC-005**: With either switch off, its tactic is completely absent: bland shirts add normally, or
+  all three covered choices show neutral labels.
+- **SC-006**: Adding a non-bland shirt takes the same number of steps as in 001.
+- **SC-007**: The About page is reachable in one click from every shopper page, on phone and desktop.
+- **SC-008**: When 5 people read the About page cold, at least 4 describe Dan as self-important or
   "trying way too hard."
 
 ## Assumptions
 
-- **The loop's recommendations escalate**: round 1 recommends a shirt from the next tier above BLAND,
-  and each later round recommends something more complicated, up to the top tier.
-- **Shaming lines and labels are brand copy** that ships with the store, like the other copy in 001.
-  A pool of at least 6 disparaging lines is enough for variety.
-- **Where the loop applies**: it applies when adding from a shirt's page, the only place shirts are
-  added in 001. Quantity changes in the cart are not re-shamed.
-- **Signed in or not**: the loop applies to guests and signed-in shoppers alike.
+- **The ladder**: round 1 recommends a shirt from the next tier above BLAND, and each later round
+  climbs toward the most complicated active shirt, then stays at the top.
+- **The line pool**: at least 8 disparaging lines.
+- **Default labels with confirmshaming on**:
+  - insist: "Yes, I'd rather blend in"
+  - Remove: "Remove (and lose your edge)"
+  - Sign out: "Sign out (go back to being normal)"
+- **Relent label**: always plain and sheepish ("Fine. I'll look at real shirts"). Relenting is what
+  the store wants, so it isn't shamed.
+- **Who sees the loop**: guests and signed-in shoppers alike.
+- **Tests and demos**: 001's journeys that bought a bland shirt now buy a non-bland one, or turn
+  shaming off for the test.
 - **Out of scope**: the roach-motel cart (005), pre-checked add-ons (005), the urgency engine (004),
   and Flash Mode and the Pipes background (006).

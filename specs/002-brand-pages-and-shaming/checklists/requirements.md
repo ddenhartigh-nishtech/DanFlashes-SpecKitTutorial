@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [ ] No [NEEDS CLARIFICATION] markers remain
+- [x] No [NEEDS CLARIFICATION] markers remain
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic (no implementation details)
@@ -35,3 +35,9 @@
   FR-004 About content storage (Q3). All other items pass.
 - Both tactics are switch-gated per constitution IV, and the bypass refusal (FR-010) keeps the gag
   enforced by the store, not just displayed.
+- Iteration 2 (2026-10-13): the owner answered Q1 endless (bland shirts are never added while
+  shaming is on), Q2 B (loop insist + cart Remove + Sign out), and Q3 A (bio in brand copy). The spec
+  was rewritten around the endless loop: FR-007/FR-010 refuse bland adds and bland quantity raises
+  at the store. All items pass.
+- No constitution amendment is needed: Principle IV's "asked 'You sure about that?' again and again"
+  is satisfied, and the switch still allows selling bland shirts when off.

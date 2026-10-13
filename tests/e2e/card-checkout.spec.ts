@@ -38,6 +38,8 @@ test.describe("US3 — checkout gate, account, faux card", () => {
     await visible(page.getByRole("button", { name: /Place order/ })).click();
     await expect(page).toHaveURL(/\/orders\/\d+$/);
     await expect(visible(page.getByTestId("payment"))).toHaveText("Charged to Visa ending 4242");
+    // Bug fix (2026-10-13): the header count must clear as soon as the order is placed.
+    await expect(page.getByTestId("cart-count")).toHaveCount(0);
     await expect(visible(page.getByTestId("total"))).toHaveText(subtotal);
 
     // History, and the line links back to the shirt.

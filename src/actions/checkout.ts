@@ -12,7 +12,10 @@ export async function placeOrderAction(
   form: FormData,
 ): Promise<ActionState> {
   const state = placeOrderCore(getDb(), await cookieJar(), form);
-  if (state.ok && state.redirectTo) redirect(state.redirectTo);
+  if (state.ok && state.redirectTo) {
+    refresh(); // the cart just emptied: re-render the shared header's count too
+    redirect(state.redirectTo);
+  }
   if (!state.ok && state.code === "GATE_SIGN_IN_REQUIRED") redirect("/sign-in?next=/checkout");
   // Re-render so a changed price, audited line, or new balance shows immediately.
   if (!state.ok) refresh();

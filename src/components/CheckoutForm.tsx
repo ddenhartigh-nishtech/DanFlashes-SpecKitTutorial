@@ -78,7 +78,7 @@ export function CheckoutForm({ checkoutToken, expectedTotalUsd, balanceUsd }: Ch
             {copy.checkout.expiry}
             <input
               name="expiry"
-              placeholder="MM/YY"
+              placeholder={copy.checkout.expiryPlaceholder}
               autoComplete="off"
               required
               className={input}

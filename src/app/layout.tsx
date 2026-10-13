@@ -5,7 +5,14 @@ import { copy } from "@/lib/copy";
 import "./globals.css";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-const bungee = Bungee({ variable: "--font-bungee", weight: "400", subsets: ["latin"] });
+const bungee = Bungee({
+  variable: "--font-bungee",
+  weight: "400",
+  subsets: ["latin"],
+  // Never swap after first paint: a late display-font swap rewrapped headings and shifted
+  // the listing (CLS 0.16 under throttling). Preloaded, so normal loads still get Bungee.
+  display: "optional",
+});
 
 export const metadata: Metadata = {
   title: {

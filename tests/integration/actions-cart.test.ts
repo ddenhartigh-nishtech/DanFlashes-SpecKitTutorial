@@ -77,6 +77,11 @@ describe("updateCartItem / removeCartItem actions", () => {
       ok: false,
       code: "INVALID_QUANTITY",
     });
+    for (const bad of ["-2", "-0", "1.5", "100"]) {
+      expect(
+        updateCartItemCore(db, jar, form({ slug: "geo-riot", size: "M", quantity: bad })),
+      ).toMatchObject({ ok: false, code: "INVALID_QUANTITY" });
+    }
     expect(removeCartItemCore(db, jar, form({ slug: "geo-riot", size: "M" }))).toEqual({
       ok: true,
       itemCount: 0,

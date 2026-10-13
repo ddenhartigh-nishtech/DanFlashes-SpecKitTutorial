@@ -4,6 +4,7 @@
  */
 import { randomUUID } from "node:crypto";
 import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { MAX_QUANTITY } from "@/lib/cart/limits";
 import { SIZES, type Size } from "@/lib/catalog/types";
 import {
   getCatalogShirtsByIds,
@@ -16,7 +17,7 @@ import { cartItems, carts, shirts } from "@/lib/db/schema";
 import { mul, sum, type Usd } from "@/lib/money";
 import type { Err, Ok } from "@/lib/result";
 
-export const MAX_QUANTITY = 99;
+export { MAX_QUANTITY };
 
 export type CartErrorCode =
   "SIZE_REQUIRED" | "SHIRT_NOT_FOUND" | "SHIRT_INACTIVE" | "NOT_IN_CART" | "INVALID_QUANTITY";

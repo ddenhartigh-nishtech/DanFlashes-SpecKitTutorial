@@ -12,9 +12,13 @@ export async function addToCart(_prev: ActionState | null, form: FormData): Prom
   return state;
 }
 
-export async function updateCartItem(form: FormData): Promise<void> {
-  updateCartItemCore(getDb(), await cookieJar(), form);
-  refresh();
+export async function updateCartItem(
+  _prev: ActionState | null,
+  form: FormData,
+): Promise<ActionState> {
+  const state = updateCartItemCore(getDb(), await cookieJar(), form);
+  if (state.ok) refresh();
+  return state;
 }
 
 export async function removeCartItem(form: FormData): Promise<void> {

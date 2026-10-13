@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { removeCartItem, updateCartItem } from "@/actions/cart";
+import { removeCartItem } from "@/actions/cart";
 import { currentCartId } from "@/app/_data/request";
 import { loadStorefront } from "@/app/_data/storefront";
+import { CartQuantityForm } from "@/components/CartQuantityForm";
 import { PriceTag } from "@/components/PriceTag";
 import { ShirtBadge } from "@/components/ShirtBadge";
 import { ShirtCard } from "@/components/ShirtCard";
@@ -145,30 +146,10 @@ function CartLineRow({ line, placeholderUrl }: { line: CartLine; placeholderUrl:
         </Link>
         <div className="flex flex-wrap items-center gap-2">
           <ShirtBadge tier={line.shirt.tier} />
-          <span className="font-display text-sm">Size {line.size}</span>
+          <span className="font-display text-sm">{copy.cart.size(line.size)}</span>
         </div>
         <div className="flex flex-wrap items-end gap-3">
-          <form action={updateCartItem} className="flex items-end gap-2">
-            <input type="hidden" name="slug" value={line.shirt.slug} />
-            <input type="hidden" name="size" value={line.size} />
-            <label className="font-display text-xs uppercase">
-              {copy.cart.quantity}
-              <input
-                type="number"
-                name="quantity"
-                min={0}
-                max={99}
-                defaultValue={line.quantity}
-                className="border-ink bg-paper mt-1 block min-h-11 w-20 border-4 px-2 font-bold"
-              />
-            </label>
-            <button
-              type="submit"
-              className="font-display border-ink min-h-11 border-4 px-3 text-sm uppercase"
-            >
-              {copy.cart.update}
-            </button>
-          </form>
+          <CartQuantityForm slug={line.shirt.slug} size={line.size} quantity={line.quantity} />
           <form action={removeCartItem}>
             <input type="hidden" name="slug" value={line.shirt.slug} />
             <input type="hidden" name="size" value={line.size} />

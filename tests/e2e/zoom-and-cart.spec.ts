@@ -47,6 +47,14 @@ test.describe("US2 — zoom, enhance, add to cart", () => {
     await expect(line.getByTestId("tier-badge")).toHaveText("Complicated");
     await expect(line.getByTestId("price")).toHaveText("$344.61");
 
+    // Bug fix (2026-10-13): the quantity box only takes 1–99; a negative never submits.
+    const qty = line.getByLabel("Qty");
+    await expect(qty).toHaveAttribute("min", "1");
+    await qty.fill("-2");
+    await line.getByRole("button", { name: "Update" }).click();
+    await expect(line.getByTestId("price")).toHaveText("$344.61");
+    expect(await qty.evaluate((el: HTMLInputElement) => el.validity.valid)).toBe(false);
+
     // Quantity update re-prices the line exactly.
     await line.getByLabel("Qty").fill("3");
     await line.getByRole("button", { name: "Update" }).click();

@@ -53,7 +53,13 @@ export function TopUpForm({ presetsUsd }: { presetsUsd: Usd[] }) {
         </label>
         <label className="font-display text-sm uppercase">
           {copy.checkout.expiry}
-          <input name="expiry" placeholder="MM/YY" autoComplete="off" required className={input} />
+          <input
+            name="expiry"
+            placeholder={copy.checkout.expiryPlaceholder}
+            autoComplete="off"
+            required
+            className={input}
+          />
         </label>
         <label className="font-display text-sm uppercase">
           {copy.checkout.cvc}

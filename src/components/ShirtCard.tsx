@@ -9,10 +9,13 @@ interface ShirtCardProps {
   shirt: ShopperShirt;
   placeholderUrl: string | null;
   priority?: boolean;
+  /** h2 when the card sits directly under the page's h1 (listing); h3 under a section heading. */
+  headingLevel?: 2 | 3;
 }
 
-export function ShirtCard({ shirt, placeholderUrl, priority }: ShirtCardProps) {
+export function ShirtCard({ shirt, placeholderUrl, priority, headingLevel = 3 }: ShirtCardProps) {
   const image = shirt.images[0];
+  const Heading = headingLevel === 2 ? "h2" : "h3";
   return (
     <article
       data-testid="shirt-card"
@@ -32,9 +35,9 @@ export function ShirtCard({ shirt, placeholderUrl, priority }: ShirtCardProps) {
           </span>
         </div>
         <div className="flex flex-1 flex-col gap-2 p-3">
-          <h3 className="font-display group-hover:text-hot-pink text-lg leading-tight">
+          <Heading className="font-display group-hover:text-hot-pink text-lg leading-tight">
             {shirt.name}
-          </h3>
+          </Heading>
           <p className="text-sm font-semibold uppercase">{copy.styles[shirt.style]}</p>
           <div className="mt-auto">
             <PriceTag priceUsd={shirt.finalPriceUsd} />

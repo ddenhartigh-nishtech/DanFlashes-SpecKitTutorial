@@ -42,7 +42,12 @@ async function Listing({ searchParams }: Pick<PageProps<"/shirts">, "searchParam
           <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {results.map((shirt, i) => (
               <li key={shirt.id} className="flex">
-                <ShirtCard shirt={shirt} placeholderUrl={placeholderUrl} priority={i < 2} />
+                <ShirtCard
+                  shirt={shirt}
+                  placeholderUrl={placeholderUrl}
+                  priority={i < 2}
+                  headingLevel={2}
+                />
               </li>
             ))}
           </ul>

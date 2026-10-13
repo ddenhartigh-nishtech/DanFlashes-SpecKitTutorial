@@ -341,14 +341,14 @@ retired-shirt links.
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-- [ ] T073 Add an integration test in tests/integration/checkout-gate-off.test.ts: with `store_settings.checkout_gate = 0`, a guest can place a card order (`orders.user_id` NULL) and Flash Credit is refused (FR-021)
-- [ ] T074 [P] Implement scripts/seed-demo.ts (`npm run db:seed-demo`): it creates `demo@danflashes.local` / `password123` with $10,000.00 in Flash Credit and one past card order, and is idempotent
-- [ ] T075 [P] Brand-voice pass: route every shopper-facing string through src/lib/copy.ts and confirm the joke is never explained (FR-037)
-- [ ] T076 [P] Add the no-score audit tests/e2e/no-score.spec.ts, running in both projects: visit every shopper page type and assert that no seeded complexity value appears as text (SC-003)
-- [ ] T077 [P] Performance pass: run Lighthouse (mobile) on /, /shirts, and one detail page. Confirm LCP ≤ 2.5 s, CLS ≤ 0.1, and lazy-loaded below-the-fold images (SC-007), and record the results in specs/001-core-storefront/quickstart.md
-- [ ] T078 [P] Update README.md with setup, the utility scripts table, Drizzle Studio usage, and `npm run verify` (pointing to quickstart.md)
-- [ ] T079 Run `npm run format`, then `npm run verify` until it is fully green
-- [ ] T080 Walk quickstart.md manual scenarios 1–23 and fix anything that fails
+- [X] T073 Add an integration test in tests/integration/checkout-gate-off.test.ts: with `store_settings.checkout_gate = 0`, a guest can place a card order (`orders.user_id` NULL) and Flash Credit is refused (FR-021)
+- [X] T074 [P] Implement scripts/seed-demo.ts (`npm run db:seed-demo`): it creates `demo@danflashes.local` / `password123` with $10,000.00 in Flash Credit and one past card order, and is idempotent
+- [X] T075 [P] Brand-voice pass: route every shopper-facing string through src/lib/copy.ts and confirm the joke is never explained (FR-037)
+- [X] T076 [P] Add the no-score audit tests/e2e/no-score.spec.ts, running in both projects: visit every shopper page type and assert that no seeded complexity value appears as text (SC-003)
+- [X] T077 [P] Performance pass: run Lighthouse (mobile) on /, /shirts, and one detail page. Confirm LCP ≤ 2.5 s, CLS ≤ 0.1, and lazy-loaded below-the-fold images (SC-007), and record the results in specs/001-core-storefront/quickstart.md
+- [X] T078 [P] Update README.md with setup, the utility scripts table, Drizzle Studio usage, and `npm run verify` (pointing to quickstart.md)
+- [X] T079 Run `npm run format`, then `npm run verify` until it is fully green
+- [X] T080 Walk quickstart.md manual scenarios 1–23 and fix anything that fails
 
 ---
 

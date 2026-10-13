@@ -7,6 +7,8 @@ export default defineConfig({
   fullyParallel: false,
   // Real bcrypt (cost 12) under two parallel browsers needs headroom; 5s flaked at ~3.7s actions.
   expect: { timeout: 15_000 },
+  // Journeys span many pages plus real bcrypt; the no-score audit alone takes ~30s.
+  timeout: 60_000,
   retries: process.env.CI ? 1 : 0,
   reporter: [["list"]],
   use: {

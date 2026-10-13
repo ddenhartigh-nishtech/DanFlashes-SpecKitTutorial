@@ -46,7 +46,7 @@ export function OrderSummary(props: OrderSummaryProps) {
               <div className="flex flex-wrap items-center gap-2 text-sm">
                 <ShirtBadge tier={line.tier} />
                 <span className="font-semibold">
-                  Size {line.size} · {line.quantity} × {formatUsd(line.unitPriceUsd)}
+                  {copy.cart.lineDetail(line.size, line.quantity, formatUsd(line.unitPriceUsd))}
                 </span>
               </div>
               <div className="self-end">

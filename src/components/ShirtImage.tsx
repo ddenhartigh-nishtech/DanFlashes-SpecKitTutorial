@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface ShirtImageProps {
   src: string | null;
@@ -18,13 +18,22 @@ interface ShirtImageProps {
  */
 export function ShirtImage({ src, alt, placeholderSrc, className, priority }: ShirtImageProps) {
   const [failed, setFailed] = useState(false);
+  const img = useRef<HTMLImageElement>(null);
   const resolved = !src || failed ? placeholderSrc : src;
+
+  // The server-rendered <img> starts loading before hydration, so a 404 can fire before React
+  // attaches onError. Catch that case on mount: a finished image with no width has failed.
+  useEffect(() => {
+    const el = img.current;
+    if (el && el.complete && el.naturalWidth === 0 && src) setFailed(true);
+  }, [src]);
   if (!resolved)
     return <div role="img" aria-label={alt} className={`loud-stripes ${className ?? ""}`} />;
 
   return (
     // eslint-disable-next-line @next/next/no-img-element -- see component doc comment
     <img
+      ref={img}
       src={resolved}
       alt={alt}
       width={800}

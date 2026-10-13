@@ -14,6 +14,7 @@ export const copy = {
     account: "Account",
     signIn: "Sign in",
     menu: "Menu",
+    mainLabel: "Main",
   },
   home: {
     headline: "These shirts are complicated.",
@@ -75,6 +76,9 @@ export const copy = {
     title: "Your cart",
     heading: "Your cart. Your choices. Your legacy.",
     quantity: "Qty",
+    size: (size: string) => `Size ${size}`,
+    lineDetail: (size: string, quantity: number, unit: string) =>
+      `Size ${size} · ${quantity} × ${unit}`,
     update: "Update",
     remove: "Remove",
     subtotal: "Subtotal",
@@ -97,6 +101,7 @@ export const copy = {
     flashBalance: (balance: string) => `Balance: ${balance}`,
     cardNumber: "Card number",
     expiry: "Expiry (MM/YY)",
+    expiryPlaceholder: "MM/YY",
     cvc: "CVC",
     place: "Place order",
     placing: "Processing your excellent decision…",

@@ -24,7 +24,7 @@ export function SiteHeader() {
           {copy.brand.name}
         </Link>
 
-        <nav aria-label="Main" className="hidden md:block">
+        <nav aria-label={copy.nav.mainLabel} className="hidden md:block">
           <ul className="flex gap-1">
             {links.map((link) => (
               <li key={link.href}>
@@ -47,7 +47,7 @@ export function SiteHeader() {
             {copy.nav.menu}
           </summary>
           <nav
-            aria-label="Main"
+            aria-label={copy.nav.mainLabel}
             className="border-highlighter bg-ink absolute right-0 mt-2 w-48 rounded-sm border-4 p-2"
           >
             <ul>

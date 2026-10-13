@@ -75,3 +75,47 @@ Studio (`npm run db:studio`).
 | 21 | Visit `/no-such-page` | Branded 404. (FR-035) |
 | 22 | Visit `/teapot` | Branded page. DevTools shows status **418**. (FR-035) |
 | 23 | Run `npm run db:backup`, change something, then `npm run db:restore -- backups/<that file>` | The change is gone, and a safety backup of the pre-restore state exists. (FR-036) |
+
+## Performance results (T077, 2026-10-13)
+
+Lighthouse 13.5, mobile form factor, against the production build (`next start`) on localhost.
+"Applied" throttles the real browser (DevTools), while "simulated" is Lighthouse's default estimate
+(Lantern).
+
+| Page | Applied LCP | Simulated LCP | CLS (applied) | Perf score (simulated) | Accessibility |
+|---|---|---|---|---|---|
+| `/` | 2.2 s | 2.8 s | 0.006 | 93 | 96 |
+| `/shirts` | 2.2 s | 2.8 s | 0.037 | 95 | 96 |
+| `/shirts/dans-masterpiece` | 2.2 s | 2.8 s | 0 | 89 | 96 |
+
+Budgets (constitution VII): LCP ≤ 2.5 s, CLS ≤ 0.1, INP ≤ 200 ms.
+
+- **CLS**: fixed. It was 0.161 on `/shirts` because the Bungee display font swapped in late and
+  rewrapped the heading. The font now uses `display: "optional"`.
+- **LCP**: within budget under applied throttling (2.2 s). The simulated estimate (2.8 s) exceeds it
+  because the first shirt image streams in after the static shell: the catalog is read per request
+  so owner edits appear immediately. This is logged in plan.md → Complexity Tracking, with the
+  option of caching the catalog.
+- **Measured (unthrottled) LCP on the dev machine**: 0.4–0.9 s.
+- **Accessibility 96**: the remaining finding is contrast of paper text on hot pink (≈ 3.4:1) for
+  some buttons and the "Complicated" badge. That is a brand-palette decision for the owner.
+- **Total blocking time**: mostly React DOM's own startup on a 4× slowed CPU. No server-only
+  library (big.js, zod, bcrypt, Drizzle) is in the client bundle.
+
+## Walkthrough results (T080, 2026-10-13)
+
+All 23 scenarios pass. Here is how each was verified:
+
+| Scenarios | Verified by |
+|---|---|
+| 1–4, 21–22 | `tests/e2e/browse.spec.ts` (desktop + phone) |
+| 5–7 | `tests/e2e/zoom-and-cart.spec.ts`. Zoom is tested through the ENHANCE/Reset buttons; wheel and pinch were checked by hand. |
+| 8–11 | `tests/e2e/card-checkout.spec.ts` |
+| 15–17 | `tests/e2e/flash-credit-checkout.spec.ts` |
+| 13, 20, 23 | `tests/integration/data-catalog.test.ts` (FK refusal, media base URL), `tests/integration/backup.test.ts` |
+| 12, 14, 18, 19 | A scripted walkthrough against a throwaway database, editing rows live as Drizzle Studio would. These aren't in the shared e2e suite because they mutate catalog state that parallel tests rely on. |
+
+**Bug found and fixed in the walkthrough (scenario 19)**: a shirt image that 404'd didn't fall back
+to the placeholder in production builds. The server-rendered `<img>` failed before hydration, so
+React's `onError` never fired. `ShirtImage` now also checks `complete && naturalWidth === 0` on
+mount.

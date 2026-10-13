@@ -99,26 +99,21 @@ This file records each technical decision, why it was made, and what else was co
   granularity as the owner asked. Rounding a monotonic function keeps it non-decreasing. Scores in
   the BLAND tier (below the anchor) land under $300 automatically.
 
-## R6. Pricing outlier alarm (complexity-order warning)
+## R6. (Removed) Pricing outlier alarm
 
-- **Purpose**: this is an **alarm for the owner's manual price overrides**. It is unrelated to
-  sorting, which the listing handles. Because the owner can set any final price, a shirt can end up
-  priced against the complexity order. The classic case is a "too cheap masterpiece": a high-scored
-  shirt priced below a simpler one. The alarm points those out so they're deliberate, not accidents.
-- **Hard error, not a warning**: a BLAND-tier shirt priced at or above the MSRP start price ($300) breaks constitution III, so it
-  is refused when saved.
-- **Decision**: a pure function sorts shirts by score and flags any shirt whose final price is lower
-  than the highest final price among shirts with a strictly lower score. It runs from
-  `npm run catalog:audit` against the database, and the Admin Console (008) will show it. It never
-  blocks.
-- **Rationale**: this is what constitution II and FR-006 call for. A pure function is trivial to test.
+- **Status**: removed 2026-10-13 by the owner (constitution v4.0.0). The owner's prices are the
+  owner's business. Pricing-vs-complexity analysis is a downstream Admin Console feature
+  (ROADMAP 008).
+- **What remains**: the **hard rule** that a BLAND-tier shirt can't be priced at or above the MSRP
+  start price (constitution III). It is enforced on save and by `catalog:audit`.
+- The number is kept so other R-references stay stable.
 
 ## R7. Authentication and sessions
 
 - **Decision**: self-hosted email + password. Passwords are hashed with `bcryptjs` (cost 12).
   Sessions use a random 32-byte token in an httpOnly, SameSite=Lax cookie, and only its SHA-256 hash
   is stored in a `sessions` table with a 30-day expiry.
-- **Rationale**: this is the simplest thing that meets FR-020, with no external provider and no
+- **Rationale**: this is the simplest thing that meets FR-019, with no external provider and no
   native build on Windows.
 - **Alternatives considered**: Auth.js Credentials, rejected as more configuration than the logic it
   replaces. Argon2, rejected because it needs a native module.
@@ -173,7 +168,7 @@ This file records each technical decision, why it was made, and what else was co
 
 - **Decision**: a client component that uses CSS transforms (scale + translate) with wheel, pinch,
   drag, and +/− buttons, up to 8×. Seed shirt art is SVG, which stays sharp at any zoom.
-- **Rationale**: no dependency (Principle VIII), and touch support is built in (FR-036).
+- **Rationale**: no dependency (Principle VIII), and touch support is built in (FR-034).
 
 ## R13. Styling
 
@@ -258,7 +253,7 @@ This file records each technical decision, why it was made, and what else was co
 ## R19. Retired shirt pages and order permanence
 
 - **Decision**: `order_items.shirt_id` is a foreign key to `shirts` with `ON DELETE RESTRICT`, so the
-  database itself refuses to delete an ordered shirt (FR-009). Owners deactivate shirts instead.
+  database itself refuses to delete an ordered shirt (FR-008). Owners deactivate shirts instead.
   `/shirts/[slug]` renders inactive shirts in a "Retired from the floor" state. Order items also
   snapshot the name, badge, and prices.
 
@@ -302,4 +297,4 @@ This file records each technical decision, why it was made, and what else was co
   - `src/app/global-error.tsx` is a last-resort branded page if the layout itself fails.
   - `src/app/teapot/route.ts` returns a branded HTML page with HTTP **418 I'm a teapot**. App Router
     pages can't set arbitrary status codes, so this one is a route handler.
-- **Rationale**: this is FR-037. A framework-default error page would break the bit.
+- **Rationale**: this is FR-035. A framework-default error page would break the bit.

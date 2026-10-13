@@ -51,8 +51,8 @@
   All items still pass.
 - Iteration 4 (2026-10-13, owner plan review):
   - Product data moved into the store database (FR-001), not files in the codebase.
-  - Added relocatable media (FR-035), responsive layout (FR-036), branded 404/500/418 pages
-    (FR-037), and backup/restore (FR-038).
+  - Added relocatable media (FR-033), responsive layout (FR-034), branded 404/500/418 pages
+    (FR-035), and backup/restore (FR-036).
 
   All items still pass. The spec stays technology-free: "database editing tool," not a product name.
 - Iteration 5 (2026-10-13, owner data-model review):
@@ -61,5 +61,11 @@
   - Tiers carry a tagline and badge colors.
   - Cart lines show most recently added first.
   - Recorded how orders snapshot the cart at checkout.
+
+  All items still pass.
+- Iteration 6 (2026-10-13, owner's analyze review):
+  - Removed the pricing outlier warning (old FR-006), so pricing analysis is downstream (ROADMAP 008).
+  - Requirements renumbered sequentially in document order (FR-001–FR-037) across all artifacts.
+  - Quickstart scenarios renumbered (1–23).
 
   All items still pass.

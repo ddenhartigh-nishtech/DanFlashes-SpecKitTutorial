@@ -33,8 +33,6 @@ final price.
   settings, not code changes.
 - The owner MAY set a **final price** for any shirt in the catalog data. When none is set, the final
   price is the MSRP. The final price is what the store displays and charges.
-- When a final price breaks the complexity order (a shirt costs less than a less complicated one),
-  the catalog check MUST warn the owner. It MUST NOT block the price. The owner may have reasons.
 - There is no price ceiling. More complicated means more expensive, forever.
 - The complexity score is the owner's lever, and shoppers MUST NEVER see the number. Shoppers see
   complexity in the pattern itself, and in a **complexity tier badge** (an owner-named band of
@@ -113,8 +111,7 @@ Pricing, cart totals, add-ons, Flash Credit balances, and checkout MUST be devel
 write the tests, watch them fail, then implement (Red → Green → Refactor).
 
 - The MSRP algorithm MUST have table-driven or property-based tests proving determinism and
-  monotonicity. Final-price resolution (owner price, else MSRP) and the complexity-order warning
-  MUST be tested.
+  monotonicity. Final-price resolution (owner price, else MSRP) MUST be tested.
 - Checkout MUST have at least one end-to-end happy-path test for each payment method (faux card and
   Flash Credit).
 - Flash Credit MUST have tests proving that the balance always equals the sum of its ledger entries
@@ -201,4 +198,4 @@ Rationale: the complexity goes in the product, never in the architecture.
   and `/speckit-analyze`. A violation needs either a Complexity Tracking justification or an amendment.
 - Like every Dan Flashes sale, this constitution is final until amended.
 
-**Version**: 3.0.0 | **Ratified**: 2026-10-12 | **Last Amended**: 2026-10-13
+**Version**: 4.0.0 | **Ratified**: 2026-10-12 | **Last Amended**: 2026-10-13

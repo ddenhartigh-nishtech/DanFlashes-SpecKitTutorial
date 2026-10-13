@@ -13,7 +13,7 @@ pricing, accounts, orders, Flash Credit).
 | 005 | Checkout Squeeze | Pre-checked add-ons (Pattern Protection Plan™, Complexity Insurance), roach-motel cart | 001 |
 | 006 | Flash Mode | Strobe/flash toggle: the most exciting button on the site | 001 |
 | 007 | Pattern Generator | Procedurally generated shirts with complexity derived from the generator. Answers "how complicated can it get?" literally. | 001 (catalog, pricing) |
-| 008 | Admin Console | Non-technical admin pages for shirts, media uploads, tiers, store settings, customers, and orders. Shows the pricing outlier alarm. Replaces Drizzle Studio as the owner's tool. | 001 (data layer) |
+| 008 | Admin Console | Non-technical admin pages for shirts, media uploads, tiers, store settings, customers, and orders. Pricing vs. complexity analysis (e.g., spotting shirts priced against the complexity order). Replaces Drizzle Studio as the owner's tool. | 001 (data layer) |
 | 009 | Nosy Sign-Up | Sign-up demands an SSN, blood type, medications, mother's maiden name, and more, all marked "required." The fields are props: never submitted, stored, or logged (constitution). They have an on/off switch. Small, and a good first feature after 001. | 001 (sign-up page) |
 
 ## Why 001 is so big

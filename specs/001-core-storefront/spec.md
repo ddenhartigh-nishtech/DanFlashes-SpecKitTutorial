@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-12
 
-**Status**: Draft (revised after `/speckit-analyze` review 2026-10-12 and plan review 2026-10-13)
+**Status**: Draft (revised after `/speckit-analyze` reviews 2026-10-12 and 2026-10-13, and plan review 2026-10-13)
 
 **Input**: User description: "Build the core Dan Flashes storefront: a home page, a product listing
 page with a complexity/price filter, and a product detail page with zoom/enhance, sizes S–XXL, and
@@ -65,6 +65,8 @@ tie-in."
   cloud storage later means changing one setting. The placeholder image is configured the same way.
 - Q: Must the site work on phones? → A: Yes. Every page works from a 360px-wide phone up to a
   desktop.
+- Q: Should the store warn the owner when a manual price breaks the complexity order? → A: No.
+  Pricing-vs-complexity analysis is a downstream admin feature (ROADMAP 008), not part of 001.
 - Q: Error pages? → A: Branded 404 and 500 pages, plus a 418 "I'm a teapot" easter egg.
 - Q: What money granularity? → A: US dollars to the cent everywhere: prices, MSRP, totals, Flash
   Credit, and top-ups.
@@ -255,102 +257,99 @@ the account shows every change.
 - **FR-005**: The owner MAY set a final price for any shirt. A shirt's final price is the owner's
   price (dollars and cents) if one is set, and its MSRP otherwise. The final price is what the store
   displays and charges. Size and style MUST NOT affect price.
-- **FR-006**: When the catalog is loaded, the system MUST warn the owner about every shirt whose
-  final price is lower than that of a shirt with a lower complexity score. The warning MUST NOT block
-  the price.
-- **FR-007**: The seed catalog MUST include at least 12 shirts, with both polos and button-downs, at
+- **FR-006**: The seed catalog MUST include at least 12 shirts, with both polos and button-downs, at
   least 2 shirts in the BLAND tier, at least one shirt in every complexity tier, and 1 T.C. Tugger cross-over
   shirt.
-- **FR-008**: The owner MUST be able to add, edit, and restyle complexity tiers without changing code.
+- **FR-007**: The owner MUST be able to add, edit, and restyle complexity tiers without changing code.
   Each tier has a name (the badge text), an optional tagline, the lowest score it covers, and badge
   colors. The tiers MUST cover every score from 0 upward with no gaps or overlaps. The last tier is
   open-ended, and **the lowest tier is the BLAND tier**. A shirt's tier follows from its score, so
   changing a tier's range re-sorts shirts automatically.
-- **FR-009**: Shirts MUST be deactivated, never deleted. Inactive shirts are hidden from the home
+- **FR-008**: Shirts MUST be deactivated, never deleted. Inactive shirts are hidden from the home
   page, listing, and cart, and they can't be added or checked out. The system MUST refuse to delete
   any shirt that appears in an order.
 
 **Home & Listing**
 
-- **FR-010**: The home page MUST show a hype headline, featured shirts (the most complicated active
+- **FR-009**: The home page MUST show a hype headline, featured shirts (the most complicated active
   shirts by default, or the ones the owner marks as featured), and a path to the full listing.
-- **FR-011**: The listing MUST let shoppers filter by complexity tier (one or more), price range, and
+- **FR-010**: The listing MUST let shoppers filter by complexity tier (one or more), price range, and
   style, and sort by Most/Least Complicated or by price in either direction.
-- **FR-012**: Wherever a shirt appears (listing, home, detail image viewer, cart lines, checkout
+- **FR-011**: Wherever a shirt appears (listing, home, detail image viewer, cart lines, checkout
   lines, order confirmation, and order history), it MUST show exactly one badge: its complexity tier,
   styled with that tier's colors.
 
 **Product Detail & Cart**
 
-- **FR-013**: The detail page MUST provide zoom/enhance with pan, size selection (S, M, L, XL, XXL),
+- **FR-012**: The detail page MUST provide zoom/enhance with pan, size selection (S, M, L, XL, XXL),
   and Add to Cart. All sizes share one price.
-- **FR-014**: The detail page of an inactive shirt MUST still render its images, name, style, badge,
+- **FR-013**: The detail page of an inactive shirt MUST still render its images, name, style, badge,
   and description, marked as retired, with no price and no Add to Cart. It MUST NOT be linked from
   anywhere except the order history of shoppers who bought it.
-- **FR-015**: Guests MUST be able to add, change the quantity of, and remove cart items, and the cart
+- **FR-014**: Guests MUST be able to add, change the quantity of, and remove cart items, and the cart
   MUST persist while they browse.
-- **FR-016**: The cart MUST show each line's image, name, badge, size, quantity, and final price,
+- **FR-015**: The cart MUST show each line's image, name, badge, size, quantity, and final price,
   ordered most recently added first, plus a running total.
-- **FR-017**: A cart audit MUST run whenever the cart loads, whenever checkout loads, and when an order
+- **FR-016**: A cart audit MUST run whenever the cart loads, whenever checkout loads, and when an order
   is placed. It deletes lines for inactive or missing shirts and tells the shopper which were removed.
-- **FR-018**: An empty cart page MUST ask "You sure about that?", spotlight the most expensive active
+- **FR-017**: An empty cart page MUST ask "You sure about that?", spotlight the most expensive active
   shirt, and link to the listing filtered to the top complexity tier.
-- **FR-019**: Wherever a shirt image is missing or fails to load, a loud placeholder image MUST be
+- **FR-018**: Wherever a shirt image is missing or fails to load, a loud placeholder image MUST be
   shown instead. The placeholder is an owner-configurable image, stored like any other image.
 
 **Accounts & the Checkout Gate**
 
-- **FR-020**: Shoppers MUST be able to create an account and sign in with an email and password, and
+- **FR-019**: Shoppers MUST be able to create an account and sign in with an email and password, and
   sign out.
-- **FR-021**: Checkout MUST require a signed-in account. A guest who attempts checkout MUST be sent
+- **FR-020**: Checkout MUST require a signed-in account. A guest who attempts checkout MUST be sent
   to sign in or sign up, and returned to checkout afterward with the cart intact.
-- **FR-022**: The checkout gate MUST be an owner-switchable setting (constitution Principle IV). When
+- **FR-021**: The checkout gate MUST be an owner-switchable setting (constitution Principle IV). When
   it is off, guests can check out with the card method.
-- **FR-023**: On sign-in, the guest cart MUST merge into the account's cart.
-- **FR-024**: The account area MUST show purchase history (orders with date, items, subtotal,
+- **FR-022**: On sign-in, the guest cart MUST merge into the account's cart.
+- **FR-023**: The account area MUST show purchase history (orders with date, items, subtotal,
   shipping, tax, total, and payment method, each item linking to its shirt page) and the Flash Credit
   balance and history.
 
 **Checkout & Payment (all faux)**
 
-- **FR-025**: Checkout MUST offer two payment methods: the faux card and Flash Credit. No real payment
+- **FR-024**: Checkout MUST offer two payment methods: the faux card and Flash Credit. No real payment
   processor is involved.
-- **FR-026**: The faux card MUST accept a number only if it passes the standard card checksum, has a
+- **FR-025**: The faux card MUST accept a number only if it passes the standard card checksum, has a
   future expiry, and has a 3–4 digit CVC. Only the card brand and last four digits are kept.
-- **FR-027**: A card payment MUST record the order and MUST NOT change the Flash Credit balance.
-- **FR-028**: A Flash Credit payment MUST succeed only when the balance covers the full order total,
+- **FR-026**: A card payment MUST record the order and MUST NOT change the Flash Credit balance.
+- **FR-027**: A Flash Credit payment MUST succeed only when the balance covers the full order total,
   and MUST deduct exactly that total.
-- **FR-029**: At checkout, the system MUST re-resolve every final price from the catalog, MUST ignore
+- **FR-028**: At checkout, the system MUST re-resolve every final price from the catalog, MUST ignore
   any price provided by the shopper's side, and MUST record each item's final price and MSRP on the
   order.
-- **FR-030**: Checkout, the order confirmation, and order history MUST show the lines Subtotal,
+- **FR-029**: Checkout, the order confirmation, and order history MUST show the lines Subtotal,
   Shipping $0.00, Tax $0.00, and Total. Nothing ships.
-- **FR-031**: A successful checkout MUST show a brand-voice confirmation. A failed one MUST record no
+- **FR-030**: A successful checkout MUST show a brand-voice confirmation. A failed one MUST record no
   order, deduct no credit, and keep the cart.
 
 **Flash Credit**
 
-- **FR-032**: Signed-in shoppers MUST be able to top up Flash Credit with a preset amount ($500,
+- **FR-031**: Signed-in shoppers MUST be able to top up Flash Credit with a preset amount ($500,
   $1,000, $5,000) or a custom amount in dollars and cents (at least $0.01), paid with the faux card.
-- **FR-033**: Every top-up and spend MUST be recorded as a history entry with its amount, date, and
+- **FR-032**: Every top-up and spend MUST be recorded as a history entry with its amount, date, and
   (for spends) the related order. The balance MUST equal the sum of the entries and MUST NEVER be
   negative.
 
 **Media, Layout & Errors**
 
-- **FR-035**: Images MUST be stored as files referenced from the store data by a relative location
+- **FR-033**: Images MUST be stored as files referenced from the store data by a relative location
   plus an owner-configurable base address. Changing the base address MUST move every image without
   editing individual records.
-- **FR-036**: Every page MUST be usable on screens from 360px wide (phones) to desktop, with no
+- **FR-034**: Every page MUST be usable on screens from 360px wide (phones) to desktop, with no
   horizontal scrolling. The zoom viewer MUST support touch pinch and drag.
-- **FR-037**: The store MUST show branded pages for "not found" (404) and "something broke" (500).
+- **FR-035**: The store MUST show branded pages for "not found" (404) and "something broke" (500).
   A request to `/teapot` MUST return HTTP 418 with a branded "I'm a teapot" page.
-- **FR-038**: The owner MUST be able to back up the store data to a timestamped copy and restore from
+- **FR-036**: The owner MUST be able to back up the store data to a timestamped copy and restore from
   a chosen copy. A backup MUST be taken automatically before any structural update or reset.
 
 **Voice**
 
-- **FR-034**: All shopper-facing copy (headlines, buttons, empty states, errors, confirmations) MUST
+- **FR-037**: All shopper-facing copy (headlines, buttons, empty states, errors, confirmations) MUST
   use the Dan Flashes voice from constitution Principle I.
 
 ### Key Entities
@@ -383,7 +382,7 @@ the account shows every change.
 - **SC-001**: A first-time visitor can go from the home page to a completed checkout (including
   creating an account) in under 3 minutes.
 - **SC-002**: In an audit of the full catalog, 100% of shirts without an owner price are priced at
-  their MSRP, 100% of complexity-order breaks are reported to the owner, and 100% of BLAND-tier shirts
+  their MSRP, and 100% of BLAND-tier shirts
   cost less than $300.
 - **SC-003**: 100% of shirt appearances show exactly one badge (a tier or BLAND), and 0 complexity
   scores appear on any shopper-facing page.

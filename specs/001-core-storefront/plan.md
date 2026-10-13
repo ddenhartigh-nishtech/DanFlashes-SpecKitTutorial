@@ -82,8 +82,8 @@ Checked against constitution v3.0.0 (draft pending ratification).
 
 | # | Principle / Rule | How 001 complies | Pre | Post |
 |---|---|---|---|---|
-| I | Built for the Dan Flashes Guy | All copy goes through `src/lib/copy.ts` in brand voice (FR-034), including the error pages and the 418. | ✅ | ✅ |
-| II | Complexity Is the Price | One MSRP function (`src/lib/pricing/msrp.ts`), with settings in `store_settings`. The owner's `final_price_usd` overrides it. The outlier alarm comes from `catalog:audit` (R6). The score is never rendered: tier/BLAND badges instead (R15). An ordered shirt can't be deleted (FK RESTRICT, R19). | ✅ | ✅ |
+| I | Built for the Dan Flashes Guy | All copy goes through `src/lib/copy.ts` in brand voice (FR-037), including the error pages and the 418. | ✅ | ✅ |
+| II | Complexity Is the Price | One MSRP function (`src/lib/pricing/msrp.ts`), with settings in `store_settings`. The owner's `final_price_usd` overrides it. The score is never rendered: tier/BLAND badges instead (R15). An ordered shirt can't be deleted (FK RESTRICT, R19). | ✅ | ✅ |
 | III | Relentlessly Vibrant | The owner curates. BLAND is the lowest tier, and its < start-price rule is enforced on save. SVG art can be zoomed. | ✅ | ✅ |
 | IV | Shamelessly Manipulative | The checkout gate is the `store_settings.checkout_gate` switch. Other tactics are deferred to their own specs. | ✅ | ✅ |
 | V | Maximum Visual Assault | Loud Tailwind tokens. Price, badge, and Add to Cart sit on solid backings. Mobile-first, responsive from 360px (R22). Flash Mode is deferred to 006. | ✅ | ✅ |
@@ -129,7 +129,7 @@ scripts/
 ├── db-backup.ts / db-restore.ts   # db:backup, db:restore <file>
 ├── seed.ts                        # db:seed: demo catalog, tiers, settings, media (fixture only)
 ├── seed-demo.ts                   # db:seed-demo: demo shoppers
-├── catalog-audit.ts               # catalog:audit: errors + pricing outlier alarm
+├── catalog-audit.ts               # catalog:audit: validation errors + seed-check warnings
 └── generate-shirt-art.ts          # art:generate
 src/
 ├── app/
@@ -150,7 +150,7 @@ src/
 └── lib/
     ├── db/                        # schema.ts (Drizzle), client.ts, backup.ts
     ├── data/                      # data-access layer: shirts.ts, settings.ts, tiers.ts, media.ts
-    ├── catalog/                   # validate.ts, warnings.ts, tiers.ts, listing.ts
+    ├── catalog/                   # validate.ts, audit.ts, tiers.ts, listing.ts
     ├── pricing/                   # msrp.ts, resolve.ts
     ├── media.ts                   # resolveMediaUrl(key, baseUrl)
     ├── money.ts

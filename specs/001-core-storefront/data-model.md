@@ -119,7 +119,6 @@ Seed defaults:
 - `finalPriceUsd(shirt)` = `final_price_usd ?? msrpUsd(complexity)`
 - `tierOf(score)` = the tier with the highest `min_score` ≤ score
 - `isBland(shirt)` = `tierOf(complexity).min_score == 0`
-- `orderWarnings(shirts)` = the pricing outlier alarm (R6)
 
 ### Catalog rules
 
@@ -134,8 +133,7 @@ These are errors:
 - an active shirt with no images
 
 These are warnings:
-- the pricing outlier alarm (R6)
-- the FR-007 seed checks: ≥ 12 active shirts, both styles, ≥ 2 in BLAND, every tier populated, a
+- the FR-006 seed checks: ≥ 12 active shirts, both styles, ≥ 2 in BLAND, every tier populated, a
   T.C. Tugger shirt
 
 ---
@@ -182,7 +180,7 @@ These are warnings:
 
 **Display order**: most recently added first (`added_at DESC`). Drag-to-reorder is out of scope (R8).
 
-There is **no price column**. Cart prices are always resolved live (FR-029).
+There is **no price column**. Cart prices are always resolved live (FR-028).
 
 ### `orders`
 
@@ -205,7 +203,7 @@ There is **no price column**. Cart prices are always resolved live (FR-029).
 | Column | Type | Rules |
 |---|---|---|
 | `order_id` | integer FK → orders | |
-| `shirt_id` | integer FK → shirts | **`ON DELETE RESTRICT`**, so an ordered shirt can't be deleted (FR-009). |
+| `shirt_id` | integer FK → shirts | **`ON DELETE RESTRICT`**, so an ordered shirt can't be deleted (FR-008). |
 | `shirt_name` | text | Snapshot. |
 | `tier_name` | text | Snapshot of the badge text at checkout (e.g. "BLAND"). |
 | `complexity` | integer | Snapshot. Owner analytics only. |

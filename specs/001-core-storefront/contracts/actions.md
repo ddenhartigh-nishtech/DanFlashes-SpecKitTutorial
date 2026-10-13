@@ -1,7 +1,7 @@
 # Contract: Server Actions (mutations)
 
 Every mutation is a Next.js Server Action. Inputs are validated with Zod on the server. **No action
-accepts a price or a total from the client** (FR-024). Each action returns
+accepts a price or a total from the client** (FR-023). Each action returns
 `{ ok: true, ... } | { ok: false, code, message }`. The `message` is brand-voice copy safe to show to
 the shopper, and `code` is stable for tests.
 

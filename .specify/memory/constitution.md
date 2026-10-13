@@ -1,29 +1,3 @@
-<!--
-Sync Impact Report
-- Version change: 2.0.0 → 3.0.0 (MAJOR: a MUST in Principle II removed and redefined)
-- Modified principles:
-  - II. Complexity Is the Price: removed "every displayed price MUST sit next to its complexity
-    score". The score is now owner-only. Shoppers see complexity tier badges (owner-named score bands)
-    (the lowest tier is BLAND). Added: shirts are deactivated, never deleted, and purchased shirts
-    stay viewable from order history.
-  - III. Relentlessly Vibrant: a bland shirt is now any shirt in the lowest tier (the separate flag
-    is gone).
-  - Commerce & Security Constraints: "Integer money" (cents) → "Exact money" (exact two-decimal
-    USD, decimal arithmetic).
-  - V. Maximum Visual Assault: "the sale still closes" now names the tier badge instead of the score.
-  - VI. Money Math Is Test-First → VI. Fully Tested, Money Math First: `npm run verify` runs the
-    full suite and gates every merge; ≥ 90% line coverage on src/lib; tests for all business logic
-    and Server Actions; an end-to-end test per user story's primary journey.
-  - IV. Shamelessly Manipulative: added the Nosy sign-up tactic
-  - V. Maximum Visual Assault: added "Loud on every screen" (responsive from 360px phones up)
-- Commerce & Security Constraints: added "Nosy fields are props" (never submitted, stored, or logged)
-- Development Workflow: added "Clean, consistent code" (Prettier + ESLint inside verify)
-- Added sections: none
-- Removed sections: none
-- Templates requiring updates: none (read at runtime) ✅
-- Follow-up TODOs: owner ratifies v3.0.0
--->
-
 # Dan Flashes Constitution
 
 > Complicated shirts. Complicated prices. All sales final.
@@ -227,4 +201,4 @@ Rationale: the complexity goes in the product, never in the architecture.
   and `/speckit-analyze`. A violation needs either a Complexity Tracking justification or an amendment.
 - Like every Dan Flashes sale, this constitution is final until amended.
 
-**Version**: 3.0.0 | **Ratified**: 2026-10-12 | **Last Amended**: 2026-10-12
+**Version**: 3.0.0 | **Ratified**: 2026-10-12 | **Last Amended**: 2026-10-13

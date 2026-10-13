@@ -41,3 +41,9 @@
   at the store. All items pass.
 - No constitution amendment is needed: Principle IV's "asked 'You sure about that?' again and again"
   is satisfied, and the switch still allows selling bland shirts when off.
+- Iteration 3 (2026-10-13, after `/speckit-analyze`): the owner ruled that while shaming is on, a
+  bland shirt can't be in a cart, period. FR-010 and SC-001 now cover sign-in merges and bland
+  lines already in a cart (pulled by the cart audit, so they can't be bought); US1 gained
+  scenario 8. The "switch flipped mid-loop" edge case now takes effect on the next page load.
+  With the switch off, bland shirts still sell normally, so no constitution amendment is needed.
+  All items pass.

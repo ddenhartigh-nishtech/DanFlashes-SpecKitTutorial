@@ -25,6 +25,11 @@ store settings).
   exist today; later features add their own.
 - Q: Where does Dan's bio live? → A: In the store's brand copy, alongside the rest of the site's copy.
   Editing it is a code change. Keep it simple.
+- Q: Can bland lines already in a cart stay, or arrive by merging carts at sign-in? → A: **No.** While
+  shaming is on, a bland shirt can't be in a cart, period. Adds, quantity raises, and the sign-in
+  merge are all refused. Bland lines already in a cart are pulled out with a notice, the same way
+  retired shirts are, so they can never be checked out. With the switch off, bland shirts sell
+  normally.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -66,6 +71,9 @@ is attempted.
    into the cart exactly as in 001.
 7. **Given** shaming is off, **When** he adds a BLAND-tier shirt, **Then** it is added like any other
    shirt.
+8. **Given** shaming is on and his cart already holds a bland line (added while it was off), **When**
+   he views his cart or checks out, **Then** the line is pulled out with a brand-voice notice and is
+   never bought.
 
 ---
 
@@ -124,9 +132,11 @@ the bio, and follow Exhibit A to the most expensive active shirt.
   bland shirt adds normally after the page is reloaded.
 - **A shirt re-tiered** (the owner moves BLAND's range): whether a shirt is bland is decided at the
   moment it would be added.
-- **Bland lines already in a cart** (added in 001, or while shaming was off): they stay and can be
-  checked out. Their quantity can be lowered or the line removed, but **not raised** while shaming
-  is on.
+- **Bland lines already in a cart** (added in 001, or while shaming was off): once shaming is on,
+  they are pulled out the next time the cart is shown or checked out, with a brand-voice notice, the
+  same way retired shirts are.
+- **Signing in with a guest cart**: while shaming is on, bland lines in the guest cart are not
+  carried into the account's cart.
 - **The top of the ladder**: once the recommendation reaches the most complicated active shirt,
   later rounds keep recommending it (or rotate among the top tier).
 - **Nothing more complicated to recommend** (no active non-bland shirts): the round still runs, and
@@ -166,9 +176,12 @@ the bio, and follow Exhibit A to the most expensive active shirt.
 - **FR-009**: Each round MUST offer three choices: take the recommendation (go to that shirt;
   nothing added), relent (close the dialog; stay on the page; nothing added), and insist (next
   round).
-- **FR-010**: While shaming is on, the store MUST refuse any attempt to add a BLAND-tier shirt to a
-  cart, or to raise the quantity of a BLAND-tier line, however it reaches the store. The refusal
-  message is in brand voice.
+- **FR-010**: While shaming is on, no BLAND-tier shirt may be in a cart, however it would get there.
+  The store MUST:
+  - refuse adds and quantity raises of BLAND-tier shirts, with a brand-voice refusal
+  - not carry bland lines over when a guest cart merges at sign-in
+  - pull out any bland line already in a cart, with a brand-voice notice, before the cart is shown or
+    checked out
 - **FR-011**: Shirts outside the BLAND tier, and all shirts while shaming is off, MUST be added
   exactly as in 001.
 
@@ -188,6 +201,8 @@ the bio, and follow Exhibit A to the most expensive active shirt.
 ### Key Entities
 
 - **Store Settings** (from 001) gains two switches: bland-shirt shaming and confirmshaming.
+- **Cart audit** (from 001): the check that pulls retired shirts from a cart also pulls bland lines
+  while shaming is on.
 - **Shaming Round**: one step of the loop. It has a round number, a disparaging line, and a
   recommended shirt.
 - **Brand Copy** (from 001) gains the About bio, the pool of shaming lines, the bland-refusal
@@ -197,8 +212,8 @@ the bio, and follow Exhibit A to the most expensive active shirt.
 
 ### Measurable Outcomes
 
-- **SC-001**: With shaming on, 0 BLAND-tier shirts are added to any cart, and 0 bland lines grow in
-  quantity, however it's attempted.
+- **SC-001**: With shaming on, 0 BLAND-tier shirts are added to, merged into, or bought from any
+  cart, however it's attempted.
 - **SC-002**: Insisting 20 times in a row produces 20 more rounds and still adds nothing.
 - **SC-003**: Within a loop, no line repeats until all lines in the pool have been shown, and
   recommendations never get less complicated.

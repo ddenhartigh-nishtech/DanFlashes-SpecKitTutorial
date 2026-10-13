@@ -10,8 +10,8 @@ Three additions to the 001 storefront:
 
 1. **The endless "You sure about that?" loop.** While bland-shirt shaming is on, adding a BLAND-tier
    shirt opens a dialog. Insisting only produces another round, each with a fresh insult and a more
-   complicated recommendation. The store refuses bland adds and bland quantity raises itself, so the
-   gag can't be bypassed.
+   complicated recommendation. The store itself keeps bland shirts out of every cart (adds, quantity
+   raises, sign-in merges, and lines already there), so the gag can't be bypassed.
 2. **Confirmshaming labels** on three decline choices: the loop's insist button, the cart's Remove,
    and Sign out.
 3. **An About page**: Dan's egocentric bio from brand copy, plus a live Exhibit A (the most expensive
@@ -81,23 +81,25 @@ src/
 ├── app/
 │   ├── about/page.tsx                # new: /about (bio + streamed Exhibit A)
 │   ├── shirts/[slug]/page.tsx        # pass isBland, shaming switch, ladder, insist label to AddToCart
-│   ├── cart/page.tsx                 # Remove label from confirmshaming
+│   ├── cart/page.tsx                 # Remove label from confirmshaming; bland-removal notice
 │   └── account/page.tsx              # Sign out label from confirmshaming
 ├── components/
 │   ├── ShameDialog.tsx               # new: native <dialog>, endless rounds
 │   ├── AddToCart.tsx                 # opens ShameDialog for bland shirts when shaming is on
 │   └── SiteHeader.tsx                # "About" link
 └── lib/
-    ├── shaming/loop.ts               # new: buildLadder, recommendationFor, lineOrder
+    ├── shaming/loop.ts               # new: buildLadder, recommendationFor, lineOrder, shameFor
     ├── shaming/labels.ts             # new: labelFor(key, confirmshaming)
-    ├── cart/cart.ts                  # BLAND_REFUSED on add and on quantity raise
+    ├── cart/cart.ts                  # BLAND_REFUSED on add/raise; audit pulls bland lines; merge skips them
     ├── data/shirts.ts                # isBlandShirt(db, shirtId)
     ├── data/settings.ts, db/schema.ts, catalog/types.ts, catalog/validate.ts   # the two switches
     └── copy.ts                       # about, shame lines, labels, BLAND_REFUSED
+scripts/seed-data.ts                  # seed both switches on
 tests/
+├── fixtures/catalog.ts, helpers/db.ts                          # switches in the fixture; setSwitches helper
 ├── unit/shaming-loop.test.ts, unit/shaming-labels.test.ts      # new
-├── integration/bland-refusal.test.ts                           # new
-└── e2e/shaming.spec.ts, e2e/about.spec.ts                      # new; card-checkout.spec.ts updated
+├── integration/bland-refusal.test.ts, integration/settings-switches.test.ts   # new
+└── e2e/shaming.spec.ts, e2e/confirmshaming.spec.ts, e2e/about.spec.ts       # new; card-checkout + zoom-and-cart updated
 ```
 
 **Structure Decision**: this extends 001's single project. The new logic sits in `src/lib/shaming/`

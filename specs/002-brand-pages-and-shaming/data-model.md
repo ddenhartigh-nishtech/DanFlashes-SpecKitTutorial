@@ -19,11 +19,17 @@ No other tables change. Cart, order, and ledger rows are untouched.
 
 ## Derived values (computed, never stored)
 
-- `isBlandShirt(shirt)`: `tierOf(shirt.complexity).minScore === 0`, evaluated at the moment of an add
-  or a quantity raise (data layer).
+- `isBlandShirt(shirt)`: `tierOf(shirt.complexity).minScore === 0`, evaluated at the moment of an
+  add, a quantity raise, a guest-cart merge, or a cart audit (data layer).
+- `RemovedLine` (001's cart audit result) gains `reason: "retired" | "bland"`. Bland lines are
+  removed only while shaming is on.
 - `ladder`: active non-bland shirts in ascending complexity order, in shopper shape (no score).
-- `recommendationFor(round)`: `ladder[min(round, ladder.length − 1)]`, or `null` when the ladder is
-  empty (the escape then goes to `/shirts`).
+- `recommendationFor(round)`: rounds count from 1, so round *n* recommends
+  `ladder[min(n − 1, ladder.length − 1)]`. It returns `null` when the ladder is empty, and the
+  escape then goes to `/shirts`.
+- `shameFor({ isBland, blandShaming, confirmshaming }, ladder)`: what the shirt page hands to Add to
+  Cart. It is `null` (a normal add) unless the shirt is bland and shaming is on. Otherwise it is
+  `{ ladder, insistLabel }`.
 
 ## Brand copy additions (`src/lib/copy.ts`, not data)
 
@@ -31,4 +37,10 @@ No other tables change. Cart, order, and ledger rows are untouched.
 - `copy.shame.lines`: ≥ 8 disparaging lines
 - `copy.shame.labels`: `{ insist, remove, signOut }`, each with a `{ shamed, neutral }` pair
 - `copy.shame.relent`, `copy.shame.takeIt`, `copy.shame.title` ("You sure about that?")
+- `copy.shame.nothingBetter`: the escape label when there's no shirt to recommend (links to
+  `/shirts`)
+- `copy.nav.about`: the header link
 - `copy.codes.BLAND_REFUSED`: the store-side refusal message
+- `copy.cart.blandRemovedNotice`: the notice above bland lines pulled from a cart
+- `copy.codes.CART_AUDITED`: reworded to cover both retired and bland removals
+- `copy.cart.remove` and `copy.auth.signOut` are removed. Their text moves to the neutral labels.

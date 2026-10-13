@@ -26,7 +26,13 @@ See `specs/001-core-storefront/research.md`. Only the new decisions are recorded
   - `updateItem` returns `BLAND_REFUSED` when a bland line's quantity would *increase*. Decreasing
     or removing a line still works.
 
-  Blandness is decided at that moment, from the shirt's current tier.
+  - `auditCart` (001), which already pulls retired shirts before every cart view and checkout, also
+    pulls bland lines while `blandShaming` is on. `RemovedLine` gains `reason: "retired" | "bland"`.
+    This is what keeps bland lines that are already in a cart from being bought.
+  - `mergeGuestCart` skips the guest's bland lines while `blandShaming` is on.
+
+  Blandness is decided at that moment, from the shirt's current tier. Reusing the existing audit
+  avoids a second removal path.
 - **Rationale**: this is FR-010 and SC-001. A gag enforced only in the browser is bypassable with a
   plain form POST. The data layer gains `isBlandShirt(db, shirtId)`, so cart code still never reads
   catalog tables directly (001 T081).
@@ -49,7 +55,9 @@ See `specs/001-core-storefront/research.md`. Only the new decisions are recorded
   - `buildLadder(shirts)`: takes catalog shirts, which already carry `tier.isBland`. Keeps active,
     non-bland shirts in ascending complexity, one per distinct score so every step is strictly more
     complicated, and maps them to shopper shirts.
-  - `recommendationFor(round, ladder)`
+  - `recommendationFor(round, ladder)`: rounds count from 1, so round 1 is `ladder[0]`
+  - `shameFor(flags, ladder)`: the switch logic the shirt page would otherwise hold. Unit-testing
+    every on/off combination is how "off" is proven without toggling the shared e2e database.
   - `lineOrder(poolSize, random)`: a shuffled permutation, re-shuffled when exhausted, never
     repeating the previous line across the cycle boundary
 

@@ -25,4 +25,4 @@ npm run dev
 | 8 | Cart: check the Remove label. Account: check the Sign out label. | "Remove (and lose your edge)" and "Sign out (go back to being normal)". (US2-1) |
 | 9 | In Studio, set `store_settings.confirmshaming = 0`, then reload | Neutral labels ("Remove", "Sign out", "Yes, I'm sure"). (US2-2) |
 | 10 | In Studio, set `store_settings.bland_shaming = 0`, then add Beige Regret | Added normally. (US1-7) |
-| 11 | With shaming back on, raise that Beige Regret line's quantity in the cart | Refused in brand voice. Lowering or removing it still works. (FR-010) |
+| 11 | With shaming back on, reload the cart that holds that Beige Regret line | The line is pulled out, with a brand-voice notice listing it. Checkout can't include it. (US1-8, FR-010) |

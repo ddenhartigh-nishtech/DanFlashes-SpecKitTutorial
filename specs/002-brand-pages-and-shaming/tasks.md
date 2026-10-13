@@ -62,7 +62,7 @@ that order.
 
 ## Phase 3: User Story 1 - "You Sure About That?" (Priority: P1) 🎯 MVP
 
-**Goal**: with shaming on, a BLAND shirt can never be added. Trying opens an endless dialog that climbs to the most complicated shirt. The store refuses bland adds and bland quantity raises however they arrive.
+**Goal**: with shaming on, a BLAND shirt can never be added. Trying opens an endless dialog that climbs to the most complicated shirt. The store keeps bland shirts out of every cart: adds and quantity raises are refused, sign-in merges skip them, and bland lines already in a cart are pulled with a notice.
 
 **Independent Test**: quickstart scenarios 3–7, 10 and 11.
 
@@ -73,18 +73,24 @@ that order.
     - drops BLAND and inactive shirts
     - orders by ascending complexity, one shirt per distinct score
     - output objects have **no** `complexity` or `msrpUsd` key (constitution II)
-  - `recommendationFor(round, ladder)`: climbs one step per round, stays on the last entry once past the end, and returns `null` for an empty ladder
+  - `recommendationFor(round, ladder)`: rounds count from 1. Round 1 returns `ladder[0]`, each round climbs one step, it stays on the last entry once past the end, and it returns `null` for an empty ladder.
   - `lineOrder(poolSize, random, previous)`, with a seeded `random`:
     - returns a permutation of `0..poolSize-1`
     - its first entry is never `previous` when `poolSize > 1`
     - is deterministic
+  - `shameFor({ isBland, blandShaming, confirmshaming }, ladder)` returns `null` unless the shirt is bland and `blandShaming` is on. Otherwise it returns `{ ladder, insistLabel }`, where the label follows `confirmshaming`. Cover all eight on/off combinations: this proves the switches are independent (FR-012) and that each tactic disappears when its switch is off (SC-005).
 - [ ] T011 [P] [US1] Integration tests in tests/integration/bland-refusal.test.ts, using `createSeededTestDb` and `setSwitches`:
   - with shaming on, `addItem` of a BLAND shirt returns `BLAND_REFUSED` and writes no cart line
   - with shaming on, for a bland line added while shaming was off:
     - `updateItem` raising its quantity returns `BLAND_REFUSED` and leaves the quantity unchanged
-    - lowering it succeeds
-    - quantity 0 and `removeItem` remove it
-  - with shaming off, a BLAND shirt adds normally (FR-011)
+    - `auditCart` removes it and reports `{ reason: "bland" }`, and `getCartView` lists it in `removed`
+    - `placeOrder` returns `CART_AUDITED` with the bland line in `removed` and writes no order (US1-8)
+  - `auditCart` still reports retired shirts with `{ reason: "retired" }`
+  - with shaming on, `mergeGuestCart` doesn't carry the guest's bland lines into the account's cart, and an existing bland line there doesn't grow. Non-bland lines merge as in 001.
+  - with shaming off, the following behave exactly as in 001 (FR-011):
+    - a BLAND shirt adds normally
+    - `auditCart` keeps bland lines
+    - `mergeGuestCart` carries bland lines over
   - a non-bland shirt adds normally either way
   - re-tiering a shirt into BLAND (raising the second tier's `min_score` above its score) makes the next add refused, because blandness is decided at the moment of the add
   - `addToCartCore` and `updateCartItemCore` return `{ ok: false, code: "BLAND_REFUSED", message: copy.codes.BLAND_REFUSED }`
@@ -104,21 +110,29 @@ that order.
   - `addItem`: after the inactive check, return it when `getSettings(db).blandShaming && isBlandShirt(db, shirt.id)`
   - `updateItem`: read the line's current quantity, and return it when the new quantity is greater and the same condition holds
   - neither writes nor touches the cart when refusing
+  - `RemovedLine` gains `reason: "retired" | "bland"`. While `blandShaming` is on, `auditCart` also deletes bland lines and reports them with `reason: "bland"`. `placeOrder` already audits first, so bland lines can't be bought.
+  - `mergeGuestCart` skips the guest's bland lines while `blandShaming` is on
 - [ ] T015 [US1] Add `copy.codes.BLAND_REFUSED` (brand voice, e.g. "Dan Flashes does not sell boring shirts. Not to you. Not to anyone.") to src/lib/copy.ts. T011 passes.
-- [ ] T016 [US1] Fix the existing tests that add a BLAND shirt now that shaming is on by default:
-  - call `setSwitches(db, { blandShaming: false })` where the test needs a bland line: tests/integration/cart.test.ts (the BLAND badge in the cart view) and tests/integration/cart-audit.test.ts
-  - swap to a non-bland shirt where blandness doesn't matter: tests/integration/cart-merge.test.ts and tests/integration/actions-cart.test.ts
-- [ ] T017 [P] [US1] Implement `buildLadder`, `recommendationFor` and `lineOrder` in src/lib/shaming/loop.ts as pure functions with no framework imports. Ties on score keep the higher-priced shirt. T010 passes.
-- [ ] T018 [US1] Add the rest of `copy.shame` to src/lib/copy.ts, all in voice and never explaining the joke:
+- [ ] T016 [US1] Show the bland removals:
+  - add `copy.cart.blandRemovedNotice` to src/lib/copy.ts in voice, e.g. "Dan took these out of your cart. You'll thank him later:"
+  - reword `copy.codes.CART_AUDITED` so it covers both retired and bland removals
+  - in src/app/cart/page.tsx, have `RemovedNotice` list `reason: "bland"` lines under `blandRemovedNotice` and `reason: "retired"` lines under 001's `removedNotice`
+- [ ] T017 [US1] Fix the existing tests that 002 breaks:
+  - shaming is on by default, so tests that add a BLAND shirt need updating:
+    - call `setSwitches(db, { blandShaming: false })` where the test needs a bland line: tests/integration/cart.test.ts (the BLAND badge in the cart view) and tests/integration/cart-audit.test.ts
+    - swap to a non-bland shirt where blandness doesn't matter: tests/integration/cart-merge.test.ts and tests/integration/actions-cart.test.ts
+  - add `reason: "retired"` to expected `RemovedLine`s in tests/integration/cart-audit.test.ts and tests/integration/place-order-card.test.ts
+- [ ] T018 [P] [US1] Implement `buildLadder`, `recommendationFor`, `lineOrder` and `shameFor` in src/lib/shaming/loop.ts as pure functions with no framework imports (`shameFor` uses `labelFor` from T009). Ties on score keep the higher-priced shirt. T010 passes.
+- [ ] T019 [US1] Add the rest of `copy.shame` to src/lib/copy.ts, all in voice and never explaining the joke:
   - `title` "You sure about that?"
   - `lines`: at least 8 disparaging lines about the man who wears bland shirts
   - `relent` "Fine. I'll look at real shirts"
   - `takeIt`, e.g. "Okay. Show me the complicated one"
   - `nothingBetter`, the escape label when the ladder is empty, linking to `/shirts`
-- [ ] T019 [US1] Extend `loadShirt` in src/app/_data/storefront.ts to also return:
+- [ ] T020 [US1] Extend `loadShirt` in src/app/_data/storefront.ts to also return:
   - `blandShaming` and `confirmshaming` from settings
   - `ladder`: `buildLadder(listCatalogShirts(db))` only when the shirt is BLAND and shaming is on, otherwise `[]`
-- [ ] T020 [US1] Create the `ShameDialog` client component in src/components/ShameDialog.tsx on native `<dialog>` with `showModal()` (R4):
+- [ ] T021 [US1] Create the `ShameDialog` client component in src/components/ShameDialog.tsx on native `<dialog>` with `showModal()` (R4):
   - **Props**: `open`, `onClose`, `ladder: ShopperShirt[]`, `insistLabel`
   - **Each round shows**:
     - the title
@@ -128,14 +142,14 @@ that order.
     - relent closes the dialog
     - the dialog's `cancel` event (Escape) also closes it, which counts as relenting
     - insist advances the round and never calls the server
-  - **Test hooks**: `data-testid` `shame-dialog`, `shame-line`, `shame-recommendation`, and `data-round` on the dialog
+  - **Test hooks**: `data-testid` `shame-dialog`, `shame-line`, `shame-recommendation`, and `data-round` on the dialog (it is `1` when the dialog opens)
   - **Styling**: loud tokens; scrolls inside the dialog with a max height so it fits at 360px
-- [ ] T021 [US1] Update `AddToCart` in src/components/AddToCart.tsx with a new prop, `shame: { ladder: ShopperShirt[]; insistLabel: string } | null`:
+- [ ] T022 [US1] Update `AddToCart` in src/components/AddToCart.tsx with a new prop, `shame: { ladder: ShopperShirt[]; insistLabel: string } | null`:
   - when `shame` is set and a size is picked, `onSubmit` calls `preventDefault()` and opens `ShameDialog` instead of running the action
   - with no size picked, submit normally so 001's `SIZE_REQUIRED` message still shows
   - `null` keeps 001 behavior exactly
-- [ ] T022 [US1] In src/app/shirts/[slug]/page.tsx, pass `shame = shirt.tier.isBland && blandShaming ? { ladder, insistLabel: labelFor("insist", confirmshaming) } : null` to `AddToCart`. T012 passes.
-- [ ] T023 [US1] In tests/e2e/card-checkout.spec.ts, replace `addShirt(page, "beige-regret", "S")` and the "Beige Regret" summary assertion with `paisley-panic` / "Paisley Panic"
+- [ ] T023 [US1] In src/app/shirts/[slug]/page.tsx, pass `shame={shameFor({ isBland: shirt.tier.isBland, blandShaming, confirmshaming }, ladder)}` to `AddToCart`. The page holds no switch logic of its own. T012 passes.
+- [ ] T024 [US1] In tests/e2e/card-checkout.spec.ts, replace `addShirt(page, "beige-regret", "S")` and the "Beige Regret" summary assertion with `paisley-panic` / "Paisley Panic"
 
 **Checkpoint**: US1 works on its own, and `npm run verify` is green.
 
@@ -149,20 +163,20 @@ that order.
 
 ### Tests for User Story 2 (write first; they must fail)
 
-- [ ] T024 [P] [US2] e2e journey in tests/e2e/confirmshaming.spec.ts (desktop and phone):
+- [ ] T025 [P] [US2] e2e journey in tests/e2e/confirmshaming.spec.ts (desktop and phone):
   - **Remove**: a guest adds Geo Riot. The cart line's button reads "Remove (and lose your edge)", and clicking it empties the cart.
   - **Sign out**: after sign-up, `/account` shows "Sign out (go back to being normal)", and clicking it signs out (`/account` then redirects to sign-in).
   - **Insist**: the insist button on beige-regret's dialog reads "Yes, I'd rather blend in".
 
 ### Implementation for User Story 2
 
-- [ ] T025 [US2] In src/app/cart/page.tsx, read `getSettings(db).confirmshaming` in `CartContents` and label each line's Remove button with `labelFor("remove", confirmshaming)`. Delete the now-unused `copy.cart.remove` from src/lib/copy.ts.
-- [ ] T026 [US2] In src/app/account/page.tsx, label the Sign out button with `labelFor("signOut", settings.confirmshaming)`. Delete the now-unused `copy.auth.signOut` from src/lib/copy.ts.
-- [ ] T027 [US2] Update the existing e2e locators that match the old exact labels to the shamed defaults:
+- [ ] T026 [US2] In src/app/cart/page.tsx, read `getSettings(db).confirmshaming` in `CartContents` and label each line's Remove button with `labelFor("remove", confirmshaming)`. Delete the now-unused `copy.cart.remove` from src/lib/copy.ts.
+- [ ] T027 [US2] In src/app/account/page.tsx, label the Sign out button with `labelFor("signOut", settings.confirmshaming)`. Delete the now-unused `copy.auth.signOut` from src/lib/copy.ts.
+- [ ] T028 [US2] Update the existing e2e locators that match the old exact labels to the shamed defaults:
   - `name: "Sign out"` in tests/e2e/card-checkout.spec.ts
   - `name: "Remove"` in tests/e2e/zoom-and-cart.spec.ts
 
-  T024 passes.
+  T025 passes.
 
 **Checkpoint**: US1 and US2 both work, and `npm run verify` is green.
 
@@ -176,23 +190,23 @@ that order.
 
 ### Tests for User Story 3 (write first; they must fail)
 
-- [ ] T028 [P] [US3] e2e journey in tests/e2e/about.spec.ts (desktop and phone):
+- [ ] T029 [P] [US3] e2e journey in tests/e2e/about.spec.ts (desktop and phone):
   - **Navigation**: from `/` and from a shirt page, the header's "About" link opens `/about`. On phone, open Menu first.
   - **Bio**: the three bio sections are visible.
   - **Exhibit A**: the `exhibit-a` section shows Dan's Masterpiece with its tier badge and price, and its link opens `/shirts/dans-masterpiece`.
-- [ ] T029 [P] [US3] Add a case to tests/unit/listing.test.ts: when the priciest shirt is inactive, `mostExpensive` returns the next priciest active shirt (Edge Case: Exhibit A deactivated)
+- [ ] T030 [P] [US3] Add a case to tests/unit/listing.test.ts: when the priciest shirt is inactive, `mostExpensive` returns the next priciest active shirt (Edge Case: Exhibit A deactivated)
 
 ### Implementation for User Story 3
 
-- [ ] T030 [US3] Add to src/lib/copy.ts, in Dan's egocentric voice and never explaining the joke (FR-002, FR-015):
+- [ ] T031 [US3] Add to src/lib/copy.ts, in Dan's egocentric voice and never explaining the joke (FR-002, FR-015):
   - `copy.nav.about` "About"
   - `copy.about`: `title`, `heading`, three `sections` (`{ heading, body }`: who he is, the method — complexity, always more complexity — and why the prices are generous), and `exhibitA` (heading plus a one-line intro)
-- [ ] T031 [US3] Create src/app/about/page.tsx:
+- [ ] T032 [US3] Create src/app/about/page.tsx:
   - `metadata.title` from `copy.about.title`
   - the bio sections rendered statically from `copy.about`, so they're in the static shell (R6, constitution VII)
   - a `<Suspense>` Exhibit A section (`data-testid="exhibit-a"`) that calls `loadStorefront()` → `mostExpensive()` → `toShopperShirt()` → `ShirtCard` (`headingLevel={3}`), and is omitted when there's no active shirt
   - loud tokens, responsive from 360px
-- [ ] T032 [US3] Add `{ href: "/about", label: copy.nav.about }` to `links` in src/components/SiteHeader.tsx, which covers both the desktop nav and the phone menu. T028 passes.
+- [ ] T033 [US3] Add `{ href: "/about", label: copy.nav.about }` to `links` in src/components/SiteHeader.tsx, which covers both the desktop nav and the phone menu. T029 passes.
 
 **Checkpoint**: all three stories work independently.
 
@@ -200,10 +214,10 @@ that order.
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T033 [P] Document both switches in README.md (store settings section: the `store_settings.bland_shaming` / `confirmshaming` columns, both on by default, edited in Drizzle Studio) and the `npm run db:migrate` step after pulling. Mark 002 in progress in ROADMAP.md.
-- [ ] T034 Constitution VII spot check: run Lighthouse (mobile) on `/about` and `/shirts/beige-regret` against a production build. CLS must be ≤ 0.1 and LCP no worse than 001's `/shirts` result. Opening the dialog must cause no layout shift.
-- [ ] T035 Run quickstart.md scenarios 1–11 by hand (dev server plus Drizzle Studio for 9–11) and note the results
-- [ ] T036 Run `npm run format`, then `npm run verify`. It must be fully green, with line coverage ≥ 90% on `src/lib`, including `src/lib/shaming/`.
+- [ ] T034 [P] Document both switches in README.md (store settings section: the `store_settings.bland_shaming` / `confirmshaming` columns, both on by default, edited in Drizzle Studio) and the `npm run db:migrate` step after pulling. Mark 002 in progress in ROADMAP.md.
+- [ ] T035 Constitution VII spot check: run Lighthouse (mobile) on `/about` and `/shirts/beige-regret` against a production build. Both pages must have CLS ≤ 0.1 and LCP ≤ 2.5 s, measured with applied throttling. For reference, 001's `/shirts` measured 2.2 s. Opening the dialog must cause no layout shift.
+- [ ] T036 Run quickstart.md scenarios 1–11 by hand (dev server plus Drizzle Studio for 9–11) and note the results
+- [ ] T037 Run `npm run format`, then `npm run verify`. It must be fully green, with line coverage ≥ 90% on `src/lib`, including `src/lib/shaming/`.
 
 ---
 
@@ -217,17 +231,17 @@ that order.
   - T005 → T006 → T007.
   - T008 depends on T006.
   - T009 depends on T003.
-- **US1 (T010–T023)** needs Foundational. Within it:
+- **US1 (T010–T024)** needs Foundational. Within it:
   - the tests (T010–T012) come first
-  - T013 → T014 → T015 → T016
-  - T017 is independent
-  - T018 → T020
-  - T019 depends on T017
-  - T020 → T021 → T022
-  - T023 can run any time after T014
-- **US2 (T024–T027)** needs Foundational, and needs T020/T021 for the insist label (or run it after US1).
-- **US3 (T028–T032)** needs only Foundational.
-- **Polish (T033–T036)** comes after the stories you are shipping.
+  - T013 → T014 → T015 → T016 → T017
+  - T018 is independent
+  - T019 → T021
+  - T020 depends on T018
+  - T021 → T022 → T023
+  - T024 can run any time after T014
+- **US2 (T025–T028)** needs Foundational, and needs T021/T022 for the insist label (or run it after US1).
+- **US3 (T029–T033)** needs only Foundational.
+- **Polish (T034–T037)** comes after the stories you are shipping.
 
 ### User story dependencies
 
@@ -238,8 +252,8 @@ that order.
 ### Parallel opportunities
 
 - **Foundational**: T002, T003 and T008 can run together.
-- **US1 tests**: T010, T011 and T012 can run together, then T017 alongside the T013–T016 chain.
-- **Across stories**: US3 (T028–T032) can run in parallel with US1 once Foundational is done.
+- **US1 tests**: T010, T011 and T012 can run together, then T018 alongside the T013–T017 chain.
+- **Across stories**: US3 (T029–T033) can run in parallel with US1 once Foundational is done.
 
 ## Parallel Example: User Story 1
 

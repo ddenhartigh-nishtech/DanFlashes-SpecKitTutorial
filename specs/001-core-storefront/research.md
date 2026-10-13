@@ -298,3 +298,36 @@ This file records each technical decision, why it was made, and what else was co
   - `src/app/teapot/route.ts` returns a branded HTML page with HTTP **418 I'm a teapot**. App Router
     pages can't set arbitrary status codes, so this one is a route handler.
 - **Rationale**: this is FR-035. A framework-default error page would break the bit.
+
+## R24. Implementation findings (2026-10-13, `/speckit-implement` T001–T040)
+
+Decisions that the plan could not have known until code ran:
+
+- **better-sqlite3 pinned to `^12.11.1`.** The v13.0.3 prebuilt Windows x64 binary segfaults
+  (access violation) on this machine's Node 22.12 / N-API 9. v12 ships a Node-ABI-specific binary
+  that works. Revisit when Node is upgraded.
+- **`@types/node` is `^22`** (the scaffold pinned `^20`), because Vitest 5 requires it and the
+  project targets Node 22 anyway.
+- **Next.js 16.4 ships with Cache Components on.** Synchronous better-sqlite3 reads count as
+  "predictable" and would be **prerendered at build time**, freezing the catalog. So every page
+  reads the database through `src/app/_data/storefront.ts`, which calls `connection()` and must
+  sit inside `<Suspense>`. Result: `/` and `/shirts` build as Partial Prerender (static shell plus
+  streamed catalog), `/teapot` is dynamic, and the build has no warnings.
+- **The error boundary prop is `retry()`** in 16.4 (formerly `reset()`).
+- **`/teapot` reads the request's Accept header.** It serves HTML or plain text, and that read
+  also keeps the route handler request-time instead of prerendered.
+- **Plain `<img>` instead of `next/image`** for shirt art. The art is SVG and is served from a
+  configurable media base URL (R18), which `next/image` doesn't support without extra
+  configuration. Images are sized 800×800 to prevent layout shift and lazy-loaded below the fold.
+- **The listing filters are a plain GET form**, so they work without JavaScript and the URLs are
+  shareable. They sit in a `FilterDrawer` that is CSS-only from `md` up (always open), and only the
+  phone toggle uses JavaScript. An earlier `<details>` + `useEffect` version caused a hydration
+  race and a desktop layout shift.
+- **Placeholder art is capped** at about 600 shapes per SVG (≤ 70 KB), so top-tier shirts stay
+  fast while still looking the most complicated.
+- **`.gitattributes` forces LF** so Prettier's check passes on Windows, where Git converts to
+  CRLF on checkout.
+- **`BACKUP_DIR` environment variable** (default `backups/`), added so the "migrate backs up
+  first" behavior can be tested end to end.
+- **The SQLite CHECK constraint for money** is built from GLOB patterns plus structural checks,
+  since SQLite has no regex. It was verified against 13 good and bad inputs.

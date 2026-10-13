@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+/* Dan Flashes brand tokens (constitution V: maximum visual assault). */
+@theme {
+  --color-ink: #111111;
+  --color-paper: #fff8e7;
+  --color-hot-pink: #ff2d95;
+  --color-electric-cyan: #00e5ff;
+  --color-highlighter: #ffe600;
+  --color-ultraviolet: #7a00ff;
+  --color-acid: #b6ff00;
+  --color-safety-orange: #ff5a00;
+
+  --font-display: var(--font-bungee), Impact, "Arial Black", sans-serif;
+  --font-sans: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+  }
+
+  /* Visible focus everywhere — loud, like everything else. */
+  :focus-visible {
+    outline: 4px solid var(--color-ultraviolet);
+    outline-offset: 3px;
+  }
+}
+
+@utility loud-stripes {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--color-hot-pink) 0 18px,
+    var(--color-highlighter) 18px 36px,
+    var(--color-electric-cyan) 36px 54px,
+    var(--color-ultraviolet) 54px 72px
+  );
+}
+
+@utility loud-dots {
+  background-color: var(--color-electric-cyan);
+  background-image:
+    radial-gradient(var(--color-hot-pink) 22%, transparent 23%),
+    radial-gradient(var(--color-highlighter) 22%, transparent 23%);
+  background-size: 28px 28px;
+  background-position:
+    0 0,
+    14px 14px;
+}
+
+/* Solid backing so price, badge, and Add to Cart stay readable over any pattern. */
+@utility solid-backing {
+  background-color: var(--color-ink);
+  color: var(--color-paper);
+  box-shadow: 4px 4px 0 var(--color-hot-pink);
+}

@@ -1,0 +1,21 @@
+# build & tooling output
+.next/
+out/
+build/
+coverage/
+node_modules/
+test-results/
+playwright-report/
+next-env.d.ts
+package-lock.json
+
+# data (never formatted)
+data/
+backups/
+drizzle/meta/
+
+# hand-formatted docs: spec-kit artifacts and all Markdown
+.specify/
+.claude/
+specs/
+**/*.md

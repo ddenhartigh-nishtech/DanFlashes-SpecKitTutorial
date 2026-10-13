@@ -36,23 +36,23 @@ and the image files.
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-- [ ] T001 Scaffold Next.js 16 into the repo root with `npx create-next-app@16 . --ts --app --src-dir --tailwind --eslint --import-alias "@/*" --use-npm`. Scaffold into a temp dir and copy in if the CLI refuses a non-empty folder. Preserve the existing `.specify/`, `.claude/`, `specs/`, `README.md`, `ROADMAP.md`, and `.gitignore` (merge its rules into the generated one).
-- [ ] T002 Install dependencies in package.json:
+- [X] T001 Scaffold Next.js 16 into the repo root with `npx create-next-app@16 . --ts --app --src-dir --tailwind --eslint --import-alias "@/*" --use-npm`. Scaffold into a temp dir and copy in if the CLI refuses a non-empty folder. Preserve the existing `.specify/`, `.claude/`, `specs/`, `README.md`, `ROADMAP.md`, and `.gitignore` (merge its rules into the generated one).
+- [X] T002 Install dependencies in package.json:
   - runtime: `drizzle-orm better-sqlite3 zod bcryptjs big.js`
   - dev: `drizzle-kit @types/better-sqlite3 @types/big.js vitest @vitest/coverage-v8 @playwright/test tsx prettier prettier-plugin-tailwindcss eslint-config-prettier`
-- [ ] T003 [P] Configure code hygiene (R21):
+- [X] T003 [P] Configure code hygiene (R21):
   - .prettierrc (with `prettier-plugin-tailwindcss`)
   - .prettierignore (`.next/`, `data/`, `backups/`, `coverage/`, `drizzle/meta/`, `.specify/`, `.claude/`, `specs/`, `**/*.md`), because spec-kit and docs Markdown are hand-formatted
   - .editorconfig (2-space indent, LF, final newline)
   - `eslint-config-prettier` appended to the ESLint flat config in eslint.config.mjs
-- [ ] T004 [P] Configure Vitest in vitest.config.ts: `@/*` → `src/*` alias, include `tests/unit/**` and `tests/integration/**`, node environment, v8 coverage over `src/lib/**` with a `lines: 90` threshold
-- [ ] T005 [P] Configure Playwright in playwright.config.ts:
+- [X] T004 [P] Configure Vitest in vitest.config.ts: `@/*` → `src/*` alias, include `tests/unit/**` and `tests/integration/**`, node environment, v8 coverage over `src/lib/**` with a `lines: 90` threshold
+- [X] T005 [P] Configure Playwright in playwright.config.ts:
   - testDir `tests/e2e`
   - **two projects**: `desktop` (Desktop Chrome) and `phone` (Pixel 7)
   - `webServer` command `npm run db:reset -- --no-backup && npm run dev -- -p 3100`, with env `DATABASE_PATH=data/e2e.db`
   - baseURL `http://localhost:3100`
-- [ ] T006 [P] Add `data/`, `backups/`, `coverage/`, `test-results/`, `playwright-report/` to .gitignore, and create .env.example documenting `DATABASE_PATH` (default `data/danflashes.db`)
-- [ ] T007 Add package.json scripts:
+- [X] T006 [P] Add `data/`, `backups/`, `coverage/`, `test-results/`, `playwright-report/` to .gitignore, and create .env.example documenting `DATABASE_PATH` (default `data/danflashes.db`)
+- [X] T007 Add package.json scripts:
   - `format`, `format:check`
   - `lint`, `typecheck` (`tsc --noEmit`)
   - `test` (`vitest run`), `test:coverage`, `test:e2e`
@@ -68,34 +68,34 @@ and the image files.
 
 ### Money, pricing, tiers, media (test-first, pure modules)
 
-- [ ] T008 [P] Write failing tests in tests/unit/money.test.ts:
+- [X] T008 [P] Write failing tests in tests/unit/money.test.ts:
   - `parseUsd` accepts `"200.18"`, `"1450"`, and `"0.5"`, normalizing to `"200.18"`/`"1450.00"`/`"0.50"`, and rejects >2 decimals, non-numeric input, `NaN`, and empty strings
   - `isUsdString` matches `^-?\d+\.\d{2}$`
   - exact arithmetic: `add("0.10","0.20") === "0.30"`, plus `sub`, `mul(price, qty)`, `sum([...])`, `cmp`
   - `roundHalfUp2`
   - `formatUsd("1234567.89") === "$1,234,567.89"`, and a 20-digit value is formatted in full, never abbreviated or in exponent notation
-- [ ] T009 [P] Implement src/lib/money.ts with big.js to pass T008. It accepts strings only and throws on a JS number argument.
-- [ ] T010 [P] Write failing tests in tests/unit/msrp.test.ts:
+- [X] T009 [P] Implement src/lib/money.ts with big.js to pass T008. It accepts strings only and throws on a JS number argument.
+- [X] T010 [P] Write failing tests in tests/unit/msrp.test.ts:
   - with defaults (start `300.00`, anchor 10, interval 10): 0→`150.00`, 10→`300.00`, 15→`424.26`, 20→`600.00`, 50→`4800.00`
   - returns money strings
   - determinism
   - monotonic (never decreasing) over scores 0..400
   - custom settings change the result
   - score 1000 returns a plain digit string (no exponent)
-- [ ] T011 Implement `msrpUsd(score, settings)` in src/lib/pricing/msrp.ts (float `2**x` → immediately `Big` → round half-up to cents) to pass T010
-- [ ] T012 [P] Write failing tests in tests/unit/resolve.test.ts: `resolvePrice(shirt, settings)` returns `{ finalPriceUsd, msrpUsd }`, using `final_price_usd` when set and the MSRP when NULL
-- [ ] T013 Implement src/lib/pricing/resolve.ts to pass T012
-- [ ] T014 [P] Write failing tests in tests/unit/tiers.test.ts:
+- [X] T011 Implement `msrpUsd(score, settings)` in src/lib/pricing/msrp.ts (float `2**x` → immediately `Big` → round half-up to cents) to pass T010
+- [X] T012 [P] Write failing tests in tests/unit/resolve.test.ts: `resolvePrice(shirt, settings)` returns `{ finalPriceUsd, msrpUsd }`, using `final_price_usd` when set and the MSRP when NULL
+- [X] T013 Implement src/lib/pricing/resolve.ts to pass T012
+- [X] T014 [P] Write failing tests in tests/unit/tiers.test.ts:
   - `tierOf(score, tiers)` with the seed defaults (BLAND 0, Complicated 10, Very 25, Seriously 45, Dangerously 70, Too Complicated for Most Men 100): 0→BLAND, 9→BLAND, 10→Complicated, 24→Complicated, 25→Very, 99→Dangerously, 100→Too…, 10000→Too…
   - `isBland` is true only for the `min_score = 0` tier
   - `validateTiers` rejects a missing `min_score = 0`, duplicate `min_score`, duplicate names, and colors that aren't `#RRGGBB`
-- [ ] T015 Implement src/lib/catalog/tiers.ts to pass T014
-- [ ] T016 [P] Write failing tests in tests/unit/media.test.ts:
+- [X] T015 Implement src/lib/catalog/tiers.ts to pass T014
+- [X] T016 [P] Write failing tests in tests/unit/media.test.ts:
   - `resolveMediaUrl("shirts/a.svg", "")` → `/media/shirts/a.svg`
   - `resolveMediaUrl(key, "https://cdn.example.com/df/")` → `https://cdn.example.com/df/shirts/a.svg` (no double slash)
   - `isValidMediaKey` rejects a leading `/`, `..`, backslashes, and drive letters such as `C:`
-- [ ] T017 Implement src/lib/media.ts to pass T016
-- [ ] T018 [P] Write failing tests in tests/unit/catalog-validate.test.ts:
+- [X] T017 Implement src/lib/media.ts to pass T016
+- [X] T018 [P] Write failing tests in tests/unit/catalog-validate.test.ts:
   - `validateShirt` (with its tiers and settings):
     - slug pattern `^[a-z0-9-]+$`
     - name 1–80 chars
@@ -111,16 +111,16 @@ and the image files.
     - presets an array of money strings
     - `media_base_url` empty or `http(s)://`
   - `seedChecks` (warnings): ≥ 12 active, both styles, ≥ 2 BLAND, every tier populated, a T.C. Tugger slug
-- [ ] T019 Implement src/lib/catalog/validate.ts (Zod) to pass T018
+- [X] T019 Implement src/lib/catalog/validate.ts (Zod) to pass T018
 
 ### Database & utilities
 
-- [ ] T020 Define the Drizzle schema in src/lib/db/schema.ts **exactly per data-model.md**:
+- [X] T020 Define the Drizzle schema in src/lib/db/schema.ts **exactly per data-model.md**:
   - catalog tables: `media`, `shirts` (no `bland` column), `shirt_images`, `complexity_tiers` (`name`, `tagline`, `min_score` UNIQUE, `badge_bg_color`, `badge_text_color`), `store_settings` (single row, CHECK `id = 1`)
   - shopper tables: `users`, `sessions`, `carts`, `cart_items` (with `added_at`, PK (`cart_id`, `shirt_id`, `size`), quantity 1–99), `orders` (`subtotal_usd`/`shipping_usd`/`tax_usd`/`total_usd`, `checkout_token` UNIQUE), `order_items` (`tier_name`, `final_price_usd`, `msrp_usd`, `shirt_id` FK **ON DELETE RESTRICT**), `flash_credit_entries` (`amount_usd` signed, never `0.00`)
   - every `*_usd` column is TEXT with a GLOB CHECK for the two-decimal shape
   - `card_last4` is exactly 4 digits
-- [ ] T021 Implement:
+- [X] T021 Implement:
   - src/lib/db/client.ts (better-sqlite3 at `process.env.DATABASE_PATH ?? "data/danflashes.db"`, `foreign_keys = ON`, WAL)
   - src/lib/db/backup.ts (`backupTo(dir)` using better-sqlite3 `db.backup()` → `backups/danflashes-YYYYMMDD-HHMMSS.db`)
   - drizzle.config.ts
@@ -130,21 +130,21 @@ and the image files.
   - scripts/db-reset.ts (backup unless `--no-backup`, delete the DB plus `-wal`/`-shm`, migrate, run the seed)
 
   Then run `npm run db:generate` to create the initial migration in drizzle/.
-- [ ] T022 [P] Write tests in tests/integration/backup.test.ts: a backup writes a timestamped copy with identical rows; a restore replaces the data and leaves a safety backup; the migrate script backs up before applying
-- [ ] T023 [P] Create the tests/helpers/db.ts test helper: a fresh temp-file SQLite database with migrations applied, an optional `seed` flag, deleted after the test file
+- [X] T022 [P] Write tests in tests/integration/backup.test.ts: a backup writes a timestamped copy with identical rows; a restore replaces the data and leaves a safety backup; the migrate script backs up before applying
+- [X] T023 [P] Create the tests/helpers/db.ts test helper: a fresh temp-file SQLite database with migrations applied, an optional `seed` flag, deleted after the test file
 
 ### Data-access layer & seed
 
-- [ ] T024 [P] Write failing tests in tests/integration/data-catalog.test.ts:
+- [X] T024 [P] Write failing tests in tests/integration/data-catalog.test.ts:
   - `getSettings` returns typed values (presets as money strings)
   - `listTiers` is ordered by `min_score`
   - `listActiveShirts` returns shirts with resolved image URLs, `finalPriceUsd`, `msrpUsd`, and tier (name + colors) attached, and **no complexity field in the shopper-facing shape**
   - `getShirtBySlug` also returns inactive shirts, with their status
   - saving an invalid shirt surfaces T019's errors
   - deleting a shirt referenced by an `order_items` row fails (FK RESTRICT)
-- [ ] T025 Implement the data-access layer in src/lib/data/settings.ts, src/lib/data/tiers.ts, src/lib/data/media.ts, and src/lib/data/shirts.ts to pass T024. The shopper-facing types MUST omit `complexity` (FR-002).
-- [ ] T026 [P] Create scripts/generate-shirt-art.ts (`npm run art:generate`), which deterministically writes SVG patterns to public/media/shirts/<slug>.svg from a slug + complexity (more complexity means more shapes, colors, and layers; BLAND-range scores get muted beige/grey) and writes a loud public/media/placeholder.svg ("IMAGE TOO COMPLICATED TO LOAD")
-- [ ] T027 Create the seed in scripts/seed-data.ts and scripts/seed.ts (`npm run db:seed`, idempotent: upsert by slug/key/name):
+- [X] T025 Implement the data-access layer in src/lib/data/settings.ts, src/lib/data/tiers.ts, src/lib/data/media.ts, and src/lib/data/shirts.ts to pass T024. The shopper-facing types MUST omit `complexity` (FR-002).
+- [X] T026 [P] Create scripts/generate-shirt-art.ts (`npm run art:generate`), which deterministically writes SVG patterns to public/media/shirts/<slug>.svg from a slug + complexity (more complexity means more shapes, colors, and layers; BLAND-range scores get muted beige/grey) and writes a loud public/media/placeholder.svg ("IMAGE TOO COMPLICATED TO LOAD")
+- [X] T027 Create the seed in scripts/seed-data.ts and scripts/seed.ts (`npm run db:seed`, idempotent: upsert by slug/key/name):
   - the `store_settings` defaults
   - the 6 default tiers with taglines and loud badge colors
   - the placeholder media row (set as `placeholder_media_id`)
@@ -152,11 +152,11 @@ and the image files.
   - media + shirt_images rows for each shirt
 
   Run T026 first.
-- [ ] T028 Write failing tests in tests/integration/catalog-audit.test.ts, then implement src/lib/catalog/audit.ts and scripts/catalog-audit.ts (`npm run catalog:audit`): validation errors (including the BLAND-tier price rule) exit 1, while seed-check warnings print and exit 0. The seeded catalog MUST audit with 0 errors.
+- [X] T028 Write failing tests in tests/integration/catalog-audit.test.ts, then implement src/lib/catalog/audit.ts and scripts/catalog-audit.ts (`npm run catalog:audit`): validation errors (including the BLAND-tier price rule) exit 1, while seed-check warnings print and exit 0. The seeded catalog MUST audit with 0 errors.
 
 ### Brand primitives, layout, error pages
 
-- [ ] T029 [P] Create src/lib/copy.ts with the brand-voice strings per constitution I:
+- [X] T029 [P] Create src/lib/copy.ts with the brand-voice strings per constitution I:
   - headlines and gate copy
   - the empty-cart "You sure about that?"
   - the "Retired from the floor" banner
@@ -164,10 +164,10 @@ and the image files.
   - the 404/500/418 copy
   - every error code from contracts/actions.md
   - confirmations
-- [ ] T030 [P] Create the brand tokens and mobile-first base styles in src/app/globals.css (Tailwind 4 `@theme`: clashing palette, display font; breakpoints sm/md/lg per R22), src/app/layout.tsx, and src/components/SiteHeader.tsx (collapses to a menu below `md`, with tap targets ≥ 44px)
-- [ ] T031 [P] Create the src/components/ShirtImage.tsx client component. It takes a resolved `src`, `alt`, and the placeholder URL, and swaps to the placeholder when `src` is empty or `onError` fires (FR-018, FR-033).
-- [ ] T032 [P] Create the src/components/PriceTag.tsx (`formatUsd`) and src/components/ShirtBadge.tsx (tier name with that tier's `badge_bg_color`/`badge_text_color`, optional tagline) components. Both sit on solid backings. They never receive or render a score.
-- [ ] T033 [P] Create the error pages:
+- [X] T030 [P] Create the brand tokens and mobile-first base styles in src/app/globals.css (Tailwind 4 `@theme`: clashing palette, display font; breakpoints sm/md/lg per R22), src/app/layout.tsx, and src/components/SiteHeader.tsx (collapses to a menu below `md`, with tap targets ≥ 44px)
+- [X] T031 [P] Create the src/components/ShirtImage.tsx client component. It takes a resolved `src`, `alt`, and the placeholder URL, and swaps to the placeholder when `src` is empty or `onError` fires (FR-018, FR-033).
+- [X] T032 [P] Create the src/components/PriceTag.tsx (`formatUsd`) and src/components/ShirtBadge.tsx (tier name with that tier's `badge_bg_color`/`badge_text_color`, optional tagline) components. Both sit on solid backings. They never receive or render a score.
+- [X] T033 [P] Create the error pages:
   - src/app/not-found.tsx (branded 404)
   - src/app/error.tsx (branded 500 with a reset button)
   - src/app/global-error.tsx (last-resort branded page)
@@ -186,7 +186,7 @@ and desktop.
 
 **Independent Test**: quickstart scenarios 1–4.
 
-- [ ] T034 [P] [US1] Write failing tests in tests/unit/listing.test.ts for `parseListingQuery` + `applyListing` + `featuredShirts`:
+- [X] T034 [P] [US1] Write failing tests in tests/unit/listing.test.ts for `parseListingQuery` + `applyListing` + `featuredShirts`:
   - `tier` (repeatable tier ids; BLAND is tier 1)
   - `minPrice`/`maxPrice` (money strings, cents optional)
   - `style`
@@ -194,12 +194,12 @@ and desktop.
   - sorts `complexity-desc` (default), `complexity-asc`, `price-desc`, `price-asc`, comparing money exactly
   - inactive shirts excluded
   - `featuredShirts` returns the featured ones, or else the top 4 active by complexity
-- [ ] T035 [US1] Implement src/lib/catalog/listing.ts to pass T034 (it sorts by complexity internally and never exposes it)
-- [ ] T036 [P] [US1] Create src/components/ShirtCard.tsx (ShirtImage, name, style, ShirtBadge, PriceTag, links to `/shirts/[slug]`)
-- [ ] T037 [P] [US1] Create the src/components/ListingFilters.tsx client component (tier multi-select by name, including BLAND, price range, style, sort labeled "Most Complicated"/"Least Complicated"/price; it's a slide-over drawer below `md` and writes the query string per contracts/routes.md)
-- [ ] T038 [US1] Implement the /shirts page in src/app/shirts/page.tsx (Server Component: searchParams → `applyListing` → a responsive grid of ShirtCard going 1 → 2 → 3–4 columns, with an empty-result state in brand voice)
-- [ ] T039 [US1] Implement the / home page in src/app/page.tsx (hype headline, `featuredShirts`, and a CTA to /shirts)
-- [ ] T040 [US1] Write and pass the Playwright test tests/e2e/browse.spec.ts, running in both projects:
+- [X] T035 [US1] Implement src/lib/catalog/listing.ts to pass T034 (it sorts by complexity internally and never exposes it)
+- [X] T036 [P] [US1] Create src/components/ShirtCard.tsx (ShirtImage, name, style, ShirtBadge, PriceTag, links to `/shirts/[slug]`)
+- [X] T037 [P] [US1] Create the src/components/ListingFilters.tsx client component (tier multi-select by name, including BLAND, price range, style, sort labeled "Most Complicated"/"Least Complicated"/price; it's a slide-over drawer below `md` and writes the query string per contracts/routes.md)
+- [X] T038 [US1] Implement the /shirts page in src/app/shirts/page.tsx (Server Component: searchParams → `applyListing` → a responsive grid of ShirtCard going 1 → 2 → 3–4 columns, with an empty-result state in brand voice)
+- [X] T039 [US1] Implement the / home page in src/app/page.tsx (hype headline, `featuredShirts`, and a CTA to /shirts)
+- [X] T040 [US1] Write and pass the Playwright test tests/e2e/browse.spec.ts, running in both projects:
   - home shows featured shirts
   - /shirts shows badges and prices, with **no seeded complexity value appearing as text**
   - filter to the top tier, then sort by price descending

@@ -220,7 +220,7 @@ empty-cart pitch.
 
 **Independent Test**: quickstart scenarios 5–7 and 14.
 
-- [ ] T041 [P] [US2] Write failing tests in tests/integration/cart.test.ts:
+- [X] T041 [P] [US2] Write failing tests in tests/integration/cart.test.ts:
   - `addItem` creates a guest cart and sets `added_at`
   - the same shirt+size increments quantity and keeps `added_at`
   - a missing size → `SIZE_REQUIRED`
@@ -230,23 +230,23 @@ empty-cart pitch.
   - `getCartView` lines are ordered newest `added_at` first, with live `finalPriceUsd` and tier
   - total = exact Σ price × qty
   - changing `final_price_usd` changes the view (no stored prices)
-- [ ] T042 [P] [US2] Write failing tests in tests/integration/cart-audit.test.ts: `auditCart` deletes inactive lines and returns them, leaves active lines alone, and is a no-op on an empty cart; `getCartView` runs the audit first and reports the removed lines
-- [ ] T043 [US2] Implement src/lib/cart/cart.ts (`getOrCreateCart`, `addItem`, `updateItem`, `removeItem`, `auditCart`, `getCartView`) to pass T041 and T042
-- [ ] T044 [US2] Write failing tests in tests/integration/actions-cart.test.ts (a new guest gets the `df_cart` cookie, and contract error codes pass through), then implement src/actions/cart.ts `addToCart`, `updateCartItem`, `removeCartItem` per contracts/actions.md (httpOnly, SameSite=Lax cookie)
-- [ ] T045 [P] [US2] Create the src/components/ZoomViewer.tsx client component (ShirtImage inside, CSS transform 1×–8×, wheel + **touch pinch** + drag pan, +/−/reset buttons labeled "ENHANCE" with ≥ 44px targets, ShirtBadge overlaid)
-- [ ] T046 [P] [US2] Create src/components/AddToCart.tsx (size picker S/M/L/XL/XXL, the `SIZE_REQUIRED` copy when no size is picked, calls `addToCart`)
-- [ ] T047 [US2] Implement the /shirts/[slug] page in src/app/shirts/[slug]/page.tsx:
+- [X] T042 [P] [US2] Write failing tests in tests/integration/cart-audit.test.ts: `auditCart` deletes inactive lines and returns them, leaves active lines alone, and is a no-op on an empty cart; `getCartView` runs the audit first and reports the removed lines
+- [X] T043 [US2] Implement src/lib/cart/cart.ts (`getOrCreateCart`, `addItem`, `updateItem`, `removeItem`, `auditCart`, `getCartView`) to pass T041 and T042
+- [X] T044 [US2] Write failing tests in tests/integration/actions-cart.test.ts (a new guest gets the `df_cart` cookie, and contract error codes pass through), then implement src/actions/cart.ts `addToCart`, `updateCartItem`, `removeCartItem` per contracts/actions.md (httpOnly, SameSite=Lax cookie)
+- [X] T045 [P] [US2] Create the src/components/ZoomViewer.tsx client component (ShirtImage inside, CSS transform 1×–8×, wheel + **touch pinch** + drag pan, +/−/reset buttons labeled "ENHANCE" with ≥ 44px targets, ShirtBadge overlaid)
+- [X] T046 [P] [US2] Create src/components/AddToCart.tsx (size picker S/M/L/XL/XXL, the `SIZE_REQUIRED` copy when no size is picked, calls `addToCart`)
+- [X] T047 [US2] Implement the /shirts/[slug] page in src/app/shirts/[slug]/page.tsx:
   - active: ZoomViewer, name, style, PriceTag, description, AddToCart
   - inactive: the "Retired from the floor" banner, images, name, style, badge, description, **no price, no AddToCart** (FR-013)
   - unknown: `notFound()`
-- [ ] T048 [US2] Implement the /cart page in src/app/cart/page.tsx:
+- [X] T048 [US2] Implement the /cart page in src/app/cart/page.tsx:
   - an audit notice
   - lines newest first with ShirtImage, name, ShirtBadge, size, qty controls, remove, and PriceTag
   - a running total and a Checkout button
   - **empty**: "You sure about that?", a spotlight on the most expensive active shirt, and a link to `/shirts?tier=<highest tier id>&sort=price-desc`
 
   Also add the cart count to SiteHeader.
-- [ ] T049 [US2] Write and pass the Playwright test tests/e2e/zoom-and-cart.spec.ts, running in both projects: empty /cart shows "You sure about that?" plus the spotlight → open a shirt → Add without a size is refused → pick L → add → the cart shows the line with its badge and price → the zoom buttons change the scale
+- [X] T049 [US2] Write and pass the Playwright test tests/e2e/zoom-and-cart.spec.ts, running in both projects: empty /cart shows "You sure about that?" plus the spotlight → open a shirt → Add without a size is refused → pick L → add → the cart shows the line with its badge and price → the zoom buttons change the scale
 
 **Checkpoint**: US1 + US2 work. A guest can browse, zoom, and build a cart.
 
@@ -259,14 +259,14 @@ retired-shirt links.
 
 **Independent Test**: quickstart scenarios 8–13.
 
-- [ ] T050 [P] [US3] Write failing tests in tests/unit/faux-card.test.ts:
+- [X] T050 [P] [US3] Write failing tests in tests/unit/faux-card.test.ts:
   - Luhn passes for 4242424242424242 and fails for 4242424242424241
   - 12–19 digits; spaces and dashes are stripped
   - future MM/YY, with the current month valid
   - CVC is 3–4 digits
   - brand detection (Visa 4, Mastercard 51–55/2221–2720, Amex 34/37, Discover 6011/65, else "Card")
   - returns only `{brand, last4}`
-- [ ] T051 [P] [US3] Write failing tests in tests/integration/auth.test.ts:
+- [X] T051 [P] [US3] Write failing tests in tests/integration/auth.test.ts:
   - sign-up lowercases and trims the email
   - bcrypt hash stored (cost 12)
   - duplicate → `EMAIL_TAKEN`
@@ -275,8 +275,8 @@ retired-shirt links.
   - only the SHA-256 of the session token is stored
   - an expired session is rejected
   - `safeNext` allows only relative paths
-- [ ] T052 [P] [US3] Write failing tests in tests/integration/cart-merge.test.ts: lines merge, identical shirt+size quantities add (capped at 99) and keep the **earlier** `added_at`, the guest cart row is deleted, and merging into a user with no cart reassigns it
-- [ ] T053 [P] [US3] Write failing tests in tests/integration/place-order-card.test.ts:
+- [X] T052 [P] [US3] Write failing tests in tests/integration/cart-merge.test.ts: lines merge, identical shirt+size quantities add (capped at 99) and keep the **earlier** `added_at`, the guest cart row is deleted, and merging into a user with no cart reassigns it
+- [X] T053 [P] [US3] Write failing tests in tests/integration/place-order-card.test.ts:
   - subtotal = exact Σ final price × qty; shipping `0.00`; tax `0.00`; total = subtotal
   - `order_items` snapshot `shirt_name`, `tier_name`, `complexity`, `final_price_usd`, `msrp_usd`
   - a client-sent price is never charged
@@ -288,23 +288,23 @@ retired-shirt links.
   - gate on with no user → `GATE_SIGN_IN_REQUIRED`
   - after success the cart lines are deleted, the cart row remains, and the Flash Credit balance is unchanged
   - a scan of every table finds no full card number and no CVC
-- [ ] T054 [P] [US3] Implement src/lib/payments/faux-card.ts to pass T050. It must never log its input.
-- [ ] T055 [US3] Implement src/lib/auth/password.ts, src/lib/auth/session.ts (`df_session` httpOnly SameSite=Lax cookie with a random 32-byte token, SHA-256 stored, 30-day expiry), and src/lib/auth/safe-next.ts to pass T051
-- [ ] T056 [US3] Add `mergeGuestCart(guestCartId, userId)` to src/lib/cart/cart.ts to pass T052
-- [ ] T057 [US3] Implement the card path of src/lib/checkout/place-order.ts, inside one `BEGIN IMMEDIATE` transaction: gate → idempotency → `auditCart` → re-resolve prices → validate → card → insert the order + `order_items` snapshot → delete the cart lines. Must pass T053.
-- [ ] T058 [US3] Write failing tests in tests/integration/actions-auth-checkout.test.ts (merge on sign-in, `next` redirect, gate enforcement, error passthrough), then implement src/actions/auth.ts (`signUp`, `signIn`, `signOut`) and src/actions/checkout.ts (`placeOrder` → redirect `/orders/[id]`)
-- [ ] T059 [P] [US3] Implement the /sign-in and /sign-up pages in src/app/sign-in/page.tsx and src/app/sign-up/page.tsx, with gate copy when `next=/checkout`
-- [ ] T060 [P] [US3] Create the src/components/OrderSummary.tsx component (lines: ShirtImage, linked name → `/shirts/[slug]`, ShirtBadge, size, qty, PriceTag; then Subtotal, Shipping $0.00, Tax $0.00, Total). Checkout, confirmation, and history all use it (FR-029).
-- [ ] T061 [US3] Implement the /checkout page in src/app/checkout/page.tsx:
+- [X] T054 [P] [US3] Implement src/lib/payments/faux-card.ts to pass T050. It must never log its input.
+- [X] T055 [US3] Implement src/lib/auth/password.ts, src/lib/auth/session.ts (`df_session` httpOnly SameSite=Lax cookie with a random 32-byte token, SHA-256 stored, 30-day expiry), and src/lib/auth/safe-next.ts to pass T051
+- [X] T056 [US3] Add `mergeGuestCart(guestCartId, userId)` to src/lib/cart/cart.ts to pass T052
+- [X] T057 [US3] Implement the card path of src/lib/checkout/place-order.ts, inside one `BEGIN IMMEDIATE` transaction: gate → idempotency → `auditCart` → re-resolve prices → validate → card → insert the order + `order_items` snapshot → delete the cart lines. Must pass T053.
+- [X] T058 [US3] Write failing tests in tests/integration/actions-auth-checkout.test.ts (merge on sign-in, `next` redirect, gate enforcement, error passthrough), then implement src/actions/auth.ts (`signUp`, `signIn`, `signOut`) and src/actions/checkout.ts (`placeOrder` → redirect `/orders/[id]`)
+- [X] T059 [P] [US3] Implement the /sign-in and /sign-up pages in src/app/sign-in/page.tsx and src/app/sign-up/page.tsx, with gate copy when `next=/checkout`
+- [X] T060 [P] [US3] Create the src/components/OrderSummary.tsx component (lines: ShirtImage, linked name → `/shirts/[slug]`, ShirtBadge, size, qty, PriceTag; then Subtotal, Shipping $0.00, Tax $0.00, Total). Checkout, confirmation, and history all use it (FR-029).
+- [X] T061 [US3] Implement the /checkout page in src/app/checkout/page.tsx:
   - gate redirect to `/sign-in?next=/checkout`
   - `auditCart` → redirect to `/cart` if the cart is now empty
   - OrderSummary
   - a hidden `checkoutToken` + `expectedTotalUsd`
   - the price-changed and audit notices
   - the Faux Card form
-- [ ] T062 [P] [US3] Implement the /orders/[id] confirmation page in src/app/orders/[id]/page.tsx (visible only to the order's owner: OrderSummary from snapshots, "charged to {brand} ending {last4}" or "paid with Flash Credit", brand-voice congratulations)
-- [ ] T063 [US3] Implement the /account purchase history in src/app/account/page.tsx (`WHERE user_id = me ORDER BY created_at DESC`, each order through OrderSummary, links reaching retired shirt pages) and a sign-out button
-- [ ] T064 [US3] Write and pass the Playwright test tests/e2e/card-checkout.spec.ts, running in both projects. Sign-up uses a **unique email per run and project** (e.g. `e2e+${project}-${Date.now()}@danflashes.local`), so desktop and phone never collide on the shared database: guest adds 2 shirts → /checkout redirects to sign-in → sign up → back at checkout with the cart intact and Shipping $0.00 / Tax $0.00 → pay with 4242 4242 4242 4242 → "ending 4242" → the order is in /account → the item link opens the shirt page → /cart shows the empty-cart pitch
+- [X] T062 [P] [US3] Implement the /orders/[id] confirmation page in src/app/orders/[id]/page.tsx (visible only to the order's owner: OrderSummary from snapshots, "charged to {brand} ending {last4}" or "paid with Flash Credit", brand-voice congratulations)
+- [X] T063 [US3] Implement the /account purchase history in src/app/account/page.tsx (`WHERE user_id = me ORDER BY created_at DESC`, each order through OrderSummary, links reaching retired shirt pages) and a sign-out button
+- [X] T064 [US3] Write and pass the Playwright test tests/e2e/card-checkout.spec.ts, running in both projects. Sign-up uses a **unique email per run and project** (e.g. `e2e+${project}-${Date.now()}@danflashes.local`), so desktop and phone never collide on the shared database: guest adds 2 shirts → /checkout redirects to sign-in → sign up → back at checkout with the cart intact and Shipping $0.00 / Tax $0.00 → pay with 4242 4242 4242 4242 → "ending 4242" → the order is in /account → the item link opens the shirt page → /cart shows the empty-cart pitch
 
 **Checkpoint**: the full buying loop works with a faux card.
 
@@ -316,24 +316,24 @@ retired-shirt links.
 
 **Independent Test**: quickstart scenarios 15–17.
 
-- [ ] T065 [P] [US4] Write failing tests in tests/integration/ledger.test.ts:
+- [X] T065 [P] [US4] Write failing tests in tests/integration/ledger.test.ts:
   - a top-up writes a positive `top_up` entry with brand/last4
   - balance = the exact decimal sum (top-ups of `0.10` + `0.20` → `0.30`)
   - a custom amount with cents (`123.45`) works
   - `INVALID_AMOUNT` for `0`, negatives, and 3 decimals
   - entries list newest first
-- [ ] T066 [P] [US4] Write failing tests in tests/integration/place-order-flash-credit.test.ts:
+- [X] T066 [P] [US4] Write failing tests in tests/integration/place-order-flash-credit.test.ts:
   - when the balance ≥ total: the order is created, one `spend` entry of −total is linked to the order, and the balance drops by exactly the total
   - when the balance < total: `INSUFFICIENT_FLASH_CREDIT` and nothing is written
   - two sequential checkouts that together exceed the balance: the second is refused and the balance never goes negative
   - a replayed token doesn't double-spend
   - a guest (gate off) choosing Flash Credit → refused
-- [ ] T067 [US4] Implement src/lib/flash-credit/ledger.ts (`getBalanceUsd`, `topUp`, `listEntries`; sums in the app via money.ts, never SQL `SUM`) to pass T065
-- [ ] T068 [US4] Add the `flash_credit` path to src/lib/checkout/place-order.ts (balance check + spend entry in the same `BEGIN IMMEDIATE` transaction) to pass T066
-- [ ] T069 [US4] Write failing tests in tests/integration/actions-flash-credit.test.ts (sign-in required, preset and custom amounts, error passthrough), then implement src/actions/flash-credit.ts `topUpFlashCredit`
-- [ ] T070 [US4] Add the Flash Credit panel to src/app/account/page.tsx (balance, entry history with spend → order links, top-up form with presets from `store_settings` plus a custom dollars-and-cents amount and the Faux Card form)
-- [ ] T071 [US4] Add the Flash Credit method to src/app/checkout/page.tsx (shows the balance; on `INSUFFICIENT_FLASH_CREDIT`, offers a top-up link or the card with hype copy; hidden for guests)
-- [ ] T072 [US4] Write and pass the Playwright test tests/e2e/flash-credit-checkout.spec.ts, running in both projects, with the same unique-email-per-run-and-project rule as the card checkout test: sign up → top up $5,000 → check out a cart ≤ balance with Flash Credit → the balance drops by exactly the total → the spend entry links to the order
+- [X] T067 [US4] Implement src/lib/flash-credit/ledger.ts (`getBalanceUsd`, `topUp`, `listEntries`; sums in the app via money.ts, never SQL `SUM`) to pass T065
+- [X] T068 [US4] Add the `flash_credit` path to src/lib/checkout/place-order.ts (balance check + spend entry in the same `BEGIN IMMEDIATE` transaction) to pass T066
+- [X] T069 [US4] Write failing tests in tests/integration/actions-flash-credit.test.ts (sign-in required, preset and custom amounts, error passthrough), then implement src/actions/flash-credit.ts `topUpFlashCredit`
+- [X] T070 [US4] Add the Flash Credit panel to src/app/account/page.tsx (balance, entry history with spend → order links, top-up form with presets from `store_settings` plus a custom dollars-and-cents amount and the Faux Card form)
+- [X] T071 [US4] Add the Flash Credit method to src/app/checkout/page.tsx (shows the balance; on `INSUFFICIENT_FLASH_CREDIT`, offers a top-up link or the card with hype copy; hidden for guests)
+- [X] T072 [US4] Write and pass the Playwright test tests/e2e/flash-credit-checkout.spec.ts, running in both projects, with the same unique-email-per-run-and-project rule as the card checkout test: sign up → top up $5,000 → check out a cart ≤ balance with Flash Credit → the balance drops by exactly the total → the spend entry links to the order
 
 **Checkpoint**: all four stories work on their own and together.
 

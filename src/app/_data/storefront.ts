@@ -1,7 +1,7 @@
 import "server-only";
 import { connection } from "next/server";
 import { getPlaceholderUrl, getSettings } from "@/lib/data/settings";
-import { listCatalogShirts } from "@/lib/data/shirts";
+import { getShirtBySlug, listCatalogShirts } from "@/lib/data/shirts";
 import { listTiers } from "@/lib/data/tiers";
 import { getDb } from "@/lib/db/client";
 
@@ -18,5 +18,15 @@ export async function loadStorefront() {
     shirts: listCatalogShirts(db),
     tiers: listTiers(db),
     placeholderUrl: getPlaceholderUrl(db, settings),
+  };
+}
+
+/** One shirt by slug (any status) plus the placeholder URL. Request-time; use inside <Suspense>. */
+export async function loadShirt(slug: string) {
+  await connection();
+  const db = getDb();
+  return {
+    shirt: getShirtBySlug(db, slug),
+    placeholderUrl: getPlaceholderUrl(db, getSettings(db)),
   };
 }

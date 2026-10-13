@@ -4,6 +4,8 @@ import path from "node:path";
 import { afterAll } from "vitest";
 import { openDatabase, type Db, type Sqlite } from "@/lib/db/client";
 import { runMigrations } from "@/lib/db/migrate";
+import { seedCatalog } from "@/lib/data/seed";
+import { SMALL_FIXTURE } from "../fixtures/catalog";
 
 export interface TestDb {
   db: Db;
@@ -23,4 +25,11 @@ export function createTestDb(): TestDb {
     fs.rmSync(dir, { recursive: true, force: true });
   });
   return { db, sqlite, file, dir };
+}
+
+/** A fresh database seeded with the small test catalog. */
+export function createSeededTestDb(): TestDb {
+  const test = createTestDb();
+  seedCatalog(test.db, SMALL_FIXTURE);
+  return test;
 }

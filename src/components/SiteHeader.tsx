@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { Suspense } from "react";
+import { CartCount } from "@/components/CartCount";
 import { copy } from "@/lib/copy";
 
 const links = [
@@ -28,6 +30,11 @@ export function SiteHeader() {
               <li key={link.href}>
                 <Link href={link.href} className={linkClass}>
                   {link.label}
+                  {link.href === "/cart" ? (
+                    <Suspense fallback={null}>
+                      <CartCount />
+                    </Suspense>
+                  ) : null}
                 </Link>
               </li>
             ))}
@@ -48,6 +55,11 @@ export function SiteHeader() {
                 <li key={link.href}>
                   <Link href={link.href} className={linkClass}>
                     {link.label}
+                    {link.href === "/cart" ? (
+                      <Suspense fallback={null}>
+                        <CartCount />
+                      </Suspense>
+                    ) : null}
                   </Link>
                 </li>
               ))}

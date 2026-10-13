@@ -1,5 +1,6 @@
 # build & tooling output
 .next/
+.next-e2e/
 out/
 build/
 coverage/

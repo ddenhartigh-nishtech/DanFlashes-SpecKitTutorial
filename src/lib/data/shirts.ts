@@ -123,6 +123,17 @@ export function listCatalogShirts(
   return hydrate(db, rows);
 }
 
+/** Hydrated shirts by id, in any status (used by the cart and checkout). */
+export function getCatalogShirtsByIds(db: Db, ids: readonly number[]): Map<number, CatalogShirt> {
+  if (ids.length === 0) return new Map();
+  const rows = db
+    .select()
+    .from(shirts)
+    .where(inArray(shirts.id, [...ids]))
+    .all();
+  return new Map(hydrate(db, rows).map((s) => [s.id, s]));
+}
+
 export function getShirtBySlug(db: Db, slug: string): CatalogShirt | null {
   const row = db.select().from(shirts).where(eq(shirts.slug, slug)).get();
   return row ? hydrate(db, [row])[0] : null;

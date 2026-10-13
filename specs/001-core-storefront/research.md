@@ -331,3 +331,30 @@ Decisions that the plan could not have known until code ran:
   first" behavior can be tested end to end.
 - **The SQLite CHECK constraint for money** is built from GLOB patterns plus structural checks,
   since SQLite has no regex. It was verified against 13 good and bad inputs.
+
+## R25. Implementation findings (2026-10-13, `/speckit-implement` T041–T072)
+
+- **Next 16 keeps visited routes mounted but hidden** (React `<Activity>`, part of Cache
+  Components) so Back and Forward are instant. After a client-side navigation, the previous page's
+  DOM is still present with `display: none`. End-to-end locators therefore target visible elements
+  only (`tests/e2e/helpers.ts → visible()`).
+- **E2E runs use their own build directory** (`NEXT_DIST_DIR=.next-e2e`, read in
+  `next.config.ts`). Next 16 refuses a second `next dev` in the same `.next`, so `npm run verify`
+  previously failed whenever the developer's own `npm run dev` was running.
+- **Action logic is framework-free.** `src/lib/actions/*` take a `CookieJar` interface and are
+  unit-tested with a fake jar. `src/actions/*` are thin `"use server"` adapters that add Next's
+  `cookies()`, `redirect()`, and `refresh()`.
+- **Pages read sessions and carts at request time** via `src/app/_data/request.ts`, inside
+  `<Suspense>`. Session caching (`"use cache: private"`) is deliberately not used yet (YAGNI).
+- **Card fields use `autoComplete="off"`** so a browser never autofills a real saved card into the
+  faux checkout or top-up forms. Only the brand and last 4 are kept.
+- **Sign-in timing is uniform.** An unknown email is still compared against a real cost-12 bcrypt
+  hash, so response time doesn't reveal which emails have accounts.
+- **Process note:** the Flash Credit *spend* branch of `placeOrder` and the read-only ledger were
+  written alongside the card path, before their US4 tests. Those tests were then written and run,
+  and they failed first (no `topUp` yet), but the spend branch itself was not strictly red-first.
+- **Order lines keep cart order** (newest first). An order with an unknown id and someone else's
+  order both return the same 404, so order ids can't be probed.
+- **An unknown shirt slug** renders the branded not-found UI. Because the page shell has already
+  streamed (Partial Prerender), the HTTP status is 200 with `noindex` rather than 404, which is
+  documented Next.js behavior. Unmatched routes still return a true 404.

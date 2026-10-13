@@ -11,7 +11,7 @@ pricing, accounts, orders, Flash Credit).
 | 003 | Revenue Streams & Per Diem Drain | Connect revenue streams (per diem, etc.) that auto-fund Flash Credit. Per diem meter that celebrates hitting $0. | 001 (accounts, Flash Credit) |
 | 004 | Urgency Engine | Fake scarcity ("Only 1 left!"), countdown timers that reset, fabricated social proof ("Gary from Accounts Payable just bought this") | 001 |
 | 005 | Checkout Squeeze | Pre-checked add-ons (Pattern Protection Plan™, Complexity Insurance), roach-motel cart | 001 |
-| 006 | Flash Mode | Strobe/flash toggle: the most exciting button on the site | 001 |
+| 006 | Flash Mode & Pipes Background | Strobe/flash toggle (the most exciting button on the site), plus an animated Windows "Pipes" screensaver as the page background in place of the plain field. Each has its own on/off switch. | 001 |
 | 007 | Pattern Generator | Procedurally generated shirts with complexity derived from the generator. Answers "how complicated can it get?" literally. | 001 (catalog, pricing) |
 | 008 | Admin Console | Non-technical admin pages for shirts, media uploads, tiers, store settings, customers, and orders. Pricing vs. complexity analysis (e.g., spotting shirts priced against the complexity order). Replaces Drizzle Studio as the owner's tool. | 001 (data layer) |
 | 009 | Nosy Sign-Up | Sign-up demands an SSN, blood type, medications, mother's maiden name, and more, all marked "required." The fields are props: never submitted, stored, or logged (constitution). They have an on/off switch. Small, and a good first feature after 001. | 001 (sign-up page) |

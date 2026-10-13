@@ -94,11 +94,12 @@ Budgets (constitution VII): LCP ≤ 2.5 s, CLS ≤ 0.1, INP ≤ 200 ms.
   rewrapped the heading. The font now uses `display: "optional"`.
 - **LCP**: within budget under applied throttling (2.2 s). The simulated estimate (2.8 s) exceeds it
   because the first shirt image streams in after the static shell: the catalog is read per request
-  so owner edits appear immediately. This is logged in plan.md → Complexity Tracking, with the
-  option of caching the catalog.
+  so owner edits appear immediately. **Owner decision (2026-10-13): accepted as-is, with no catalog caching,
+  because this is a demo site.**
 - **Measured (unthrottled) LCP on the dev machine**: 0.4–0.9 s.
 - **Accessibility 96**: the remaining finding is contrast of paper text on hot pink (≈ 3.4:1) for
-  some buttons and the "Complicated" badge. That is a brand-palette decision for the owner.
+  some buttons and the "Complicated" badge. **Owner decision (2026-10-13): keep the palette, because this
+  is a demo site.**
 - **Total blocking time**: mostly React DOM's own startup on a 4× slowed CPU. No server-only
   library (big.js, zod, bcrypt, Drizzle) is in the client bundle.
 

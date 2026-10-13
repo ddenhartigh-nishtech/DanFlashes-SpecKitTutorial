@@ -3,13 +3,13 @@
  * database. Errors break a rule (e.g. a BLAND shirt at or above the start price); warnings are
  * advisory (seed-catalog checks, a missing placeholder).
  */
-import { count } from "drizzle-orm";
 import { validateTiers } from "@/lib/catalog/tiers";
 import { seedChecks, validateSettings, validateShirt } from "@/lib/catalog/validate";
+import { listMedia } from "@/lib/data/media";
 import { getSettings } from "@/lib/data/settings";
+import { countImagesByShirt, listShirtRows } from "@/lib/data/shirts";
 import { listTiers } from "@/lib/data/tiers";
 import type { Db } from "@/lib/db/client";
-import { media, shirtImages, shirts } from "@/lib/db/schema";
 import { isValidMediaKey } from "@/lib/media";
 
 export interface AuditReport {
@@ -34,7 +34,7 @@ export function auditCatalog(db: Db): AuditReport {
     warnings.push("No placeholder image is configured (store_settings.placeholder_media_id).");
   }
 
-  for (const row of db.select().from(media).all()) {
+  for (const row of listMedia(db)) {
     if (!isValidMediaKey(row.key))
       errors.push(`media #${row.id}: invalid key ${JSON.stringify(row.key)}`);
   }
@@ -46,16 +46,8 @@ export function auditCatalog(db: Db): AuditReport {
     return { errors, warnings }; // shirt checks need valid tiers
   }
 
-  const imageCounts = new Map(
-    db
-      .select({ shirtId: shirtImages.shirtId, n: count() })
-      .from(shirtImages)
-      .groupBy(shirtImages.shirtId)
-      .all()
-      .map((r) => [r.shirtId, r.n]),
-  );
-
-  const rows = db.select().from(shirts).all();
+  const imageCounts = countImagesByShirt(db);
+  const rows = listShirtRows(db);
   for (const row of rows) {
     const issues = validateShirt(
       {

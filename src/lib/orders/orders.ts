@@ -9,7 +9,7 @@ import type { CartView } from "@/lib/cart/cart";
 import { getCatalogShirtsByIds, type ShirtImageView, type TierBadge } from "@/lib/data/shirts";
 import { listTiers } from "@/lib/data/tiers";
 import type { Db } from "@/lib/db/client";
-import { orderItems, orders, shirts } from "@/lib/db/schema";
+import { orderItems, orders } from "@/lib/db/schema";
 import { mul, type Usd } from "@/lib/money";
 
 export interface SummaryLine {
@@ -56,9 +56,8 @@ export function cartSummaryLines(view: CartView): SummaryLine[] {
 function hydrateOrders(db: Db, rows: (typeof orders.$inferSelect)[]): OrderView[] {
   if (rows.length === 0) return [];
   const items = db
-    .select({ item: orderItems, slug: shirts.slug })
+    .select()
     .from(orderItems)
-    .innerJoin(shirts, eq(orderItems.shirtId, shirts.id))
     .where(
       inArray(
         orderItems.orderId,
@@ -68,7 +67,7 @@ function hydrateOrders(db: Db, rows: (typeof orders.$inferSelect)[]): OrderView[
     .orderBy(orderItems.id)
     .all();
 
-  const catalog = getCatalogShirtsByIds(db, [...new Set(items.map((i) => i.item.shirtId))]);
+  const catalog = getCatalogShirtsByIds(db, [...new Set(items.map((i) => i.shirtId))]);
   const tiers = sortTiers(listTiers(db));
   const badge = (name: string): TierBadge => {
     const tier = tiers.find((t) => t.name === name);
@@ -97,9 +96,9 @@ function hydrateOrders(db: Db, rows: (typeof orders.$inferSelect)[]): OrderView[
         ? { method: "card", brand: order.cardBrand!, last4: order.cardLast4! }
         : { method: "flash_credit" },
     lines: items
-      .filter((i) => i.item.orderId === order.id)
-      .map(({ item, slug }) => ({
-        slug,
+      .filter((item) => item.orderId === order.id)
+      .map((item) => ({
+        slug: catalog.get(item.shirtId)!.slug, // ordered shirts can't be deleted (FK RESTRICT)
         name: item.shirtName,
         tier: badge(item.tierName),
         size: item.size,

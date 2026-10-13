@@ -80,7 +80,10 @@ async function AccountContents() {
                   data-testid="flash-entry"
                   className="bg-paper flex flex-wrap items-center justify-between gap-2 p-3"
                 >
-                  <span className="font-semibold">
+                  <span className="flex flex-col font-semibold">
+                    <time dateTime={entry.createdAt} className="text-xs font-normal uppercase">
+                      {dateFormat.format(new Date(entry.createdAt))}
+                    </time>
                     {entry.kind === "top_up" ? (
                       copy.account.entryTopUp(entry.cardBrand ?? "Card", entry.cardLast4 ?? "????")
                     ) : (

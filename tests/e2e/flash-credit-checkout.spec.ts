@@ -29,6 +29,10 @@ test.describe("US4 — Flash Credit", () => {
     await expect(visible(page.getByTestId("flash-entry")).first()).toContainText(
       "Top-up from Visa ending 4242",
     );
+    // FR-032: each entry shows its date.
+    await expect(visible(page.getByTestId("flash-entry")).first().locator("time")).toHaveText(
+      /^[A-Z][a-z]{2} \d{1,2}, \d{4}$/,
+    );
 
     // Spend it.
     await addShirt(page, "geo-riot", "L");

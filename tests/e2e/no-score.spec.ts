@@ -4,6 +4,7 @@ import { addShirt, signUp, uniqueEmail, visible } from "./helpers";
 /**
  * SC-003: shoppers never see a complexity score — not in the visible text, and not in the
  * serialized React payload that ships with the HTML.
+ * SC-010 / FR-034: and no page scrolls sideways (the phone project runs at 360px wide).
  */
 async function expectNoScore(page: Page, where: string) {
   await page.waitForLoadState("networkidle");
@@ -14,7 +15,11 @@ async function expectNoScore(page: Page, where: string) {
   expect(text, `${where}: visible text mentions a score`).not.toMatch(/\bcomplexity\b|\bscore\b/i);
 }
 
-test("no shopper-facing page reveals a complexity score", async ({ page }, info) => {
+test("no shopper-facing page reveals a complexity score or scrolls sideways", async ({
+  page,
+}, info) => {
+  // FR-034's floor: the smallest supported phone width.
+  if (info.project.name === "phone") await page.setViewportSize({ width: 360, height: 780 });
   for (const path of ["/", "/shirts", "/shirts/geo-riot", "/shirts/last-seasons-swirl", "/cart"]) {
     await page.goto(path);
     await expectNoScore(page, path);

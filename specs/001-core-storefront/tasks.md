@@ -411,3 +411,11 @@ T018 tests/unit/catalog-validate.test.ts
 5. Polish → `npm run verify` green → PR `001-core-storefront` → `main`
 
 Run `/speckit-converge` after `/speckit-implement`, and repeat until it reports Converged.
+
+---
+
+## Phase 8: Convergence
+
+- [X] T081 Route every catalog-table read in src/lib/cart/cart.ts, src/lib/orders/orders.ts, and src/lib/catalog/audit.ts through src/lib/data/ (adding src/lib/data/media.ts for media lookups), so the data-access layer is the only code that queries catalog tables, per plan: Structure Decision (contradicts)
+- [X] T082 Assert no horizontal scroll at a 360px-wide viewport on every shopper page type (home, listing, active and retired detail, cart, sign-in, checkout, order confirmation, account) in tests/e2e/no-score.spec.ts, per SC-010 / FR-034 (partial)
+- [X] T083 Show each Flash Credit history entry's date in src/app/account/page.tsx, per FR-032 / US4-AC1 (partial)

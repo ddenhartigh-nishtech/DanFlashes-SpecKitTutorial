@@ -7,13 +7,15 @@ import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { MAX_QUANTITY } from "@/lib/cart/limits";
 import { SIZES, type Size } from "@/lib/catalog/types";
 import {
+  findShirtRef,
   getCatalogShirtsByIds,
+  getShirtRefsByIds,
   toShopperShirt,
   type CatalogShirt,
   type ShopperShirt,
 } from "@/lib/data/shirts";
 import type { Db } from "@/lib/db/client";
-import { cartItems, carts, shirts } from "@/lib/db/schema";
+import { cartItems, carts } from "@/lib/db/schema";
 import { mul, sum, type Usd } from "@/lib/money";
 import type { Err, Ok } from "@/lib/result";
 
@@ -108,11 +110,7 @@ export function itemCount(db: Db, cartId: string | null): number {
 
 export function addItem(db: Db, cartId: string, input: { slug: string; size: string }): CartResult {
   if (!isSize(input.size)) return { ok: false, code: "SIZE_REQUIRED" };
-  const shirt = db
-    .select({ id: shirts.id, status: shirts.status })
-    .from(shirts)
-    .where(eq(shirts.slug, input.slug))
-    .get();
+  const shirt = findShirtRef(db, input.slug);
   if (!shirt) return { ok: false, code: "SHIRT_NOT_FOUND" };
   if (shirt.status !== "active") return { ok: false, code: "SHIRT_INACTIVE" };
 
@@ -128,7 +126,7 @@ export function addItem(db: Db, cartId: string, input: { slug: string; size: str
 }
 
 function lineWhere(db: Db, cartId: string, slug: string, size: string) {
-  const shirt = db.select({ id: shirts.id }).from(shirts).where(eq(shirts.slug, slug)).get();
+  const shirt = findShirtRef(db, slug);
   if (!shirt || !isSize(size)) return null;
   const where = and(
     eq(cartItems.cartId, cartId),
@@ -165,18 +163,21 @@ export function removeItem(
 /** Delete lines for deactivated shirts and report them (FR-016). */
 export function auditCart(db: Db, cartId: string | null): RemovedLine[] {
   if (!cartId) return [];
-  const doomed = db
-    .select({
-      shirtId: cartItems.shirtId,
-      slug: shirts.slug,
-      name: shirts.name,
-      size: cartItems.size,
-      quantity: cartItems.quantity,
-    })
-    .from(cartItems)
-    .innerJoin(shirts, eq(cartItems.shirtId, shirts.id))
-    .where(and(eq(cartItems.cartId, cartId), eq(shirts.status, "inactive")))
-    .all();
+  const lines = db.select().from(cartItems).where(eq(cartItems.cartId, cartId)).all();
+  const refs = getShirtRefsByIds(
+    db,
+    lines.map((l) => l.shirtId),
+  );
+  const doomed = lines
+    .map((line) => ({ line, ref: refs.get(line.shirtId) }))
+    .filter(({ ref }) => !ref || ref.status === "inactive")
+    .map(({ line, ref }) => ({
+      shirtId: line.shirtId,
+      slug: ref?.slug ?? "",
+      name: ref?.name ?? "",
+      size: line.size,
+      quantity: line.quantity,
+    }));
   if (doomed.length === 0) return [];
   db.delete(cartItems)
     .where(

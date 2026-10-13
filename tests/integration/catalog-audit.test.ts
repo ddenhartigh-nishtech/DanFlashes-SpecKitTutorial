@@ -75,7 +75,8 @@ describe("auditCatalog", () => {
   });
 });
 
-describe("npm run catalog:audit", () => {
+// Each test spawns the real script through tsx (~1–5s cold start), so give it room.
+describe("npm run catalog:audit", { timeout: 30_000 }, () => {
   it("exits 0 on a clean catalog", () => {
     const { db, file } = createTestDb();
     seedCatalog(db, SEED);

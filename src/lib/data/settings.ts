@@ -2,7 +2,8 @@ import { eq } from "drizzle-orm";
 import type { StoreSettings } from "@/lib/catalog/types";
 import { validateSettings } from "@/lib/catalog/validate";
 import type { Db } from "@/lib/db/client";
-import { media, storeSettings } from "@/lib/db/schema";
+import { getMediaById } from "@/lib/data/media";
+import { storeSettings } from "@/lib/db/schema";
 import { resolveMediaUrl } from "@/lib/media";
 
 export function getSettings(db: Db): StoreSettings {
@@ -48,6 +49,6 @@ export function saveSettings(db: Db, settings: StoreSettings): void {
 /** URL of the owner-configured placeholder image, or null if none is configured. */
 export function getPlaceholderUrl(db: Db, settings: StoreSettings): string | null {
   if (settings.placeholderMediaId === null) return null;
-  const row = db.select().from(media).where(eq(media.id, settings.placeholderMediaId)).get();
+  const row = getMediaById(db, settings.placeholderMediaId);
   return row ? resolveMediaUrl(row.key, settings.mediaBaseUrl) : null;
 }

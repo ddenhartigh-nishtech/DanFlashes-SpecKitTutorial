@@ -68,21 +68,25 @@ describe("database backups", () => {
     expect(["", "-wal", "-shm"].some((s) => fs.existsSync(`${victim}${s}`))).toBe(false);
   });
 
-  it("db:migrate backs up the existing database before applying migrations", async () => {
-    const scriptDir = path.join(dir, "migrate-script");
-    const dbFile = path.join(scriptDir, "app.db");
-    const backupDir = path.join(scriptDir, "backups");
-    // A plain file copy of a live WAL database would miss un-checkpointed rows; use the backup API.
-    const seeded = await backupDatabaseFile(file, scriptDir);
-    fs.renameSync(seeded!, dbFile);
+  it(
+    "db:migrate backs up the existing database before applying migrations",
+    { timeout: 30_000 },
+    async () => {
+      const scriptDir = path.join(dir, "migrate-script");
+      const dbFile = path.join(scriptDir, "app.db");
+      const backupDir = path.join(scriptDir, "backups");
+      // A plain file copy of a live WAL database would miss un-checkpointed rows; use the backup API.
+      const seeded = await backupDatabaseFile(file, scriptDir);
+      fs.renameSync(seeded!, dbFile);
 
-    execFileSync(process.execPath, ["node_modules/tsx/dist/cli.mjs", "scripts/migrate.ts"], {
-      env: { ...process.env, DATABASE_PATH: dbFile, BACKUP_DIR: backupDir },
-      stdio: "pipe",
-    });
+      execFileSync(process.execPath, ["node_modules/tsx/dist/cli.mjs", "scripts/migrate.ts"], {
+        env: { ...process.env, DATABASE_PATH: dbFile, BACKUP_DIR: backupDir },
+        stdio: "pipe",
+      });
 
-    const made = fs.readdirSync(backupDir).filter((f) => f.startsWith("danflashes-"));
-    expect(made).toHaveLength(1);
-    expect(countMedia(path.join(backupDir, made[0]))).toBe(1);
-  });
+      const made = fs.readdirSync(backupDir).filter((f) => f.startsWith("danflashes-"));
+      expect(made).toHaveLength(1);
+      expect(countMedia(path.join(backupDir, made[0]))).toBe(1);
+    },
+  );
 });

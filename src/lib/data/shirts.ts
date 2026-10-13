@@ -3,7 +3,7 @@
  * tiers) and the MSRP. Anything sent toward the browser goes through `toShopperShirt`, which
  * strips both — shoppers never see the score (constitution II, FR-002).
  */
-import { asc, eq, inArray } from "drizzle-orm";
+import { asc, count, eq, inArray } from "drizzle-orm";
 import { isBlandTier, tierOf } from "@/lib/catalog/tiers";
 import type { ShirtStatus, ShirtStyle, StoreSettings, Tier } from "@/lib/catalog/types";
 import { getSettings } from "@/lib/data/settings";
@@ -132,6 +132,46 @@ export function getCatalogShirtsByIds(db: Db, ids: readonly number[]): Map<numbe
     .where(inArray(shirts.id, [...ids]))
     .all();
   return new Map(hydrate(db, rows).map((s) => [s.id, s]));
+}
+
+/** A shirt's identity and status, without pricing — for cart and order bookkeeping. */
+export interface ShirtRef {
+  id: number;
+  slug: string;
+  name: string;
+  status: ShirtStatus;
+}
+
+const refColumns = { id: shirts.id, slug: shirts.slug, name: shirts.name, status: shirts.status };
+
+export function findShirtRef(db: Db, slug: string): ShirtRef | null {
+  return db.select(refColumns).from(shirts).where(eq(shirts.slug, slug)).get() ?? null;
+}
+
+export function getShirtRefsByIds(db: Db, ids: readonly number[]): Map<number, ShirtRef> {
+  if (ids.length === 0) return new Map();
+  const rows = db
+    .select(refColumns)
+    .from(shirts)
+    .where(inArray(shirts.id, [...ids]))
+    .all();
+  return new Map(rows.map((r) => [r.id, r]));
+}
+
+/** Raw owner-side rows (including the complexity score) — for the catalog audit only. */
+export function listShirtRows(db: Db): ShirtRow[] {
+  return db.select().from(shirts).all();
+}
+
+export function countImagesByShirt(db: Db): Map<number, number> {
+  return new Map(
+    db
+      .select({ shirtId: shirtImages.shirtId, n: count() })
+      .from(shirtImages)
+      .groupBy(shirtImages.shirtId)
+      .all()
+      .map((r) => [r.shirtId, r.n]),
+  );
 }
 
 export function getShirtBySlug(db: Db, slug: string): CatalogShirt | null {

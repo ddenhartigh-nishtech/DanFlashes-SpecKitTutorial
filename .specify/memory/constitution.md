@@ -1,3 +1,29 @@
+<!--
+Sync Impact Report
+- Version change: 2.0.0 → 3.0.0 (MAJOR: a MUST in Principle II removed and redefined)
+- Modified principles:
+  - II. Complexity Is the Price: removed "every displayed price MUST sit next to its complexity
+    score". The score is now owner-only. Shoppers see complexity tier badges (owner-named score bands)
+    (the lowest tier is BLAND). Added: shirts are deactivated, never deleted, and purchased shirts
+    stay viewable from order history.
+  - III. Relentlessly Vibrant: a bland shirt is now any shirt in the lowest tier (the separate flag
+    is gone).
+  - Commerce & Security Constraints: "Integer money" (cents) → "Exact money" (exact two-decimal
+    USD, decimal arithmetic).
+  - V. Maximum Visual Assault: "the sale still closes" now names the tier badge instead of the score.
+  - VI. Money Math Is Test-First → VI. Fully Tested, Money Math First: `npm run verify` runs the
+    full suite and gates every merge; ≥ 90% line coverage on src/lib; tests for all business logic
+    and Server Actions; an end-to-end test per user story's primary journey.
+  - IV. Shamelessly Manipulative: added the Nosy sign-up tactic
+  - V. Maximum Visual Assault: added "Loud on every screen" (responsive from 360px phones up)
+- Commerce & Security Constraints: added "Nosy fields are props" (never submitted, stored, or logged)
+- Development Workflow: added "Clean, consistent code" (Prettier + ESLint inside verify)
+- Added sections: none
+- Removed sections: none
+- Templates requiring updates: none (read at runtime) ✅
+- Follow-up TODOs: owner ratifies v3.0.0
+-->
+
 # Dan Flashes Constitution
 
 > Complicated shirts. Complicated prices. All sales final.
@@ -36,10 +62,15 @@ final price.
 - When a final price breaks the complexity order (a shirt costs less than a less complicated one),
   the catalog check MUST warn the owner. It MUST NOT block the price. The owner may have reasons.
 - There is no price ceiling. More complicated means more expensive, forever.
-- Every displayed price MUST sit next to its complexity score, shown loudly and as a point of pride.
+- The complexity score is the owner's lever, and shoppers MUST NEVER see the number. Shoppers see
+  complexity in the pattern itself, and in a **complexity tier badge** (an owner-named band of
+  scores, e.g. "Dangerously Complicated") wherever a shirt appears. The lowest tier's badge is
+  **BLAND**.
+- Shirts are deactivated, never deleted. A shirt someone has bought MUST stay viewable from their
+  order history for as long as the order exists.
 
 Rationale: the shirts are expensive because the patterns are complicated. The math suggests the
-price, and Dan decides it.
+price, and Dan decides it. The guy doesn't need a number. He can *see* it's complicated.
 
 ### III. Relentlessly Vibrant
 
@@ -47,10 +78,10 @@ Vibrancy is curated by the store owner, not measured by software. The catalog MU
 overwhelmingly loud.
 
 - Muted, pastel, monochrome, and earth-tone shirts MAY appear only as **bland shirts**: explicit
-  foils, flagged as bland in the catalog data, that exist so the store can disparage them and steer
-  him toward something more complicated. Beige is for guys who've given up.
-- Bland shirts sit at the bottom of the price curve, below the starting price of a real Dan Flashes
-  shirt.
+  foils that exist so the store can disparage them and steer him toward something more complicated.
+  Beige is for guys who've given up.
+- A bland shirt is any shirt in the **lowest complexity tier**, the BLAND tier. Bland shirts MUST be
+  priced below the starting price of a real Dan Flashes shirt.
 - Product imagery is the hero. It MUST be high-resolution and zoomable so he can count every shape
   he's paying for.
 
@@ -73,7 +104,9 @@ feature, and it is played completely straight:
   $0.
 - **Checkout gate.** He can build a cart as a guest, but he can't check out until he makes an
   account.
-- **Bland-shirt shaming.** Buying a bland shirt means getting asked "You sure about that?" again and
+- **Nosy sign-up.** Sign-up demands absurd personal data (Social Security number, blood type,
+  current medications, mother's maiden name) as if it were standard.
+- **Bland-shirt shaming. Buying a bland shirt means getting asked "You sure about that?" again and
   again, with copy that disparages the kind of guy who wears basic attire.
 
 Every tactic MUST be its own named feature with an on/off switch, so it can be specced, tested, demoed,
@@ -89,16 +122,21 @@ everywhere, and patterns on top of patterns.
 
 - **Flash Mode.** The site MUST offer a strobe/flash mode behind a toggle. It starts off, and the
   button that turns it on MUST be the most exciting button on the site.
-- **The sale still closes.** The price, the complexity score, and Add to Cart MUST stay readable over
+- **The sale still closes.** The price, the tier badge, and Add to Cart MUST stay readable over
   any background. Go wild everywhere else. Nobody buys a shirt when he can't find the price.
+- **Loud on every screen.** Every page MUST work from a 360px-wide phone up to a desktop. He shops
+  from the food court too.
 
 Rationale: the brand is literally called Dan _Flashes_.
 
-### VI. Money Math Is Test-First (NON-NEGOTIABLE)
+### VI. Fully Tested, Money Math First (NON-NEGOTIABLE)
 
-The prices are ridiculous, but the math behind them MUST NOT be. Pricing, cart totals, add-ons,
-Flash Credit balances, and checkout MUST be developed test-first: write the tests, watch them fail,
-then implement (Red → Green → Refactor).
+The prices are ridiculous, but the code behind them MUST NOT be. A single command, `npm run verify`,
+runs the whole suite (lint, type check, unit, integration, and end-to-end tests), and it MUST pass
+before every merge. One glance tells you whether anything is broken.
+
+Pricing, cart totals, add-ons, Flash Credit balances, and checkout MUST be developed test-first:
+write the tests, watch them fail, then implement (Red → Green → Refactor).
 
 - The MSRP algorithm MUST have table-driven or property-based tests proving determinism and
   monotonicity. Final-price resolution (owner price, else MSRP) and the complexity-order warning
@@ -107,9 +145,13 @@ then implement (Red → Green → Refactor).
   Flash Credit).
 - Flash Credit MUST have tests proving that the balance always equals the sum of its ledger entries
   and never goes below zero.
-- Other business logic MUST have unit tests. UI-only changes are tested at the author's discretion.
+- All business logic and every Server Action MUST have unit or integration tests. Domain code in
+  `src/lib/` MUST keep at least 90% line coverage.
+- Every user story's primary journey MUST have an end-to-end test. Purely visual changes (copy,
+  color, layout) need no new tests.
 
-Rationale: the joke only lands if the $1,400 shirt actually rings up at $1,400.
+Rationale: the joke only lands if the $1,400 shirt actually rings up at $1,400, every time, after
+every change.
 
 ### VII. Fast Even When Complicated
 
@@ -140,17 +182,22 @@ Rationale: the complexity goes in the product, never in the architecture.
 - **Card numbers are props.** The faux card form checks only that a number is card-shaped (valid
   format and checksum, a future expiry, a CVC). The full number and the CVC MUST NEVER be stored or
   logged. Only the brand and last four digits are kept.
-- **Flash Credit is a ledger.** Every change to a balance (top-up, spend, refund) MUST be recorded as
+- **Nosy fields are props.** Joke data-grab fields MUST NEVER be submitted to the server, stored, or
+  logged. They have no form field names and no autofill. Real people type real data into forms.
+- **Flash Credit is a ledger. Every change to a balance (top-up, spend, refund) MUST be recorded as
   an entry. The balance is derived from the entries and MUST NEVER go negative.
 - **Server-authoritative pricing.** At checkout the server MUST re-resolve every final price from
   the catalog. Prices sent from the client MUST NEVER be trusted.
-- **Integer money.** Money MUST be stored and calculated as integer minor units (cents) with an
-  explicit currency. Floating-point math on money is prohibited.
+- **Exact money.** Money is US dollars to the cent. It MUST be stored as an exact two-decimal value
+  (e.g., `200.18`) and calculated with exact decimal arithmetic. Binary floating-point math on money
+  is prohibited, because `0.10 + 0.20` must equal `0.30`.
 - **Secrets stay out of git.** Secrets live in environment configuration. `.env.example` documents every
   required variable without real values.
 
 ## Development Workflow & Quality Gates
 
+- **Clean, consistent code.** Formatting (Prettier) and linting (ESLint) are automated, and both run
+  inside `npm run verify`. Nobody argues about style; the tools decide.
 - **Spec-driven, always.** Every feature follows `/speckit-specify` → `/speckit-clarify` (when
   ambiguity exists) → `/speckit-plan` → `/speckit-tasks` → `/speckit-implement` → `/speckit-converge`.
   The artifacts live in `specs/NNN-feature-name/` and are committed alongside the code.
@@ -180,4 +227,4 @@ Rationale: the complexity goes in the product, never in the architecture.
   and `/speckit-analyze`. A violation needs either a Complexity Tracking justification or an amendment.
 - Like every Dan Flashes sale, this constitution is final until amended.
 
-**Version**: 2.0.0 | **Ratified**: 2026-10-12 | **Last Amended**: 2026-10-12
+**Version**: 3.0.0 | **Ratified**: 2026-10-12 | **Last Amended**: 2026-10-12

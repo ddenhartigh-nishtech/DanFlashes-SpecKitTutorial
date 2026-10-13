@@ -39,3 +39,27 @@
   requirement, to keep the spec technology-free.
 - Constitution amended to v2.0.0 in the same branch (Principles II and III, payment constraints).
   The spec aligns with v2.0.0.
+- Iteration 3 (2026-10-12): revised after the `/speckit-analyze` review (C1–C8, I1).
+  - Complexity score hidden from shoppers; replaced by owner-defined tier badges (constitution
+    v3.0.0).
+  - Deactivate-not-delete, with a cart audit.
+  - $0 shipping/tax lines shown.
+  - Empty-cart "You sure about that?" pitch.
+  - Placeholder image.
+  - MSRP/final-price glossary.
+
+  All items still pass.
+- Iteration 4 (2026-10-13, owner plan review):
+  - Product data moved into the store database (FR-001), not files in the codebase.
+  - Added relocatable media (FR-035), responsive layout (FR-036), branded 404/500/418 pages
+    (FR-037), and backup/restore (FR-038).
+
+  All items still pass. The spec stays technology-free: "database editing tool," not a product name.
+- Iteration 5 (2026-10-13, owner data-model review):
+  - Money is exact dollars to the cent everywhere.
+  - BLAND is the lowest tier (no flag).
+  - Tiers carry a tagline and badge colors.
+  - Cart lines show most recently added first.
+  - Recorded how orders snapshot the cart at checkout.
+
+  All items still pass.

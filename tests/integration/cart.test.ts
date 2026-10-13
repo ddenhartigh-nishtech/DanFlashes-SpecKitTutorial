@@ -7,7 +7,7 @@ import {
   removeItem,
   updateItem,
 } from "@/lib/cart/cart";
-import { createSeededTestDb } from "../helpers/db";
+import { createSeededTestDb, setSwitches } from "../helpers/db";
 
 describe("guest cart", () => {
   it("creates a guest cart, then reuses it by id", () => {
@@ -124,6 +124,7 @@ describe("getCartView", () => {
 
   it("orders lines newest first, with live prices, tiers, and an exact subtotal", () => {
     const { db, sqlite } = createSeededTestDb();
+    setSwitches(db, { blandShaming: false }); // a bland line, to check its BLAND badge
     const { id } = getOrCreateCart(db, { cartId: null, userId: null });
     addItem(db, id, { slug: "beige-regret", size: "S" });
     addItem(db, id, { slug: "geo-riot", size: "XL" });

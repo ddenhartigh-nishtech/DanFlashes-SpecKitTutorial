@@ -36,7 +36,8 @@ No other tables change. Cart, order, and ledger rows are untouched.
 - `copy.about`: the bio sections and the Exhibit A heading
 - `copy.shame.lines`: ≥ 8 disparaging lines
 - `copy.shame.labels`: `{ insist, remove, signOut }`, each with a `{ shamed, neutral }` pair
-- `copy.shame.relent`, `copy.shame.takeIt`, `copy.shame.title` ("You sure about that?")
+- `copy.shame.relent`, `copy.shame.takeIt`, `copy.shame.pitch` (the line above the
+  recommendation), `copy.shame.title` ("You sure about that?")
 - `copy.shame.nothingBetter`: the escape label when there's no shirt to recommend (links to
   `/shirts`)
 - `copy.nav.about`: the header link

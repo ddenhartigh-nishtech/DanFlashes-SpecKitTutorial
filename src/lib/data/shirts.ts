@@ -158,6 +158,16 @@ export function getShirtRefsByIds(db: Db, ids: readonly number[]): Map<number, S
   return new Map(rows.map((r) => [r.id, r]));
 }
 
+/** Whether a shirt sits in the BLAND tier right now. Decided at the moment it's asked. */
+export function isBlandShirt(db: Db, shirtId: number): boolean {
+  const row = db
+    .select({ complexity: shirts.complexity })
+    .from(shirts)
+    .where(eq(shirts.id, shirtId))
+    .get();
+  return row ? isBlandTier(tierOf(row.complexity, listTiers(db))) : false;
+}
+
 /** Raw owner-side rows (including the complexity score) — for the catalog audit only. */
 export function listShirtRows(db: Db): ShirtRow[] {
   return db.select().from(shirts).all();

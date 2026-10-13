@@ -1,17 +1,35 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState, type FormEvent } from "react";
 import { addToCart } from "@/actions/cart";
+import { ShameDialog } from "@/components/ShameDialog";
 import type { ActionState } from "@/lib/actions/state";
 import { SIZES } from "@/lib/catalog/types";
 import { copy } from "@/lib/copy";
+import type { Shame } from "@/lib/shaming/loop";
 
-export function AddToCart({ slug }: { slug: string }) {
+interface AddToCartProps {
+  slug: string;
+  /** Set for a BLAND shirt while shaming is on: Add to Cart opens the loop instead (002 US1). */
+  shame?: Shame | null;
+  placeholderUrl?: string | null;
+}
+
+export function AddToCart({ slug, shame = null, placeholderUrl = null }: AddToCartProps) {
   const [state, action, pending] = useActionState<ActionState | null, FormData>(addToCart, null);
+  /** Bumped on every attempt, so each one mounts a fresh loop starting at round 1. */
+  const [attempt, setAttempt] = useState<number | null>(null);
+
+  function onSubmit(event: FormEvent<HTMLFormElement>) {
+    // Without a size, let the store answer with 001's SIZE_REQUIRED message.
+    if (!shame || !new FormData(event.currentTarget).get("size")) return;
+    event.preventDefault();
+    setAttempt((n) => (n ?? 0) + 1);
+  }
 
   return (
-    <form action={action} className="flex flex-col gap-4">
+    <form action={action} onSubmit={onSubmit} className="flex flex-col gap-4">
       <input type="hidden" name="slug" value={slug} />
       <fieldset>
         <legend className="font-display mb-2 text-sm uppercase">{copy.product.size}</legend>
@@ -50,6 +68,16 @@ export function AddToCart({ slug }: { slug: string }) {
           </p>
         ) : null}
       </div>
+
+      {shame && attempt !== null ? (
+        <ShameDialog
+          key={attempt}
+          ladder={shame.ladder}
+          insistLabel={shame.insistLabel}
+          placeholderUrl={placeholderUrl}
+          onClose={() => setAttempt(null)}
+        />
+      ) : null}
     </form>
   );
 }

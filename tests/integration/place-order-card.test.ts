@@ -2,13 +2,14 @@ import { describe, expect, it } from "vitest";
 import { addItem, getCartView, getOrCreateCart, updateItem } from "@/lib/cart/cart";
 import { placeOrder, type PlaceOrderInput } from "@/lib/checkout/place-order";
 import { getOrderForUser, listOrdersForUser } from "@/lib/orders/orders";
-import { createSeededTestDb } from "../helpers/db";
+import { createSeededTestDb, setSwitches } from "../helpers/db";
 
 const NOW = new Date("2026-10-13T12:00:00Z");
 const CARD = { number: "4242 4242 4242 4242", expiry: "12/29", cvc: "123" };
 
 function setup() {
   const test = createSeededTestDb();
+  setSwitches(test.db, { blandShaming: false }); // 001's fixture cart holds a bland line
   const userId = (
     test.sqlite
       .prepare("INSERT INTO users (email, password_hash) VALUES ('buyer@x.io', 'h') RETURNING id")
@@ -121,7 +122,7 @@ describe("placeOrder — card", () => {
     expect(placeOrder(db, input())).toEqual({
       ok: false,
       code: "CART_AUDITED",
-      removed: [{ slug: "geo-riot", name: "Geo Riot", size: "L", quantity: 2 }],
+      removed: [{ slug: "geo-riot", name: "Geo Riot", size: "L", quantity: 2, reason: "retired" }],
     });
     expect(count(sqlite, "orders")).toBe(0);
     expect(getCartView(db, cartId).lines.map((l) => l.shirt.slug)).toEqual(["beige-regret"]);
@@ -158,11 +159,14 @@ describe("placeOrder — card", () => {
     const tables = sqlite.prepare("SELECT name FROM sqlite_master WHERE type = 'table'").all() as {
       name: string;
     }[];
-    const everything = tables
-      .map((t) => JSON.stringify(sqlite.prepare(`SELECT * FROM "${t.name}"`).all()))
-      .join("\n");
-    expect(everything).not.toContain("4242424242424242");
-    expect(everything).not.toContain("987");
+    // Compare whole cell values: a 3-digit CVC turns up by chance inside hashes and timestamps.
+    const cells = tables.flatMap((t) =>
+      (sqlite.prepare(`SELECT * FROM "${t.name}"`).all() as Record<string, unknown>[]).flatMap(
+        (row) => Object.values(row).map(String),
+      ),
+    );
+    expect(cells.some((c) => c.includes("4242424242424242"))).toBe(false);
+    expect(cells).not.toContain("987");
   });
 });
 

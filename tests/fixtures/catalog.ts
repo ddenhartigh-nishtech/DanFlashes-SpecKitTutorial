@@ -5,6 +5,8 @@ export const SMALL_FIXTURE: CatalogFixture = {
   settings: {
     msrp: { startPriceUsd: "300.00", anchorScore: 10, doublingInterval: 10 },
     checkoutGate: true,
+    blandShaming: true,
+    confirmshaming: true,
     flashCreditPresetsUsd: ["500.00", "1000.00", "5000.00"],
     mediaBaseUrl: "",
   },

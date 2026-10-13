@@ -27,7 +27,7 @@ describe("addToCart action", () => {
     const jar = new FakeCookieJar();
     addToCartCore(db, jar, form({ slug: "geo-riot", size: "M" }));
     const cartId = jar.get(CART_COOKIE)!;
-    addToCartCore(db, jar, form({ slug: "beige-regret", size: "S" }));
+    addToCartCore(db, jar, form({ slug: "fractal-fury", size: "S" }));
     expect(jar.get(CART_COOKIE)).toBe(cartId);
     expect(getCartView(db, cartId).itemCount).toBe(2);
   });

@@ -51,7 +51,8 @@ See `specs/001-core-storefront/research.md`. Only the new decisions are recorded
 - **Rationale**: endless rounds cost nothing on the server, and the store-side refusal (R2) makes
   the gag hold even if the dialog is skipped. The ladder ordering reveals relative complexity, as
   the listing's "Most Complicated" sort already does, but never a number.
-- **Pure logic** (unit-tested) lives in `src/lib/shaming/loop.ts`:
+- **Pure logic** (unit-tested) lives in `src/lib/shaming/`. `ladder.ts` holds `buildLadder` and runs on
+  the server, because it imports the catalog layer. `loop.ts` holds the rest and is browser-safe:
   - `buildLadder(shirts)`: takes catalog shirts, which already carry `tier.isBland`. Keeps active,
     non-bland shirts in ascending complexity, one per distinct score so every step is strictly more
     complicated, and maps them to shopper shirts.

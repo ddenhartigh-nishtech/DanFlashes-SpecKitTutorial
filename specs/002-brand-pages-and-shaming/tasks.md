@@ -26,7 +26,7 @@ that order.
 
 ## Phase 1: Setup
 
-- [ ] T001 Run `npm run verify` on the branch before changing anything, so later failures are known to be new. Record the result in the PR notes.
+- [X] T001 Run `npm run verify` on the branch before changing anything, so later failures are known to be new. Record the result in the PR notes.
 
 ---
 
@@ -34,27 +34,27 @@ that order.
 
 **Purpose**: the two switches and the shared label helper. US1 and US2 both need them.
 
-- [ ] T002 [P] Write failing unit tests in tests/unit/catalog-validate.test.ts. `validateSettings` must:
+- [X] T002 [P] Write failing unit tests in tests/unit/catalog-validate.test.ts. `validateSettings` must:
   - accept `blandShaming` and `confirmshaming` as booleans
   - report an issue for each when it is missing or not a boolean
-- [ ] T003 [P] Write failing unit tests in tests/unit/shaming-labels.test.ts for `labelFor(key, confirmshaming)`. For each key, `true` returns the shamed label and `false` the neutral one, with exact strings from spec Assumptions:
+- [X] T003 [P] Write failing unit tests in tests/unit/shaming-labels.test.ts for `labelFor(key, confirmshaming)`. For each key, `true` returns the shamed label and `false` the neutral one, with exact strings from spec Assumptions:
   - `insist`: "Yes, I'd rather blend in" / "Yes, I'm sure"
   - `remove`: "Remove (and lose your edge)" / "Remove"
   - `signOut`: "Sign out (go back to being normal)" / "Sign out"
-- [ ] T004 Add `blandShaming: boolean` and `confirmshaming: boolean` to `StoreSettings` in src/lib/catalog/types.ts, and `z.boolean()` for both to `settingsSchema` in src/lib/catalog/validate.ts (T002 passes)
-- [ ] T005 Add the columns to `storeSettings` in src/lib/db/schema.ts:
+- [X] T004 Add `blandShaming: boolean` and `confirmshaming: boolean` to `StoreSettings` in src/lib/catalog/types.ts, and `z.boolean()` for both to `settingsSchema` in src/lib/catalog/validate.ts (T002 passes)
+- [X] T005 Add the columns to `storeSettings` in src/lib/db/schema.ts:
   - `blandShaming: integer("bland_shaming", { mode: "boolean" }).notNull().default(true)`
   - `confirmshaming: integer("confirmshaming", { mode: "boolean" }).notNull().default(true)`
 
   Then run `npx drizzle-kit generate --name shaming_switches` to produce drizzle/0001_shaming_switches.sql. Per data-model.md it must be `ALTER TABLE … ADD COLUMN … NOT NULL DEFAULT 1`, with no table rebuild.
-- [ ] T006 Wire the switches through, using `blandShaming: true, confirmshaming: true` for both seed sources:
+- [X] T006 Wire the switches through, using `blandShaming: true, confirmshaming: true` for both seed sources:
   - read and write both in `getSettings` / `saveSettings` in src/lib/data/settings.ts
   - add them to the seed settings in scripts/seed-data.ts and tests/fixtures/catalog.ts
-- [ ] T007 Write an integration test in tests/integration/settings-switches.test.ts:
+- [X] T007 Write an integration test in tests/integration/settings-switches.test.ts:
   - a `store_settings` row inserted with raw SQL that omits the new columns reads both switches as `true`
   - `saveSettings` round-trips both as `false`
-- [ ] T008 [P] Add `setSwitches(db, patch: Partial<Pick<StoreSettings, "blandShaming" | "confirmshaming">>)` to tests/helpers/db.ts. It reads with `getSettings`, merges, and writes with `saveSettings`.
-- [ ] T009 Add `copy.shame.labels` (the three `{ shamed, neutral }` pairs from T003) to src/lib/copy.ts. Implement `labelFor(key: keyof typeof copy.shame.labels, confirmshaming: boolean): string` in src/lib/shaming/labels.ts (T003 passes).
+- [X] T008 [P] Add `setSwitches(db, patch: Partial<Pick<StoreSettings, "blandShaming" | "confirmshaming">>)` to tests/helpers/db.ts. It reads with `getSettings`, merges, and writes with `saveSettings`.
+- [X] T009 Add `copy.shame.labels` (the three `{ shamed, neutral }` pairs from T003) to src/lib/copy.ts. Implement `labelFor(key: keyof typeof copy.shame.labels, confirmshaming: boolean): string` in src/lib/shaming/labels.ts (T003 passes).
 
 **Checkpoint**: settings carry both switches (default on), migration 0001 exists, `labelFor` works, and the existing suite is still green.
 
@@ -68,7 +68,7 @@ that order.
 
 ### Tests for User Story 1 (write first; they must fail)
 
-- [ ] T010 [P] [US1] Unit tests in tests/unit/shaming-loop.test.ts:
+- [X] T010 [P] [US1] Unit tests in tests/unit/shaming-loop.test.ts:
   - `buildLadder(shirts)`:
     - drops BLAND and inactive shirts
     - orders by ascending complexity, one shirt per distinct score
@@ -79,7 +79,7 @@ that order.
     - its first entry is never `previous` when `poolSize > 1`
     - is deterministic
   - `shameFor({ isBland, blandShaming, confirmshaming }, ladder)` returns `null` unless the shirt is bland and `blandShaming` is on. Otherwise it returns `{ ladder, insistLabel }`, where the label follows `confirmshaming`. Cover all eight on/off combinations: this proves the switches are independent (FR-012) and that each tactic disappears when its switch is off (SC-005).
-- [ ] T011 [P] [US1] Integration tests in tests/integration/bland-refusal.test.ts, using `createSeededTestDb` and `setSwitches`:
+- [X] T011 [P] [US1] Integration tests in tests/integration/bland-refusal.test.ts, using `createSeededTestDb` and `setSwitches`:
   - with shaming on, `addItem` of a BLAND shirt returns `BLAND_REFUSED` and writes no cart line
   - with shaming on, for a bland line added while shaming was off:
     - `updateItem` raising its quantity returns `BLAND_REFUSED` and leaves the quantity unchanged
@@ -94,7 +94,7 @@ that order.
   - a non-bland shirt adds normally either way
   - re-tiering a shirt into BLAND (raising the second tier's `min_score` above its score) makes the next add refused, because blandness is decided at the moment of the add
   - `addToCartCore` and `updateCartItemCore` return `{ ok: false, code: "BLAND_REFUSED", message: copy.codes.BLAND_REFUSED }`
-- [ ] T012 [P] [US1] e2e journey in tests/e2e/shaming.spec.ts (desktop and phone):
+- [X] T012 [P] [US1] e2e journey in tests/e2e/shaming.spec.ts (desktop and phone):
   - **Opening the dialog**: on `/shirts/beige-regret`, pick S and click Add to cart. The `shame-dialog` is open with "You sure about that?", a line, and Geo Riot as the recommendation.
   - **Insisting**: click the insist button ("Yes, I'd rather blend in") 20 times. Each click advances `data-round`. No line repeats within one pass through the pool. The recommendation climbs the seed order and stays on Dan's Masterpiece.
   - **Leaving**: Escape closes the dialog, and so does "Fine. I'll look at real shirts". The URL stays on beige-regret.
@@ -105,34 +105,34 @@ that order.
 
 ### Implementation for User Story 1
 
-- [ ] T013 [US1] Add `isBlandShirt(db, shirtId): boolean` to src/lib/data/shirts.ts: `isBlandTier(tierOf(complexity, listTiers(db)))` for that shirt row
-- [ ] T014 [US1] Add `"BLAND_REFUSED"` to `CartErrorCode` in src/lib/cart/cart.ts:
+- [X] T013 [US1] Add `isBlandShirt(db, shirtId): boolean` to src/lib/data/shirts.ts: `isBlandTier(tierOf(complexity, listTiers(db)))` for that shirt row
+- [X] T014 [US1] Add `"BLAND_REFUSED"` to `CartErrorCode` in src/lib/cart/cart.ts:
   - `addItem`: after the inactive check, return it when `getSettings(db).blandShaming && isBlandShirt(db, shirt.id)`
   - `updateItem`: read the line's current quantity, and return it when the new quantity is greater and the same condition holds
   - neither writes nor touches the cart when refusing
   - `RemovedLine` gains `reason: "retired" | "bland"`. While `blandShaming` is on, `auditCart` also deletes bland lines and reports them with `reason: "bland"`. `placeOrder` already audits first, so bland lines can't be bought.
   - `mergeGuestCart` skips the guest's bland lines while `blandShaming` is on
-- [ ] T015 [US1] Add `copy.codes.BLAND_REFUSED` (brand voice, e.g. "Dan Flashes does not sell boring shirts. Not to you. Not to anyone.") to src/lib/copy.ts. T011 passes.
-- [ ] T016 [US1] Show the bland removals:
+- [X] T015 [US1] Add `copy.codes.BLAND_REFUSED` (brand voice, e.g. "Dan Flashes does not sell boring shirts. Not to you. Not to anyone.") to src/lib/copy.ts. T011 passes.
+- [X] T016 [US1] Show the bland removals:
   - add `copy.cart.blandRemovedNotice` to src/lib/copy.ts in voice, e.g. "Dan took these out of your cart. You'll thank him later:"
   - reword `copy.codes.CART_AUDITED` so it covers both retired and bland removals
   - in src/app/cart/page.tsx, have `RemovedNotice` list `reason: "bland"` lines under `blandRemovedNotice` and `reason: "retired"` lines under 001's `removedNotice`
-- [ ] T017 [US1] Fix the existing tests that 002 breaks:
+- [X] T017 [US1] Fix the existing tests that 002 breaks:
   - shaming is on by default, so tests that add a BLAND shirt need updating:
     - call `setSwitches(db, { blandShaming: false })` where the test needs a bland line: tests/integration/cart.test.ts (the BLAND badge in the cart view) and tests/integration/cart-audit.test.ts
     - swap to a non-bland shirt where blandness doesn't matter: tests/integration/cart-merge.test.ts and tests/integration/actions-cart.test.ts
   - add `reason: "retired"` to expected `RemovedLine`s in tests/integration/cart-audit.test.ts and tests/integration/place-order-card.test.ts
-- [ ] T018 [P] [US1] Implement `buildLadder`, `recommendationFor`, `lineOrder` and `shameFor` in src/lib/shaming/loop.ts as pure functions with no framework imports (`shameFor` uses `labelFor` from T009). Ties on score keep the higher-priced shirt. T010 passes.
-- [ ] T019 [US1] Add the rest of `copy.shame` to src/lib/copy.ts, all in voice and never explaining the joke:
+- [X] T018 [P] [US1] Implement `recommendationFor`, `lineOrder` and `shameFor` in src/lib/shaming/loop.ts as pure functions with no framework imports (`shameFor` uses `labelFor` from T009). Implement `buildLadder` in src/lib/shaming/ladder.ts, which is server-side because it imports the catalog layer's `toShopperShirt`; this keeps the browser bundle free of Drizzle and Zod. Ties on score keep the higher-priced shirt. T010 passes.
+- [X] T019 [US1] Add the rest of `copy.shame` to src/lib/copy.ts, all in voice and never explaining the joke:
   - `title` "You sure about that?"
   - `lines`: at least 8 disparaging lines about the man who wears bland shirts
   - `relent` "Fine. I'll look at real shirts"
   - `takeIt`, e.g. "Okay. Show me the complicated one"
   - `nothingBetter`, the escape label when the ladder is empty, linking to `/shirts`
-- [ ] T020 [US1] Extend `loadShirt` in src/app/_data/storefront.ts to also return:
+- [X] T020 [US1] Extend `loadShirt` in src/app/_data/storefront.ts to also return:
   - `blandShaming` and `confirmshaming` from settings
   - `ladder`: `buildLadder(listCatalogShirts(db))` only when the shirt is BLAND and shaming is on, otherwise `[]`
-- [ ] T021 [US1] Create the `ShameDialog` client component in src/components/ShameDialog.tsx on native `<dialog>` with `showModal()` (R4):
+- [X] T021 [US1] Create the `ShameDialog` client component in src/components/ShameDialog.tsx on native `<dialog>` with `showModal()` (R4):
   - **Props**: `open`, `onClose`, `ladder: ShopperShirt[]`, `insistLabel`
   - **Each round shows**:
     - the title
@@ -144,12 +144,12 @@ that order.
     - insist advances the round and never calls the server
   - **Test hooks**: `data-testid` `shame-dialog`, `shame-line`, `shame-recommendation`, and `data-round` on the dialog (it is `1` when the dialog opens)
   - **Styling**: loud tokens; scrolls inside the dialog with a max height so it fits at 360px
-- [ ] T022 [US1] Update `AddToCart` in src/components/AddToCart.tsx with a new prop, `shame: { ladder: ShopperShirt[]; insistLabel: string } | null`:
+- [X] T022 [US1] Update `AddToCart` in src/components/AddToCart.tsx with a new prop, `shame: { ladder: ShopperShirt[]; insistLabel: string } | null`:
   - when `shame` is set and a size is picked, `onSubmit` calls `preventDefault()` and opens `ShameDialog` instead of running the action
   - with no size picked, submit normally so 001's `SIZE_REQUIRED` message still shows
   - `null` keeps 001 behavior exactly
-- [ ] T023 [US1] In src/app/shirts/[slug]/page.tsx, pass `shame={shameFor({ isBland: shirt.tier.isBland, blandShaming, confirmshaming }, ladder)}` to `AddToCart`. The page holds no switch logic of its own. T012 passes.
-- [ ] T024 [US1] In tests/e2e/card-checkout.spec.ts, replace `addShirt(page, "beige-regret", "S")` and the "Beige Regret" summary assertion with `paisley-panic` / "Paisley Panic"
+- [X] T023 [US1] In src/app/shirts/[slug]/page.tsx, pass `shame={shameFor({ isBland: shirt.tier.isBland, blandShaming, confirmshaming }, ladder)}` to `AddToCart`. The page holds no switch logic of its own. T012 passes.
+- [X] T024 [US1] In tests/e2e/card-checkout.spec.ts, replace `addShirt(page, "beige-regret", "S")` and the "Beige Regret" summary assertion with `paisley-panic` / "Paisley Panic"
 
 **Checkpoint**: US1 works on its own, and `npm run verify` is green.
 

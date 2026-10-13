@@ -20,6 +20,10 @@ export interface StoreSettings {
   flashCreditPresetsUsd: Usd[];
   mediaBaseUrl: string;
   placeholderMediaId: number | null;
+  /** Bland-shirt shaming (constitution IV): the endless "You sure about that?" loop. */
+  blandShaming: boolean;
+  /** Confirmshaming (constitution IV): decline buttons that make him feel it. */
+  confirmshaming: boolean;
 }
 
 /** An owner-defined band of complexity scores. The tier with minScore 0 is the BLAND tier. */

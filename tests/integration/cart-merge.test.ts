@@ -7,7 +7,7 @@ import {
   mergeGuestCart,
   updateItem,
 } from "@/lib/cart/cart";
-import { createSeededTestDb } from "../helpers/db";
+import { createSeededTestDb, setSwitches } from "../helpers/db";
 
 function makeUser(sqlite: import("better-sqlite3").Database, email: string): number {
   return (
@@ -34,6 +34,7 @@ describe("mergeGuestCart", () => {
 
   it("merges into the user's cart: quantities add (capped at 99), earlier added_at wins, guest cart deleted", () => {
     const { db, sqlite } = createSeededTestDb();
+    setSwitches(db, { blandShaming: false }); // shaming's merge rule is covered in bland-refusal
     const userId = makeUser(sqlite, "b@x.io");
     const mine = getOrCreateCart(db, { cartId: null, userId }).id;
     addItem(db, mine, { slug: "geo-riot", size: "M" });

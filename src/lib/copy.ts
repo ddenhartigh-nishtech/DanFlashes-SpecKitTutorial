@@ -84,6 +84,7 @@ export const copy = {
     subtotal: "Subtotal",
     checkout: "Check out",
     removedNotice: "Dan pulled these from the floor while you were away:",
+    blandRemovedNotice: "Dan took these out of your cart. You'll thank him later:",
     emptyTitle: "You sure about that?",
     emptyBody:
       "An empty cart. On purpose? Here's the most complicated thing we could find for you.",
@@ -156,6 +157,33 @@ export const copy = {
     entrySpend: (order: string) => `Spent on order ${order}`,
   },
 
+  shame: {
+    title: "You sure about that?",
+    /** At least 8 (spec Assumptions). Rotated without repeats until the pool is used up. */
+    lines: [
+      "Beige is what a man wears when he's stopped trying. Is that you? It's starting to look like that's you.",
+      "Guys who wear this have a lanyard for their lanyard.",
+      "This shirt has never been invited to a party. Not once.",
+      "You'd look like the guy who explains the printer to people.",
+      "Nobody has ever pointed at a shirt like this from the far end of the food court.",
+      "Men who wear this order the plain bagel and call it a treat.",
+      "That's a shirt for a man who claps when the plane lands.",
+      "There's nothing going on here. At all. You can see that, right?",
+      "Picture walking into the conference and nobody says a word. That's this shirt.",
+      "This is what the guy who reads the terms and conditions wears to the beach.",
+    ],
+    pitch: "Here's a shirt with something going on:",
+    takeIt: "Okay. Show me the complicated one",
+    nothingBetter: "Show me something complicated",
+    relent: "Fine. I'll look at real shirts",
+    /** Confirmshaming (constitution IV): shamed while the switch is on, neutral while it is off. */
+    labels: {
+      insist: { shamed: "Yes, I'd rather blend in", neutral: "Yes, I'm sure" },
+      remove: { shamed: "Remove (and lose your edge)", neutral: "Remove" },
+      signOut: { shamed: "Sign out (go back to being normal)", neutral: "Sign out" },
+    },
+  },
+
   /** One message per error code in contracts/actions.md. */
   codes: {
     SIZE_REQUIRED: "Pick a size. Even complicated men have measurements.",
@@ -163,6 +191,7 @@ export const copy = {
     SHIRT_INACTIVE: "That shirt has been retired from the floor.",
     NOT_IN_CART: "That's not in your cart anymore.",
     INVALID_QUANTITY: "Quantity must be between 0 and 99. We checked.",
+    BLAND_REFUSED: "Dan Flashes does not sell boring shirts. Not to you. Not to anyone.",
     INVALID_EMAIL: "That doesn't look like an email address.",
     WEAK_PASSWORD: "Your password needs at least 8 characters. Make it complicated.",
     EMAIL_TAKEN: "There's already an account with that email. Sign in instead.",
@@ -170,8 +199,7 @@ export const copy = {
     SIGN_IN_REQUIRED: "Sign in first.",
     GATE_SIGN_IN_REQUIRED: "Only members can check out. Sign in or sign up.",
     CART_EMPTY: "Your cart is empty. You sure about that?",
-    CART_AUDITED:
-      "Some shirts were retired from the floor and removed. Review your cart and try again.",
+    CART_AUDITED: "Dan pulled some shirts from your cart. Review it and try again.",
     PRICE_CHANGED: "A price changed. Review your new total and place the order again.",
     CARD_INVALID_NUMBER: "That card number doesn't check out.",
     CARD_EXPIRED: "That card has expired. Dan doesn't accept the past.",

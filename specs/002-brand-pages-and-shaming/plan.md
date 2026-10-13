@@ -88,7 +88,8 @@ src/
 │   ├── AddToCart.tsx                 # opens ShameDialog for bland shirts when shaming is on
 │   └── SiteHeader.tsx                # "About" link
 └── lib/
-    ├── shaming/loop.ts               # new: buildLadder, recommendationFor, lineOrder, shameFor
+    ├── shaming/loop.ts               # new (browser-safe): recommendationFor, lineOrder, shameFor
+    ├── shaming/ladder.ts             # new (server): buildLadder, shopper-shaped
     ├── shaming/labels.ts             # new: labelFor(key, confirmshaming)
     ├── cart/cart.ts                  # BLAND_REFUSED on add/raise; audit pulls bland lines; merge skips them
     ├── data/shirts.ts                # isBlandShirt(db, shirtId)

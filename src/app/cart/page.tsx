@@ -9,7 +9,7 @@ import { PriceTag } from "@/components/PriceTag";
 import { ShirtBadge } from "@/components/ShirtBadge";
 import { ShirtCard } from "@/components/ShirtCard";
 import { ShirtImage } from "@/components/ShirtImage";
-import { getCartView, type CartLine, type RemovedLine } from "@/lib/cart/cart";
+import { getCartView, type CartLine, type RemovalReason, type RemovedLine } from "@/lib/cart/cart";
 import { mostExpensive } from "@/lib/catalog/listing";
 import { sortTiers } from "@/lib/catalog/tiers";
 import { copy } from "@/lib/copy";
@@ -99,22 +99,34 @@ async function CartContents() {
   );
 }
 
+const REMOVAL_NOTICES: Record<RemovalReason, string> = {
+  retired: copy.cart.removedNotice,
+  bland: copy.cart.blandRemovedNotice,
+};
+
 function RemovedNotice({ removed }: { removed: RemovedLine[] }) {
   if (removed.length === 0) return null;
+  const groups = (Object.keys(REMOVAL_NOTICES) as RemovalReason[])
+    .map((reason) => ({ reason, lines: removed.filter((r) => r.reason === reason) }))
+    .filter((g) => g.lines.length > 0);
   return (
     <div
       role="status"
       data-testid="audit-notice"
-      className="bg-safety-orange border-ink border-4 p-3 font-bold"
+      className="bg-safety-orange border-ink flex flex-col gap-2 border-4 p-3 font-bold"
     >
-      <p>{copy.cart.removedNotice}</p>
-      <ul className="mt-1 list-disc pl-6">
-        {removed.map((r) => (
-          <li key={`${r.slug}-${r.size}`}>
-            {r.name} ({r.size} × {r.quantity})
-          </li>
-        ))}
-      </ul>
+      {groups.map(({ reason, lines }) => (
+        <div key={reason} data-reason={reason}>
+          <p>{REMOVAL_NOTICES[reason]}</p>
+          <ul className="mt-1 list-disc pl-6">
+            {lines.map((r) => (
+              <li key={`${r.slug}-${r.size}`}>
+                {r.name} ({r.size} × {r.quantity})
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
     </div>
   );
 }

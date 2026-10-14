@@ -12,9 +12,11 @@ const s = copy.streams;
 export function StreamList({
   streams,
   confirmshaming,
+  payPeriodMinutes,
 }: {
   streams: StreamView[];
   confirmshaming: boolean;
+  payPeriodMinutes: number;
 }) {
   if (streams.length === 0) return <p className="solid-backing p-3">{s.empty}</p>;
   return (
@@ -29,7 +31,10 @@ export function StreamList({
             <span className="font-display text-lg leading-tight">{stream.name}</span>
             <span className="font-display tabular-nums">+{formatUsd(stream.amountUsd)}</span>
           </div>
-          <p className="text-sm font-semibold uppercase">{s.schedules[stream.schedule]}</p>
+          <p className="text-sm font-semibold uppercase">
+            {s.schedules[stream.schedule]}
+            {stream.schedule === "recurring" ? ` · every ${s.period(payPeriodMinutes)}` : ""}
+          </p>
           {stream.schedule === "one_time" ? null : (
             <p className="text-sm">
               {s.windowFrom} <LocalTime iso={stream.startsAt} />{" "}

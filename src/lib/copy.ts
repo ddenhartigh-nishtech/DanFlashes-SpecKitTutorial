@@ -209,6 +209,22 @@ export const copy = {
       one_time: "Just once",
       whenever: "Whenever I want",
     },
+    /** What each schedule actually does, so "every payday" and "whenever" can't be confused. */
+    hints: {
+      recurring: (period: string) => `Pays automatically, every ${period}.`,
+      one_time: "Pays once, as soon as it starts.",
+      whenever: "Pays each time you hit Cash in. Never on its own.",
+    },
+    /** The store's pay period in words: "5 minutes", "hour", "2 days". */
+    period: (minutes: number) => {
+      const [n, unit] =
+        minutes % 1440 === 0
+          ? [minutes / 1440, "day"]
+          : minutes % 60 === 0
+            ? [minutes / 60, "hour"]
+            : [minutes, "minute"];
+      return n === 1 ? unit : `${n} ${unit}s`;
+    },
     form: {
       heading: "Connect a stream",
       source: "Where's it coming from?",
@@ -221,6 +237,8 @@ export const copy = {
       endsAt: "Ends",
       connect: "Connect it",
       connecting: "Connecting…",
+      apply: "Apply it",
+      applying: "Applying…",
     },
     nextPayment: "Next payday",
     windowFrom: "From",
@@ -233,6 +251,7 @@ export const copy = {
     endedBadge: "Over",
     disconnectedBadge: "Disconnected",
     connected: "Connected. The money is already on its way to shirts.",
+    applied: "Applied. It's already in your Flash Credit.",
     cashedIn: "Cashed in. Straight to Flash Credit.",
     disconnected: "Disconnected. Bold move.",
     historyEntry: (name: string) => `${name}: payday`,
@@ -290,7 +309,7 @@ export const copy = {
     INVALID_AMOUNT: "Enter an amount of at least $0.01, in dollars and cents.",
     INVALID_STREAM_NAME: "Pick where it's coming from, or give it a name (40 characters, tops).",
     INVALID_STREAM_AMOUNT:
-      "Each payment has to be between $0.01 and $10,000.00. In dollars and cents.",
+      "Each payment has to be at least $0.01, in dollars and cents. There's no upper limit. Dream big.",
     INVALID_WINDOW:
       "That timing doesn't work. Start now or later, and end after it starts. Or let it run forever.",
     PER_DIEM_EXISTS: "You already have a per diem running. One at a time. Spend it first.",

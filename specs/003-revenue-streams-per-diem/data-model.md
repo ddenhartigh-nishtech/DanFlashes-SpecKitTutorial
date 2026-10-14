@@ -14,7 +14,7 @@ All changes ship in one migration, `drizzle/0002_*.sql`. `npm run db:migrate` ba
 | `user_id` | integer, NOT NULL | FK → `users.id`, ON DELETE RESTRICT |
 | `preset` | text, nullable | one of `per_diem`, `expense_report`, `college_fund`, `garage_sale`, `second_mortgage` |
 | `custom_name` | text, nullable | 1–40 characters after trimming |
-| `amount_usd` | text, NOT NULL | exact money format (001's `money` CHECK), positive, not `0.00`; at most `10000.00` (enforced in validation) |
+| `amount_usd` | text, NOT NULL | exact money format (001's `money` CHECK), positive, not `0.00`; no upper limit (owner) |
 | `schedule` | text, NOT NULL | one of `recurring`, `one_time`, `whenever` |
 | `starts_at` | text, NOT NULL | ISO-8601 UTC; never in the past when created |
 | `ends_at` | text, nullable | ISO-8601 UTC; NULL means ongoing; CHECK `ends_at IS NULL OR ends_at > starts_at` |

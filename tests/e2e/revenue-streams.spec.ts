@@ -20,7 +20,9 @@ async function connect(
   await section.getByLabel(s.form.amount).fill(stream.amount);
   await section.getByRole("radio", { name: stream.schedule }).check();
   if (stream.ongoing) await section.getByLabel(s.form.ongoing).check();
-  await section.getByRole("button", { name: s.form.connect }).click();
+  // A one-time top-up is applied, not connected.
+  const submit = stream.schedule === s.schedules.one_time ? s.form.apply : s.form.connect;
+  await section.getByRole("button", { name: submit }).click();
 }
 
 const entry = (page: Page, name: string) =>
@@ -38,6 +40,14 @@ test.describe("US1 — revenue streams", () => {
     const section = visible(page.locator("#revenue-streams"));
     await expect(section.getByRole("heading", { name: s.heading })).toBeVisible();
     await expect(section.getByText(s.empty)).toBeVisible();
+    // The schedules say what they mean: the real pay period, or only when he cashes in.
+    await expect(section.getByText(s.hints.recurring(s.period(5)))).toBeVisible();
+    await expect(section.getByText(s.hints.whenever)).toBeVisible();
+    await section.getByRole("radio", { name: s.schedules.one_time }).check();
+    await expect(section.getByRole("button", { name: s.form.apply })).toBeVisible();
+    await section.getByRole("radio", { name: s.schedules.recurring }).check();
+    await expect(section.getByRole("button", { name: s.form.connect })).toBeVisible();
+
     // SC-007: the props never ask for real banking details.
     await expect(page.getByLabel(/bank|routing|payroll|account number/i)).toHaveCount(0);
 
@@ -60,6 +70,7 @@ test.describe("US1 — revenue streams", () => {
       amount: "2000.00",
       schedule: s.schedules.one_time,
     });
+    await expect(section.getByRole("status")).toContainText(s.applied);
     await expect(entry(page, s.presets.college_fund)).toHaveCount(1);
     await expect(entry(page, s.presets.college_fund)).toContainText("+$2,000.00");
     await expect(

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { visible } from "./helpers";
+import { addShirt, visible } from "./helpers";
 
 test.describe("US2 — zoom, enhance, add to cart", () => {
   test("empty cart pitches the most expensive shirt", async ({ page }) => {
@@ -84,6 +84,24 @@ test.describe("US2 — zoom, enhance, add to cart", () => {
     await page.mouse.move(box.x + box.width / 2 + 60, box.y + box.height / 2 + 40, { steps: 6 });
     await page.mouse.up();
     await expect(frame).toHaveAttribute("data-scale", "2.25");
+  });
+
+  test("a huge subtotal stays inside its box", async ({ page }) => {
+    await addShirt(page, "dans-masterpiece", "XL");
+    await page.goto("/cart");
+    const line = visible(page.getByTestId("cart-line"));
+    await line.getByLabel("Qty").fill("99");
+    await line.getByRole("button", { name: "Update" }).click();
+    const summary = visible(page.getByTestId("cart-summary"));
+    await expect(summary.getByTestId("price")).toHaveText("$121,651,200.00");
+    const spill = await summary.evaluate((box) => {
+      const outer = box.getBoundingClientRect();
+      return [...box.querySelectorAll("*")].some((el) => {
+        const r = el.getBoundingClientRect();
+        return r.right > outer.right + 0.5 || r.left < outer.left - 0.5;
+      });
+    });
+    expect(spill).toBe(false);
   });
 
   test("a retired shirt shows no price and no Add to cart", async ({ page }) => {

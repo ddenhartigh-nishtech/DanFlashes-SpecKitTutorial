@@ -88,8 +88,11 @@ async function CartContents() {
           ))}
         </ul>
       </div>
-      <aside className="border-ink bg-paper flex flex-col gap-3 border-4 p-4 shadow-[6px_6px_0_var(--color-ink)]">
-        <p className="font-display flex items-center justify-between gap-3 uppercase">
+      <aside
+        data-testid="cart-summary"
+        className="border-ink bg-paper flex min-w-0 flex-col gap-3 border-4 p-4 shadow-[6px_6px_0_var(--color-ink)]"
+      >
+        <p className="font-display flex flex-wrap items-center justify-between gap-3 uppercase">
           {copy.cart.subtotal}
           <PriceTag priceUsd={view.subtotalUsd} />
         </p>

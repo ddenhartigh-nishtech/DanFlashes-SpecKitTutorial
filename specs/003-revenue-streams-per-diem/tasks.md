@@ -435,6 +435,28 @@ at any time before placing. The server recomputes the split, and any refusal wri
 
 ---
 
+## Phase 7: Owner Feedback (2026-10-14, after US1)
+
+- [X] T050 Stop a big cart subtotal spilling out of its summary box (a 001 bug). `PriceTag` gets
+  `max-w-full` and `overflow-wrap: anywhere`, so any amount wraps inside its container; the cart
+  summary row wraps the tag under its label. Test: tests/e2e/zoom-and-cart.spec.ts "a huge subtotal
+  stays inside its box" (99 × Dan's Masterpiece; no descendant crosses the box's edges).
+- [X] T051 Label a one-time stream's submit "Apply it" (and its success "Applied…"). Other schedules
+  keep "Connect it". The changes are in src/components/ConnectStreamForm.tsx and
+  src/lib/actions/streams.ts. Test: tests/e2e/revenue-streams.spec.ts.
+- [X] T052 Make the schedules self-explanatory:
+  - each radio shows a hint, with "Every payday" spelling out the store's pay period
+    (`copy.streams.period`: "5 minutes", "hour", "2 days")
+  - the stream list shows "Every payday · every 5 minutes"
+  - the period reaches the form and list from `store_settings.stream_pay_period_minutes`
+
+  Tests: tests/unit/streams-period.test.ts and the e2e journey.
+- [X] T053 Remove the $10,000.00 ceiling on a stream's amount ("the sky should be the limit"). Any
+  amount ≥ $0.01 is accepted. This supersedes the ceiling in T008's description, and FR-002 is
+  updated. Tests: tests/unit/streams-validate.test.ts (a $1,000,000,000,000.99 stream is accepted).
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase dependencies

@@ -32,7 +32,9 @@ export function connectStreamCore(
     },
     now,
   );
-  return result.ok ? { ok: true, message: copy.streams.connected } : failure(result.code);
+  if (!result.ok) return failure(result.code);
+  const oneTime = field(form, "schedule") === "one_time";
+  return { ok: true, message: oneTime ? copy.streams.applied : copy.streams.connected };
 }
 
 export function disconnectStreamCore(

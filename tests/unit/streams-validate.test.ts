@@ -39,15 +39,20 @@ describe("validateConnectInput — the name", () => {
 });
 
 describe("validateConnectInput — the amount", () => {
-  it("normalizes dollars and cents between $0.01 and $10,000.00", () => {
+  it("normalizes dollars and cents from $0.01 up, with no ceiling (the sky is the limit)", () => {
     expect(validateConnectInput({ ...base, amountUsd: "75" }, NOW)).toMatchObject({
       value: { amountUsd: "75.00" },
     });
-    expect(code({ amountUsd: "10000.00" })).toBe("ok");
+    expect(code({ amountUsd: "10000.01" })).toBe("ok");
+    expect(
+      validateConnectInput({ ...base, amountUsd: "$1,000,000,000,000.99" }, NOW),
+    ).toMatchObject({
+      value: { amountUsd: "1000000000000.99" },
+    });
     expect(code({ amountUsd: "0.01" })).toBe("ok");
   });
 
-  it.each(["0.00", "10000.01", "1.234", "abc", "", "-5.00"])("refuses %j", (amountUsd) => {
+  it.each(["0.00", "0.001", "1.234", "abc", "", "-5.00"])("refuses %j", (amountUsd) => {
     expect(code({ amountUsd })).toBe("INVALID_STREAM_AMOUNT");
   });
 });

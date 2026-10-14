@@ -6,7 +6,6 @@ import { cmp, tryParseUsd, type Usd } from "@/lib/money";
 import type { Err, Ok } from "@/lib/result";
 import {
   MAX_CUSTOM_NAME_LENGTH,
-  MAX_STREAM_AMOUNT_USD,
   STREAM_PRESETS,
   STREAM_SCHEDULES,
   type StreamPreset,
@@ -69,11 +68,8 @@ export function validateConnectInput(
   }
 
   const amountUsd = tryParseUsd(input.amountUsd);
-  if (
-    amountUsd === null ||
-    cmp(amountUsd, "0.01") < 0 ||
-    cmp(amountUsd, MAX_STREAM_AMOUNT_USD) > 0
-  ) {
+  // No ceiling: the sky is the limit (owner, 2026-10-14).
+  if (amountUsd === null || cmp(amountUsd, "0.01") < 0) {
     return { ok: false, code: "INVALID_STREAM_AMOUNT" };
   }
 

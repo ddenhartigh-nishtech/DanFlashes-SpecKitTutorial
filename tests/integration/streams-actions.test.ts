@@ -70,7 +70,7 @@ describe("connectStream / disconnectStream / cashIn actions", () => {
   });
 
   it.each([
-    ["INVALID_STREAM_AMOUNT", { amountUsd: "10000.01" }],
+    ["INVALID_STREAM_AMOUNT", { amountUsd: "0.00" }],
     ["INVALID_STREAM_NAME", { preset: "custom", customName: "" }],
     ["INVALID_WINDOW", { ongoing: "", endsAt: "" }],
   ])("pass %s through in brand voice", async (code, extra) => {

@@ -126,10 +126,14 @@ async function AccountContents() {
             {copy.streams.heading}
           </h2>
           <p className="font-semibold">{copy.streams.intro}</p>
-          <StreamList streams={streams} confirmshaming={settings.confirmshaming} />
+          <StreamList
+            streams={streams}
+            confirmshaming={settings.confirmshaming}
+            payPeriodMinutes={settings.streamPayPeriodMinutes}
+          />
         </div>
         <div className="border-ink bg-paper border-4 p-4 shadow-[6px_6px_0_var(--color-ink)]">
-          <ConnectStreamForm />
+          <ConnectStreamForm payPeriodMinutes={settings.streamPayPeriodMinutes} />
         </div>
       </section>
 

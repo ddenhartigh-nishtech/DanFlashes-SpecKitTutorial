@@ -14,7 +14,8 @@ const f = copy.streams.form;
 const toIso = (local: FormDataEntryValue | null): string =>
   typeof local === "string" && local ? new Date(local).toISOString() : "";
 
-export function ConnectStreamForm() {
+/** `payPeriodMinutes` is the store's pay period, so "Every payday" can say how often that is. */
+export function ConnectStreamForm({ payPeriodMinutes }: { payPeriodMinutes: number }) {
   const [state, dispatch, pending] = useActionState<ActionState | null, FormData>(
     connectStream,
     null,
@@ -73,19 +74,23 @@ export function ConnectStreamForm() {
         <legend className={`${label} mb-1`}>{f.schedule}</legend>
         <div className="flex flex-col gap-1">
           {STREAM_SCHEDULES.map((key) => (
-            <label
-              key={key}
-              className="flex min-h-11 cursor-pointer items-center gap-3 font-semibold"
-            >
+            <label key={key} className="flex min-h-11 cursor-pointer items-start gap-3 py-1">
               <input
                 type="radio"
                 name="schedule"
                 value={key}
                 checked={schedule === key}
                 onChange={() => setSchedule(key)}
-                className="accent-hot-pink size-5"
+                className="accent-hot-pink mt-0.5 size-5 shrink-0"
               />
-              {copy.streams.schedules[key]}
+              <span className="flex flex-col">
+                <span className="font-semibold">{copy.streams.schedules[key]}</span>
+                <span className="text-sm">
+                  {key === "recurring"
+                    ? copy.streams.hints.recurring(copy.streams.period(payPeriodMinutes))
+                    : copy.streams.hints[key]}
+                </span>
+              </span>
             </label>
           ))}
         </div>
@@ -133,7 +138,13 @@ export function ConnectStreamForm() {
         disabled={pending}
         className="font-display bg-hot-pink text-paper min-h-12 px-6 text-lg uppercase shadow-[4px_4px_0_var(--color-ink)] disabled:opacity-60"
       >
-        {pending ? f.connecting : f.connect}
+        {schedule === "one_time"
+          ? pending
+            ? f.applying
+            : f.apply
+          : pending
+            ? f.connecting
+            : f.connect}
       </button>
 
       <div role="status" aria-live="polite" className="min-h-6">

@@ -28,6 +28,11 @@
   and can remove the applied credit before placing the order. When his credit doesn't cover the total,
   the store asks him to confirm putting the rest on a card. This replaces 001 FR-027's "Flash Credit
   only if it covers the whole total".
+- Owner feedback after US1:
+  - **No ceiling on a stream's amount.** The sky's the limit; the $10,000.00 cap is gone.
+  - **A one-time stream is "applied", not "connected".**
+  - **Each schedule says what it does**: "Every payday" shows the store's real pay period, and
+    "Whenever I want" says it only pays on Cash in.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -183,9 +188,10 @@ Confirm that:
   the store's presets (the per diem plus a fixed set of absurd ones) or a custom stream he names
   himself (1–40 characters).
 - **FR-002**: Connecting a stream MUST ask for its amount per payment, in exact dollars and cents,
-  greater than $0.00 and at most $10,000.00. It MUST NOT ask for bank, payroll, or account details.
+  greater than $0.00, with no upper limit. It MUST NOT ask for bank, payroll, or account details.
   Streams are props, and no real money moves.
-- **FR-003**: Each stream MUST have a schedule chosen by the shopper:
+- **FR-003**: Each stream MUST have a schedule chosen by the shopper. The form MUST say what each one
+  does, including the store's actual pay period for "Every payday":
   - **Recurring**: pays every pay period
   - **One time**: pays once
   - **Whenever I want**: pays each time he presses "Cash in"

@@ -8,7 +8,7 @@ These are deltas to [001 routes.md](../../001-core-storefront/contracts/routes.m
 
 | Route | Change | Spec |
 |---|---|---|
-| *header* (every page) | Signed-in shoppers with a connected per diem, while the drain is on, get a full-width **per diem meter** strip under the header bar: "Per diem left $X.XX", or the achievement state at $0. It links to `/account#revenue-streams`. It settles due payments first. | US2, FR-013 |
+| *every page* | Signed-in shoppers with a connected per diem, while the drain is on, get a floating **per diem gauge** (fixed, bottom-left; it shifts no layout): "Per diem left $X.XX", or the achievement state at $0. It links to `/account#revenue-streams`. It settles due payments first. | US2, FR-013 |
 | `/account` | A new **Revenue Streams** section (`#revenue-streams`): the connect form, then each stream with its name, amount, schedule, window (local time), and next payment or a **Cash in** button, plus a **Disconnect** button labeled by confirmshaming. The Flash Credit history names stream payments. The meter's value sits beside the balance. It settles first. | US1, FR-001–FR-011, FR-013 |
 | `/checkout` | Settles due payments before showing the Flash Credit balance. | FR-006, FR-007 |
 | `/orders/[id]` | When the order has `per_diem_drained` and the drain is on, a loud **per diem achievement** celebration tops the confirmation. | US2, FR-014 |

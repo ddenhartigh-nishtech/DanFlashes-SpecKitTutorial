@@ -16,7 +16,7 @@ Two additions on top of 001's Flash Credit ledger:
      every payment that has come due is credited, exactly once (guaranteed by a unique index), up to
      30 per stream per visit.
    - "Cash in" pays on demand, once per press.
-2. **The per diem drain.** While the new switch is on, a meter strip under the header shows his per
+2. **The per diem drain.** While the new switch is on, a floating gauge on every page shows his per
    diem left: per diem paid in, minus his orders since it started, floored at $0. The order that takes
    it to $0 is flagged at placement and opens with a loud achievement.
 
@@ -62,7 +62,7 @@ Checked against constitution v4.0.0.
 | IV | Shamelessly Manipulative | The per diem drain gets its own named switch, `store_settings.per_diem_drain`, on by default. Disconnect reuses 002's confirmshaming switch. Revenue streams are a store feature, not a tactic (spec Assumptions). | ✅ | ✅ |
 | V | Maximum Visual Assault | The meter strip and the celebration use the loud tokens, responsive from 360px. | ✅ | ✅ |
 | VI | Fully Tested | Money paths are test-first: schedule math, the meter, settlement, Cash in, and placeOrder's flag. Exactly-once is tested under simultaneous settles. `src/lib` stays ≥ 90%. Each story gets an e2e journey. | ✅ | ✅ |
-| VII | Fast | Settlement skips its write transaction when nothing is due. There's no polling, and the meter streams in Suspense like the cart count. | ✅ | ✅ |
+| VII | Fast | Settlement skips its write transaction when nothing is due. There's no polling. The meter streams in Suspense as a fixed-position gauge, so it causes no layout shift. | ✅ | ✅ |
 | VIII | Simple Code | No new packages, no background worker. Pure schedule and meter functions plus one settlement function. | ✅ | ✅ |
 | C | Commerce constraints | **Ledger**: each stream payment is its own positive entry, the balance is the exact sum, and duplicates are impossible (unique index). **Fake money**: streams are props with no bank details. **Exact money**: amounts go through `money.ts`. **Server-authoritative**: placeOrder settles and re-reads the balance in its transaction. | ✅ | ✅ |
 | W | Workflow | Feature branch; spec → clarify → plan → tasks → **analyze** (mandatory: this touches Flash Credit and checkout) → implement → converge; merge by PR. | ✅ | ✅ |
@@ -93,15 +93,15 @@ src/
 │   ├── account/page.tsx              # Revenue Streams section; meter beside the balance; settles first
 │   ├── checkout/page.tsx             # settles before showing the balance
 │   ├── orders/[id]/page.tsx          # per diem achievement when per_diem_drained
+│   ├── layout.tsx                    # renders <PerDiemMeter/> in Suspense on every page
 │   └── _data/streams.ts              # new: request-time loaders (settle + meter + list)
 ├── components/
 │   ├── ConnectStreamForm.tsx         # new (client): preset/custom, amount, schedule, window → ISO UTC
 │   ├── StreamList.tsx                # new: streams, next payment, Cash in, Disconnect (confirmshaming)
 │   ├── CashInButton.tsx              # new (client): useActionState(cashIn) with paymentNo
-│   ├── PerDiemMeter.tsx              # new (server): strip under the header; settles first
+│   ├── PerDiemMeter.tsx              # new (server): floating gauge (fixed, no layout shift); settles first
 │   ├── PerDiemCelebration.tsx        # new: the $0 achievement
-│   ├── LocalTime.tsx                 # new (client): useSyncExternalStore local-time formatting
-│   └── SiteHeader.tsx                # renders <PerDiemMeter/> in Suspense
+│   └── LocalTime.tsx                 # new (client): useSyncExternalStore local-time formatting
 └── lib/
     ├── streams/schedule.ts           # new (pure): duePayments
     ├── streams/meter.ts              # new (pure): perDiemLeft, crossedToZero

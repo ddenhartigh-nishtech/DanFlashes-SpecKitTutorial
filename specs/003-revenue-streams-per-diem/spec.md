@@ -230,8 +230,8 @@ feature, but it needs P1's money to measure.
 - **"Cash in"** has no limit beyond the window. It's a faux source, like the faux card top-up.
 - **The meter's spending window**: Dan Flashes orders placed at or after the per diem's start, by any
   payment method. Top-ups and other streams don't affect it; only per diem payments raise it.
-- **Where the meter shows**: in the site header for signed-in shoppers with a per diem (desktop and
-  phone), and in the account next to Flash Credit.
+- **Where the meter shows**: as a floating gauge pinned to a bottom corner of every page, for
+  signed-in shoppers with a per diem (desktop and phone), and in the account next to Flash Credit.
 - **Where the celebration shows**: on the order confirmation for the order that drained the per diem.
 - **Disconnect labels**: shamed "Disconnect (and settle for less)", neutral "Disconnect".
 - **Revenue streams are a store feature, not a manipulation tactic**: they have no switch of their

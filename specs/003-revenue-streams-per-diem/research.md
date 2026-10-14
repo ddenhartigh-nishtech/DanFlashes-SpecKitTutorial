@@ -95,14 +95,23 @@ Only the new decisions are recorded here.
 
 ## R6. Where the meter lives
 
-- **Decision**: a server component `PerDiemMeter` in the header, inside `<Suspense>` like `CartCount`.
-  - It renders a full-width strip directly under the header bar on every page, desktop and phone.
+- **Decision**: a server component `PerDiemMeter`, rendered from the root layout inside
+  `<Suspense>` like `CartCount`.
+  - It's a **floating gauge** with `position: fixed`, pinned to the bottom-left corner of every page,
+    desktop and phone.
   - It shows "Per diem left $X.XX", or an achievement state at $0, and links to
     `/account#revenue-streams`.
   - The account shows the same value next to the Flash Credit balance.
   - It updates on navigation; there's no client polling.
-- **Rationale**: "prominent" without crowding the phone header bar, which already holds the logo, the
-  cart and Menu. No polling keeps it cheap (constitution VII, VIII).
+- **Rationale**:
+  - It streams in after the shell, so anything in the page flow (like a strip under the header) would
+    push every page down when it arrives: a layout shift on every page for signed-in shoppers
+    (constitution VII). A fixed element shifts nothing.
+  - It's always in view, and it doesn't crowd the phone header bar, which already holds the logo, the
+    cart and Menu.
+  - No polling keeps it cheap (constitution VII, VIII).
+- **Alternatives**: a strip under the header was rejected for the layout shift. A pill in the header bar
+  was rejected because it doesn't fit beside the logo, cart and Menu at 360px.
 
 ## R7. Time windows and local time
 

@@ -33,6 +33,14 @@ test("no shopper-facing page reveals a complexity score or scrolls sideways", as
     await expectNoScore(page, path);
   }
 
+  // A bland shirt's page ships the shaming ladder (other shirts): still no scores, dialog open.
+  await page.goto("/shirts/beige-regret");
+  await visible(page.locator("label").filter({ hasText: /^S$/ })).click();
+  await visible(page.getByRole("button", { name: "Add to cart" })).click();
+  await expect(visible(page.getByTestId("shame-dialog"))).toBeVisible();
+  await expectNoScore(page, "/shirts/beige-regret (shame dialog open)");
+  await page.keyboard.press("Escape");
+
   await addShirt(page, "dans-masterpiece", "M");
   await page.goto("/cart");
   await expectNoScore(page, "/cart (with a line)");

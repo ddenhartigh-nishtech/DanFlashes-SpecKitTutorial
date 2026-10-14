@@ -119,3 +119,10 @@ See `specs/001-core-storefront/research.md`. Only the new decisions are recorded
   switch.
 - **Update 001's card-checkout journey**: it adds Beige Regret, which shaming now refuses. Swap it for
   a non-bland shirt.
+- **Timeouts** (added during implementation): Vitest's `testTimeout` is 20 s, up from the 5 s
+  default. bcrypt at cost 12 (a constitution constraint) is deliberately slow. With about 30 test
+  workers in parallel on one machine, a test that hashes three passwords sometimes passed 5 s, and
+  that was the intermittent failure seen during US1 and R8. A real hang still fails at 20 s. For the
+  same reason, 001's long no-score journey (ten pages, a sign-up and a checkout) is `test.slow()`.
+- **Known gap**: e2e runs a production build, so dev-only behavior isn't exercised. That includes
+  React Strict Mode's double effects, which hid T044 until the owner hit it in `next dev`.

@@ -17,7 +17,7 @@ These are deltas to [001 routes.md](../../001-core-storefront/contracts/routes.m
 | `/cart` | Each line's Remove label follows confirmshaming. While shaming is on, bland lines are pulled from the cart and listed in a brand-voice notice, next to 001's retired-shirt notice. | US2, FR-013, US1-8, FR-010 |
 | `/checkout` | The cart audit also pulls bland lines while shaming is on. Checkout then refuses with 001's `CART_AUDITED`, whose copy now covers both reasons. | US1-8, FR-010 |
 | `/account` | The Sign out label follows confirmshaming. | US2, FR-013 |
-| *header* | Adds an "About" link. | FR-001 |
+| *header* | Reads About, Shirts, Account, then a neon cart icon with the item count (the link is named "Cart"). Home is dropped, since the logo links home. On phones the cart icon stays in the bar beside Menu. | FR-001, owner request (T045) |
 
 ## Changed actions
 

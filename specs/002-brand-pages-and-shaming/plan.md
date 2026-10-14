@@ -84,11 +84,14 @@ src/
 │   ├── error.tsx, global-error.tsx   # console pointer to the terminal (R8)
 │   ├── shirts/[slug]/page.tsx        # pass isBland, shaming switch, ladder, insist label to AddToCart
 │   ├── cart/page.tsx                 # Remove label from confirmshaming; bland-removal notice
-│   └── account/page.tsx              # Sign out label from confirmshaming
+│   ├── account/page.tsx              # Sign out label from confirmshaming
+│   └── globals.css                   # `neon` utility for the cart icon (T045)
 ├── components/
-│   ├── ShameDialog.tsx               # new: native <dialog>, endless rounds
+│   ├── ShameDialog.tsx               # new: native <dialog>, endless rounds; closes on leave (T042, T044)
 │   ├── AddToCart.tsx                 # opens ShameDialog for bland shirts when shaming is on
-│   └── SiteHeader.tsx                # "About" link
+│   ├── SiteHeader.tsx, CartCount.tsx # About, Shirts, Account + neon cart icon; Home dropped (T045)
+│   ├── ListingFilters.tsx            # form keyed on the query so Reset clears it (T041)
+│   └── ZoomViewer.tsx                # click on the shirt = ENHANCE (T043)
 ├── instrumentation.ts                # new: startup + request-error diagnostics (R8)
 └── lib/
     ├── db/health.ts, db/client.ts    # new: database health checks; getDb refuses a stale DB (R8)
@@ -104,7 +107,10 @@ tests/
 ├── fixtures/catalog.ts, helpers/db.ts                          # switches in the fixture; setSwitches helper
 ├── unit/shaming-loop.test.ts, unit/shaming-labels.test.ts      # new
 ├── integration/bland-refusal.test.ts, integration/settings-switches.test.ts   # new
-└── e2e/shaming.spec.ts, e2e/confirmshaming.spec.ts, e2e/about.spec.ts       # new; card-checkout + zoom-and-cart updated
+├── integration/db-health.test.ts                               # new (R8)
+└── e2e/shaming.spec.ts, e2e/confirmshaming.spec.ts, e2e/about.spec.ts       # new
+    # updated: card-checkout, zoom-and-cart, browse (Reset), no-score (/about, bland page)
+vitest.config.mts                     # testTimeout 20 s (R7)
 ```
 
 **Structure Decision**: this extends 001's single project. The new logic sits in `src/lib/shaming/`

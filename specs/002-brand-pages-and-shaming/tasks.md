@@ -311,3 +311,9 @@ Task: "e2e endless loop in tests/e2e/shaming.spec.ts"
 - The complexity score never leaves the server. The ladder and Exhibit A are shopper-shaped.
 - No new dependencies (constitution VIII).
 - Commit after each phase checkpoint.
+
+## Phase 9: Convergence
+
+- [X] T046 Extend tests/e2e/no-score.spec.ts to visit `/shirts/beige-regret` and check it again with the shame dialog open, since its payload is the only one that carries other shirts (the ladder), per Constitution II (partial)
+- [X] T047 Update the header row in specs/002-brand-pages-and-shaming/contracts/changes.md (About, Shirts, Account, neon cart icon; Home dropped) and add the files touched by T038–T045 to plan.md's Project Structure, per plan: Project Structure (partial)
+- [X] T048 Record the Vitest `testTimeout: 20_000` rationale (bcrypt cost 12 under ~30 parallel workers) in research.md, per plan: Testing (unrequested)

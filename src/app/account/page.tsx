@@ -128,22 +128,19 @@ async function AccountContents() {
         </div>
       </CollapsibleSection>
 
-      <section
+      <CollapsibleSection
         id="revenue-streams"
-        aria-labelledby="streams-heading"
-        className="grid scroll-mt-24 gap-6 md:grid-cols-[1fr_22rem] md:items-start"
+        heading={copy.streams.heading}
+        className="mt-4 grid gap-6 md:grid-cols-[1fr_22rem] md:items-start"
       >
         <div className="flex flex-col gap-4">
-          <h2 id="streams-heading" className="font-display text-2xl md:text-3xl">
-            {copy.streams.heading}
-          </h2>
           <p className="font-semibold">{copy.streams.intro}</p>
           <StreamList streams={streams} confirmshaming={settings.confirmshaming} />
         </div>
         <div className="border-ink bg-paper border-4 p-4 shadow-[6px_6px_0_var(--color-ink)]">
           <ConnectStreamForm />
         </div>
-      </section>
+      </CollapsibleSection>
 
       <CollapsibleSection
         id="purchase-history"

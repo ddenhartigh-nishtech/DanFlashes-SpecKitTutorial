@@ -481,6 +481,8 @@ at any time before placing. The server recomputes the split, and any refusal wri
   and arrives greyed out as paid in full. Only recurring and "whenever" streams can be disconnected
   (`canDisconnect`; `disconnectStream` refuses a one-time stream). Tests: settle and e2e.
 
+- [X] T058 Make Revenue Streams collapse at its header too, the same `CollapsibleSection` as Flash Credit and Purchase history (owner request). Test: tests/e2e/account-sections.spec.ts covers all three.
+
 ---
 
 ## Dependencies & Execution Order

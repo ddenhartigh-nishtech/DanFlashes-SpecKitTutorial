@@ -3,13 +3,16 @@ import { copy } from "../../src/lib/copy";
 import { signUp, uniqueEmail, visible } from "./helpers";
 
 test.describe("account sections", () => {
-  test("Flash Credit and Purchase history collapse at their headers", async ({ page }, info) => {
+  test("Flash Credit, Revenue Streams and Purchase history collapse at their headers", async ({
+    page,
+  }, info) => {
     await page.goto("/sign-up");
     await signUp(page, uniqueEmail(info.project.name));
     await expect(page).toHaveURL(/\/account$/);
 
     for (const [id, heading, content] of [
       ["#flash-credit", copy.account.flashHeading, page.getByTestId("flash-balance")],
+      ["#revenue-streams", copy.streams.heading, page.getByText(copy.streams.empty)],
       ["#purchase-history", copy.account.ordersHeading, page.getByText(copy.account.noOrders)],
     ] as const) {
       const section = visible(page.locator(id));

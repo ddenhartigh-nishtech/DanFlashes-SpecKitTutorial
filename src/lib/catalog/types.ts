@@ -24,6 +24,10 @@ export interface StoreSettings {
   blandShaming: boolean;
   /** Confirmshaming (constitution IV): decline buttons that make him feel it. */
   confirmshaming: boolean;
+  /** The per diem drain (constitution IV): the per diem gauge and its $0 celebration. */
+  perDiemDrain: boolean;
+  /** How often a recurring revenue stream pays, in minutes (003). */
+  streamPayPeriodMinutes: number;
 }
 
 /** An owner-defined band of complexity scores. The tier with minScore 0 is the BLAND tier. */

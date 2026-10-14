@@ -65,6 +65,8 @@ const settingsSchema = z.object({
   placeholderMediaId: z.number().int().nullable(),
   blandShaming: z.boolean(),
   confirmshaming: z.boolean(),
+  perDiemDrain: z.boolean(),
+  streamPayPeriodMinutes: z.number().int().min(1),
 });
 
 function toIssues(error: z.ZodError): Issue[] {

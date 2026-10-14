@@ -97,6 +97,7 @@ export function placeOrder(db: Db, input: PlaceOrderInput): PlaceOrderResult {
           paymentMethod: input.method,
           cardBrand: card?.brand ?? null,
           cardLast4: card?.last4 ?? null,
+          flashCreditUsd: input.method === "flash_credit" ? totalUsd : ZERO,
         })
         .returning({ id: orders.id })
         .get();

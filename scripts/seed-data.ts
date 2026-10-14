@@ -21,6 +21,8 @@ export const SEED: CatalogFixture = {
     checkoutGate: true,
     blandShaming: true,
     confirmshaming: true,
+    perDiemDrain: true,
+    streamPayPeriodMinutes: 5,
     flashCreditPresetsUsd: ["500.00", "1000.00", "5000.00"],
     mediaBaseUrl: "",
   },

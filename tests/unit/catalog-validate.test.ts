@@ -102,6 +102,8 @@ describe("validateSettings", () => {
     placeholderMediaId: 1,
     blandShaming: true,
     confirmshaming: true,
+    perDiemDrain: true,
+    streamPayPeriodMinutes: 5,
   };
 
   it("accepts the defaults and an https base URL", () => {
@@ -125,6 +127,12 @@ describe("validateSettings", () => {
     ["blandShaming", { blandShaming: undefined }],
     ["confirmshaming", { confirmshaming: 1 }],
     ["confirmshaming", { confirmshaming: undefined }],
+    ["perDiemDrain", { perDiemDrain: "on" }],
+    ["perDiemDrain", { perDiemDrain: undefined }],
+    ["streamPayPeriodMinutes", { streamPayPeriodMinutes: 0 }],
+    ["streamPayPeriodMinutes", { streamPayPeriodMinutes: 1.5 }],
+    ["streamPayPeriodMinutes", { streamPayPeriodMinutes: "5" }],
+    ["streamPayPeriodMinutes", { streamPayPeriodMinutes: undefined }],
   ])("flags an invalid %s", (field, patch) => {
     expect(fields(validateSettings({ ...settings, ...patch } as StoreSettings))).toContain(field);
   });

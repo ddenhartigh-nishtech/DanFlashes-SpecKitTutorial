@@ -28,7 +28,7 @@ may do money math with JS numbers.
 
 ## Phase 1: Setup
 
-- [ ] T001 Run `npm run verify` on the branch before changing anything, and record the baseline for
+- [X] T001 Run `npm run verify` on the branch before changing anything, and record the baseline for
   the PR
 
 ---
@@ -37,14 +37,14 @@ may do money math with JS numbers.
 
 **Purpose**: the schema, migration 0002, and the two settings that both stories need.
 
-- [ ] T002 [P] Write failing unit tests in tests/unit/catalog-validate.test.ts. `validateSettings`
+- [X] T002 [P] Write failing unit tests in tests/unit/catalog-validate.test.ts. `validateSettings`
   must:
   - accept `perDiemDrain` (boolean) and `streamPayPeriodMinutes` (an integer ≥ 1)
   - report each when it is missing, the wrong type, `0`, or `1.5`
-- [ ] T003 Add `perDiemDrain: boolean` and `streamPayPeriodMinutes: number` to `StoreSettings` in
+- [X] T003 Add `perDiemDrain: boolean` and `streamPayPeriodMinutes: number` to `StoreSettings` in
   src/lib/catalog/types.ts, and to `settingsSchema` in src/lib/catalog/validate.ts as `z.boolean()`
   and `z.number().int().min(1)` (T002 passes)
-- [ ] T004 Extend src/lib/db/schema.ts per data-model.md, then run
+- [X] T004 Extend src/lib/db/schema.ts per data-model.md, then run
   `npx drizzle-kit generate --name revenue_streams` to produce drizzle/0002_revenue_streams.sql.
   - **New table `revenue_streams`**:
     - `preset` is one of `per_diem`, `expense_report`, `college_fund`, `garage_sale`,
@@ -76,12 +76,12 @@ may do money math with JS numbers.
       would fail the new CHECK for existing Flash Credit orders
   - **`store_settings`**: `per_diem_drain` (boolean, default 1) and `stream_pay_period_minutes`
     (integer, default 5, CHECK `>= 1`)
-- [ ] T005 Wire the settings through, using `perDiemDrain: true, streamPayPeriodMinutes: 5` in both
+- [X] T005 Wire the settings through, using `perDiemDrain: true, streamPayPeriodMinutes: 5` in both
   seed sources:
   - read and write both in `getSettings` / `saveSettings` in src/lib/data/settings.ts
   - add them to scripts/seed-data.ts and tests/fixtures/catalog.ts
   - extend `setSwitches` in tests/helpers/db.ts to accept `perDiemDrain`
-- [ ] T006 Write tests/integration/migration-0002.test.ts:
+- [X] T006 Write tests/integration/migration-0002.test.ts:
   - **Setup**: build a database migrated through 0001 only, by migrating from a temp copy of
     `drizzle/` whose journal stops at 0001. Seed it, add a top-up, and place a Flash Credit order (a
     spend).

@@ -35,6 +35,8 @@ export interface OrderView {
   taxUsd: Usd;
   totalUsd: Usd;
   payment: OrderPayment;
+  /** This order drained his per diem (003 US2). */
+  perDiemDrained: boolean;
   lines: SummaryLine[];
 }
 
@@ -95,6 +97,7 @@ function hydrateOrders(db: Db, rows: (typeof orders.$inferSelect)[]): OrderView[
       order.paymentMethod === "card"
         ? { method: "card", brand: order.cardBrand!, last4: order.cardLast4! }
         : { method: "flash_credit" },
+    perDiemDrained: order.perDiemDrained,
     lines: items
       .filter((item) => item.orderId === order.id)
       .map((item) => ({

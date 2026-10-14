@@ -267,6 +267,19 @@ export const copy = {
     historyEntry: (name: string) => `${name}: payday`,
   },
 
+  /** The per diem drain (003 US2): a gauge that only ever goes one way, and a party at $0. */
+  meter: {
+    label: "Per diem left",
+    drained: "Per diem: GONE",
+    drainedTag: "Achievement unlocked",
+  },
+  celebration: {
+    badge: "ACHIEVEMENT UNLOCKED",
+    headline: "You spent your entire per diem on shirts.",
+    body: "Every last cent. On complicated shirts. Dan has never been prouder of anyone. Ever.",
+    cta: "Keep the streak alive",
+  },
+
   shame: {
     title: "You sure about that?",
     /** At least 8 (spec Assumptions). Rotated without repeats until the pool is used up. */

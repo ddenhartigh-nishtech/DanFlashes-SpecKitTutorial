@@ -4,12 +4,14 @@
  * (R2), and each is credited exactly once: the unique (stream_id, stream_payment_no) index makes a
  * duplicate impossible, not just unlikely (R1).
  */
-import { and, asc, desc, eq, isNotNull, isNull, lte, ne, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gte, isNotNull, isNull, lte, ne, sql } from "drizzle-orm";
 import { copy } from "@/lib/copy";
 import type { Db } from "@/lib/db/client";
-import { flashCreditEntries, revenueStreams } from "@/lib/db/schema";
-import type { Usd } from "@/lib/money";
+import type { StoreSettings } from "@/lib/catalog/types";
+import { flashCreditEntries, orders, revenueStreams } from "@/lib/db/schema";
+import { cmp, ZERO, type Usd } from "@/lib/money";
 import type { Err, Ok } from "@/lib/result";
+import { perDiemLeft, type PerDiemEvent } from "@/lib/streams/meter";
 import { duePayments } from "@/lib/streams/schedule";
 import {
   CATCH_UP_CAP,
@@ -268,4 +270,54 @@ export function listStreams(db: Db, userId: number, now: Date = new Date()): Str
     .orderBy(sql`${revenueStreams.disconnectedAt} IS NOT NULL`, desc(revenueStreams.id))
     .all()
     .map((row) => toView(row, now));
+}
+
+export interface PerDiemMeter {
+  streamId: number;
+  leftUsd: Usd;
+  /** At $0.00 after paying in: the achievement state. */
+  drained: boolean;
+}
+
+/**
+ * His per diem left (003 FR-013): the connected per diem's payments, minus his orders since it
+ * started, by any payment method, never below $0.00. Null while the drain is off or with no per
+ * diem. Reads only; callers settle first so a top-off that came due is counted.
+ */
+export function getPerDiemMeter(
+  db: Db,
+  userId: number,
+  settings: StoreSettings,
+): PerDiemMeter | null {
+  if (!settings.perDiemDrain) return null;
+  const stream = db
+    .select({ id: revenueStreams.id, startsAt: revenueStreams.startsAt })
+    .from(revenueStreams)
+    .where(
+      and(
+        eq(revenueStreams.userId, userId),
+        eq(revenueStreams.preset, PER_DIEM),
+        isNull(revenueStreams.disconnectedAt),
+      ),
+    )
+    .get();
+  if (!stream) return null;
+  const paydays: PerDiemEvent[] = db
+    .select({ at: flashCreditEntries.createdAt, amountUsd: flashCreditEntries.amountUsd })
+    .from(flashCreditEntries)
+    .where(eq(flashCreditEntries.streamId, stream.id))
+    .all()
+    .map((e) => ({ ...e, kind: "payday" }));
+  const spending: PerDiemEvent[] = db
+    .select({ at: orders.createdAt, amountUsd: orders.totalUsd })
+    .from(orders)
+    .where(and(eq(orders.userId, userId), gte(orders.createdAt, stream.startsAt)))
+    .all()
+    .map((o) => ({ ...o, kind: "order" }));
+  const leftUsd = perDiemLeft([...paydays, ...spending]);
+  return {
+    streamId: stream.id,
+    leftUsd,
+    drained: paydays.length > 0 && cmp(leftUsd, ZERO) === 0,
+  };
 }

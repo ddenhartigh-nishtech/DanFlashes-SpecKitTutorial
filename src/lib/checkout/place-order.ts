@@ -12,7 +12,8 @@ import { getBalanceUsd } from "@/lib/flash-credit/ledger";
 import { add, cmp, isUsdString, sub, sum, ZERO, type Usd } from "@/lib/money";
 import { validateFauxCard, type CardErrorCode, type FauxCardInput } from "@/lib/payments/faux-card";
 import type { Err, Ok } from "@/lib/result";
-import { settleStreams } from "@/lib/streams/streams";
+import { afterOrder, crossedToZero } from "@/lib/streams/meter";
+import { getPerDiemMeter, settleStreams } from "@/lib/streams/streams";
 
 export type PaymentMethod = "card" | "flash_credit";
 
@@ -89,6 +90,11 @@ export function placeOrder(db: Db, input: PlaceOrderInput): PlaceOrderResult {
         }
       }
 
+      // The per diem drain (003 R5): does this order take the meter from above $0 to $0?
+      const meter = input.userId !== null ? getPerDiemMeter(db, input.userId, settings) : null;
+      const perDiemDrained =
+        meter !== null && crossedToZero(meter.leftUsd, afterOrder(meter.leftUsd, totalUsd));
+
       const { id: orderId } = db
         .insert(orders)
         .values({
@@ -102,6 +108,8 @@ export function placeOrder(db: Db, input: PlaceOrderInput): PlaceOrderResult {
           cardBrand: card?.brand ?? null,
           cardLast4: card?.last4 ?? null,
           flashCreditUsd: input.method === "flash_credit" ? totalUsd : ZERO,
+          perDiemDrained,
+          createdAt: (input.now ?? new Date()).toISOString(),
         })
         .returning({ id: orders.id })
         .get();

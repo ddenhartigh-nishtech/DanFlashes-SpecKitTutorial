@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import { currentUser } from "@/app/_data/request";
 import { OrderSummary } from "@/components/OrderSummary";
+import { PerDiemCelebration } from "@/components/PerDiemCelebration";
 import { copy } from "@/lib/copy";
 import { getPlaceholderUrl, getSettings } from "@/lib/data/settings";
 import { getDb } from "@/lib/db/client";
@@ -26,8 +27,10 @@ async function OrderContents({ params }: Pick<PageProps<"/orders/[id]">, "params
   const order = /^\d+$/.test(id) ? getOrderForUser(db, Number(id), user.id) : null;
   if (!order) notFound(); // someone else's order looks exactly like a missing one
 
+  const celebrate = order.perDiemDrained && getSettings(db).perDiemDrain;
   return (
     <div className="flex flex-col gap-6">
+      {celebrate ? <PerDiemCelebration /> : null}
       <title>{`${copy.order.title(order.number)} · ${copy.brand.name}`}</title>
       <section className="loud-stripes border-ink border-4 p-4">
         <div className="solid-backing p-6">

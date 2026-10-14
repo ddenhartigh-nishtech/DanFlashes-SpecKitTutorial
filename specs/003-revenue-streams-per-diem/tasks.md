@@ -262,11 +262,11 @@ none of this appears.
 
 ### Tests for User Story 2 (write first; they must fail)
 
-- [ ] T025 [P] [US2] Unit tests in tests/unit/streams-meter.test.ts:
+- [X] T025 [P] [US2] Unit tests in tests/unit/streams-meter.test.ts:
   - `perDiemLeft(paidIn, spent)` is `max(0, Σpaid − Σspent)` in exact cents, never negative
   - `crossedToZero(before, after)` is true only when before > 0 and after = 0. Overshooting counts;
     starting at 0 doesn't.
-- [ ] T026 [P] [US2] Integration tests in tests/integration/per-diem-drain.test.ts (injected `now`,
+- [X] T026 [P] [US2] Integration tests in tests/integration/per-diem-drain.test.ts (injected `now`,
   `setSwitches`):
   - **`getPerDiemMeter`**:
     - null with no per diem, when it's disconnected, or with the drain off
@@ -280,7 +280,7 @@ none of this appears.
     - never while the drain is off; turning it on later doesn't flag old orders
     - counts a payment that came due before checkout (settled in the transaction)
   - **Read model**: `getOrderForUser` exposes `perDiemDrained`.
-- [ ] T027 [P] [US2] e2e journey in tests/e2e/per-diem-drain.spec.ts (desktop and phone):
+- [X] T027 [P] [US2] e2e journey in tests/e2e/per-diem-drain.spec.ts (desktop and phone):
   - **Setup**: sign up, connect a Per Diem of $500.00 (every payday, starts now, ongoing).
   - **The gauge**: reads "$500.00" on the home page and the listing, and causes no sideways scroll at
     360px.
@@ -292,18 +292,18 @@ none of this appears.
 
 ### Implementation for User Story 2
 
-- [ ] T028 [P] [US2] Implement `perDiemLeft` and `crossedToZero` in src/lib/streams/meter.ts: pure,
+- [X] T028 [P] [US2] Implement `perDiemLeft` and `crossedToZero` in src/lib/streams/meter.ts: pure,
   through `money.ts` (T025 passes)
-- [ ] T029 [US2] Add `getPerDiemMeter(db, userId, settings)` to src/lib/streams/streams.ts: null when
+- [X] T029 [US2] Add `getPerDiemMeter(db, userId, settings)` to src/lib/streams/streams.ts: null when
   the drain is off or there's no connected per diem; otherwise `{ leftUsd, drained, streamId }`
-- [ ] T030 [US2] In `placeOrder` (src/lib/checkout/place-order.ts), after settling, read the meter
+- [X] T030 [US2] In `placeOrder` (src/lib/checkout/place-order.ts), after settling, read the meter
   before the order and compute it after. Store `per_diem_drained` when the drain is on and
   `crossedToZero`. Expose `perDiemDrained` in `getOrderForUser` / `listOrdersForUser` in
   src/lib/orders/orders.ts. T026 passes.
-- [ ] T031 [US2] Add brand copy to src/lib/copy.ts, in voice:
+- [X] T031 [US2] Add brand copy to src/lib/copy.ts, in voice:
   - `copy.meter`: "Per diem left", the achievement state at $0, the account line
   - `copy.celebration`: headline, body, badge
-- [ ] T032 [US2] Create src/components/PerDiemMeter.tsx (server: `connection()`, current user,
+- [X] T032 [US2] Create src/components/PerDiemMeter.tsx (server: `connection()`, current user,
   `settleStreams`, `getPerDiemMeter`):
   - a fixed bottom-left gauge linking to `/account#revenue-streams`, with `data-testid="per-diem-meter"`
   - the achievement styling at $0
@@ -311,7 +311,7 @@ none of this appears.
 
   Render it in `<Suspense fallback={null}>` from src/app/layout.tsx. Show the same value beside the
   Flash Credit balance in src/app/account/page.tsx.
-- [ ] T033 [US2] Create src/components/PerDiemCelebration.tsx (loud, `data-testid="per-diem-achievement"`)
+- [X] T033 [US2] Create src/components/PerDiemCelebration.tsx (loud, `data-testid="per-diem-achievement"`)
   and render it at the top of src/app/orders/[id]/page.tsx when `order.perDiemDrained` and
   `settings.perDiemDrain`. T027 passes.
 

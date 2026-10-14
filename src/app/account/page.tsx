@@ -17,7 +17,7 @@ import { getBalanceUsd, listEntries } from "@/lib/flash-credit/ledger";
 import { formatUsd } from "@/lib/money";
 import { listOrdersForUser, orderNumber } from "@/lib/orders/orders";
 import { labelFor } from "@/lib/shaming/labels";
-import { listStreams, settleStreams } from "@/lib/streams/streams";
+import { getPerDiemMeter, listStreams, settleStreams } from "@/lib/streams/streams";
 
 export const metadata: Metadata = { title: copy.account.title };
 
@@ -40,6 +40,7 @@ async function AccountContents() {
   const settings = getSettings(db);
   settleStreams(db, user.id); // every payday that came due, before the balance and history below
   const streams = listStreams(db, user.id);
+  const meter = getPerDiemMeter(db, user.id, settings);
   const placeholderUrl = getPlaceholderUrl(db, settings);
   const orders = listOrdersForUser(db, user.id);
   const balanceUsd = getBalanceUsd(db, user.id);
@@ -73,6 +74,19 @@ async function AccountContents() {
               <PriceTag priceUsd={balanceUsd} size="lg" />
             </span>
           </p>
+          {meter ? (
+            <p
+              data-testid="account-per-diem"
+              className="font-display flex flex-wrap items-center gap-3 uppercase"
+            >
+              {copy.meter.label}
+              {meter.drained ? (
+                <span className="bg-hot-pink text-paper px-2 py-1">🏆 {copy.meter.drained}</span>
+              ) : (
+                <PriceTag priceUsd={meter.leftUsd} />
+              )}
+            </p>
+          ) : null}
           <h3 className="font-display text-lg">{copy.account.history}</h3>
           {entries.length === 0 ? (
             <p className="solid-backing p-3">{copy.account.noEntries}</p>

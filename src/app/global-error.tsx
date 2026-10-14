@@ -1,14 +1,24 @@
 "use client"; // Last-resort boundary: replaces the root layout, so it brings its own document.
 
+import { useEffect } from "react";
 import { copy } from "@/lib/copy";
 import "./globals.css";
 
 export default function GlobalError({
+  error,
   retry,
 }: {
   error: Error & { digest?: string };
   retry: () => void;
 }) {
+  useEffect(() => {
+    console.error(
+      `[Dan Flashes] Server error${error.digest ? ` (digest ${error.digest})` : ""}. ` +
+        "The terminal running the server says what broke and how to fix it.",
+      error,
+    );
+  }, [error]);
+
   return (
     <html lang="en">
       <body className="loud-stripes flex min-h-screen items-center justify-center p-4">

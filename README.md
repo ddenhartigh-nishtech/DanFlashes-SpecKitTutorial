@@ -18,8 +18,8 @@ Requires Node 22+.
 
 ```bash
 npm install
-npm run db:reset        # creates data/danflashes.db and seeds the demo catalog
-npm run db:seed-demo    # optional: demo@danflashes.local / password123 with $10,000 of Flash Credit
+npm run db:reset        # creates data/danflashes.db: demo catalog + demo@danflashes.local / password123
+                        # ($10,000 of Flash Credit). After pulling, use db:migrate instead: it keeps your data.
 npm run dev             # http://localhost:3000
 ```
 
@@ -58,12 +58,21 @@ npm run catalog:audit   # checks the catalog: errors exit 1, warnings exit 0
 | `npm run format` | Prettier |
 | `npm run db:migrate` | Back up, then apply migrations |
 | `npm run db:backup` / `db:restore -- <file>` | Timestamped backups in `backups/`; restoring makes a safety backup first |
-| `npm run db:reset` | Back up, then rebuild and reseed the database |
+| `npm run db:reset` | Back up, then rebuild and reseed the database (catalog and demo shopper) |
 | `npm run db:seed` / `db:seed-demo` | Demo catalog / demo shopper (both idempotent) |
 | `npm run art:generate` | Regenerate the placeholder shirt art |
 
 The e2e suite builds into `.next-e2e/` and uses `data/e2e.db`, so it can run while your own
 `npm run dev` is running.
+
+### When a page 500s
+
+Shoppers only ever see the 500 page. The **terminal running the server** explains what broke, with
+the command that fixes it, in lines starting `[Dan Flashes]`. The browser's dev console also points
+there. Usually it's one of these:
+- **"…migrations behind the code…"**: you pulled a change that alters the database. Run
+  `npm run db:migrate`, which keeps your data. A running dev server picks the change up on its own.
+- **"No database…" or "Store settings are missing"**: run `npm run db:reset`.
 
 ## How this repo is organized
 

@@ -1,8 +1,19 @@
 /**
- * Demo catalog fixture — development/demo data only, loaded once by `npm run db:seed`.
- * The database is the runtime source of truth; edit live data in Drizzle Studio, not here.
+ * Demo catalog fixture and demo shopper — development/demo data only, loaded by `npm run db:reset`
+ * (or `db:seed` / `db:seed-demo`). The database is the runtime source of truth; edit live data in
+ * Drizzle Studio, not here.
  */
+import type { DemoShopper } from "@/lib/data/demo-shopper";
 import type { CatalogFixture } from "@/lib/data/seed";
+
+/** The demo shopper that `db:reset` (and `db:seed-demo`) create for local development. */
+export const DEMO_SHOPPER: DemoShopper = {
+  email: "demo@danflashes.local",
+  password: "password123",
+  displayName: "Demo Dan",
+  creditUsd: "10000.00",
+  pastOrder: { slug: "fractal-fury", size: "XL" },
+};
 
 export const SEED: CatalogFixture = {
   settings: {

@@ -84,6 +84,19 @@ See `specs/001-core-storefront/research.md`. Only the new decisions are recorded
   (`loadStorefront()` → `mostExpensive()`) inside `<Suspense>`, as 001 does for all catalog reads.
   "About" joins the header links (desktop and phone menu).
 
+## R8. Developer diagnostics (owner request, added after US1)
+
+- **Decision**: a database that's behind the code fails loudly and says how to fix it.
+  - `getDb()` refuses to serve from it, and the error message names the file, the missing
+    migrations, and `npm run db:migrate`.
+  - `src/instrumentation.ts` reports problems at server start and adds a one-line fix to
+    recognized server errors.
+  - The browser console points to the terminal. The 500 page is unchanged.
+  - `db:reset` also recreates the demo shopper.
+- **Rationale**: the owner hit a bare 500 after pulling a migration. The check is cheap: a file stat
+  per `getDb` call, plus a journal read only when the file changes. It stays out of the shopper's
+  way.
+
 ## R7. Testing
 
 - **Unit**:

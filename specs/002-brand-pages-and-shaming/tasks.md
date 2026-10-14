@@ -221,6 +221,25 @@ that order.
 
 ---
 
+## Phase 7: Developer Experience (owner request, 2026-10-13)
+
+**Why**: after pulling US1, the owner's homepage 500'd. The database was one migration behind, and nothing said so. A `db:reset` fixed it but lost Demo Dan.
+
+- [X] T038 Write an integration test in tests/integration/db-health.test.ts, then implement src/lib/db/health.ts:
+  - `pendingMigrations(sqlite)` uses drizzle's own rule: journal entries newer than the newest applied `created_at`
+  - `assertCurrent(sqlite, file)` throws, naming the file, the missing migrations, and `npm run db:migrate`
+  - `startupProblems(file)` is read-only, so looking never creates the file. It reports a missing file (`db:reset`), pending migrations, and missing store settings.
+  - `diagnose(error)` returns a plain-English fix for known SQLite errors: no such column/table, locked, can't open
+- [X] T039 Wire the diagnostics into the app:
+  - `getDb()` in src/lib/db/client.ts calls `assertCurrent`, re-checked whenever the migration journal changes, so a running dev server notices a pull and recovers after `db:migrate`
+  - src/instrumentation.ts `register()` logs `startupProblems` at server start (skipped during `next build`)
+  - `onRequestError` adds one `[Dan Flashes] … Fix:` line per recognized error (deduped for 5 s, because Next already logs the error itself)
+  - src/app/error.tsx and global-error.tsx log a browser-console pointer to the terminal, with the digest
+  - the 500 page itself is unchanged
+- [X] T040 Make `db:reset` recreate Demo Dan: move the demo shopper to `DEMO_SHOPPER` in scripts/seed-data.ts, call `ensureDemoShopper` from scripts/db-reset.ts (`db:seed-demo` reuses it), and update README.md with the quick start plus a "When a page 500s" section
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase dependencies

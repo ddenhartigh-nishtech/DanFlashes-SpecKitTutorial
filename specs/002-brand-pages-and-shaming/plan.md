@@ -77,9 +77,11 @@ specs/002-brand-pages-and-shaming/
 
 ```text
 drizzle/0001_*.sql                    # new: store_settings switches
+scripts/db-reset.ts, scripts/seed-demo.ts   # db:reset also recreates Demo Dan (R8)
 src/
 ├── app/
 │   ├── about/page.tsx                # new: /about (bio + streamed Exhibit A)
+│   ├── error.tsx, global-error.tsx   # console pointer to the terminal (R8)
 │   ├── shirts/[slug]/page.tsx        # pass isBland, shaming switch, ladder, insist label to AddToCart
 │   ├── cart/page.tsx                 # Remove label from confirmshaming; bland-removal notice
 │   └── account/page.tsx              # Sign out label from confirmshaming
@@ -87,7 +89,9 @@ src/
 │   ├── ShameDialog.tsx               # new: native <dialog>, endless rounds
 │   ├── AddToCart.tsx                 # opens ShameDialog for bland shirts when shaming is on
 │   └── SiteHeader.tsx                # "About" link
+├── instrumentation.ts                # new: startup + request-error diagnostics (R8)
 └── lib/
+    ├── db/health.ts, db/client.ts    # new: database health checks; getDb refuses a stale DB (R8)
     ├── shaming/loop.ts               # new (browser-safe): recommendationFor, lineOrder, shameFor
     ├── shaming/ladder.ts             # new (server): buildLadder, shopper-shaped
     ├── shaming/labels.ts             # new: labelFor(key, confirmshaming)

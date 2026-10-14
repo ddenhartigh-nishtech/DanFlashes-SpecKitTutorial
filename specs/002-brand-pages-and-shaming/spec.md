@@ -17,8 +17,8 @@ store settings).
 
 - Q: How many rounds of "You sure about that?" → A: **Endless.** While shaming is on, the loop never
   ends and a BLAND shirt can never be added to a cart. "Dan Flashes does not sell boring,
-  uncomplicated shirts." The only ways out are to relent (close the dialog and keep shopping) or to
-  take the recommended, more complicated shirt. This replaces the input's "push through and buy it
+  uncomplicated shirts." The only ways out are to relent (go look at real shirts), close the
+  dialog, or take the recommended, more complicated shirt. This replaces the input's "push through and buy it
   anyway."
 - Q: Which decline choices get confirmshaming labels? → A: The bland-shirt loop's "continue with the
   bland shirt" choice, the cart's **Remove**, and **Sign out**. These are the decline moments that
@@ -31,6 +31,12 @@ store settings).
   retired shirts are, so they can never be checked out. With the switch off, bland shirts sell
   normally.
 
+### Session 2026-10-14
+
+- Q: Where does relenting take him? → A: To the shirt listing. "Fine. I'll look at real shirts"
+  goes to the shirts page, because relenting means going to look at real shirts. Escape just closes
+  the dialog and leaves him on the bland shirt's page.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - "You Sure About That?" (Priority: P1)
@@ -39,8 +45,8 @@ The guy finds Beige Regret and, for reasons known only to him, hits Add to Cart.
 "You sure about that?" A line about the kind of man who wears beige, and right next to it a shirt
 that's actually complicated. He insists. "You sure about that?" again, meaner, with an even more
 complicated shirt. He insists again, and again, and again. It never ends. Dan Flashes does not sell
-boring shirts. Eventually he either relents and closes the dialog, or takes the complicated shirt
-he's being offered.
+boring shirts. Eventually he relents and goes to look at real shirts, closes the dialog, or takes the
+complicated shirt he's being offered.
 
 **Why this priority**: this is the core gag of the feature and the constitution's "bland-shirt
 shaming" tactic. It's the piece that changes shopping behavior.
@@ -48,7 +54,7 @@ shaming" tactic. It's the piece that changes shopping behavior.
 **Independent Test**: on a BLAND-tier shirt's page, choose a size and add it to the cart. Confirm
 that the dialog appears, that insisting any number of times only produces new rounds (each with a
 new line and a more complicated recommendation, until the most complicated shirt is reached), that
-relenting or escaping leaves the cart unchanged, and that the store refuses a bland add however it
+relenting (to the shirt listing) or escaping (staying put) leaves the cart unchanged, and that the store refuses a bland add however it
 is attempted.
 
 **Acceptance Scenarios**:
@@ -62,8 +68,9 @@ is attempted.
    still not added.
 3. **Given** any round, **When** he takes the recommendation, **Then** he lands on that shirt's page
    and nothing is added.
-4. **Given** any round, **When** he relents (closes the dialog), **Then** the dialog closes, he stays
-   on the bland shirt's page, and nothing is added.
+4. **Given** any round, **When** he relents ("Fine. I'll look at real shirts"), **Then** he lands on
+   the shirt listing and nothing is added. **When** he closes the dialog instead (Escape), **Then**
+   it closes, he stays on the bland shirt's page, and nothing is added.
 5. **Given** shaming is on, **When** a bland add reaches the store by any route (skipping the dialog
    or raising a bland line's quantity in the cart), **Then** the store refuses it in brand voice and
    the cart is unchanged.
@@ -174,8 +181,8 @@ the bio, and follow Exhibit A to the most expensive active shirt.
   previous round's recommendation (strictly more complicated until the most complicated active
   shirt is reached).
 - **FR-009**: Each round MUST offer three choices: take the recommendation (go to that shirt;
-  nothing added), relent (close the dialog; stay on the page; nothing added), and insist (next
-  round).
+  nothing added), relent (go to the shirt listing; nothing added), and insist (next
+  round). Closing the dialog (Escape) MUST leave him on the page with nothing added.
 - **FR-010**: While shaming is on, no BLAND-tier shirt may be in a cart, however it would get there.
   The store MUST:
   - refuse adds and quantity raises of BLAND-tier shirts, with a brand-voice refusal

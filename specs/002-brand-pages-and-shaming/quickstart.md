@@ -19,7 +19,7 @@ npm run dev
 | 2 | Read `/about` | Dan's self-important bio, then Exhibit A: Dan's Masterpiece with its badge and price, linked. (US3) |
 | 3 | Open `/shirts/beige-regret`, pick a size, then Add to cart | "You sure about that?" dialog with a disparaging line and a recommended shirt. The cart is unchanged. (US1-1) |
 | 4 | Click "Yes, I'd rather blend in" 20 times | 20 more rounds: lines rotate without repeats, the recommendation climbs to the top and stays, and nothing is added. (US1-2, SC-002/003) |
-| 5 | Press Escape, or "Fine. I'll look at real shirts" | The dialog closes. You stay on the page and the cart is unchanged. (US1-4) |
+| 5 | Press Escape; then reopen the dialog and click "Fine. I'll look at real shirts" | Escape closes it and you stay on the page. Relenting lands you on `/shirts`. The cart is unchanged either way. (US1-4) |
 | 6 | Take the recommendation | You land on that shirt's page and the cart is unchanged. (US1-3) |
 | 7 | Open a non-bland shirt and Add to cart | Added immediately, as in 001. (US1-6) |
 | 8 | Cart: check the Remove label. Account: check the Sign out label. | "Remove (and lose your edge)" and "Sign out (go back to being normal)". (US2-1) |

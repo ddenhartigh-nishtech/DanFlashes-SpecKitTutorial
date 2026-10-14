@@ -65,8 +65,9 @@ See `specs/001-core-storefront/research.md`. Only the new decisions are recorded
 ## R4. Dialog: native `<dialog>`
 
 - **Decision**: a `ShameDialog` client component built on the HTML `<dialog>` element with
-  `showModal()`. That gives focus trapping, Escape-to-close (which counts as relenting), and a
-  backdrop with no library. Three actions: the recommendation (a link), relent (closes), and insist
+  `showModal()`. That gives focus trapping, Escape-to-close (he stays on the page), and a
+  backdrop with no library. Three actions: the recommendation (a link), relent (a link to
+  `/shirts`, owner decision 2026-10-14), and insist
   (next round).
 - **Rationale**: Principle VIII (no dependency).
 

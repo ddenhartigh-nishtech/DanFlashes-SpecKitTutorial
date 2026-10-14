@@ -13,7 +13,7 @@ These are deltas to [001 routes.md](../../001-core-storefront/contracts/routes.m
 
 | Route | Change | Spec |
 |---|---|---|
-| `/shirts/[slug]` | For a BLAND-tier shirt with shaming on, Add to Cart opens the "You sure about that?" dialog instead of adding. It has three actions: take the recommendation (link), relent (close), and insist (next round, endless). | US1, FR-006–FR-009 |
+| `/shirts/[slug]` | For a BLAND-tier shirt with shaming on, Add to Cart opens the "You sure about that?" dialog instead of adding. It has three actions: take the recommendation (link), relent (a link to `/shirts`), and insist (next round, endless). Escape closes it, leaving him on the page. | US1, FR-006–FR-009 |
 | `/cart` | Each line's Remove label follows confirmshaming. While shaming is on, bland lines are pulled from the cart and listed in a brand-voice notice, next to 001's retired-shirt notice. | US2, FR-013, US1-8, FR-010 |
 | `/checkout` | The cart audit also pulls bland lines while shaming is on. Checkout then refuses with 001's `CART_AUDITED`, whose copy now covers both reasons. | US1-8, FR-010 |
 | `/account` | The Sign out label follows confirmshaming. | US2, FR-013 |

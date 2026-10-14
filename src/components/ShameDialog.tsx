@@ -121,13 +121,14 @@ export function ShameDialog({ ladder, insistLabel, placeholderUrl, onClose }: Sh
           >
             {pick ? copy.shame.takeIt : copy.shame.nothingBetter}
           </Link>
-          <button
-            type="button"
+          {/* Relenting means going to look at real shirts. Escape is the only way to stay put. */}
+          <Link
+            href="/shirts"
             onClick={leave}
-            className="font-display border-ink bg-highlighter min-h-11 border-4 px-4 uppercase"
+            className="font-display border-ink bg-highlighter flex min-h-11 items-center justify-center border-4 px-4 text-center uppercase"
           >
             {copy.shame.relent}
-          </button>
+          </Link>
           <button
             type="button"
             onClick={insist}

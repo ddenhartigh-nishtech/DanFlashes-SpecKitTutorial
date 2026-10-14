@@ -317,3 +317,7 @@ Task: "e2e endless loop in tests/e2e/shaming.spec.ts"
 - [X] T046 Extend tests/e2e/no-score.spec.ts to visit `/shirts/beige-regret` and check it again with the shame dialog open, since its payload is the only one that carries other shirts (the ladder), per Constitution II (partial)
 - [X] T047 Update the header row in specs/002-brand-pages-and-shaming/contracts/changes.md (About, Shirts, Account, neon cart icon; Home dropped) and add the files touched by T038–T045 to plan.md's Project Structure, per plan: Project Structure (partial)
 - [X] T048 Record the Vitest `testTimeout: 20_000` rationale (bcrypt cost 12 under ~30 parallel workers) in research.md, per plan: Testing (unrequested)
+
+## Phase 10: Owner Request (2026-10-14)
+
+- [X] T049 Make relenting go somewhere: "Fine. I'll look at real shirts" becomes a link to `/shirts` in src/components/ShameDialog.tsx. It closes the dialog on the way out, so the T042 inert-page fix still applies. Escape still only closes the dialog. Spec updated (clarification 2026-10-14, US1 AC4, FR-009), along with research R4, contracts and quickstart 5. Test: tests/e2e/shaming.spec.ts relents to `/shirts` and clicks a shirt card without a reload (written first, seen failing). It was also checked by hand against `next dev` (Strict Mode).

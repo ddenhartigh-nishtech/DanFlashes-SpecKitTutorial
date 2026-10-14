@@ -60,18 +60,20 @@ test.describe("US1 — You sure about that?", () => {
     }
     for (let i = 1; i < lines.length; i++) expect(lines[i]).not.toBe(lines[i - 1]);
 
-    // Escape is relenting: the dialog closes and he stays put.
+    // Escape just closes it: he stays put.
     await page.keyboard.press("Escape");
     await expect(dialog).toBeHidden();
     await expect(page).toHaveURL(/\/shirts\/beige-regret$/);
 
-    // So is the relent button.
+    // Relenting sends him off to look at real shirts, and the listing works without a reload.
     await visible(page.getByRole("button", { name: "Add to cart" })).click();
     await expect(dialog).toBeVisible();
     await expect(dialog).toHaveAttribute("data-round", "1");
-    await dialog.getByRole("button", { name: copy.shame.relent }).click();
-    await expect(dialog).toBeHidden();
-    await expect(page).toHaveURL(/\/shirts\/beige-regret$/);
+    await dialog.getByRole("link", { name: copy.shame.relent }).click();
+    await expect(page).toHaveURL(/\/shirts$/);
+    await expect(page.locator("dialog[open]")).toHaveCount(0);
+    await visible(page.getByTestId("shirt-card")).first().click();
+    await expect(page).toHaveURL(/\/shirts\/[a-z0-9-]+$/);
 
     await page.goto("/cart");
     await expect(visible(page.getByTestId("empty-cart"))).toBeVisible();

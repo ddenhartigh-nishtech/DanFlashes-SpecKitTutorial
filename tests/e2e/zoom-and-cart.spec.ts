@@ -61,7 +61,7 @@ test.describe("US2 — zoom, enhance, add to cart", () => {
     await expect(line.getByTestId("price")).toHaveText("$1,033.83");
 
     // Remove empties the cart and brings back the pitch.
-    await line.getByRole("button", { name: "Remove" }).click();
+    await line.getByRole("button", { name: "Remove (and lose your edge)" }).click();
     await expect(visible(page.getByTestId("empty-cart"))).toBeVisible();
   });
 

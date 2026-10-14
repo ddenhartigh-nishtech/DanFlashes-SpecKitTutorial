@@ -163,16 +163,16 @@ that order.
 
 ### Tests for User Story 2 (write first; they must fail)
 
-- [ ] T025 [P] [US2] e2e journey in tests/e2e/confirmshaming.spec.ts (desktop and phone):
+- [X] T025 [P] [US2] e2e journey in tests/e2e/confirmshaming.spec.ts (desktop and phone):
   - **Remove**: a guest adds Geo Riot. The cart line's button reads "Remove (and lose your edge)", and clicking it empties the cart.
   - **Sign out**: after sign-up, `/account` shows "Sign out (go back to being normal)", and clicking it signs out (`/account` then redirects to sign-in).
   - **Insist**: the insist button on beige-regret's dialog reads "Yes, I'd rather blend in".
 
 ### Implementation for User Story 2
 
-- [ ] T026 [US2] In src/app/cart/page.tsx, read `getSettings(db).confirmshaming` in `CartContents` and label each line's Remove button with `labelFor("remove", confirmshaming)`. Delete the now-unused `copy.cart.remove` from src/lib/copy.ts.
-- [ ] T027 [US2] In src/app/account/page.tsx, label the Sign out button with `labelFor("signOut", settings.confirmshaming)`. Delete the now-unused `copy.auth.signOut` from src/lib/copy.ts.
-- [ ] T028 [US2] Update the existing e2e locators that match the old exact labels to the shamed defaults:
+- [X] T026 [US2] In src/app/cart/page.tsx, read `getSettings(db).confirmshaming` in `CartContents` and label each line's Remove button with `labelFor("remove", confirmshaming)`. Delete the now-unused `copy.cart.remove` from src/lib/copy.ts.
+- [X] T027 [US2] In src/app/account/page.tsx, label the Sign out button with `labelFor("signOut", settings.confirmshaming)`. Delete the now-unused `copy.auth.signOut` from src/lib/copy.ts.
+- [X] T028 [US2] Update the existing e2e locators that match the old exact labels to the shamed defaults:
   - `name: "Sign out"` in tests/e2e/card-checkout.spec.ts
   - `name: "Remove"` in tests/e2e/zoom-and-cart.spec.ts
 

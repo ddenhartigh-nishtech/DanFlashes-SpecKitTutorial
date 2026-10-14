@@ -13,8 +13,10 @@ import { getCartView, type CartLine, type RemovalReason, type RemovedLine } from
 import { mostExpensive } from "@/lib/catalog/listing";
 import { sortTiers } from "@/lib/catalog/tiers";
 import { copy } from "@/lib/copy";
+import { getSettings } from "@/lib/data/settings";
 import { toShopperShirt } from "@/lib/data/shirts";
 import { getDb } from "@/lib/db/client";
+import { labelFor } from "@/lib/shaming/labels";
 
 export const metadata: Metadata = { title: copy.cart.title };
 
@@ -32,7 +34,9 @@ export default function CartPage() {
 }
 
 async function CartContents() {
-  const view = getCartView(getDb(), await currentCartId());
+  const db = getDb();
+  const view = getCartView(db, await currentCartId());
+  const removeLabel = labelFor("remove", getSettings(db).confirmshaming);
   const { shirts, tiers, placeholderUrl } = await loadStorefront();
 
   if (view.lines.length === 0) {
@@ -79,6 +83,7 @@ async function CartContents() {
               key={`${line.shirt.slug}-${line.size}`}
               line={line}
               placeholderUrl={placeholderUrl}
+              removeLabel={removeLabel}
             />
           ))}
         </ul>
@@ -131,7 +136,15 @@ function RemovedNotice({ removed }: { removed: RemovedLine[] }) {
   );
 }
 
-function CartLineRow({ line, placeholderUrl }: { line: CartLine; placeholderUrl: string | null }) {
+function CartLineRow({
+  line,
+  placeholderUrl,
+  removeLabel,
+}: {
+  line: CartLine;
+  placeholderUrl: string | null;
+  removeLabel: string;
+}) {
   const image = line.shirt.images[0];
   return (
     <li
@@ -169,7 +182,7 @@ function CartLineRow({ line, placeholderUrl }: { line: CartLine; placeholderUrl:
               type="submit"
               className="font-display min-h-11 px-3 text-sm uppercase underline decoration-4 underline-offset-4"
             >
-              {copy.cart.remove}
+              {removeLabel}
             </button>
           </form>
           <span className="ml-auto">

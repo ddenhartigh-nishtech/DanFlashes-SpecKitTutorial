@@ -58,7 +58,7 @@ test.describe("US3 — checkout gate, account, faux card", () => {
     await page.goto("/sign-up");
     await signUp(page, uniqueEmail(info.project.name));
     await expect(page).toHaveURL(/\/account$/);
-    await visible(page.getByRole("button", { name: "Sign out" })).click();
+    await visible(page.getByRole("button", { name: "Sign out (go back to being normal)" })).click();
     await expect(page).toHaveURL(/\/$/);
     await page.goto("/account");
     await expect(page).toHaveURL(/\/sign-in\?next=/);

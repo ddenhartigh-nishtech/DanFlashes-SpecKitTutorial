@@ -80,7 +80,6 @@ export const copy = {
     lineDetail: (size: string, quantity: number, unit: string) =>
       `Size ${size} · ${quantity} × ${unit}`,
     update: "Update",
-    remove: "Remove",
     subtotal: "Subtotal",
     checkout: "Check out",
     removedNotice: "Dan pulled these from the floor while you were away:",
@@ -136,7 +135,6 @@ export const copy = {
     working: "One moment…",
     toSignUp: "New here? Create an account",
     toSignIn: "Already a member? Sign in",
-    signOut: "Sign out",
   },
   account: {
     title: "Account",

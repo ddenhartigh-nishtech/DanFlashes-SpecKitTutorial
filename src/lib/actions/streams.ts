@@ -26,6 +26,8 @@ export function connectStreamCore(
       customName: field(form, "customName"),
       amountUsd: field(form, "amountUsd"),
       schedule: field(form, "schedule"),
+      intervalCount: field(form, "intervalCount"),
+      intervalUnit: field(form, "intervalUnit"),
       startsAt: field(form, "startsAt"),
       endsAt: field(form, "endsAt"),
       ongoing: field(form, "ongoing") === "on",

@@ -36,8 +36,8 @@ Only the new decisions are recorded here.
 
 - **Decision**: `settleStreams(db, userId, now)` pays every recurring or one-time payment that has
   come due, inside one transaction.
-  - It walks `next_due_at` forward one pay period at a time, using the period in effect now. That is
-    how a changed period affects only payments still to come.
+  - It walks `next_due_at` forward one interval at a time, using the stream's own
+    `interval_minutes` (owner, round 2; it replaced 0002's store-wide pay period).
   - It stops at `ends_at`, at `now`, or after **30 payments per stream per call** (the catch-up cap).
   - Each payment's history `created_at` is its due time, so the history reads in true order.
   - It runs at request time wherever money or the meter is shown: the per diem gauge on every page for

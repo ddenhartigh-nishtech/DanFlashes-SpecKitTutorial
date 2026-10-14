@@ -24,6 +24,7 @@ describe("ensureDemoShopper", () => {
         isPerDiem: true,
         amountUsd: "75.00",
         schedule: "recurring",
+        intervalMinutes: 1440, // a per diem tops off daily
         endsAt: null,
       },
     ]);

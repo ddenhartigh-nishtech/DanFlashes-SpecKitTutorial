@@ -62,6 +62,8 @@ export async function ensureDemoShopper(
       customName: "",
       amountUsd: demo.perDiem.amountUsd,
       schedule: "recurring",
+      intervalCount: "1", // a per diem tops off daily
+      intervalUnit: "days",
       startsAt: "",
       endsAt: "",
       ongoing: true,

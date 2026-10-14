@@ -11,8 +11,8 @@ npm run dev
 
 Or start fresh with `npm run db:reset`: Demo Dan comes back with an ongoing $75.00 per diem.
 
-"Studio" means Drizzle Studio (`npm run db:studio`). The default pay period is 5 minutes. To watch
-recurring payments faster, set `store_settings.stream_pay_period_minutes = 1`.
+"Studio" means Drizzle Studio (`npm run db:studio`). Each recurring top-off has its own interval. To
+watch payments land quickly, connect one that tops off every 1 minute.
 
 ## Manual validation scenarios
 
@@ -20,8 +20,8 @@ recurring payments faster, set `store_settings.stream_pay_period_minutes = 1`.
 |---|---|---|
 | 1 | Sign in as Demo Dan | The per diem gauge appears in the bottom-left corner. The account lists his Per Diem ($75.00, every payday, ongoing) with a next payment, and the history shows its first payment. (R9, FR-013) |
 | 2 | Sign up as someone new; open Account → Revenue Streams | An empty state and the connect form. No bank, routing or payroll fields anywhere. (FR-002, SC-007) |
-| 3 | Connect a Per Diem: $75.00, every payday, starts now, ends in 30 minutes | It's listed with its window in local time. The Flash Credit history gains "Per Diem" +$75.00, and the gauge reads $75.00. (US1-1, US2-1) |
-| 4 | Wait one pay period, or set the period to 1 minute, then reload | One more +$75.00 per period, never twice, and none after the end. (US1-2, SC-003) |
+| 3 | Connect a Per Diem: $75.00, Recurring top-off every 1 minute, starts now, ends in 30 minutes | It's listed with its window in local time. The Flash Credit history gains "Per Diem" +$75.00, and the gauge reads $75.00. (US1-1, US2-1) |
+| 4 | Wait a minute or two, then reload | One more +$75.00 per minute, never twice, and none after the end. The record reads "Recurring top-off · every minute". (US1-2, SC-003) |
 | 5 | Pick "My Kid's College Fund", $2,000.00, Just once, and press **Apply it** | Exactly one +$2,000.00, and the stream shows as paid in full. (US1-3) |
 | 6 | Connect a custom stream "Craig owes me" for $40.00, whenever I want, ongoing; press Cash in twice quickly, then once more | Each separate press adds +$40.00. A double-click counts once. (US1-4, FR-007) |
 | 7 | Try a start in the past, an end before the start, $0.00, $1.234, or a 41-character name | Refused in brand voice. Nothing is created. (FR-002, FR-005) |

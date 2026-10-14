@@ -205,32 +205,42 @@ export const copy = {
     },
     customOption: "Something else…",
     schedules: {
-      recurring: "Every payday",
+      recurring: "Recurring top-off",
       one_time: "Just once",
       whenever: "Whenever I want",
     },
-    /** What each schedule actually does, so "every payday" and "whenever" can't be confused. */
+    /** What each schedule actually does, so a recurring top-off and "whenever" can't be confused. */
     hints: {
-      recurring: (period: string) => `Pays automatically, every ${period}.`,
-      one_time: "Pays once, as soon as it starts.",
+      recurring:
+        "Tops off on its own, on the interval you set. The first top-off sets the day and time it repeats.",
+      one_time: "Applied once, right now. That's it.",
       whenever: "Pays each time you hit Cash in. Never on its own.",
     },
-    /** The store's pay period in words: "5 minutes", "hour", "2 days". */
+    /** An interval in words: "5 minutes", "hour", "2 days", "2 weeks". */
     period: (minutes: number) => {
       const [n, unit] =
-        minutes % 1440 === 0
-          ? [minutes / 1440, "day"]
-          : minutes % 60 === 0
-            ? [minutes / 60, "hour"]
-            : [minutes, "minute"];
+        minutes % 10080 === 0
+          ? [minutes / 10080, "week"]
+          : minutes % 1440 === 0
+            ? [minutes / 1440, "day"]
+            : minutes % 60 === 0
+              ? [minutes / 60, "hour"]
+              : [minutes, "minute"];
       return n === 1 ? unit : `${n} ${unit}s`;
     },
+    every: (minutes: number) => `every ${copy.streams.period(minutes)}`,
+    units: { minutes: "minutes", hours: "hours", days: "days", weeks: "weeks" },
     form: {
       heading: "Connect a stream",
       source: "Where's it coming from?",
       customName: "What do you call it?",
       amount: "How much each time",
       schedule: "When does it pay?",
+      interval: "Tops off every",
+      intervalCount: "How many",
+      intervalUnit: "Minutes, hours, days or weeks",
+      intervalExample:
+        "Paycheck? Every 2 weeks, starting a Friday at 5:00 PM. Per diem? Every 1 day, starting at 8:00 AM.",
       startsNow: "Starts now",
       startsAt: "Starts",
       ongoing: "Ongoing (it never stops)",
@@ -310,6 +320,7 @@ export const copy = {
     INVALID_STREAM_NAME: "Pick where it's coming from, or give it a name (40 characters, tops).",
     INVALID_STREAM_AMOUNT:
       "Each payment has to be at least $0.01, in dollars and cents. There's no upper limit. Dream big.",
+    INVALID_INTERVAL: "How often? A whole number of minutes, hours, days or weeks, 1 to 1,000.",
     INVALID_WINDOW:
       "That timing doesn't work. Start now or later, and end after it starts. Or let it run forever.",
     PER_DIEM_EXISTS: "You already have a per diem running. One at a time. Spend it first.",

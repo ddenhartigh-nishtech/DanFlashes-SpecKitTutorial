@@ -4,18 +4,26 @@ import { useActionState, useState } from "react";
 import { connectStream } from "@/actions/streams";
 import type { ActionState } from "@/lib/actions/state";
 import { copy } from "@/lib/copy";
-import { STREAM_PRESETS, STREAM_SCHEDULES, type StreamSchedule } from "@/lib/streams/types";
+import {
+  INTERVAL_UNITS,
+  MAX_INTERVAL_COUNT,
+  STREAM_PRESETS,
+  STREAM_SCHEDULES,
+  type IntervalUnit,
+  type StreamSchedule,
+} from "@/lib/streams/types";
 
 const input = "border-ink bg-paper mt-1 block min-h-11 w-full border-4 px-3 font-semibold";
 const label = "font-display text-sm uppercase";
+const check = "flex min-h-11 cursor-pointer items-center gap-3 font-semibold";
 const f = copy.streams.form;
+const UNITS = Object.keys(INTERVAL_UNITS) as IntervalUnit[];
 
 /** A datetime-local value is in his own zone; the server wants ISO-8601 UTC (003 R7). */
 const toIso = (local: FormDataEntryValue | null): string =>
   typeof local === "string" && local ? new Date(local).toISOString() : "";
 
-/** `payPeriodMinutes` is the store's pay period, so "Every payday" can say how often that is. */
-export function ConnectStreamForm({ payPeriodMinutes }: { payPeriodMinutes: number }) {
+export function ConnectStreamForm() {
   const [state, dispatch, pending] = useActionState<ActionState | null, FormData>(
     connectStream,
     null,
@@ -24,6 +32,7 @@ export function ConnectStreamForm({ payPeriodMinutes }: { payPeriodMinutes: numb
   const [schedule, setSchedule] = useState<StreamSchedule>("recurring");
   const [startsNow, setStartsNow] = useState(true);
   const [ongoing, setOngoing] = useState(false);
+  const oneTime = schedule === "one_time";
 
   // Convert the local inputs in the browser, the only place that knows his time zone.
   const submit = (form: FormData) => {
@@ -85,36 +94,64 @@ export function ConnectStreamForm({ payPeriodMinutes }: { payPeriodMinutes: numb
               />
               <span className="flex flex-col">
                 <span className="font-semibold">{copy.streams.schedules[key]}</span>
-                <span className="text-sm">
-                  {key === "recurring"
-                    ? copy.streams.hints.recurring(copy.streams.period(payPeriodMinutes))
-                    : copy.streams.hints[key]}
-                </span>
+                <span className="text-sm">{copy.streams.hints[key]}</span>
               </span>
             </label>
           ))}
         </div>
       </fieldset>
 
-      <label className="flex min-h-11 cursor-pointer items-center gap-3 font-semibold">
-        <input
-          type="checkbox"
-          checked={startsNow}
-          onChange={(e) => setStartsNow(e.target.checked)}
-          className="accent-hot-pink size-5"
-        />
-        {f.startsNow}
-      </label>
-      {startsNow ? null : (
-        <label className={label}>
-          {f.startsAt}
-          <input type="datetime-local" name="startsLocal" required className={input} />
-        </label>
-      )}
+      {schedule === "recurring" ? (
+        <fieldset className="flex flex-col gap-1">
+          <legend className={`${label} mb-1`}>{f.interval}</legend>
+          <div className="grid grid-cols-[6rem_1fr] gap-2">
+            <input
+              name="intervalCount"
+              type="number"
+              min={1}
+              max={MAX_INTERVAL_COUNT}
+              step={1}
+              defaultValue={1}
+              required
+              aria-label={f.intervalCount}
+              className={`${input} mt-0`}
+            />
+            <select
+              name="intervalUnit"
+              defaultValue="days"
+              aria-label={f.intervalUnit}
+              className={`${input} mt-0`}
+            >
+              {UNITS.map((unit) => (
+                <option key={unit} value={unit}>
+                  {copy.streams.units[unit]}
+                </option>
+              ))}
+            </select>
+          </div>
+          <p className="text-sm">{f.intervalExample}</p>
+        </fieldset>
+      ) : null}
 
-      {schedule === "one_time" ? null : (
+      {/* A one-time stream is applied right now, so it has no start or end. */}
+      {oneTime ? null : (
         <>
-          <label className="flex min-h-11 cursor-pointer items-center gap-3 font-semibold">
+          <label className={check}>
+            <input
+              type="checkbox"
+              checked={startsNow}
+              onChange={(e) => setStartsNow(e.target.checked)}
+              className="accent-hot-pink size-5"
+            />
+            {f.startsNow}
+          </label>
+          {startsNow ? null : (
+            <label className={label}>
+              {f.startsAt}
+              <input type="datetime-local" name="startsLocal" required className={input} />
+            </label>
+          )}
+          <label className={check}>
             <input
               type="checkbox"
               name="ongoing"
@@ -138,13 +175,7 @@ export function ConnectStreamForm({ payPeriodMinutes }: { payPeriodMinutes: numb
         disabled={pending}
         className="font-display bg-hot-pink text-paper min-h-12 px-6 text-lg uppercase shadow-[4px_4px_0_var(--color-ink)] disabled:opacity-60"
       >
-        {schedule === "one_time"
-          ? pending
-            ? f.applying
-            : f.apply
-          : pending
-            ? f.connecting
-            : f.connect}
+        {oneTime ? (pending ? f.applying : f.apply) : pending ? f.connecting : f.connect}
       </button>
 
       <div role="status" aria-live="polite" className="min-h-6">

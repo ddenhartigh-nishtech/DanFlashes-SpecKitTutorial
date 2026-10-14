@@ -9,7 +9,8 @@
 Three additions on top of 001's Flash Credit ledger:
 
 1. **Revenue streams.** A signed-in shopper connects money sources: a per diem, absurd presets, or
-   custom names. Each has an amount, a schedule (every payday, just once, or whenever I want), and a
+   custom names. Each has an amount, a schedule (a recurring top-off on his own interval, just once, or
+   whenever I want), and a
    window (start, plus an end or ongoing).
    - Payments land in Flash Credit as their own ledger entries.
    - Recurring and one-time payments are **settled lazily**: whenever his money or meter is shown,
@@ -35,7 +36,9 @@ Three additions on top of 001's Flash Credit ledger:
 - a `stream` kind on `flash_credit_entries`, with a unique index on (stream, payment number)
 - `orders.per_diem_drained`, a `split` payment method, and `flash_credit_usd` (rebuilt with a hand
   backfill)
-- two `store_settings` columns: the drain switch and the pay period
+- a `store_settings` column for the drain switch
+- migration `0003`: each recurring stream's own `interval_minutes` (it replaces the store-wide pay
+  period), plus NULL-proof CHECKs
 
 See [data-model.md](./data-model.md).
 

@@ -12,11 +12,9 @@ const s = copy.streams;
 export function StreamList({
   streams,
   confirmshaming,
-  payPeriodMinutes,
 }: {
   streams: StreamView[];
   confirmshaming: boolean;
-  payPeriodMinutes: number;
 }) {
   if (streams.length === 0) return <p className="solid-backing p-3">{s.empty}</p>;
   return (
@@ -25,7 +23,7 @@ export function StreamList({
         <li
           key={stream.id}
           data-testid="stream"
-          className={`border-ink bg-paper flex flex-col gap-2 border-4 p-3 shadow-[4px_4px_0_var(--color-ink)] ${stream.connected ? "" : "opacity-60"}`}
+          className={`border-ink bg-paper flex flex-col gap-2 border-4 p-3 shadow-[4px_4px_0_var(--color-ink)] ${stream.connected && !stream.done ? "" : "opacity-60"}`}
         >
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <span className="font-display text-lg leading-tight">{stream.name}</span>
@@ -33,7 +31,7 @@ export function StreamList({
           </div>
           <p className="text-sm font-semibold uppercase">
             {s.schedules[stream.schedule]}
-            {stream.schedule === "recurring" ? ` · every ${s.period(payPeriodMinutes)}` : ""}
+            {stream.intervalMinutes ? ` · ${s.every(stream.intervalMinutes)}` : ""}
           </p>
           {stream.schedule === "one_time" ? null : (
             <p className="text-sm">
@@ -49,7 +47,7 @@ export function StreamList({
           )}
           <div className="flex flex-wrap items-center justify-between gap-2">
             <Status stream={stream} />
-            {stream.connected ? (
+            {stream.canDisconnect ? (
               <form action={disconnectStream}>
                 <input type="hidden" name="streamId" value={stream.id} />
                 <button

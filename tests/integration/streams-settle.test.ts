@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { getSettings, saveSettings } from "@/lib/data/settings";
 import { getBalanceUsd, listEntries } from "@/lib/flash-credit/ledger";
 import { sum } from "@/lib/money";
 import {
@@ -21,6 +20,8 @@ const PER_DIEM: ConnectInput = {
   customName: "",
   amountUsd: "75.00",
   schedule: "recurring",
+  intervalCount: "5",
+  intervalUnit: "minutes",
   startsAt: "",
   endsAt: "",
   ongoing: true,
@@ -122,6 +123,20 @@ describe("connectStream", () => {
     ]);
   });
 
+  it("applies a one-time stream at once, even with a later start asked for", () => {
+    const { db, sqlite, userId } = setup();
+    const fund = connect(db, userId, {
+      preset: "college_fund",
+      schedule: "one_time",
+      startsAt: iso(60),
+      amountUsd: "2000.00",
+    });
+    expect(streamEntries(sqlite)).toEqual([
+      { stream_id: fund, stream_payment_no: 1, amount_usd: "2000.00", created_at: iso(0) },
+    ]);
+    expect(listStreams(db, userId, START)[0]).toMatchObject({ done: true, canDisconnect: false });
+  });
+
   it("lets other presets and custom streams repeat", () => {
     const { db, userId } = setup();
     connect(db, userId, { preset: "garage_sale", schedule: "whenever" });
@@ -165,21 +180,19 @@ describe("settleStreams", () => {
     expect(numbers).toEqual(Array.from({ length: 61 }, (_, i) => i + 1));
   });
 
-  it("applies a changed pay period only to payments still to come", () => {
+  it("pays each recurring top-off on its own interval", () => {
     const { db, sqlite, userId } = setup();
-    connect(db, userId, {});
-    settleStreams(db, userId, at(5));
-    saveSettings(db, { ...getSettings(db), streamPayPeriodMinutes: 1 });
-    // The payment already scheduled for minute 10 stays; the new 1-minute period applies after it.
-    expect(settleStreams(db, userId, at(8))).toBe(0);
-    settleStreams(db, userId, at(12));
-    expect(streamEntries(sqlite).map((e) => e.created_at)).toEqual([
-      iso(0),
-      iso(5),
-      iso(10),
-      iso(11),
-      iso(12),
-    ]);
+    const often = connect(db, userId, { preset: "garage_sale", intervalCount: "10" });
+    const daily = connect(db, userId, { intervalCount: "1", intervalUnit: "days" });
+    settleStreams(db, userId, at(60));
+    const paid = (id: number) =>
+      streamEntries(sqlite)
+        .filter((e) => e.stream_id === id)
+        .map((e) => e.created_at);
+    expect(paid(often)).toEqual([0, 10, 20, 30, 40, 50, 60].map(iso));
+    expect(paid(daily)).toEqual([iso(0)]);
+    settleStreams(db, userId, at(24 * 60));
+    expect(paid(daily)).toEqual([iso(0), iso(24 * 60)]);
   });
 
   it("pays a future start nothing until it arrives", () => {
@@ -265,6 +278,15 @@ describe("cashIn", () => {
 });
 
 describe("disconnectStream and listStreams", () => {
+  it("can't disconnect a one-time stream: it's already been applied", () => {
+    const { db, userId } = setup();
+    const fund = connect(db, userId, { preset: "college_fund", schedule: "one_time" });
+    expect(disconnectStream(db, userId, fund, at(1))).toEqual({
+      ok: false,
+      code: "STREAM_NOT_FOUND",
+    });
+  });
+
   it("refuses someone else's stream or one already disconnected", () => {
     const { db, userId, other } = setup();
     const id = connect(db, userId, {});
@@ -278,10 +300,11 @@ describe("disconnectStream and listStreams", () => {
 
   it("lists connected streams first with what the account needs to show", () => {
     const { db, userId } = setup();
-    const gone = connect(db, userId, { preset: "garage_sale", schedule: "one_time" });
+    const gone = connect(db, userId, { preset: "garage_sale", schedule: "whenever" });
+    connect(db, userId, { preset: "college_fund", schedule: "one_time" });
     connect(db, userId, { ongoing: false, endsAt: iso(30) }, at(1));
     disconnectStream(db, userId, gone, at(2));
-    const [perDiem, sale] = listStreams(db, userId, at(3));
+    const [perDiem, fund, sale] = listStreams(db, userId, at(3));
     expect(perDiem).toMatchObject({
       name: "Per Diem",
       isPerDiem: true,
@@ -290,11 +313,20 @@ describe("disconnectStream and listStreams", () => {
       startsAt: iso(1),
       endsAt: iso(30),
       nextDueAt: iso(6),
+      intervalMinutes: 5,
+      canDisconnect: true,
       connected: true,
       ended: false,
       done: false,
       cashable: false,
     });
-    expect(sale).toMatchObject({ name: "Garage Sale", connected: false, done: true });
+    // A one-time stream is applied the moment it's added: done, with nothing left to disconnect.
+    expect(fund).toMatchObject({
+      name: "My Kid's College Fund",
+      connected: true,
+      done: true,
+      canDisconnect: false,
+    });
+    expect(sale).toMatchObject({ name: "Garage Sale", connected: false, canDisconnect: false });
   });
 });

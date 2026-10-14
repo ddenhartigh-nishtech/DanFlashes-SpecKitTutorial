@@ -13,7 +13,15 @@ const NOW = new Date("2026-10-14T12:00:00.000Z");
 const later = (minutes: number) => new Date(NOW.getTime() + minutes * 60_000);
 
 const perDiemForm = (extra: Record<string, string> = {}) =>
-  form({ preset: "per_diem", amountUsd: "75.00", schedule: "recurring", ongoing: "on", ...extra });
+  form({
+    preset: "per_diem",
+    amountUsd: "75.00",
+    schedule: "recurring",
+    intervalCount: "5",
+    intervalUnit: "minutes",
+    ongoing: "on",
+    ...extra,
+  });
 
 async function signedIn() {
   const test = createSeededTestDb();
@@ -73,6 +81,7 @@ describe("connectStream / disconnectStream / cashIn actions", () => {
     ["INVALID_STREAM_AMOUNT", { amountUsd: "0.00" }],
     ["INVALID_STREAM_NAME", { preset: "custom", customName: "" }],
     ["INVALID_WINDOW", { ongoing: "", endsAt: "" }],
+    ["INVALID_INTERVAL", { intervalCount: "0" }],
   ])("pass %s through in brand voice", async (code, extra) => {
     const { db, jar } = await signedIn();
     expect(connectStreamCore(db, jar, perDiemForm(extra), NOW)).toEqual({
@@ -114,6 +123,8 @@ describe("placeOrder settles streams first", () => {
         customName: "",
         amountUsd: "500.00",
         schedule: "recurring",
+        intervalCount: "5",
+        intervalUnit: "minutes",
         startsAt: "",
         endsAt: "",
         ongoing: true,

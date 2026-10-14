@@ -139,7 +139,6 @@ export const storeSettings = sqliteTable(
     blandShaming: integer("bland_shaming", { mode: "boolean" }).notNull().default(true),
     confirmshaming: integer("confirmshaming", { mode: "boolean" }).notNull().default(true),
     perDiemDrain: integer("per_diem_drain", { mode: "boolean" }).notNull().default(true),
-    streamPayPeriodMinutes: integer("stream_pay_period_minutes").notNull().default(5),
   },
   (t) => [
     check("store_settings_singleton", sql`${t.id} = 1`),
@@ -147,7 +146,6 @@ export const storeSettings = sqliteTable(
     check("store_settings_anchor", sql`${t.msrpAnchorScore} >= 0`),
     check("store_settings_interval", sql`${t.msrpDoublingInterval} >= 1`),
     check("store_settings_presets_json", sql`json_valid(${t.flashCreditPresetsUsd})`),
-    check("store_settings_pay_period", sql`${t.streamPayPeriodMinutes} >= 1`),
   ],
 );
 
@@ -278,6 +276,8 @@ export const revenueStreams = sqliteTable(
     customName: text("custom_name"),
     amountUsd: text("amount_usd").notNull(),
     schedule: text("schedule", { enum: STREAM_SCHEDULES }).notNull(),
+    /** A recurring top-off's own interval (owner, 2026-10-14); NULL for the other schedules. */
+    intervalMinutes: integer("interval_minutes"),
     startsAt: text("starts_at").notNull(),
     endsAt: text("ends_at"),
     nextDueAt: text("next_due_at"),
@@ -302,6 +302,11 @@ export const revenueStreams = sqliteTable(
     ),
     check("revenue_streams_schedule", sql`${t.schedule} IN ('recurring', 'one_time', 'whenever')`),
     check("revenue_streams_window", sql`${t.endsAt} IS NULL OR ${t.endsAt} > ${t.startsAt}`),
+    check(
+      "revenue_streams_interval",
+      sql`(${t.schedule} = 'recurring' AND ${t.intervalMinutes} IS NOT NULL AND ${t.intervalMinutes} >= 1)
+        OR (${t.schedule} <> 'recurring' AND ${t.intervalMinutes} IS NULL)`,
+    ),
     check("revenue_streams_payments", sql`${t.paymentsMade} >= 0`),
     uniqueIndex("revenue_streams_one_per_diem")
       .on(t.userId)
@@ -334,7 +339,8 @@ export const flashCreditEntries = sqliteTable(
       "flash_credit_kind",
       sql`(${t.kind} = 'top_up' AND ${t.amountUsd} NOT GLOB '-*' AND ${t.cardBrand} IS NOT NULL AND length(${t.cardLast4}) = 4)
         OR (${t.kind} = 'spend' AND ${t.amountUsd} GLOB '-*' AND ${t.orderId} IS NOT NULL)
-        OR (${t.kind} = 'stream' AND ${t.amountUsd} NOT GLOB '-*' AND ${t.streamId} IS NOT NULL AND ${t.streamPaymentNo} >= 1
+        OR (${t.kind} = 'stream' AND ${t.amountUsd} NOT GLOB '-*' AND ${t.streamId} IS NOT NULL
+            AND ${t.streamPaymentNo} IS NOT NULL AND ${t.streamPaymentNo} >= 1
             AND ${t.orderId} IS NULL AND ${t.cardBrand} IS NULL AND ${t.cardLast4} IS NULL)`,
     ),
     uniqueIndex("flash_credit_stream_payment_unique").on(t.streamId, t.streamPaymentNo),

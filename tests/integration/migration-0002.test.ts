@@ -1,41 +1,12 @@
-import fs from "node:fs";
-import os from "node:os";
-import path from "node:path";
-import { afterAll, describe, expect, it } from "vitest";
-import { openDatabase, type Sqlite } from "@/lib/db/client";
-import { MIGRATIONS_FOLDER, runMigrations } from "@/lib/db/migrate";
+import { describe, expect, it } from "vitest";
+import type { Sqlite } from "@/lib/db/client";
+import { runMigrations } from "@/lib/db/migrate";
 import { sum } from "@/lib/money";
-
-/** A migrations folder that stops at 0001, so a database can be built as it was before 003. */
-function foldersThrough0001(): string {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "danflashes-mig-"));
-  fs.mkdirSync(path.join(dir, "meta"));
-  const journal = JSON.parse(
-    fs.readFileSync(path.join(MIGRATIONS_FOLDER, "meta", "_journal.json"), "utf8"),
-  ) as { entries: { tag: string }[] };
-  journal.entries = journal.entries.filter((e) => e.tag < "0002");
-  fs.writeFileSync(path.join(dir, "meta", "_journal.json"), JSON.stringify(journal));
-  for (const e of journal.entries) {
-    fs.copyFileSync(path.join(MIGRATIONS_FOLDER, `${e.tag}.sql`), path.join(dir, `${e.tag}.sql`));
-  }
-  return dir;
-}
-
-const dirs: string[] = [];
-const handles: Sqlite[] = [];
-afterAll(() => {
-  handles.forEach((h) => h.close());
-  dirs.forEach((d) => fs.rmSync(d, { recursive: true, force: true }));
-});
+import { databaseBefore } from "../helpers/migrations";
 
 /** A database at migration 0001 holding a top-up, a Flash Credit order + spend, and a card order. */
-function populated0001(): { sqlite: Sqlite; db: ReturnType<typeof openDatabase>["db"] } {
-  const migrations = foldersThrough0001();
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "danflashes-db-"));
-  dirs.push(migrations, dir);
-  const { sqlite, db } = openDatabase(path.join(dir, "old.db"));
-  handles.push(sqlite);
-  runMigrations(db, migrations);
+function populated0001() {
+  const { sqlite, db } = databaseBefore("0002");
   sqlite.exec(`
     INSERT INTO store_settings (id) VALUES (1);
     INSERT INTO users (id, email, password_hash) VALUES (1, 'old@x.io', 'h');
@@ -81,9 +52,9 @@ describe("migration 0002 (revenue streams, split payment, per diem drain)", () =
       { id: 1, flash_credit_usd: "344.61", per_diem_drained: 0 },
       { id: 2, flash_credit_usd: "0.00", per_diem_drained: 0 },
     ]);
-    expect(
-      sqlite.prepare("SELECT per_diem_drain, stream_pay_period_minutes FROM store_settings").get(),
-    ).toEqual({ per_diem_drain: 1, stream_pay_period_minutes: 5 });
+    expect(sqlite.prepare("SELECT per_diem_drain FROM store_settings").get()).toEqual({
+      per_diem_drain: 1,
+    });
     expect(sqlite.pragma("foreign_key_check")).toEqual([]);
   });
 
@@ -93,7 +64,7 @@ describe("migration 0002 (revenue streams, split payment, per diem drain)", () =
     const stream = (preset: string | null, name: string | null = null) =>
       sqlite
         .prepare(
-          "INSERT INTO revenue_streams (user_id, preset, custom_name, amount_usd, schedule, starts_at) VALUES (1, ?, ?, '75.00', 'recurring', '2026-10-14T12:00:00.000Z') RETURNING id",
+          "INSERT INTO revenue_streams (user_id, preset, custom_name, amount_usd, schedule, interval_minutes, starts_at) VALUES (1, ?, ?, '75.00', 'recurring', 5, '2026-10-14T12:00:00.000Z') RETURNING id",
         )
         .get(preset, name) as { id: number };
     const pay = (streamId: number | null, no: number | null) =>

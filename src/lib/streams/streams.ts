@@ -4,9 +4,8 @@
  * (R2), and each is credited exactly once: the unique (stream_id, stream_payment_no) index makes a
  * duplicate impossible, not just unlikely (R1).
  */
-import { and, asc, desc, eq, isNotNull, isNull, lte, sql } from "drizzle-orm";
+import { and, asc, desc, eq, isNotNull, isNull, lte, ne, sql } from "drizzle-orm";
 import { copy } from "@/lib/copy";
-import { getSettings } from "@/lib/data/settings";
 import type { Db } from "@/lib/db/client";
 import { flashCreditEntries, revenueStreams } from "@/lib/db/schema";
 import type { Usd } from "@/lib/money";
@@ -28,6 +27,8 @@ export interface StreamView {
   isPerDiem: boolean;
   amountUsd: Usd;
   schedule: StreamSchedule;
+  /** A recurring top-off's own interval; null for the other schedules. */
+  intervalMinutes: number | null;
   startsAt: string;
   endsAt: string | null;
   nextDueAt: string | null;
@@ -40,6 +41,8 @@ export interface StreamView {
   done: boolean;
   /** A connected "whenever" stream inside its window. */
   cashable: boolean;
+  /** Recurring and "whenever" streams can be stopped; a one-time stream was applied and is done. */
+  canDisconnect: boolean;
 }
 
 export function streamName(row: {
@@ -62,6 +65,7 @@ function toView(row: StreamRow, now: Date): StreamView {
     isPerDiem: row.preset === PER_DIEM,
     amountUsd: row.amountUsd,
     schedule: row.schedule,
+    intervalMinutes: row.intervalMinutes,
     startsAt: row.startsAt,
     endsAt: row.endsAt,
     nextDueAt: row.nextDueAt,
@@ -71,6 +75,7 @@ function toView(row: StreamRow, now: Date): StreamView {
     ended,
     done: row.schedule !== "whenever" && row.nextDueAt === null && row.paymentsMade > 0,
     cashable: connected && row.schedule === "whenever" && started && !ended,
+    canDisconnect: connected && row.schedule !== "one_time",
   };
 }
 
@@ -90,7 +95,6 @@ export function settleStreams(db: Db, userId: number, now: Date = new Date()): n
 
   return db.transaction(
     () => {
-      const periodMs = getSettings(db).streamPayPeriodMinutes * 60_000;
       let paid = 0;
       for (const row of db
         .select()
@@ -103,7 +107,8 @@ export function settleStreams(db: Db, userId: number, now: Date = new Date()): n
           nextDueAt: row.nextDueAt,
           endsAt: row.endsAt,
           now,
-          periodMs,
+          // Each recurring top-off pays on its own interval (owner, 2026-10-14).
+          periodMs: Math.max(1, row.intervalMinutes ?? 1) * 60_000,
           cap: CATCH_UP_CAP,
         });
         dueAt.forEach((createdAt, i) => {
@@ -198,6 +203,7 @@ export function disconnectStream(
             eq(revenueStreams.id, streamId),
             eq(revenueStreams.userId, userId),
             isNull(revenueStreams.disconnectedAt),
+            ne(revenueStreams.schedule, "one_time"), // already applied; nothing left to stop
           ),
         )
         .get();

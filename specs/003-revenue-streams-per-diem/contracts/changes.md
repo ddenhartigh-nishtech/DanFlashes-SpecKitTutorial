@@ -19,8 +19,8 @@ Guests see no meter. `/account` already redirects guests to sign in (001), which
 
 | Action | Input | Success | Errors |
 |---|---|---|---|
-| `connectStream` | `preset` (a preset key) **or** `customName` (1–40 chars); `amountUsd` (> `0.00`, no upper limit, dollars and cents); `schedule` (`recurring` \| `one_time` \| `whenever`); `startsAt` (ISO UTC, or empty for now); `endsAt` (ISO UTC) **or** `ongoing=on` | The stream is created and settled at once (a start of now pays its first recurring or one-time payment); `refresh()` | `SIGN_IN_REQUIRED`, `INVALID_STREAM_NAME`, `INVALID_STREAM_AMOUNT`, `INVALID_WINDOW` (start in the past, end ≤ start, or neither an end nor ongoing), `PER_DIEM_EXISTS` (a running per diem is still connected) |
-| `disconnectStream` | `streamId` | `disconnected_at` is set; past payments stay; `refresh()` | `SIGN_IN_REQUIRED`, `STREAM_NOT_FOUND` (not his, or already disconnected) |
+| `connectStream` | `preset` (a preset key) **or** `customName` (1–40 chars); `amountUsd` (> `0.00`, no upper limit, dollars and cents); `schedule` (`recurring` \| `one_time` \| `whenever`); for `recurring`, `intervalCount` (1–1,000) and `intervalUnit` (`minutes` \| `hours` \| `days` \| `weeks`); `startsAt` (ISO UTC, or empty for now); `endsAt` (ISO UTC) **or** `ongoing=on` | The stream is created and settled at once (a start of now pays its first recurring or one-time payment); `refresh()` | `SIGN_IN_REQUIRED`, `INVALID_STREAM_NAME`, `INVALID_STREAM_AMOUNT`, `INVALID_INTERVAL`, `INVALID_WINDOW` (start in the past, end ≤ start, or neither an end nor ongoing), `PER_DIEM_EXISTS` (a running per diem is still connected) |
+| `disconnectStream` | `streamId` | `disconnected_at` is set; past payments stay; `refresh()` | `SIGN_IN_REQUIRED`, `STREAM_NOT_FOUND` (not his, already disconnected, or one-time, which can't be disconnected) |
 | `cashIn` | `streamId`, `paymentNo` (as rendered) | One `stream` entry for exactly `amount_usd`; a repeated `paymentNo` is a no-op success; `refresh()` | `SIGN_IN_REQUIRED`, `STREAM_NOT_FOUND`, `NOT_CASHABLE` (not "whenever", disconnected, or outside the window) |
 
 Every message comes from `copy.codes`, in brand voice.

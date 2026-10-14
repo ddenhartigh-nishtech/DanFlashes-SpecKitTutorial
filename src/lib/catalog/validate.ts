@@ -66,7 +66,6 @@ const settingsSchema = z.object({
   blandShaming: z.boolean(),
   confirmshaming: z.boolean(),
   perDiemDrain: z.boolean(),
-  streamPayPeriodMinutes: z.number().int().min(1),
 });
 
 function toIssues(error: z.ZodError): Issue[] {

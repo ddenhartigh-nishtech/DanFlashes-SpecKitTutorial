@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { signOutAction } from "@/actions/auth";
 import { currentUser } from "@/app/_data/request";
+import { CollapsibleSection } from "@/components/CollapsibleSection";
 import { ConnectStreamForm } from "@/components/ConnectStreamForm";
 import { OrderSummary } from "@/components/OrderSummary";
 import { PriceTag } from "@/components/PriceTag";
@@ -60,15 +61,12 @@ async function AccountContents() {
         </form>
       </div>
 
-      <section
+      <CollapsibleSection
         id="flash-credit"
-        aria-labelledby="flash-heading"
-        className="grid scroll-mt-24 gap-6 md:grid-cols-[1fr_22rem] md:items-start"
+        heading={copy.account.flashHeading}
+        className="mt-4 grid gap-6 md:grid-cols-[1fr_22rem] md:items-start"
       >
         <div className="flex flex-col gap-4">
-          <h2 id="flash-heading" className="font-display text-2xl md:text-3xl">
-            {copy.account.flashHeading}
-          </h2>
           <p className="font-display flex items-center gap-3 uppercase">
             {copy.account.balance}
             <span data-testid="flash-balance">
@@ -114,7 +112,7 @@ async function AccountContents() {
         <div className="border-ink bg-paper border-4 p-4 shadow-[6px_6px_0_var(--color-ink)]">
           <TopUpForm presetsUsd={settings.flashCreditPresetsUsd} />
         </div>
-      </section>
+      </CollapsibleSection>
 
       <section
         id="revenue-streams"
@@ -126,21 +124,18 @@ async function AccountContents() {
             {copy.streams.heading}
           </h2>
           <p className="font-semibold">{copy.streams.intro}</p>
-          <StreamList
-            streams={streams}
-            confirmshaming={settings.confirmshaming}
-            payPeriodMinutes={settings.streamPayPeriodMinutes}
-          />
+          <StreamList streams={streams} confirmshaming={settings.confirmshaming} />
         </div>
         <div className="border-ink bg-paper border-4 p-4 shadow-[6px_6px_0_var(--color-ink)]">
-          <ConnectStreamForm payPeriodMinutes={settings.streamPayPeriodMinutes} />
+          <ConnectStreamForm />
         </div>
       </section>
 
-      <section aria-labelledby="orders-heading" className="flex flex-col gap-4">
-        <h2 id="orders-heading" className="font-display text-2xl md:text-3xl">
-          {copy.account.ordersHeading}
-        </h2>
+      <CollapsibleSection
+        id="purchase-history"
+        heading={copy.account.ordersHeading}
+        className="mt-4 flex flex-col gap-4"
+      >
         {orders.length === 0 ? (
           <p className="solid-backing p-4">{copy.account.noOrders}</p>
         ) : (
@@ -168,7 +163,7 @@ async function AccountContents() {
             ))}
           </ul>
         )}
-      </section>
+      </CollapsibleSection>
     </div>
   );
 }

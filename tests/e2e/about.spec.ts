@@ -21,6 +21,22 @@ test.describe("header", () => {
     const cart = visible(page.getByTestId("cart-link"));
     await expect(cart).toHaveAccessibleName(/^Cart/);
     await expect(cart.locator("svg")).toBeVisible();
+
+    // The neon glow is the icon's own color, so on hover both turn yellow together.
+    const glow = () =>
+      cart.locator("svg").evaluate((svg) => {
+        const style = getComputedStyle(svg);
+        return { color: style.color, filter: style.filter };
+      });
+    const resting = await glow();
+    expect(resting.filter).toContain(resting.color);
+    if (!(await page.locator("summary", { hasText: "Menu" }).isVisible())) {
+      await cart.hover();
+      await expect.poll(async () => (await glow()).color).not.toBe(resting.color);
+      const hovered = await glow();
+      expect(hovered.filter).toContain(hovered.color);
+      expect(hovered.filter).not.toContain(resting.color);
+    }
     await cart.click();
     await expect(page).toHaveURL(/\/cart$/);
 

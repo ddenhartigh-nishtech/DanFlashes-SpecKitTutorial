@@ -33,6 +33,14 @@
   - **A one-time stream is "applied", not "connected".**
   - **Each schedule says what it does**: "Every payday" shows the store's real pay period, and
     "Whenever I want" says it only pays on Cash in.
+- Owner feedback, round 2 (this replaces Q2's store-wide pay period):
+  - **"Every payday" becomes a "Recurring top-off" with its own interval**: every N minutes, hours,
+    days or weeks, chosen by the shopper. The first top-off sets the day and time it repeats on. For
+    example: every 2 weeks from a Friday at 5:00 PM (a paycheck), every 1 day from 8:00 AM (a per
+    diem), or every 5 minutes for testing.
+  - **"Just once" is applied immediately and once.** It has no start, end, or Disconnect, and it
+    shows as paid in full straight away.
+  - **"Whenever I want" keeps Cash in and Disconnect.**
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -50,9 +58,9 @@ nothing to measure until money is flowing in, and it's demoable on its own: conn
 watch the Flash Credit balance grow.
 
 **Independent Test**: as a signed-in shopper, connect one stream of each schedule. Confirm that:
-- a recurring stream pays at its start and then every pay period until its end (or forever if it's
-  ongoing), including payments he missed while away
-- a one-time stream pays exactly once
+- a recurring top-off pays at its first top-off and then every interval he set until its end (or
+  forever if it's ongoing), including payments he missed while away
+- a one-time stream is applied immediately and exactly once
 - a "whenever I want" stream pays each time he cashes in, and only inside its window
 - every payment is its own history entry, and the balance always equals the history
 
@@ -62,11 +70,11 @@ watch the Flash Credit balance grow.
    own), entering an amount in dollars and cents, picking a schedule, and setting a start and an end
    (or ticking Ongoing), **Then** the stream appears in his account with its name, amount, schedule,
    window, and next payment.
-2. **Given** a recurring stream, **When** each pay period inside its window comes due, **Then**
+2. **Given** a recurring top-off, **When** each interval inside its window comes due, **Then**
    exactly its amount is added to his Flash Credit as its own history entry, labeled with the
    stream's name. The first payment comes at its start. None come after its end.
-3. **Given** a one-time stream, **When** its start arrives, **Then** it pays its amount exactly once
-   and is done.
+3. **Given** a one-time stream, **When** he applies it, **Then** it pays its amount immediately and
+   exactly once. Its record shows as paid in full, with nothing to disconnect.
 4. **Given** a "whenever I want" stream inside its window, **When** he presses "Cash in", **Then** its
    amount is added as its own history entry. Outside its window there is nothing to cash in.
 5. **Given** he was away while recurring payments came due, **When** he next visits, **Then** each
@@ -170,8 +178,10 @@ Confirm that:
 - **Disconnect**: the meter disappears with the per diem. Its payments and history stay.
 - **Switch flipped while at $0**: turning the drain off hides the meter. Turning it back on shows the
   current amount, without replaying an old celebration.
-- **The owner changes the pay period**: payments already made stay. Payments still to come follow the
-  new period.
+- **Changing an interval**: disconnect and reconnect. A top-off keeps the interval it was connected
+  with.
+- **Daylight saving**: a daily or weekly top-off repeats every 24 hours or 7 days of real time, so a
+  local "8:00 AM" can drift by an hour across a clock change.
 - **Signed out**: guests see no meter.
 - **Credit exactly equal to the total**: it's a plain Flash Credit order. No split and no confirmation.
 - **An invalid card in a split**: nothing is placed and no credit is deducted.
@@ -190,26 +200,27 @@ Confirm that:
 - **FR-002**: Connecting a stream MUST ask for its amount per payment, in exact dollars and cents,
   greater than $0.00, with no upper limit. It MUST NOT ask for bank, payroll, or account details.
   Streams are props, and no real money moves.
-- **FR-003**: Each stream MUST have a schedule chosen by the shopper. The form MUST say what each one
-  does, including the store's actual pay period for "Every payday":
-  - **Recurring**: pays every pay period
-  - **One time**: pays once
-  - **Whenever I want**: pays each time he presses "Cash in"
-- **FR-004**: The pay period MUST be an owner setting. It defaults to a few minutes so a demo shows
-  money flowing, and the owner can lengthen it up to a day or more.
-- **FR-005**: Each stream MUST have a start (now or later, never in the past) and either an end after
-  the start or Ongoing (no end). Payments happen only inside the window:
-  - a recurring stream pays at its start and then every pay period until its end
-  - a one-time stream pays at its start
+- **FR-003**: Each stream MUST have a schedule chosen by the shopper, and the form MUST say what each
+  one does:
+  - **Recurring top-off**: pays automatically, every interval he set
+  - **Just once**: applied immediately, once
+  - **Whenever I want**: pays each time he presses "Cash in", never on its own
+- **FR-004**: A recurring top-off MUST have its own interval, chosen by the shopper: a whole number (1 to
+  1,000) of minutes, hours, days or weeks. Its first top-off sets the day and time it repeats on.
+- **FR-005**: Recurring and "whenever" streams MUST have a start (now or later, never in the past) and
+  either an end after the start or Ongoing (no end). Payments happen only inside the window:
+  - a recurring top-off pays at its first top-off and then every interval until its end
   - "Cash in" works only inside the window
+  - a one-time stream has no window; it is applied the moment it is added
 - **FR-006**: Every stream payment MUST be its own Flash Credit history entry, naming the stream. The
   balance MUST always equal the exact sum of the history and MUST never go negative.
 - **FR-007**: Recurring payments that came due while he was away MUST be credited on his next visit,
   each separately and oldest first. No payment may ever be credited twice, and one "Cash in" press
   pays exactly once.
-- **FR-008**: His account MUST list his streams with each one's name, amount, schedule, window, and
-  next payment (or a "Cash in" button), and MUST let him disconnect any of them. Disconnecting stops
-  future payments and never removes past ones.
+- **FR-008**: His account MUST list his streams with each one's name, amount, schedule (with the
+  interval for a recurring top-off), window, and next payment (or a "Cash in" button). He MUST be able
+  to disconnect recurring and "whenever" streams. A one-time stream shows as applied (greyed, paid in
+  full), with no Disconnect. Disconnecting stops future payments and never removes past ones.
 - **FR-009**: The disconnect button MUST follow 002's confirmshaming switch: a shaming label while it
   is on, a neutral one while it is off, and the same behavior either way.
 - **FR-010**: A shopper MUST have at most one per diem at a time that is still connected. Ended per
@@ -265,7 +276,7 @@ Confirm that:
   and which scheduled payment (or which "Cash in") it is.
 - **Per Diem Meter** (derived, never stored): the per diem paid in, minus Dan Flashes spending since
   that per diem started, floored at $0.00.
-- **Store Settings** (from 001/002) gains the per diem drain switch and the pay period.
+- **Store Settings** (from 001/002) gains the per diem drain switch.
 - **Order** (from 001) can now be paid by card, by Flash Credit, or **split**, and records how much
   Flash Credit it used.
 - **Brand Copy** gains the preset names, the schedule names, the meter, the celebration, the
@@ -296,8 +307,9 @@ Confirm that:
 
 - **Presets**: Per Diem, Expense Report Padding, My Kid's College Fund, Garage Sale, and Second
   Mortgage. Only the per diem drives the meter.
-- **Default pay period**: 5 minutes. The owner sets it in minutes in Drizzle Studio, from 1 minute up.
-- **Form defaults**: start now, recurring, and no end chosen yet. He must pick an end or tick Ongoing.
+- **Form defaults**: start now, a recurring top-off every 1 day, and no end chosen yet. He must pick an
+  end or tick Ongoing.
+- **No monthly intervals**: months vary in length, so intervals are minutes, hours, days or weeks.
 - **Window times** are entered and shown in the shopper's local time.
 - **Catch-up cap**: at most 30 missed payments per stream are credited per visit. Later visits catch
   up the rest.

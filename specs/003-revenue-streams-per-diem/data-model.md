@@ -16,6 +16,7 @@ All changes ship in one migration, `drizzle/0002_*.sql`. `npm run db:migrate` ba
 | `custom_name` | text, nullable | 1–40 characters after trimming |
 | `amount_usd` | text, NOT NULL | exact money format (001's `money` CHECK), positive, not `0.00`; no upper limit (owner) |
 | `schedule` | text, NOT NULL | one of `recurring`, `one_time`, `whenever` |
+| `interval_minutes` | integer, nullable | a recurring top-off's own interval (migration 0003); CHECK "recurring → NOT NULL and ≥ 1; otherwise NULL" |
 | `starts_at` | text, NOT NULL | ISO-8601 UTC; never in the past when created |
 | `ends_at` | text, nullable | ISO-8601 UTC; NULL means ongoing; CHECK `ends_at IS NULL OR ends_at > starts_at` |
 | `next_due_at` | text, nullable | the next scheduled payment (recurring or one time); NULL when finished or `whenever` |
@@ -40,7 +41,7 @@ Constraints and indexes:
 **Lifecycle**:
 1. **Connected.** Recurring and one-time streams start with `next_due_at = starts_at`; whenever streams
    start with `next_due_at = NULL`.
-2. **Paying.** Settlement advances `next_due_at` by the pay period in effect and increments
+2. **Paying.** Settlement advances `next_due_at` by the stream's own `interval_minutes` and increments
    `payments_made`.
 3. **Finished** (`next_due_at = NULL`): one time after its payment; recurring once the next tick would
    pass `ends_at`.
@@ -83,9 +84,9 @@ must show every existing order unchanged.
 | Column | Type | Default | Rules |
 |---|---|---|---|
 | `per_diem_drain` | integer (boolean) | 1 | the constitution IV switch |
-| `stream_pay_period_minutes` | integer | 5 | CHECK `>= 1` |
 
-`StoreSettings` gains `perDiemDrain: boolean` and `streamPayPeriodMinutes: number`. Both are
+`StoreSettings` gains `perDiemDrain: boolean`. (A store-wide `stream_pay_period_minutes` shipped in 0002 and
+was removed by 0003, which copied its value into each existing recurring stream's interval.) It is
 validated by `validateSettings` and seeded.
 
 ## Derived: the per diem meter
@@ -102,7 +103,8 @@ perDiemLeft = max(0, Σ payments of the connected per diem − Σ his order tota
 
 - `copy.streams`:
   - presets: five names
-  - schedule names: "Every payday", "Just once", "Whenever I want"
+  - schedule names: "Recurring top-off", "Just once", "Whenever I want", each with a hint, and
+    interval units (minutes, hours, days, weeks)
   - form labels, the Cash in button, history wording, the empty state, and the sign-in prompt
 - `copy.meter`: the label, the achievement state, and the account line
 - `copy.celebration`: the $0 achievement on the order confirmation

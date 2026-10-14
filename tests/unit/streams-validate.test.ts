@@ -8,6 +8,8 @@ const base: ConnectInput = {
   customName: "",
   amountUsd: "75.00",
   schedule: "recurring",
+  intervalCount: "5",
+  intervalUnit: "minutes",
   startsAt: "",
   endsAt: "",
   ongoing: true,
@@ -57,6 +59,39 @@ describe("validateConnectInput — the amount", () => {
   });
 });
 
+describe("validateConnectInput — a recurring top-off's interval", () => {
+  it.each([
+    ["5", "minutes", 5],
+    ["3", "hours", 180],
+    ["1", "days", 1440],
+    ["2", "weeks", 20160],
+  ])("every %s %s is %i minutes", (intervalCount, intervalUnit, minutes) => {
+    expect(validateConnectInput({ ...base, intervalCount, intervalUnit }, NOW)).toMatchObject({
+      ok: true,
+      value: { intervalMinutes: minutes },
+    });
+  });
+
+  it.each([
+    ["0", "minutes"],
+    ["1.5", "days"],
+    ["", "days"],
+    ["abc", "hours"],
+    ["1001", "minutes"],
+    ["1", "months"],
+  ])("refuses every %j %j", (intervalCount, intervalUnit) => {
+    expect(code({ intervalCount, intervalUnit })).toBe("INVALID_INTERVAL");
+  });
+
+  it("has no interval for the other schedules", () => {
+    for (const schedule of ["one_time", "whenever"]) {
+      expect(
+        validateConnectInput({ ...base, schedule, intervalCount: "", intervalUnit: "" }, NOW),
+      ).toMatchObject({ ok: true, value: { intervalMinutes: null } });
+    }
+  });
+});
+
 describe("validateConnectInput — the schedule and the window", () => {
   it("starts now when no start is given, and clamps a start a few seconds back to now", () => {
     expect(validateConnectInput(base, NOW)).toMatchObject({
@@ -74,10 +109,16 @@ describe("validateConnectInput — the schedule and the window", () => {
     ).toMatchObject({ value: { startsAt: iso(60), endsAt: iso(120) } });
   });
 
-  it("ignores any end for a one-time stream", () => {
+  it("applies a one-time stream right now, ignoring any start or end", () => {
     expect(
-      validateConnectInput({ ...base, schedule: "one_time", ongoing: false, endsAt: "" }, NOW),
-    ).toMatchObject({ ok: true, value: { schedule: "one_time", endsAt: null } });
+      validateConnectInput(
+        { ...base, schedule: "one_time", startsAt: iso(60), ongoing: false, endsAt: "" },
+        NOW,
+      ),
+    ).toMatchObject({
+      ok: true,
+      value: { schedule: "one_time", startsAt: NOW.toISOString(), endsAt: null },
+    });
   });
 
   it.each([

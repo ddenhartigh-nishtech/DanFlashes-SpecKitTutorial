@@ -5,7 +5,9 @@
 import { cmp, tryParseUsd, type Usd } from "@/lib/money";
 import type { Err, Ok } from "@/lib/result";
 import {
+  INTERVAL_UNITS,
   MAX_CUSTOM_NAME_LENGTH,
+  MAX_INTERVAL_COUNT,
   STREAM_PRESETS,
   STREAM_SCHEDULES,
   type StreamPreset,
@@ -18,7 +20,10 @@ export interface ConnectInput {
   customName: string;
   amountUsd: string;
   schedule: string;
-  /** ISO-8601; empty means "now". */
+  /** A recurring top-off repeats every `intervalCount` `intervalUnit`s; ignored otherwise. */
+  intervalCount: string;
+  intervalUnit: string;
+  /** ISO-8601; empty means "now". Ignored for one-time streams, which apply right away. */
   startsAt: string;
   /** ISO-8601; ignored when `ongoing`, and for one-time streams. */
   endsAt: string;
@@ -30,11 +35,14 @@ export interface ValidStream {
   customName: string | null;
   amountUsd: Usd;
   schedule: StreamSchedule;
+  /** Only for recurring top-offs. */
+  intervalMinutes: number | null;
   startsAt: string;
   endsAt: string | null;
 }
 
-export type ConnectError = "INVALID_STREAM_NAME" | "INVALID_STREAM_AMOUNT" | "INVALID_WINDOW";
+export type ConnectError =
+  "INVALID_STREAM_NAME" | "INVALID_STREAM_AMOUNT" | "INVALID_INTERVAL" | "INVALID_WINDOW";
 
 /** A start this far in the past counts as "now" (clock skew between browser and server). */
 const START_SKEW_MS = 60_000;
@@ -76,9 +84,20 @@ export function validateConnectInput(
   if (!isSchedule(input.schedule)) return { ok: false, code: "INVALID_WINDOW" };
   const schedule = input.schedule;
 
+  let intervalMinutes: number | null = null;
+  if (schedule === "recurring") {
+    const count = input.intervalCount.trim() ? Number(input.intervalCount) : NaN;
+    const unit = INTERVAL_UNITS[input.intervalUnit as keyof typeof INTERVAL_UNITS];
+    if (!unit || !Number.isInteger(count) || count < 1 || count > MAX_INTERVAL_COUNT) {
+      return { ok: false, code: "INVALID_INTERVAL" };
+    }
+    intervalMinutes = count * unit;
+  }
+
   const nowMs = now.getTime();
   let startMs = nowMs;
-  if (input.startsAt.trim()) {
+  // A one-time stream is applied right now: no start, no end.
+  if (schedule !== "one_time" && input.startsAt.trim()) {
     const parsed = parseTime(input.startsAt);
     if (parsed === null || parsed < nowMs - START_SKEW_MS)
       return { ok: false, code: "INVALID_WINDOW" };
@@ -99,6 +118,7 @@ export function validateConnectInput(
       customName,
       amountUsd,
       schedule,
+      intervalMinutes,
       startsAt: new Date(startMs).toISOString(),
       endsAt,
     },

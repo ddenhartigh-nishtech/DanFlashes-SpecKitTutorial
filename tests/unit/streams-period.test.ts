@@ -10,13 +10,13 @@ describe("copy.streams.period", () => {
     [120, "2 hours"],
     [1440, "day"],
     [2880, "2 days"],
+    [10080, "week"],
+    [20160, "2 weeks"],
   ])("%i minutes reads as %j", (minutes, words) => {
     expect(copy.streams.period(minutes)).toBe(words);
   });
 
-  it("feeds the every-payday hint", () => {
-    expect(copy.streams.hints.recurring(copy.streams.period(5))).toBe(
-      "Pays automatically, every 5 minutes.",
-    );
+  it("reads in the stream list as the top-off's own interval", () => {
+    expect(copy.streams.every(20160)).toBe("every 2 weeks");
   });
 });

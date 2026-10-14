@@ -70,7 +70,7 @@ function CartLink() {
     <Link
       href="/cart"
       data-testid="cart-link"
-      className="text-electric-cyan hover:text-highlighter relative flex min-h-11 min-w-11 items-center justify-center"
+      className="text-electric-cyan hover:text-highlighter relative flex min-h-11 min-w-11 items-center justify-center transition-colors"
     >
       <CartIcon />
       <span className="sr-only">{copy.nav.cart}</span>

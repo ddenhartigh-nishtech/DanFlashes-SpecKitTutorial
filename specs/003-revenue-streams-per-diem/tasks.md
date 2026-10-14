@@ -455,6 +455,32 @@ at any time before placing. The server recomputes the split, and any refusal wri
   amount ≥ $0.01 is accepted. This supersedes the ceiling in T008's description, and FR-002 is
   updated. Tests: tests/unit/streams-validate.test.ts (a $1,000,000,000,000.99 stream is accepted).
 
+## Phase 8: Owner Feedback, Round 2 (2026-10-14)
+
+- [X] T054 Make the neon cart's glow follow its color: the `neon` utility (src/app/globals.css)
+  draws its drop-shadows in `currentColor`, so on hover the glow turns yellow with the icon. Test:
+  tests/e2e/about.spec.ts (the glow contains the icon's color, at rest and on hover).
+- [X] T055 Make Flash Credit and Purchase history collapse at their headers, with a ▼ indicator that
+  flips: `CollapsibleSection` (native `<details open>`) in src/app/account/page.tsx. Test:
+  tests/e2e/account-sections.spec.ts.
+- [X] T056 Replace the store-wide pay period with a per-stream interval:
+  - "Every payday" becomes **Recurring top-off**, every N (1–1,000) minutes, hours, days or weeks;
+    the first top-off sets the day and time it repeats on
+  - migration 0003 adds `revenue_streams.interval_minutes` and drops
+    `store_settings.stream_pay_period_minutes`. Its generated SQL was hand-edited to reorder the
+    rebuilds and copy the old period into existing recurring streams.
+  - the CHECKs are NULL-proof: SQLite passes a CHECK that evaluates to NULL, so the interval and
+    stream payment number rules say `IS NOT NULL`
+  - `INVALID_INTERVAL` is a new error code
+  - Demo Dan's per diem tops off daily
+
+  Tests: tests/unit/streams-validate.test.ts, tests/integration/streams-settle.test.ts ("each
+  recurring top-off pays on its own interval"), tests/integration/migration-0003.test.ts, and the e2e
+  journey.
+- [X] T057 Make one-time streams final: "Just once" is applied immediately (no start, end, or window)
+  and arrives greyed out as paid in full. Only recurring and "whenever" streams can be disconnected
+  (`canDisconnect`; `disconnectStream` refuses a one-time stream). Tests: settle and e2e.
+
 ---
 
 ## Dependencies & Execution Order

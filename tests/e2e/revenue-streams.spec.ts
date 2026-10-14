@@ -11,6 +11,8 @@ async function connect(
     customName?: string;
     amount: string;
     schedule: string;
+    /** A recurring top-off's interval, e.g. ["5", "minutes"]. */
+    every?: [string, keyof typeof copy.streams.units];
     ongoing?: boolean;
   },
 ) {
@@ -19,6 +21,10 @@ async function connect(
   if (stream.customName) await section.getByLabel(s.form.customName).fill(stream.customName);
   await section.getByLabel(s.form.amount).fill(stream.amount);
   await section.getByRole("radio", { name: stream.schedule }).check();
+  if (stream.every) {
+    await section.getByLabel(s.form.intervalCount).fill(stream.every[0]);
+    await section.getByLabel(s.form.intervalUnit).selectOption(stream.every[1]);
+  }
   if (stream.ongoing) await section.getByLabel(s.form.ongoing).check();
   // A one-time top-up is applied, not connected.
   const submit = stream.schedule === s.schedules.one_time ? s.form.apply : s.form.connect;
@@ -40,27 +46,33 @@ test.describe("US1 — revenue streams", () => {
     const section = visible(page.locator("#revenue-streams"));
     await expect(section.getByRole("heading", { name: s.heading })).toBeVisible();
     await expect(section.getByText(s.empty)).toBeVisible();
-    // The schedules say what they mean: the real pay period, or only when he cashes in.
-    await expect(section.getByText(s.hints.recurring(s.period(5)))).toBeVisible();
+    // The schedules say what they mean: his own interval, once right now, or only on Cash in.
+    await expect(section.getByText(s.hints.recurring)).toBeVisible();
     await expect(section.getByText(s.hints.whenever)).toBeVisible();
+    await expect(section.getByLabel(s.form.intervalCount)).toBeVisible();
     await section.getByRole("radio", { name: s.schedules.one_time }).check();
     await expect(section.getByRole("button", { name: s.form.apply })).toBeVisible();
+    await expect(section.getByLabel(s.form.intervalCount)).toHaveCount(0);
+    await expect(section.getByText(s.form.startsNow)).toHaveCount(0); // applied right now
     await section.getByRole("radio", { name: s.schedules.recurring }).check();
     await expect(section.getByRole("button", { name: s.form.connect })).toBeVisible();
 
     // SC-007: the props never ask for real banking details.
     await expect(page.getByLabel(/bank|routing|payroll|account number/i)).toHaveCount(0);
 
-    // A per diem, every payday, starting now, ongoing: its first payday lands right away.
+    // A per diem topping off every 5 minutes, starting now, ongoing: the first top-off lands now.
     await connect(page, {
       source: s.presets.per_diem,
       amount: "75.00",
       schedule: s.schedules.recurring,
+      every: ["5", "minutes"],
       ongoing: true,
     });
     await expect(section.getByRole("status")).toContainText(s.connected);
+    const perDiem = visible(page.getByTestId("stream")).filter({ hasText: s.presets.per_diem });
+    await expect(perDiem).toContainText(s.every(5));
     await expect(
-      visible(page.getByTestId("stream")).filter({ hasText: s.presets.per_diem }),
+      perDiem.getByRole("button", { name: copy.shame.labels.disconnect.shamed }),
     ).toBeVisible();
     await expect(entry(page, s.presets.per_diem)).toContainText("+$75.00");
 
@@ -73,9 +85,10 @@ test.describe("US1 — revenue streams", () => {
     await expect(section.getByRole("status")).toContainText(s.applied);
     await expect(entry(page, s.presets.college_fund)).toHaveCount(1);
     await expect(entry(page, s.presets.college_fund)).toContainText("+$2,000.00");
-    await expect(
-      visible(page.getByTestId("stream")).filter({ hasText: s.presets.college_fund }),
-    ).toContainText(s.done);
+    // Already applied: it arrives as paid in full, with nothing to disconnect.
+    const fund = visible(page.getByTestId("stream")).filter({ hasText: s.presets.college_fund });
+    await expect(fund).toContainText(s.done);
+    await expect(fund.getByRole("button")).toHaveCount(0);
 
     // A custom stream that pays whenever he cashes in. Each separate press pays once.
     await connect(page, {

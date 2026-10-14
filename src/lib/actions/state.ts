@@ -6,9 +6,23 @@ import { SESSION_COOKIE, type CookieJar } from "@/lib/http/cookies";
 /** What a form's action hands back to the UI (useActionState). Messages are brand voice. */
 export type ActionState =
   | { ok: true; message?: string; itemCount?: number; balanceUsd?: string; redirectTo?: string }
-  | { ok: false; code: ErrorCode; message: string; totalUsd?: string; balanceUsd?: string };
+  | {
+      ok: false;
+      code: ErrorCode;
+      message: string;
+      totalUsd?: string;
+      balanceUsd?: string;
+      creditUsd?: string;
+      cardUsd?: string;
+    };
 
-type FailureExtra = { message?: string; totalUsd?: string; balanceUsd?: string };
+type FailureExtra = {
+  message?: string;
+  totalUsd?: string;
+  balanceUsd?: string;
+  creditUsd?: string;
+  cardUsd?: string;
+};
 
 export function failure(code: ErrorCode, extra: FailureExtra = {}): ActionState {
   return { ok: false, code, message: copy.codes[code], ...extra };

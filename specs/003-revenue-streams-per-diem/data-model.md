@@ -92,7 +92,9 @@ validated by `validateSettings` and seeded.
 ## Derived: the per diem meter
 
 ```
-perDiemLeft = max(0, Σ payments of the connected per diem − Σ his order totals with created_at ≥ starts_at)
+perDiemLeft = replay, in time order, the connected per diem's payments (+) and his orders since
+              starts_at (−), floored at 0 after every step (a top-off at the same instant as an
+              order lands first). Spending past $0 is not carried as debt into the next top-off.
 ```
 
 - The meter is null when there's no connected per diem, or when the drain is off.

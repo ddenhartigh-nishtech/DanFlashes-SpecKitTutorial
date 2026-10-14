@@ -6,10 +6,10 @@ export function PerDiemCelebration() {
   return (
     <section
       data-testid="per-diem-achievement"
-      className="loud-stripes border-ink animate-pulse border-4 p-4 motion-reduce:animate-none md:p-8"
+      className="loud-stripes border-ink border-4 p-4 md:p-8"
     >
       <div className="solid-backing p-6 text-center">
-        <p className="font-display bg-hot-pink text-paper inline-block px-3 py-1 text-sm">
+        <p className="font-display bg-hot-pink text-paper inline-block animate-bounce px-3 py-1 text-sm motion-reduce:animate-none">
           🏆 {copy.celebration.badge} 🏆
         </p>
         <h2 className="font-display text-highlighter mt-3 text-3xl leading-tight md:text-5xl">

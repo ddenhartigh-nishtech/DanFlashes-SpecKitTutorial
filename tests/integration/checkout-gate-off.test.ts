@@ -9,7 +9,6 @@ const checkout = (extra: Record<string, string> = {}) =>
   form({
     checkoutToken: TOKEN,
     expectedTotalUsd: "424.26",
-    method: "card",
     cardNumber: "4242 4242 4242 4242",
     expiry: "12/29",
     cvc: "123",
@@ -39,7 +38,9 @@ describe("checkout with the gate switched off (FR-021)", () => {
 
   it("still refuses Flash Credit for a guest", () => {
     const { db, sqlite, jar } = guestWithCart();
-    expect(placeOrderCore(db, jar, checkout({ method: "flash_credit" }))).toMatchObject({
+    expect(
+      placeOrderCore(db, jar, checkout({ useFlashCredit: "on", expectedCreditUsd: "0.00" })),
+    ).toMatchObject({
       ok: false,
       code: "SIGN_IN_REQUIRED",
     });

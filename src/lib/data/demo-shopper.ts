@@ -51,7 +51,7 @@ export async function ensureDemoShopper(
     cartId: null,
     checkoutToken: randomUUID(),
     expectedTotalUsd: getCartView(db, cartId).subtotalUsd,
-    method: "card",
+    useFlashCredit: false,
     card: DEMO_CARD,
   });
   if (!order.ok) throw new Error(`Demo order failed: ${order.code}`);

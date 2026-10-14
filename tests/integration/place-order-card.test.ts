@@ -27,7 +27,7 @@ function setup() {
     cartId: null,
     checkoutToken: "tok-1",
     expectedTotalUsd: "1033.19",
-    method: "card",
+    useFlashCredit: false,
     card: CARD,
     now: NOW,
     ...patch,

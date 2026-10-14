@@ -12,10 +12,9 @@ import { getBalanceUsd } from "@/lib/flash-credit/ledger";
 import { add, cmp, isUsdString, sub, sum, ZERO, type Usd } from "@/lib/money";
 import { validateFauxCard, type CardErrorCode, type FauxCardInput } from "@/lib/payments/faux-card";
 import type { Err, Ok } from "@/lib/result";
+import { splitPayment, type Split } from "@/lib/checkout/split";
 import { afterOrder, crossedToZero } from "@/lib/streams/meter";
 import { getPerDiemMeter, settleStreams } from "@/lib/streams/streams";
-
-export type PaymentMethod = "card" | "flash_credit";
 
 export interface PlaceOrderInput {
   userId: number | null;
@@ -24,7 +23,13 @@ export interface PlaceOrderInput {
   checkoutToken: string;
   /** What the shopper saw. Used only to detect a price change — never charged. */
   expectedTotalUsd: string;
-  method: PaymentMethod;
+  /** Apply his Flash Credit: his whole balance, up to the total (003 FR-018). */
+  useFlashCredit: boolean;
+  /** The credit checkout showed him. Compared with the live split, never trusted (FR-021). */
+  expectedCreditUsd?: string;
+  /** He confirmed putting the rest on a card (FR-019). */
+  confirmSplit?: boolean;
+  /** Required whenever a card portion remains. */
   card?: FauxCardInput;
   now?: Date;
 }
@@ -33,7 +38,7 @@ export type PlaceOrderResult =
   | Ok<{ orderId: number }>
   | Err<"CART_AUDITED", { removed: RemovedLine[] }>
   | Err<"PRICE_CHANGED", { totalUsd: Usd }>
-  | Err<"INSUFFICIENT_FLASH_CREDIT", { balanceUsd: Usd }>
+  | Err<"CREDIT_CHANGED" | "SPLIT_CONFIRMATION_REQUIRED", { creditUsd: Usd; cardUsd: Usd }>
   | Err<"GATE_SIGN_IN_REQUIRED" | "SIGN_IN_REQUIRED" | "CART_EMPTY" | CardErrorCode>;
 
 export function placeOrder(db: Db, input: PlaceOrderInput): PlaceOrderResult {
@@ -74,20 +79,31 @@ export function placeOrder(db: Db, input: PlaceOrderInput): PlaceOrderResult {
         return { ok: false, code: "PRICE_CHANGED", totalUsd };
       }
 
+      // How it's paid (003 US3): recomputed from his live balance, never taken from the client.
+      let split: Split = { creditUsd: ZERO, cardUsd: totalUsd, method: "card" };
+      if (input.useFlashCredit) {
+        if (input.userId === null) return { ok: false, code: "SIGN_IN_REQUIRED" };
+        split = splitPayment(getBalanceUsd(db, input.userId), totalUsd);
+        const amounts = { creditUsd: split.creditUsd, cardUsd: split.cardUsd };
+        if (
+          !isUsdString(input.expectedCreditUsd) ||
+          cmp(input.expectedCreditUsd, split.creditUsd) !== 0
+        ) {
+          return { ok: false, code: "CREDIT_CHANGED", ...amounts };
+        }
+        if (split.method === "split" && !input.confirmSplit) {
+          return { ok: false, code: "SPLIT_CONFIRMATION_REQUIRED", ...amounts };
+        }
+      }
+
       let card: { brand: string; last4: string } | null = null;
-      if (input.method === "card") {
+      if (cmp(split.cardUsd, ZERO) > 0) {
         const checked = validateFauxCard(
           input.card ?? { number: "", expiry: "", cvc: "" },
           input.now,
         );
         if (!checked.ok) return checked;
         card = { brand: checked.brand, last4: checked.last4 };
-      } else {
-        if (input.userId === null) return { ok: false, code: "SIGN_IN_REQUIRED" };
-        const balanceUsd = getBalanceUsd(db, input.userId);
-        if (cmp(balanceUsd, totalUsd) < 0) {
-          return { ok: false, code: "INSUFFICIENT_FLASH_CREDIT", balanceUsd };
-        }
       }
 
       // The per diem drain (003 R5): does this order take the meter from above $0 to $0?
@@ -104,10 +120,10 @@ export function placeOrder(db: Db, input: PlaceOrderInput): PlaceOrderResult {
           shippingUsd,
           taxUsd,
           totalUsd,
-          paymentMethod: input.method,
+          paymentMethod: split.method,
           cardBrand: card?.brand ?? null,
           cardLast4: card?.last4 ?? null,
-          flashCreditUsd: input.method === "flash_credit" ? totalUsd : ZERO,
+          flashCreditUsd: split.creditUsd,
           perDiemDrained,
           createdAt: (input.now ?? new Date()).toISOString(),
         })
@@ -130,9 +146,14 @@ export function placeOrder(db: Db, input: PlaceOrderInput): PlaceOrderResult {
           .run();
       }
 
-      if (input.method === "flash_credit") {
+      if (cmp(split.creditUsd, ZERO) > 0) {
         db.insert(flashCreditEntries)
-          .values({ userId: input.userId!, amountUsd: sub(ZERO, totalUsd), kind: "spend", orderId })
+          .values({
+            userId: input.userId!,
+            amountUsd: sub(ZERO, split.creditUsd),
+            kind: "spend",
+            orderId,
+          })
           .run();
       }
 

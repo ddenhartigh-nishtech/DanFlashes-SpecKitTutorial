@@ -27,7 +27,8 @@ function setup(balance: string) {
     cartId: null,
     checkoutToken: "fc-token-1",
     expectedTotalUsd: "424.26",
-    method: "flash_credit",
+    useFlashCredit: true,
+    expectedCreditUsd: "424.26",
     now: NOW,
     ...patch,
   });
@@ -65,12 +66,13 @@ describe("placeOrder — Flash Credit", () => {
     expect(getBalanceUsd(db, userId)).toBe("0.00");
   });
 
-  it("refuses when the balance is short, writing nothing", () => {
+  it("turns a short balance into a split that needs confirming, writing nothing", () => {
     const { db, sqlite, userId, input } = setup("424.25");
-    expect(placeOrder(db, input())).toEqual({
+    expect(placeOrder(db, input({ expectedCreditUsd: "424.25" }))).toEqual({
       ok: false,
-      code: "INSUFFICIENT_FLASH_CREDIT",
-      balanceUsd: "424.25",
+      code: "SPLIT_CONFIRMATION_REQUIRED",
+      creditUsd: "424.25",
+      cardUsd: "0.01",
     });
     expect(count(sqlite, "orders")).toBe(0);
     expect(getBalanceUsd(db, userId)).toBe("424.25");
@@ -80,9 +82,11 @@ describe("placeOrder — Flash Credit", () => {
     const { db, userId, input, fill } = setup("500.00");
     expect(placeOrder(db, input({ checkoutToken: "fc-token-a" }))).toMatchObject({ ok: true });
     fill();
+    // He saw $424.26 of credit, but only $75.74 is left: the split changed, so nothing is charged.
     expect(placeOrder(db, input({ checkoutToken: "fc-token-b" }))).toMatchObject({
       ok: false,
-      code: "INSUFFICIENT_FLASH_CREDIT",
+      code: "CREDIT_CHANGED",
+      creditUsd: "75.74",
     });
     expect(getBalanceUsd(db, userId)).toBe("75.74");
   });
@@ -106,7 +110,8 @@ describe("placeOrder — Flash Credit", () => {
         cartId: guestCart,
         checkoutToken: "guest-token",
         expectedTotalUsd: "424.26",
-        method: "flash_credit",
+        useFlashCredit: true,
+        expectedCreditUsd: "424.26",
       }),
     ).toEqual({ ok: false, code: "SIGN_IN_REQUIRED" });
   });

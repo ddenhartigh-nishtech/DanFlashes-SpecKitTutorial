@@ -231,9 +231,10 @@ Confirm that:
 
 - **FR-012**: The per diem drain MUST be an owner on/off setting, on by default (constitution IV).
 - **FR-013**: While it is on and the shopper has a connected per diem (running or ended), a meter MUST
-  show his per diem left on every page and in his account: the per diem paid in, minus his Dan Flashes
-  order totals since the per diem started (any payment method), exact to the cent and never below
-  $0.00.
+  show his per diem left on every page and in his account, exact to the cent. Replaying in time order
+  since the per diem started, each top-off adds to it and each Dan Flashes order (any payment method)
+  takes from it, and it never drops below $0.00 at any point. Spending past $0 came from other money,
+  so it isn't held against the next top-off, which refills the meter by its whole amount (US2 AC4).
 - **FR-014**: When an order takes the meter from above $0 to $0, the store MUST celebrate loudly and
   as an achievement, once, at that moment. The meter MUST show the achievement for as long as it stays
   at $0.

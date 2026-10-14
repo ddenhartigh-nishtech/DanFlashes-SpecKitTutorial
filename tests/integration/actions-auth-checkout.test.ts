@@ -90,7 +90,6 @@ describe("placeOrder action", () => {
     form({
       checkoutToken: TOKEN,
       expectedTotalUsd: "424.26",
-      method: "card",
       cardNumber: "4242 4242 4242 4242",
       expiry: "12/29",
       cvc: "123",

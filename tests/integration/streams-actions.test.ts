@@ -141,7 +141,8 @@ describe("placeOrder settles streams first", () => {
       cartId: null,
       checkoutToken: "tok-payday",
       expectedTotalUsd: "999.99",
-      method: "flash_credit",
+      useFlashCredit: true,
+      expectedCreditUsd: "999.99",
       now: later(5),
     });
     expect(order).toMatchObject({ ok: true });

@@ -329,13 +329,13 @@ at any time before placing. The server recomputes the split, and any refusal wri
 
 ### Tests for User Story 3 (write first; they must fail)
 
-- [ ] T034 [P] [US3] Unit tests in tests/unit/split-payment.test.ts, table-driven, in exact cents,
+- [X] T034 [P] [US3] Unit tests in tests/unit/split-payment.test.ts, table-driven, in exact cents,
   for `splitPayment(balanceUsd, totalUsd)`:
   - balance ≥ total → `{ creditUsd: total, cardUsd: "0.00", method: "flash_credit" }`
   - 0 < balance < total → `split`, with credit plus card equal to the total
   - balance `0.00` → `card`
   - credit never exceeds the balance or the total
-- [ ] T035 [P] [US3] Integration tests in tests/integration/place-order-split.test.ts:
+- [X] T035 [P] [US3] Integration tests in tests/integration/place-order-split.test.ts:
   - **Happy path**: one spend entry of `−creditUsd` linked to the order; `payment_method = 'split'`,
     `flash_credit_usd = creditUsd`, and the card's brand and last four. The balance after equals the
     balance before minus the credit; credit plus card equals the total; the ledger equals its sum.
@@ -350,7 +350,7 @@ at any time before placing. The server recomputes the split, and any refusal wri
   - **A replayed token**: the same order, charged once.
   - **The per diem meter** counts the full total of a split order.
   - **`getOrderForUser`** exposes `payment: { method: "split", creditUsd, brand, last4, cardUsd }`.
-- [ ] T036 [P] [US3] Update the tests that the new `placeOrder` inputs break (`method` becomes
+- [X] T036 [P] [US3] Update the tests that the new `placeOrder` inputs break (`method` becomes
   `useFlashCredit` / `expectedCreditUsd` / `confirmSplit`; `INSUFFICIENT_FLASH_CREDIT` is retired):
   - tests/integration/place-order-card.test.ts and tests/integration/place-order-flash-credit.test.ts:
     its short-balance case becomes a split that needs confirmation
@@ -358,7 +358,7 @@ at any time before placing. The server recomputes the split, and any refusal wri
   - tests/e2e/flash-credit-checkout.spec.ts: "a short balance is refused" becomes "a short balance
     asks to confirm the split"
   - tests/e2e/card-checkout.spec.ts, wherever it picks a payment method
-- [ ] T037 [P] [US3] e2e journey in tests/e2e/split-checkout.spec.ts (desktop and phone), the
+- [X] T037 [P] [US3] e2e journey in tests/e2e/split-checkout.spec.ts (desktop and phone), the
   constitution's happy path for this payment method:
   1. Sign up, top up $100.00, add Geo Riot, open checkout.
   2. Apply my Flash Credit: Flash Credit −$100.00, $244.61 on the card.
@@ -372,9 +372,9 @@ at any time before placing. The server recomputes the split, and any refusal wri
 
 ### Implementation for User Story 3
 
-- [ ] T038 [P] [US3] Implement `splitPayment` in src/lib/checkout/split.ts: pure, through
+- [X] T038 [P] [US3] Implement `splitPayment` in src/lib/checkout/split.ts: pure, through
   `money.ts` (T034 passes)
-- [ ] T039 [US3] Change `placeOrder` in src/lib/checkout/place-order.ts:
+- [X] T039 [US3] Change `placeOrder` in src/lib/checkout/place-order.ts:
   - **Inputs**: `useFlashCredit`, `expectedCreditUsd` and `confirmSplit` replace `method`.
   - **Order of checks**: after settling, compute `splitPayment` from the live balance, then:
     1. `CREDIT_CHANGED` when the credit differs from `expectedCreditUsd`
@@ -386,10 +386,10 @@ at any time before placing. The server recomputes the split, and any refusal wri
   - **Callers**: update `ensureDemoShopper` in src/lib/data/demo-shopper.ts.
 
   T035 and the integration part of T036 pass.
-- [ ] T040 [US3] In src/lib/orders/orders.ts, `OrderPayment` gains a `split` variant
+- [X] T040 [US3] In src/lib/orders/orders.ts, `OrderPayment` gains a `split` variant
   (`creditUsd`, `brand`, `last4`, `cardUsd`), with the card portion derived as
   `total_usd − flash_credit_usd` through `money.ts`
-- [ ] T041 [US3] Add brand copy to src/lib/copy.ts, in voice:
+- [X] T041 [US3] Add brand copy to src/lib/copy.ts, in voice:
   - `copy.checkout`:
     - `applyCredit(available)` and `removeCredit`
     - the breakdown lines `creditLine(amount)` / `cardLine(amount)`
@@ -398,10 +398,10 @@ at any time before placing. The server recomputes the split, and any refusal wri
   - `copy.order.paidSplit(credit, brand, last4, card)`
   - `copy.codes`: add `SPLIT_CONFIRMATION_REQUIRED` and `CREDIT_CHANGED`, and remove
     `INSUFFICIENT_FLASH_CREDIT`
-- [ ] T042 [US3] In src/lib/actions/checkout.ts, parse `useFlashCredit`, `expectedCreditUsd` and
+- [X] T042 [US3] In src/lib/actions/checkout.ts, parse `useFlashCredit`, `expectedCreditUsd` and
   `confirmSplit`, and pass the new codes through with their `creditUsd` / `cardUsd` in the action
   state
-- [ ] T043 [US3] In src/components/CheckoutForm.tsx (client), replace the method radios with:
+- [X] T043 [US3] In src/components/CheckoutForm.tsx (client), replace the method radios with:
   - an "Apply my Flash Credit" / "Remove Flash Credit" toggle, disabled with the prompt at $0
   - the breakdown
   - the card fields whenever a card portion remains
@@ -410,7 +410,7 @@ at any time before placing. The server recomputes the split, and any refusal wri
   - on `CREDIT_CHANGED`: show the new split and clear the confirmation
 
   src/app/checkout/page.tsx passes the settled balance. T037 and the e2e part of T036 pass.
-- [ ] T044 [US3] Render the split payment line on the order confirmation (src/app/orders/[id]/page.tsx)
+- [X] T044 [US3] Render the split payment line on the order confirmation (src/app/orders/[id]/page.tsx)
   and in the account's order history (src/app/account/page.tsx) with `copy.order.paidSplit`
 
 **Checkpoint**: all three stories work independently, and `npm run verify` is green.

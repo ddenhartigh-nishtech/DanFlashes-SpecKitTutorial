@@ -15,7 +15,7 @@ import { getPlaceholderUrl, getSettings } from "@/lib/data/settings";
 import { getDb } from "@/lib/db/client";
 import { getBalanceUsd, listEntries } from "@/lib/flash-credit/ledger";
 import { formatUsd } from "@/lib/money";
-import { listOrdersForUser, orderNumber } from "@/lib/orders/orders";
+import { describePayment, listOrdersForUser, orderNumber } from "@/lib/orders/orders";
 import { labelFor } from "@/lib/shaming/labels";
 import { getPerDiemMeter, listStreams, settleStreams } from "@/lib/streams/streams";
 
@@ -159,11 +159,7 @@ async function AccountContents() {
                 <p className="font-display flex flex-wrap gap-3 text-sm">
                   <span className="bg-ink text-highlighter px-2 py-0.5">{order.number}</span>
                   <span>{copy.account.placedOn(dateFormat.format(new Date(order.createdAt)))}</span>
-                  <span className="bg-highlighter px-2">
-                    {order.payment.method === "card"
-                      ? copy.order.paidCard(order.payment.brand, order.payment.last4)
-                      : copy.order.paidFlash}
-                  </span>
+                  <span className="bg-highlighter px-2">{describePayment(order.payment)}</span>
                 </p>
                 <OrderSummary
                   lines={order.lines}

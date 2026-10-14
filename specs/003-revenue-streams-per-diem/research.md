@@ -76,11 +76,15 @@ Only the new decisions are recorded here.
 ## R5. The meter and the celebration
 
 - **Decision**:
-  - **Meter**: pure `perDiemLeft(paidIn: Usd[], spent: Usd[])`, which is `max(0, Σpaid − Σspent)` in
-    exact money.
-    - `paidIn` is the payments of the shopper's connected per diem.
-    - `spent` is his order totals with `created_at ≥ starts_at`, by any payment method.
-    - `getPerDiemMeter(db, userId)` returns null when there's no connected per diem.
+  - **Meter**: pure `perDiemLeft(events)` replays the per diem's top-offs (+) and his orders (−) in
+    time order, flooring at $0.00 after every step, so overspending isn't held against the next top-off
+    (US2 AC4). This replaced the first `max(0, Σpaid − Σspent)` design during US2, when a test showed
+    the debt.
+    - `paidIn` is the payments of the shopper's connected per diem, at their due times.
+    - `spent` is his order totals with `created_at ≥ starts_at`, by any payment method. Orders carry the
+      checkout's own time.
+    - `getPerDiemMeter(db, userId, settings)` returns null when the drain is off or there's no connected
+      per diem.
   - **Celebration**: `placeOrder` already runs in one `BEGIN IMMEDIATE` transaction. It settles, reads
     the meter before the order, and computes the meter after it. It stores
     `orders.per_diem_drained = 1` only when the drain switch is on, the meter was above $0, and the

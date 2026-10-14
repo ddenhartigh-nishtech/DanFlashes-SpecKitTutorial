@@ -47,7 +47,7 @@ function setup() {
       cartId: null,
       checkoutToken: `tok-${++token}`,
       expectedTotalUsd: "424.26",
-      method: "card",
+      useFlashCredit: false,
       card: CARD,
       now,
     });
@@ -93,7 +93,8 @@ describe("getPerDiemMeter", () => {
       cartId: null,
       checkoutToken: "tok-credit",
       expectedTotalUsd: "999.99",
-      method: "flash_credit",
+      useFlashCredit: true,
+      expectedCreditUsd: "999.99",
       now: at(3),
     });
     expect(meter(at(3))).toMatchObject({ leftUsd: "0.00", drained: true });

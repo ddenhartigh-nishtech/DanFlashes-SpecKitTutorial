@@ -7,7 +7,7 @@ import { PerDiemCelebration } from "@/components/PerDiemCelebration";
 import { copy } from "@/lib/copy";
 import { getPlaceholderUrl, getSettings } from "@/lib/data/settings";
 import { getDb } from "@/lib/db/client";
-import { getOrderForUser } from "@/lib/orders/orders";
+import { describePayment, getOrderForUser } from "@/lib/orders/orders";
 
 export default function OrderPage({ params }: PageProps<"/orders/[id]">) {
   return (
@@ -43,9 +43,7 @@ async function OrderContents({ params }: Pick<PageProps<"/orders/[id]">, "params
             data-testid="payment"
             className="bg-highlighter text-ink mt-4 inline-block px-3 py-1 font-bold"
           >
-            {order.payment.method === "card"
-              ? copy.order.paidCard(order.payment.brand, order.payment.last4)
-              : copy.order.paidFlash}
+            {describePayment(order.payment)}
           </p>
         </div>
       </section>

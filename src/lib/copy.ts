@@ -108,7 +108,18 @@ export const copy = {
     priceChanged: (total: string) =>
       `Dan adjusted a price. Your new total is ${total}. Check it, then place the order again.`,
     topUpLink: "Top up Flash Credit",
+    streamsLink: "connect a revenue stream",
     useCard: "or pay by card",
+    // Split payment (003 US3)
+    applyCredit: (available: string) => `Apply my Flash Credit (${available} available)`,
+    removeCredit: "Remove Flash Credit",
+    creditLine: (amount: string) => `Flash Credit: −${amount}`,
+    cardLine: (amount: string) => `On your card: ${amount}`,
+    coveredByCredit: "Flash Credit covers the whole thing. No card needed. Look at you.",
+    confirmSplit: (cardAmount: string) => `Put the remaining ${cardAmount} on my card`,
+    noCredit: "You have $0.00 of Flash Credit.",
+    creditChanged: (credit: string, card: string) =>
+      `Your Flash Credit changed. It now covers ${credit}, leaving ${card} for your card. Confirm and place it again.`,
     signedInAs: (who: string) => `Checking out as ${who}`,
   },
   order: {
@@ -117,6 +128,8 @@ export const copy = {
     body: "Your shirts are complicated, your decision was not. Dan is proud of you.",
     paidCard: (brand: string, last4: string) => `Charged to ${brand} ending ${last4}`,
     paidFlash: "Paid with Flash Credit",
+    paidSplit: (credit: string, brand: string, last4: string, card: string) =>
+      `${credit} in Flash Credit, ${card} charged to ${brand} ending ${last4}`,
     keepShopping: "Keep shopping",
     viewAccount: "See all your orders",
   },
@@ -328,7 +341,8 @@ export const copy = {
     CARD_INVALID_NUMBER: "That card number doesn't check out.",
     CARD_EXPIRED: "That card has expired. Dan doesn't accept the past.",
     CARD_INVALID_CVC: "The CVC should be 3 or 4 digits.",
-    INSUFFICIENT_FLASH_CREDIT: "Not enough Flash Credit. Top up, or pay by card.",
+    SPLIT_CONFIRMATION_REQUIRED: "Confirm putting the rest on your card first.",
+    CREDIT_CHANGED: "Your Flash Credit changed. Check the new split and place the order again.",
     INVALID_AMOUNT: "Enter an amount of at least $0.01, in dollars and cents.",
     INVALID_STREAM_NAME: "Pick where it's coming from, or give it a name (40 characters, tops).",
     INVALID_STREAM_AMOUNT:

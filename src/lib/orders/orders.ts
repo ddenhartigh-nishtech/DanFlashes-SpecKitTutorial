@@ -6,11 +6,12 @@ import { and, desc, eq, inArray } from "drizzle-orm";
 import { sortTiers } from "@/lib/catalog/tiers";
 import type { Size } from "@/lib/catalog/types";
 import type { CartView } from "@/lib/cart/cart";
+import { copy } from "@/lib/copy";
 import { getCatalogShirtsByIds, type ShirtImageView, type TierBadge } from "@/lib/data/shirts";
 import { listTiers } from "@/lib/data/tiers";
 import type { Db } from "@/lib/db/client";
 import { orderItems, orders } from "@/lib/db/schema";
-import { mul, type Usd } from "@/lib/money";
+import { formatUsd, mul, sub, type Usd } from "@/lib/money";
 
 export interface SummaryLine {
   slug: string;
@@ -24,7 +25,9 @@ export interface SummaryLine {
 }
 
 export type OrderPayment =
-  { method: "card"; brand: string; last4: string } | { method: "flash_credit" };
+  | { method: "card"; brand: string; last4: string }
+  | { method: "flash_credit" }
+  | { method: "split"; creditUsd: Usd; cardUsd: Usd; brand: string; last4: string };
 
 export interface OrderView {
   id: number;
@@ -38,6 +41,40 @@ export interface OrderView {
   /** This order drained his per diem (003 US2). */
   perDiemDrained: boolean;
   lines: SummaryLine[];
+}
+
+function paymentOf(order: typeof orders.$inferSelect): OrderPayment {
+  switch (order.paymentMethod) {
+    case "card":
+      return { method: "card", brand: order.cardBrand!, last4: order.cardLast4! };
+    case "flash_credit":
+      return { method: "flash_credit" };
+    case "split":
+      return {
+        method: "split",
+        creditUsd: order.flashCreditUsd,
+        cardUsd: sub(order.totalUsd, order.flashCreditUsd),
+        brand: order.cardBrand!,
+        last4: order.cardLast4!,
+      };
+  }
+}
+
+/** The confirmation's and the history's payment line. */
+export function describePayment(payment: OrderPayment): string {
+  switch (payment.method) {
+    case "card":
+      return copy.order.paidCard(payment.brand, payment.last4);
+    case "flash_credit":
+      return copy.order.paidFlash;
+    case "split":
+      return copy.order.paidSplit(
+        formatUsd(payment.creditUsd),
+        payment.brand,
+        payment.last4,
+        formatUsd(payment.cardUsd),
+      );
+  }
 }
 
 export const orderNumber = (id: number) => `DF-${String(id).padStart(6, "0")}`;
@@ -93,10 +130,7 @@ function hydrateOrders(db: Db, rows: (typeof orders.$inferSelect)[]): OrderView[
     shippingUsd: order.shippingUsd,
     taxUsd: order.taxUsd,
     totalUsd: order.totalUsd,
-    payment:
-      order.paymentMethod === "card"
-        ? { method: "card", brand: order.cardBrand!, last4: order.cardLast4! }
-        : { method: "flash_credit" },
+    payment: paymentOf(order),
     perDiemDrained: order.perDiemDrained,
     lines: items
       .filter((item) => item.orderId === order.id)

@@ -5,7 +5,7 @@
 Same as 001/002. After pulling this branch:
 
 ```bash
-npm run db:migrate      # backs up, then applies 0002 (streams, ledger kind, settings, orders flag)
+npm run db:migrate      # backs up, then applies 0002–0004 (streams, intervals, order drains)
 npm run dev
 ```
 
@@ -18,7 +18,7 @@ watch payments land quickly, connect one that tops off every 1 minute.
 
 | # | Scenario | Expected |
 |---|---|---|
-| 1 | Sign in as Demo Dan | The per diem gauge appears in the bottom-left corner. The account lists his Per Diem ($75.00, every payday, ongoing) with a next payment, and the history shows its first payment. (R9, FR-013) |
+| 1 | Sign in as Demo Dan | The per diem gauge appears in the bottom-left corner. The account lists his Per Diem ($75.00, Recurring top-off · every day, ongoing) with a next payment, and the history shows its first payment. (R9, FR-013) |
 | 2 | Sign up as someone new; open Account → Revenue Streams | An empty state and the connect form. No bank, routing or payroll fields anywhere. (FR-002, SC-007) |
 | 3 | Connect a Per Diem: $75.00, Recurring top-off every 1 minute, starts now, ends in 30 minutes | It's listed with its window in local time. The Flash Credit history gains "Per Diem" +$75.00, and the gauge reads $75.00. (US1-1, US2-1) |
 | 4 | Wait a minute or two, then reload | One more +$75.00 per minute, never twice, and none after the end. The record reads "Recurring top-off · every minute". (US1-2, SC-003) |
@@ -35,7 +35,7 @@ watch payments land quickly, connect one that tops off every 1 minute.
 | 15 | Try to place the order without ticking the confirmation | Refused. Nothing is deducted and no order is created. (US3-3, SC-010) |
 | 16 | Remove Flash Credit | The whole $344.61 goes back on the card, and the balance is untouched. (US3-5) |
 | 17 | Apply again, confirm, and pay with the test card | The confirmation shows both parts. The balance is $0.00, and the history shows −$100.00 linked to the order. (US3-4, SC-009) |
+| 18 | With the split showing, top up in another tab, then place the order | Refused with the new split (`CREDIT_CHANGED`). Nothing is charged. (US3-6) |
 | 19 | Connect a Per Diem ($100.00, every day), then apply My Kid's College Fund ($300.00), then a Garage Sale ($50.00) | Each record shows its "left": $100.00, $300.00, $50.00. (US4-2) |
 | 20 | Buy Geo Riot ($344.61) by card | The per diem drains first: its achievement shows. College Fund is left $55.39, and Garage Sale is untouched. (US4-1, US4-3) |
 | 21 | Buy Geo Riot again | One order empties both: "You spent your kid's college fund on shirts." and "Garage Sale: GONE" are stacked on the confirmation. (US4-4, SC-012) |
-| 18 | With the split showing, top up in another tab, then place the order | Refused with the new split (`CREDIT_CHANGED`). Nothing is charged. (US3-6) |

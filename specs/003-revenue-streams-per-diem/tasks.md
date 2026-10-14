@@ -419,19 +419,54 @@ at any time before placing. The server recomputes the split, and any refusal wri
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T045 [P] Update README.md:
-  - add `per_diem_drain` and `stream_pay_period_minutes` to the switches table
-  - note Demo Dan's per diem and the 1-minute period trick for demos
+- [X] T045 [P] Update README.md:
+  - add `per_diem_drain` to the switches table (`stream_pay_period_minutes` was dropped in 0003:
+    each recurring top-off has its own interval)
+  - note Demo Dan's per diem and the 1-minute interval trick for demos
   - describe split checkout in a sentence
-- [ ] T046 Check the client components (ConnectStreamForm, CashInButton, LocalTime, CheckoutForm) by
+  - **Result (2026-10-14).** Done. The switches table also covers the drain's "left" amounts and
+    achievements (US4), and the shamed Disconnect label.
+- [X] T046 Check the client components (ConnectStreamForm, CashInButton, LocalTime, CheckoutForm) by
   hand against `next dev`: React Strict Mode, connect, Cash in, disconnect, apply and remove credit,
   and place a split (known e2e gap, 002 R7)
-- [ ] T047 Constitution VII spot check: run Lighthouse (mobile) on `/account` with streams, on `/` with
+  - **Result (2026-10-14).** Clean. Driven with Playwright against `next dev` on a throwaway
+    database: three kinds of connect, a double-pressed Cash in (paid once), disconnect, the
+    collapsible sections, apply, remove and re-apply credit, and a confirmed split. There were no
+    console errors or warnings, and nothing in the server log.
+- [X] T047 Constitution VII spot check: run Lighthouse (mobile) on `/account` with streams, on `/` with
   the gauge, and on `/checkout`, against a production build. All must have CLS ≤ 0.1 and LCP ≤ 2.5 s
   (applied throttling); the gauge must add no layout shift.
-- [ ] T048 Run quickstart.md scenarios 1–21 and note the results
-- [ ] T049 Run `npm run format`, then `npm run verify`. It must be fully green, with line coverage
+  - **Result (2026-10-14, Lighthouse 13.5.0, mobile, production build, signed in with three
+    streams and a shirt in the cart).** Applied throttling:
+    - `/account`: LCP 2.2 s, CLS 0, TBT 310 ms
+    - `/checkout`: LCP 2.0 s, CLS 0, TBT 190 ms
+    - `/` with the gauge: LCP 2.3 s and 2.2 s, CLS 0.005
+    - `/` as a guest (no gauge): LCP 2.2 s and 2.1 s, CLS 0.005
+    - 001's baseline for `/` was 2.2 s.
+
+    The gauge adds no shift: CLS is the same with and without it. A first run of `/` measured
+    3.0 s. That was the first request after the server started; it didn't repeat.
+- [X] T048 Run quickstart.md scenarios 1–21 and note the results
+  - **Result (2026-10-14).** All 21 pass, as 002 did them: scripted through the UI with Playwright
+    against the production build on a fresh `db:reset` copy, with the switches flipped directly in
+    SQLite. Scenario 4 waited for the real 1-minute top-off, and scenario 11 re-checked a minute
+    later that the disconnected per diem stayed quiet.
+  - **Bug found and fixed.** The connect form was a React form action, so React reset its fields
+    after every connect, but not its React state:
+    - a refusal wiped what he had typed
+    - "Starts now" showed ticked while its required start field was still on screen, so the
+      browser silently blocked every later submit
+    - after "Just once", the radio showed "Recurring top-off" while the form still behaved as
+      one-time
+
+    ConnectStreamForm now submits by hand, which keeps his input on a refusal, and remounts on
+    success, which resets the fields and controls together. There is a regression test in
+    tests/e2e/revenue-streams.spec.ts. The quickstart's row order and its scenario 1 wording were
+    also corrected.
+- [X] T049 Run `npm run format`, then `npm run verify`. It must be fully green, with line coverage
   ≥ 90% on `src/lib`, including `src/lib/streams/` and `src/lib/checkout/split.ts`.
+  - **Result (2026-10-14).** Green: 467 unit and integration tests at 94.9% line coverage
+    (`src/lib/streams/allocation.ts` and `streams.ts` are at 100%), and 70 e2e tests.
 
 ---
 

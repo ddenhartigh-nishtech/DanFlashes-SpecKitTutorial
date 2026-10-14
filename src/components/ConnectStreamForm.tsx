@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { startTransition, useActionState, useState, type FormEvent, type ReactNode } from "react";
 import { connectStream } from "@/actions/streams";
 import type { ActionState } from "@/lib/actions/state";
 import { copy } from "@/lib/copy";
@@ -28,21 +28,57 @@ export function ConnectStreamForm() {
     connectStream,
     null,
   );
+  // A refused connect keeps everything he typed. A successful one starts the form over: a new key
+  // remounts the fields and their controls together, so no control can show one thing and do another.
+  const [seen, setSeen] = useState(state);
+  const [round, setRound] = useState(0);
+  if (state !== seen) {
+    setSeen(state);
+    if (state?.ok) setRound((r) => r + 1);
+  }
+
+  return (
+    <StreamFields key={round} dispatch={dispatch} pending={pending}>
+      <div role="status" aria-live="polite" className="min-h-6">
+        {state ? (
+          <p
+            className={`border-ink border-4 px-3 py-2 font-bold ${state.ok ? "bg-acid" : "bg-safety-orange"}`}
+          >
+            {state.message}
+          </p>
+        ) : null}
+      </div>
+    </StreamFields>
+  );
+}
+
+function StreamFields({
+  dispatch,
+  pending,
+  children,
+}: {
+  dispatch: (form: FormData) => void;
+  pending: boolean;
+  children: ReactNode;
+}) {
   const [preset, setPreset] = useState<string>(STREAM_PRESETS[0]);
   const [schedule, setSchedule] = useState<StreamSchedule>("recurring");
   const [startsNow, setStartsNow] = useState(true);
   const [ongoing, setOngoing] = useState(false);
   const oneTime = schedule === "one_time";
 
-  // Convert the local inputs in the browser, the only place that knows his time zone.
-  const submit = (form: FormData) => {
+  // Submitted by hand rather than as a form action, which React would reset even when refused.
+  // The local inputs are converted here, in the only place that knows his time zone.
+  const submit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
     form.set("startsAt", startsNow ? "" : toIso(form.get("startsLocal")));
     form.set("endsAt", toIso(form.get("endsLocal")));
-    dispatch(form);
+    startTransition(() => dispatch(form));
   };
 
   return (
-    <form action={submit} className="flex flex-col gap-4">
+    <form onSubmit={submit} className="flex flex-col gap-4">
       <h3 className="font-display text-lg">{f.heading}</h3>
 
       <label className={label}>
@@ -178,15 +214,7 @@ export function ConnectStreamForm() {
         {oneTime ? (pending ? f.applying : f.apply) : pending ? f.connecting : f.connect}
       </button>
 
-      <div role="status" aria-live="polite" className="min-h-6">
-        {state ? (
-          <p
-            className={`border-ink border-4 px-3 py-2 font-bold ${state.ok ? "bg-acid" : "bg-safety-orange"}`}
-          >
-            {state.message}
-          </p>
-        ) : null}
-      </div>
+      {children}
     </form>
   );
 }

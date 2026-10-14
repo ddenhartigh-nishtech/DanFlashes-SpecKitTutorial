@@ -98,4 +98,46 @@ test.describe("US1 — revenue streams", () => {
     );
     expect(overflow).toBeLessThanOrEqual(0);
   });
+
+  test("a refusal keeps what he typed; a success resets the form, controls and all", async ({
+    page,
+  }, info) => {
+    await page.goto("/sign-up");
+    await signUp(page, uniqueEmail(info.project.name));
+    await expect(page).toHaveURL(/\/account$/);
+    const section = visible(page.locator("#revenue-streams"));
+
+    // Refused: a start in the past. Everything he entered is still there to fix.
+    await section.getByLabel(s.form.source).selectOption({ label: s.presets.expense_report });
+    await section.getByLabel(s.form.amount).fill("75.00");
+    await section.getByLabel(s.form.intervalCount).fill("2");
+    await section.getByLabel(s.form.intervalUnit).selectOption("hours");
+    await section.getByLabel(s.form.ongoing).check();
+    await section.getByLabel(s.form.startsNow).uncheck();
+    await section.locator('input[name="startsLocal"]').fill("2020-01-01T09:00");
+    await section.getByRole("button", { name: s.form.connect }).click();
+    await expect(section.getByRole("status")).toContainText(copy.codes.INVALID_WINDOW);
+    await expect(section.getByLabel(s.form.amount)).toHaveValue("75.00");
+    await expect(section.getByLabel(s.form.intervalCount)).toHaveValue("2");
+    await expect(section.getByLabel(s.form.intervalUnit)).toHaveValue("hours");
+    await expect(section.getByLabel(s.form.startsNow)).not.toBeChecked();
+
+    // Fixed and connected: the form starts over, and every control matches what it will do.
+    await section.getByLabel(s.form.startsNow).check();
+    await section.getByRole("button", { name: s.form.connect }).click();
+    await expect(section.getByRole("status")).toContainText(s.connected);
+    await expect(section.getByLabel(s.form.amount)).toHaveValue("");
+    await expect(section.getByLabel(s.form.startsNow)).toBeChecked();
+
+    // After applying a one-time stream, "Recurring top-off" is selected and behaves like it.
+    await connect(page, {
+      source: s.presets.garage_sale,
+      amount: "50.00",
+      schedule: s.schedules.one_time,
+    });
+    await expect(section.getByRole("status")).toContainText(s.applied);
+    await expect(section.getByRole("radio", { name: s.schedules.recurring })).toBeChecked();
+    await expect(section.getByLabel(s.form.intervalCount)).toBeVisible();
+    await expect(section.getByRole("button", { name: s.form.connect })).toBeVisible();
+  });
 });

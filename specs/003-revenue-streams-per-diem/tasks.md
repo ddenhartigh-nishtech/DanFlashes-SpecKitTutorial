@@ -22,7 +22,7 @@ may do money math with JS numbers.
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: can run in parallel (different files, no dependency on incomplete tasks)
-- **[Story]**: which user story the task belongs to (US1–US2)
+- **[Story]**: which user story the task belongs to (US1–US3)
 
 ---
 
@@ -64,7 +64,16 @@ may do money math with JS numbers.
       `stream_payment_no >= 1`, and NULL order/card fields
     - nullable `stream_id` (FK, RESTRICT) and `stream_payment_no`
     - unique index on (`stream_id`, `stream_payment_no`)
-  - **`orders`**: `per_diem_drained` integer (boolean), NOT NULL, default 0
+  - **`orders`**:
+    - `per_diem_drained` integer (boolean), NOT NULL, default 0
+    - `payment_method` adds `split`
+    - `flash_credit_usd` text, NOT NULL, default `0.00`, with the `money` CHECK
+    - the per-method payment CHECK replaces `orders_card_fields`: "`card`: `flash_credit_usd = '0.00'`
+      and card fields set; `flash_credit`: `flash_credit_usd = total_usd` and no card fields; `split`:
+      `flash_credit_usd` not `0.00` and card fields set"
+    - **hand-edit the generated SQL** so the rebuild copies existing rows with `flash_credit_usd = CASE
+      WHEN payment_method = 'flash_credit' THEN total_usd ELSE '0.00' END`; the column default alone
+      would fail the new CHECK for existing Flash Credit orders
   - **`store_settings`**: `per_diem_drain` (boolean, default 1) and `stream_pay_period_minutes`
     (integer, default 5, CHECK `>= 1`)
 - [ ] T005 Wire the settings through, using `perDiemDrain: true, streamPayPeriodMinutes: 5` in both
@@ -82,6 +91,8 @@ may do money math with JS numbers.
     - a `stream` entry without `stream_id` is rejected
     - a duplicate (`stream_id`, `stream_payment_no`) is rejected
     - a second connected per diem for the same user is rejected
+    - every existing order is unchanged through the `orders` rebuild, with `flash_credit_usd` backfilled
+      (`0.00` for card orders, `total_usd` for Flash Credit orders)
 
 **Checkpoint**: migration 0002 applies cleanly to an existing database, and the existing suite is still
 green.
@@ -165,6 +176,8 @@ pays on demand, and he can disconnect.
   - **Disconnect**: the label reads "Disconnect (and settle for less)", and after disconnecting the
     stream shows as disconnected.
   - **Phone**: no sideways scroll at 360px.
+  - **SC-001**: each connection is a single form submission, which is the "three steps or fewer"
+    check.
 
 ### Implementation for User Story 1
 
@@ -189,9 +202,10 @@ pays on demand, and he can disconnect.
   - `connectStream`: validate, supersede an ended per diem, insert, then settle
   - `disconnectStream`
   - `listStreams`
-  - `settleStreams(db, userId, now)`: a cheap read first; then one `BEGIN IMMEDIATE` transaction that
-    reads `streamPayPeriodMinutes` from settings, runs `duePayments`, inserts entries, and advances
-    `next_due_at` / `payments_made`
+  - `settleStreams(db, userId, now)`: a cheap read first; then `db.transaction(...)` that reads
+    `streamPayPeriodMinutes` from settings, runs `duePayments`, inserts entries, and advances
+    `next_due_at` / `payments_made`. When it's called inside `placeOrder`'s transaction, this becomes
+    a savepoint within that transaction rather than a second transaction, which SQLite doesn't allow.
   - `cashIn(db, userId, { streamId, paymentNo, now })`
 
   T009 passes.
@@ -259,6 +273,7 @@ none of this appears.
     - counts only the current per diem's payments
     - subtracts orders at or after its start by card and Flash Credit, ignoring earlier ones
     - still meters an ended per diem
+    - returns `drained: true` at $0, and false again after a payday refills it (FR-014)
   - **`placeOrder` sets `per_diem_drained`**:
     - only on the crossing order; not on later orders while at $0
     - again after a payday refills the meter
@@ -272,6 +287,8 @@ none of this appears.
   - **First order**: buy Geo Riot by card. The gauge drops by its total and there's no celebration.
   - **Second order**: buy Geo Riot again. The confirmation opens with the per diem achievement, and the
     gauge shows the achievement state.
+  - **Guests**: in a fresh, signed-out context, `/` has no `per-diem-meter` (spec Edge Case "Signed
+    out").
 
 ### Implementation for User Story 2
 
@@ -302,19 +319,119 @@ none of this appears.
 
 ---
 
-## Phase 5: Polish & Cross-Cutting Concerns
+## Phase 5: User Story 3 - Split the Bill (Priority: P3)
 
-- [ ] T034 [P] Update README.md:
+**Goal**: at checkout he applies his Flash Credit. If it covers the total, that's the order. If not,
+the store shows the split, makes him confirm putting the rest on a card, and lets him remove the credit
+at any time before placing. The server recomputes the split, and any refusal writes nothing.
+
+**Independent Test**: quickstart scenarios 14–18.
+
+### Tests for User Story 3 (write first; they must fail)
+
+- [ ] T034 [P] [US3] Unit tests in tests/unit/split-payment.test.ts, table-driven, in exact cents,
+  for `splitPayment(balanceUsd, totalUsd)`:
+  - balance ≥ total → `{ creditUsd: total, cardUsd: "0.00", method: "flash_credit" }`
+  - 0 < balance < total → `split`, with credit plus card equal to the total
+  - balance `0.00` → `card`
+  - credit never exceeds the balance or the total
+- [ ] T035 [P] [US3] Integration tests in tests/integration/place-order-split.test.ts:
+  - **Happy path**: one spend entry of `−creditUsd` linked to the order; `payment_method = 'split'`,
+    `flash_credit_usd = creditUsd`, and the card's brand and last four. The balance after equals the
+    balance before minus the credit; credit plus card equals the total; the ledger equals its sum.
+  - **No confirmation**: without `confirmSplit` → `SPLIT_CONFIRMATION_REQUIRED` with the split, and
+    nothing written.
+  - **The balance moved**: a stream payment settling inside the transaction, or a top-up, makes the
+    live credit differ from `expectedCreditUsd` → `CREDIT_CHANGED` with the new split, and nothing
+    written.
+  - **A bad card in a split**: nothing deducted.
+  - **Balance equals the total**: a `flash_credit` order with no confirmation needed.
+  - **`useFlashCredit` off**: card only.
+  - **A replayed token**: the same order, charged once.
+  - **The per diem meter** counts the full total of a split order.
+  - **`getOrderForUser`** exposes `payment: { method: "split", creditUsd, brand, last4, cardUsd }`.
+- [ ] T036 [P] [US3] Update the tests that the new `placeOrder` inputs break (`method` becomes
+  `useFlashCredit` / `expectedCreditUsd` / `confirmSplit`; `INSUFFICIENT_FLASH_CREDIT` is retired):
+  - tests/integration/place-order-card.test.ts and tests/integration/place-order-flash-credit.test.ts:
+    its short-balance case becomes a split that needs confirmation
+  - tests/integration/actions-auth-checkout.test.ts
+  - tests/e2e/flash-credit-checkout.spec.ts: "a short balance is refused" becomes "a short balance
+    asks to confirm the split"
+  - tests/e2e/card-checkout.spec.ts, wherever it picks a payment method
+- [ ] T037 [P] [US3] e2e journey in tests/e2e/split-checkout.spec.ts (desktop and phone), the
+  constitution's happy path for this payment method:
+  1. Sign up, top up $100.00, add Geo Riot, open checkout.
+  2. Apply my Flash Credit: Flash Credit −$100.00, $244.61 on the card.
+  3. Try to place it unconfirmed: it isn't placed.
+  4. Remove Flash Credit: card only.
+  5. Apply again, tick "Put the remaining $244.61 on my card", enter the test card, place it.
+  6. The confirmation shows both parts. The account balance is $0.00, with a −$100.00 history entry
+     linked to the order.
+  7. No sideways scroll at 360px.
+  8. A fresh account with $0.00 sees the top-up / Revenue Streams prompt instead of Apply (US3-7).
+
+### Implementation for User Story 3
+
+- [ ] T038 [P] [US3] Implement `splitPayment` in src/lib/checkout/split.ts: pure, through
+  `money.ts` (T034 passes)
+- [ ] T039 [US3] Change `placeOrder` in src/lib/checkout/place-order.ts:
+  - **Inputs**: `useFlashCredit`, `expectedCreditUsd` and `confirmSplit` replace `method`.
+  - **Order of checks**: after settling, compute `splitPayment` from the live balance, then:
+    1. `CREDIT_CHANGED` when the credit differs from `expectedCreditUsd`
+    2. `SPLIT_CONFIRMATION_REQUIRED` for an unconfirmed split
+    3. validate the card when `cardUsd > 0`
+  - **Writes**: insert the order with `payment_method` and `flash_credit_usd`, and write the spend
+    entry for `−creditUsd` when it's above $0.
+  - **Retire** `INSUFFICIENT_FLASH_CREDIT`.
+  - **Callers**: update `ensureDemoShopper` in src/lib/data/demo-shopper.ts.
+
+  T035 and the integration part of T036 pass.
+- [ ] T040 [US3] In src/lib/orders/orders.ts, `OrderPayment` gains a `split` variant
+  (`creditUsd`, `brand`, `last4`, `cardUsd`), with the card portion derived as
+  `total_usd − flash_credit_usd` through `money.ts`
+- [ ] T041 [US3] Add brand copy to src/lib/copy.ts, in voice:
+  - `copy.checkout`:
+    - `applyCredit(available)` and `removeCredit`
+    - the breakdown lines `creditLine(amount)` / `cardLine(amount)`
+    - `confirmSplit(cardUsd)`, "Put the remaining $Y on my card"
+    - the $0-balance prompt, linking to top-up and Revenue Streams
+  - `copy.order.paidSplit(credit, brand, last4, card)`
+  - `copy.codes`: add `SPLIT_CONFIRMATION_REQUIRED` and `CREDIT_CHANGED`, and remove
+    `INSUFFICIENT_FLASH_CREDIT`
+- [ ] T042 [US3] In src/lib/actions/checkout.ts, parse `useFlashCredit`, `expectedCreditUsd` and
+  `confirmSplit`, and pass the new codes through with their `creditUsd` / `cardUsd` in the action
+  state
+- [ ] T043 [US3] In src/components/CheckoutForm.tsx (client), replace the method radios with:
+  - an "Apply my Flash Credit" / "Remove Flash Credit" toggle, disabled with the prompt at $0
+  - the breakdown
+  - the card fields whenever a card portion remains
+  - a **required** confirmation checkbox when splitting
+  - hidden `useFlashCredit` and `expectedCreditUsd` fields
+  - on `CREDIT_CHANGED`: show the new split and clear the confirmation
+
+  src/app/checkout/page.tsx passes the settled balance. T037 and the e2e part of T036 pass.
+- [ ] T044 [US3] Render the split payment line on the order confirmation (src/app/orders/[id]/page.tsx)
+  and in the account's order history (src/app/account/page.tsx) with `copy.order.paidSplit`
+
+**Checkpoint**: all three stories work independently, and `npm run verify` is green.
+
+---
+
+## Phase 6: Polish & Cross-Cutting Concerns
+
+- [ ] T045 [P] Update README.md:
   - add `per_diem_drain` and `stream_pay_period_minutes` to the switches table
   - note Demo Dan's per diem and the 1-minute period trick for demos
-- [ ] T035 Check the client components (ConnectStreamForm, CashInButton, LocalTime) by hand against
-  `next dev`: React Strict Mode, connect, Cash in, and disconnect (known e2e gap, 002 R7)
-- [ ] T036 Constitution VII spot check: run Lighthouse (mobile) on `/account` with streams and on `/`
-  with the gauge, against a production build. Both must have CLS ≤ 0.1 and LCP ≤ 2.5 s (applied
-  throttling); the gauge must add no layout shift.
-- [ ] T037 Run quickstart.md scenarios 1–13 and note the results
-- [ ] T038 Run `npm run format`, then `npm run verify`. It must be fully green, with line coverage
-  ≥ 90% on `src/lib`, including `src/lib/streams/`.
+  - describe split checkout in a sentence
+- [ ] T046 Check the client components (ConnectStreamForm, CashInButton, LocalTime, CheckoutForm) by
+  hand against `next dev`: React Strict Mode, connect, Cash in, disconnect, apply and remove credit,
+  and place a split (known e2e gap, 002 R7)
+- [ ] T047 Constitution VII spot check: run Lighthouse (mobile) on `/account` with streams, on `/` with
+  the gauge, and on `/checkout`, against a production build. All must have CLS ≤ 0.1 and LCP ≤ 2.5 s
+  (applied throttling); the gauge must add no layout shift.
+- [ ] T048 Run quickstart.md scenarios 1–18 and note the results
+- [ ] T049 Run `npm run format`, then `npm run verify`. It must be fully green, with line coverage
+  ≥ 90% on `src/lib`, including `src/lib/streams/` and `src/lib/checkout/split.ts`.
 
 ---
 
@@ -323,7 +440,7 @@ none of this appears.
 ### Phase dependencies
 
 - **Setup (T001)** comes first.
-- **Foundational (T002–T006)** blocks both stories:
+- **Foundational (T002–T006)** blocks every story:
   - T003 depends on T002.
   - T004 → T005 → T006.
 - **US1 (T007–T024)** needs Foundational. Within it:
@@ -339,19 +456,26 @@ none of this appears.
   - the tests (T025–T027) come first
   - T028 → T029 → T030
   - T031 comes before T032 and T033
-- **Polish (T034–T038)** comes after both stories.
+- **US3 (T034–T044)** needs Foundational and US1's T018 (`placeOrder` settles first). Within it:
+  - the tests (T034–T037) come first
+  - T038 → T039 → T040
+  - T041 comes before T042, T043 and T044
+  - T039 and T030 both edit `placeOrder`, so do them one after the other (US2 first)
+- **Polish (T045–T049)** comes after all three stories.
 
 ### User story dependencies
 
 - **US1** is independent after Foundational.
 - **US2** needs US1's streams (the per diem it meters), but it's testable on its own once a per diem
   can be connected.
+- **US3** is independent of US2. It needs only a Flash Credit balance, which a 001 top-up can supply.
 
 ### Parallel opportunities
 
 - **Foundational**: T002 alongside the T004 chain.
 - **US1 tests**: T007–T012 can run together. Then T013, T014 and T020 alongside the T015 → T019 chain.
 - **US2 tests**: T025–T027 can run together, then T028 alongside the copy task T031.
+- **US3 tests**: T034–T037 can run together, then T038 alongside the copy task T041.
 
 ## Parallel Example: User Story 1
 
@@ -367,7 +491,8 @@ Task: "e2e connect / cash in / disconnect in tests/e2e/revenue-streams.spec.ts"
 1. **MVP**: Setup, Foundational, then US1. Stop and validate with quickstart 1–8 and 11. Money now
    flows into Flash Credit from streams.
 2. **Then** US2: the meter and the celebration.
-3. **Then** Polish, converge, and open a PR to main.
+3. **Then** US3: the split checkout.
+4. **Then** Polish, converge, and open a PR to main.
 
 ## Notes
 

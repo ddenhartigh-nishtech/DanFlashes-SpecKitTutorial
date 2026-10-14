@@ -40,7 +40,7 @@ Only the new decisions are recorded here.
     how a changed period affects only payments still to come.
   - It stops at `ends_at`, at `now`, or after **30 payments per stream per call** (the catch-up cap).
   - Each payment's history `created_at` is its due time, so the history reads in true order.
-  - It runs at request time wherever money or the meter is shown: the header meter on every page for
+  - It runs at request time wherever money or the meter is shown: the per diem gauge on every page for
     signed-in shoppers, the account, the checkout page, and inside `placeOrder` before the balance and
     meter are read.
   - A cheap read (`next_due_at <= now` for this user) skips the write transaction when nothing is due.
@@ -144,6 +144,36 @@ Only the new decisions are recorded here.
 - **Rationale**: the demo should show the feature without setup. It's created through the same
   connect function the UI uses.
 
+## R11. Split payment (US3, owner addition)
+
+- **Decision**:
+  - **Pure math**: `splitPayment(balanceUsd, totalUsd)` in `src/lib/checkout/split.ts` returns
+    `{ creditUsd: min(balance, total), cardUsd: total − credit, method: "card" | "flash_credit" | "split" }`,
+    in exact money.
+  - **`placeOrder` inputs**: `useFlashCredit`, `expectedCreditUsd` (what he was shown), and
+    `confirmSplit` replace `method`. Card fields are required whenever `cardUsd > 0`.
+  - **Inside the existing transaction**, after settling streams:
+    1. recompute the split from the live balance
+    2. a different `creditUsd` → `CREDIT_CHANGED` (returns the new split)
+    3. a split without `confirmSplit` → `SPLIT_CONFIRMATION_REQUIRED`
+    4. validate the card
+    5. insert the order with its method and `flash_credit_usd`
+    6. write one spend entry for `−creditUsd` when it's above $0
+
+    Any refusal writes nothing.
+  - **Retired**: `INSUFFICIENT_FLASH_CREDIT` can no longer happen; a short balance becomes a split.
+  - **UI**: `CheckoutForm` replaces the method radios with an "Apply my Flash Credit" toggle.
+    - Applying shows the breakdown. When there's a remainder, it shows the card fields and a required
+      "Put the remaining $Y on my card" checkbox.
+    - "Remove Flash Credit" flips the toggle back.
+- **Rationale**:
+  - The server stays authoritative: the split is never taken from the client, only compared with it
+    (constitution).
+  - Confirmation is enforced on the server, not only by the form (SC-010).
+  - It's one spend entry, so the ledger rules are unchanged.
+- **Alternatives**: typing a partial credit amount was rejected; the owner didn't ask for it, and it
+  adds validation. Auto-splitting without asking was rejected; the owner asked for confirmation.
+
 ## R10. Testing
 
 - **Unit**:
@@ -164,9 +194,15 @@ Only the new decisions are recorded here.
   - the balance always equals the history
   - migration 0002 preserves existing ledger rows
   - the actions pass error codes through
+  - split checkout:
+    - `splitPayment` tables
+    - `placeOrder` split happy path, `SPLIT_CONFIRMATION_REQUIRED`, `CREDIT_CHANGED` (a payday or
+      top-up between render and submit), an invalid card, an exactly-covered total, a replay
+    - the per diem counts the full total of a split order
 - **End-to-end** (default switches, never toggled in the shared database):
-  - connect a per diem starting now → first payment in the history and the header meter
+  - connect a per diem starting now → first payment in the history and the gauge
   - a one-time stream and Cash in
-  - drain to $0 with Flash Credit → celebration on the confirmation, achievement in the header
+  - drain to $0 with Flash Credit → celebration on the confirmation, achievement on the gauge
   - the disconnect label, desktop and phone
+  - a split checkout: apply, confirm, remove, place (constitution: a happy path per payment method)
   - Recurring payments after the first, and "drain off", are covered by integration tests.

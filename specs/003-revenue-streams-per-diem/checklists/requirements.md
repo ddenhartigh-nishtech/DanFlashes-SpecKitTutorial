@@ -42,3 +42,6 @@
   streams), Q2 (recurring on an owner-tunable period, plus one-time and "whenever I want" options),
   and Q3 (a set start and end per stream, or Ongoing). The spec was rewritten around per-stream
   schedules and windows. All items pass.
+- Iteration 3 (2026-10-14, after `/speckit-analyze`): the owner added split payment (US3,
+  FR-018–FR-023, SC-009, SC-010). Voice moved to FR-024 to keep FRs in document order. This replaces 001
+  FR-027 for partial coverage. All items pass.

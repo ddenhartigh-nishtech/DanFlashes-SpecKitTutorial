@@ -64,7 +64,19 @@ positive, so it can never go negative.
 
 | Column | Type | Rules |
 |---|---|---|
+| `payment_method` | adds `split` | one of `card`, `flash_credit`, `split` |
+| `flash_credit_usd` | text, NOT NULL, default `0.00` | the Flash Credit applied; the `money` CHECK |
 | `per_diem_drained` | integer (boolean), NOT NULL, default 0 | set at placement when the drain is on and this order took the meter from above $0 to $0 (R5) |
+
+The payment CHECK, per method (it replaces 001's `orders_card_fields`):
+- `card`: `flash_credit_usd = '0.00'`, with card brand and last four set
+- `flash_credit`: `flash_credit_usd = total_usd`, with no card fields
+- `split`: `flash_credit_usd` not `0.00`, with card brand and last four set. "Less than the total"
+  is enforced in `placeOrder`, where exact money comparison is available.
+
+The card portion is derived as `total_usd − flash_credit_usd`. A split order has exactly one spend
+entry, for `−flash_credit_usd`. Changing the CHECK rebuilds `orders` in 0002, and the migration test
+must show every existing order unchanged.
 
 ## Changed: `store_settings`
 
@@ -95,5 +107,9 @@ perDiemLeft = max(0, Σ payments of the connected per diem − Σ his order tota
 - `copy.meter`: the label, the achievement state, and the account line
 - `copy.celebration`: the $0 achievement on the order confirmation
 - `copy.shame.labels.disconnect`: shamed "Disconnect (and settle for less)", neutral "Disconnect"
-- `copy.codes` gains `INVALID_STREAM_NAME`, `INVALID_STREAM_AMOUNT`, `INVALID_WINDOW`,
+- `copy.checkout` gains: apply "Apply my Flash Credit ($X available)", remove "Remove Flash Credit",
+  the breakdown lines, the confirmation "Put the remaining $Y on my card", and the $0-balance prompt.
+  `copy.order.paidSplit` covers the confirmation's payment line.
+- `copy.codes` gains `SPLIT_CONFIRMATION_REQUIRED` and `CREDIT_CHANGED` (and retires
+  `INSUFFICIENT_FLASH_CREDIT`), plus `INVALID_STREAM_NAME`, `INVALID_STREAM_AMOUNT`, `INVALID_WINDOW`,
   `PER_DIEM_EXISTS`, `STREAM_NOT_FOUND` and `NOT_CASHABLE`

@@ -4,11 +4,11 @@
 
 **Created**: 2026-10-14
 
-**Status**: Draft (clarifications Q1–Q3 resolved 2026-10-14)
+**Status**: Draft (clarifications Q1–Q3 resolved 2026-10-14; split payment added by the owner)
 
 **Input**: User description: "Revenue streams and the per diem drain (ROADMAP 003). (1) Revenue streams: a signed-in shopper can connect "revenue streams", recurring sources of money starting with his work per diem, that automatically fund his Flash Credit, so the money goes straight to shirts without him having to think about it. (2) Per diem drain: the store tracks how much of his per diem is left (what the per diem gave him minus what he has spent at Dan Flashes) on a prominent meter, and celebrates loudly, as if it were an achievement, when it hits $0. Per the constitution, the per diem drain is a manipulation tactic and needs its own owner on/off switch. Flash Credit stays a ledger: every auto-funding is its own ledger entry and the balance never goes negative. Money is exact dollars and cents. There is no real bank or payroll connection: revenue streams are props, like the faux card."
 
-**Builds on**: 001-core-storefront (accounts, Flash Credit and its history, orders) and
+**Builds on**: 001-core-storefront (accounts, Flash Credit and its history, orders, checkout) and
 002-brand-pages-and-shaming (store switches, confirmshaming labels).
 
 ## Clarifications
@@ -24,6 +24,10 @@
   - **Whenever I want** (ad hoc): pays each time he presses "Cash in".
 - Q: Is a per diem ongoing or tied to a trip? → A: **Every stream has a set beginning and end, with
   the option to make it ongoing** (no end). Payments only happen inside that window.
+- Owner addition, after analysis: **a shopper can split a payment between Flash Credit and a card**,
+  and can remove the applied credit before placing the order. When his credit doesn't cover the total,
+  the store asks him to confirm putting the rest on a card. This replaces 001 FR-027's "Flash Credit
+  only if it covers the whole total".
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -106,6 +110,44 @@ feature, but it needs P1's money to measure.
 
 ---
 
+### User Story 3 - Split the Bill (Priority: P3)
+
+His per diem left him $155.39 of Flash Credit, and the shirt he wants is $344.61. At checkout he
+applies his Flash Credit. The store takes $155.39 off and shows $189.22 still to pay, and asks him to
+confirm putting the rest on a card. He confirms, enters the card, and the shirt is his. If he'd rather
+not, he removes the credit and pays it all by card, or walks away with his credit untouched.
+
+**Why this priority**: without it, Flash Credit is all or nothing, so a small per diem can never touch
+a complicated shirt. It makes P1's money spendable, but P1 and P2 work without it.
+
+**Independent Test**: with a Flash Credit balance smaller than the order total, apply the credit.
+Confirm that:
+- checkout shows the credit applied and the remainder
+- the order can't be placed until he confirms the split and enters a valid card
+- removing the credit puts the whole total back on the card
+- a placed split order deducts exactly the applied credit and records both parts
+
+**Acceptance Scenarios**:
+
+1. **Given** a balance that covers the order, **When** he applies his Flash Credit, **Then** it pays
+   the whole total, and no card is needed (as in 001).
+2. **Given** a balance above $0 but below the total, **When** he applies his Flash Credit, **Then**
+   checkout shows his whole balance applied and the amount left to pay, and asks him to confirm
+   putting that amount on a card.
+3. **Given** the split shown, **When** he tries to place the order without confirming it or without a
+   valid card, **Then** nothing is placed and nothing is deducted.
+4. **Given** he confirms and his card is valid, **When** he places the order, **Then** exactly the
+   applied credit comes off his Flash Credit, the card covers the rest, and the order shows both parts.
+5. **Given** credit applied, **When** he removes it before placing, **Then** the whole total goes back
+   on the card and his balance is untouched.
+6. **Given** his balance changed after checkout showed the split (a payday landed, or another tab
+   spent it), **When** he places the order, **Then** nothing is charged, and he's shown the new split
+   to confirm.
+7. **Given** a $0.00 balance, **When** he checks out, **Then** applying credit isn't offered; he's
+   pointed to top up or connect a revenue stream instead.
+
+---
+
 ### Edge Cases
 
 - **Paying by card**: an order paid by faux card counts against the per diem, the same as Flash
@@ -126,6 +168,10 @@ feature, but it needs P1's money to measure.
 - **The owner changes the pay period**: payments already made stay. Payments still to come follow the
   new period.
 - **Signed out**: guests see no meter.
+- **Credit exactly equal to the total**: it's a plain Flash Credit order. No split and no confirmation.
+- **An invalid card in a split**: nothing is placed and no credit is deducted.
+- **The per diem and a split order**: the meter counts the full order total, however it was split.
+- **Replaying a split checkout** (a double submit): it returns the same order, charged once.
 
 ## Requirements *(mandatory)*
 
@@ -181,11 +227,28 @@ feature, but it needs P1's money to measure.
 - **FR-017**: While the drain is off, no meter and no celebration may appear anywhere. Streams and
   Flash Credit MUST behave identically either way.
 
+**Split payment**
+
+- **FR-018**: Checkout MUST let a signed-in shopper with a balance above $0.00 apply his Flash Credit
+  to the order. Applying uses his whole balance, up to the order total.
+- **FR-019**: When the applied credit covers the total, the order is paid by Flash Credit alone. When
+  it doesn't, the remainder MUST be paid by faux card, and he MUST explicitly confirm the split (the
+  credit applied and the amount going on the card) before the order can be placed.
+- **FR-020**: He MUST be able to remove the applied credit at any time before placing the order. The
+  whole total then goes on the card, and nothing is deducted.
+- **FR-021**: At placement the store MUST recompute the split from his live balance. If it differs from
+  what he confirmed, nothing is charged and he is shown the new split to confirm.
+- **FR-022**: A split order MUST deduct exactly the applied credit as one Flash Credit spend linked to
+  the order, and keep only the card's brand and last four digits for the rest. The confirmation and his
+  order history MUST show both parts. The balance never goes negative.
+- **FR-023**: This replaces 001 FR-027 for partial coverage. Paying by Flash Credit alone still requires
+  a balance that covers the whole total.
+
 **Voice**
 
-- **FR-018**: All new copy MUST use the Dan Flashes voice from constitution I and never explain the
+- **FR-024**: All new copy MUST use the Dan Flashes voice from constitution I and never explain the
   joke. That covers preset names, schedule names, the meter, the celebration, the disconnect labels,
-  "Cash in", and history entries.
+  "Cash in", history entries, and the checkout split.
 
 ### Key Entities
 
@@ -197,6 +260,8 @@ feature, but it needs P1's money to measure.
 - **Per Diem Meter** (derived, never stored): the per diem paid in, minus Dan Flashes spending since
   that per diem started, floored at $0.00.
 - **Store Settings** (from 001/002) gains the per diem drain switch and the pay period.
+- **Order** (from 001) can now be paid by card, by Flash Credit, or **split**, and records how much
+  Flash Credit it used.
 - **Brand Copy** gains the preset names, the schedule names, the meter, the celebration, the
   disconnect labels, "Cash in", and the history wording.
 
@@ -217,6 +282,9 @@ feature, but it needs P1's money to measure.
 - **SC-006**: With the drain off, 0 meters and 0 celebrations appear on any page.
 - **SC-007**: 0 fields anywhere ask for bank, routing, or payroll details.
 - **SC-008**: When 5 people watch the $0 celebration cold, at least 4 laugh or call it "way too much."
+- **SC-009**: In 100% of split orders, the credit deducted plus the card portion equals the order total
+  to the cent, and the balance drops by exactly the credit applied.
+- **SC-010**: 0 split orders are placed without the shopper confirming the exact amounts he was shown.
 
 ## Assumptions
 
@@ -237,5 +305,9 @@ feature, but it needs P1's money to measure.
 - **Revenue streams are a store feature, not a manipulation tactic**: they have no switch of their
   own. The per diem drain is the tactic, and it has one.
 - **Changing a stream**: disconnect and reconnect. There is no editing in this feature.
+- **Applying credit is all or nothing per order**: his whole balance, up to the total. There's no
+  partial amount to type.
+- **Reversing is before placement only**: after an order is placed, refunds remain out of scope.
+- **The card is the only other payment method.**
 - **Out of scope**: real banks or payroll, refunds, the Admin Console (008), Flash Mode and the Pipes
   background (006), and the urgency engine (004).

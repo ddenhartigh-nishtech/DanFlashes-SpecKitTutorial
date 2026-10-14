@@ -4,7 +4,7 @@ import { addShirt, signUp, uniqueEmail, visible } from "./helpers";
 test.describe("US3 — checkout gate, account, faux card", () => {
   test("guest cart → gate → sign up → card checkout → history", async ({ page }, info) => {
     await addShirt(page, "geo-riot", "L");
-    await addShirt(page, "beige-regret", "S");
+    await addShirt(page, "paisley-panic", "S");
 
     // The gate.
     await page.goto("/checkout");
@@ -17,7 +17,7 @@ test.describe("US3 — checkout gate, account, faux card", () => {
     await expect(page).toHaveURL(/\/checkout$/);
     const summary = visible(page.getByTestId("order-summary"));
     await expect(summary.getByRole("link", { name: "Geo Riot" })).toBeVisible();
-    await expect(summary.getByRole("link", { name: "Beige Regret" })).toBeVisible();
+    await expect(summary.getByRole("link", { name: "Paisley Panic" })).toBeVisible();
     await expect(visible(page.getByTestId("shipping"))).toHaveText("$0.00");
     await expect(visible(page.getByTestId("tax"))).toHaveText("$0.00");
     const subtotal = await visible(page.getByTestId("subtotal")).innerText();
@@ -58,7 +58,7 @@ test.describe("US3 — checkout gate, account, faux card", () => {
     await page.goto("/sign-up");
     await signUp(page, uniqueEmail(info.project.name));
     await expect(page).toHaveURL(/\/account$/);
-    await visible(page.getByRole("button", { name: "Sign out" })).click();
+    await visible(page.getByRole("button", { name: "Sign out (go back to being normal)" })).click();
     await expect(page).toHaveURL(/\/$/);
     await page.goto("/account");
     await expect(page).toHaveURL(/\/sign-in\?next=/);

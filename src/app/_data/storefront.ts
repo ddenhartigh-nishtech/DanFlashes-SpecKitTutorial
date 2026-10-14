@@ -4,6 +4,7 @@ import { getPlaceholderUrl, getSettings } from "@/lib/data/settings";
 import { getShirtBySlug, listCatalogShirts } from "@/lib/data/shirts";
 import { listTiers } from "@/lib/data/tiers";
 import { getDb } from "@/lib/db/client";
+import { buildLadder } from "@/lib/shaming/ladder";
 
 /**
  * Request-time catalog read for pages. `connection()` is required: better-sqlite3 is synchronous,
@@ -21,12 +22,22 @@ export async function loadStorefront() {
   };
 }
 
-/** One shirt by slug (any status) plus the placeholder URL. Request-time; use inside <Suspense>. */
+/**
+ * One shirt by slug (any status), the placeholder URL, and the shaming switches. For a BLAND shirt
+ * while shaming is on, also the ladder of complicated shirts to recommend instead (002 US1).
+ * Request-time; use inside <Suspense>.
+ */
 export async function loadShirt(slug: string) {
   await connection();
   const db = getDb();
+  const settings = getSettings(db);
+  const shirt = getShirtBySlug(db, slug);
+  const shamed = Boolean(shirt?.tier.isBland && settings.blandShaming);
   return {
-    shirt: getShirtBySlug(db, slug),
-    placeholderUrl: getPlaceholderUrl(db, getSettings(db)),
+    shirt,
+    placeholderUrl: getPlaceholderUrl(db, settings),
+    blandShaming: settings.blandShaming,
+    confirmshaming: settings.confirmshaming,
+    ladder: shamed ? buildLadder(listCatalogShirts(db)) : [],
   };
 }

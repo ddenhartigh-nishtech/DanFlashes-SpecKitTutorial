@@ -14,13 +14,13 @@ describe("cart audit (FR-016)", () => {
     const { db, sqlite } = createSeededTestDb();
     const { id } = getOrCreateCart(db, { cartId: null, userId: null });
     addItem(db, id, { slug: "geo-riot", size: "M" });
-    addItem(db, id, { slug: "beige-regret", size: "L" });
+    addItem(db, id, { slug: "fractal-fury", size: "L" });
     sqlite.prepare("UPDATE shirts SET status = 'inactive' WHERE slug = 'geo-riot'").run();
 
     expect(auditCart(db, id)).toEqual([
-      { slug: "geo-riot", name: "Geo Riot", size: "M", quantity: 1 },
+      { slug: "geo-riot", name: "Geo Riot", size: "M", quantity: 1, reason: "retired" },
     ]);
-    expect(getCartView(db, id).lines.map((l) => l.shirt.slug)).toEqual(["beige-regret"]);
+    expect(getCartView(db, id).lines.map((l) => l.shirt.slug)).toEqual(["fractal-fury"]);
   });
 
   it("getCartView runs the audit first and reports what it removed", () => {
@@ -31,7 +31,9 @@ describe("cart audit (FR-016)", () => {
 
     const view = getCartView(db, id);
     expect(view.lines).toEqual([]);
-    expect(view.removed).toEqual([{ slug: "geo-riot", name: "Geo Riot", size: "M", quantity: 1 }]);
+    expect(view.removed).toEqual([
+      { slug: "geo-riot", name: "Geo Riot", size: "M", quantity: 1, reason: "retired" },
+    ]);
     expect(getCartView(db, id).removed).toEqual([]); // reported once, then gone
   });
 });

@@ -7,6 +7,7 @@ import { ShirtBadge } from "@/components/ShirtBadge";
 import { ZoomViewer } from "@/components/ZoomViewer";
 import { copy } from "@/lib/copy";
 import { toShopperShirt } from "@/lib/data/shirts";
+import { shameFor } from "@/lib/shaming/loop";
 
 export default function ShirtPage({ params }: PageProps<"/shirts/[slug]">) {
   return (
@@ -18,7 +19,13 @@ export default function ShirtPage({ params }: PageProps<"/shirts/[slug]">) {
 
 async function ShirtDetail({ params }: Pick<PageProps<"/shirts/[slug]">, "params">) {
   const { slug } = await params;
-  const { shirt: catalogShirt, placeholderUrl } = await loadShirt(slug);
+  const {
+    shirt: catalogShirt,
+    placeholderUrl,
+    blandShaming,
+    confirmshaming,
+    ladder,
+  } = await loadShirt(slug);
   if (!catalogShirt) notFound();
   const shirt = toShopperShirt(catalogShirt);
   const retired = shirt.status === "inactive";
@@ -49,7 +56,13 @@ async function ShirtDetail({ params }: Pick<PageProps<"/shirts/[slug]">, "params
         </div>
         {retired ? null : <PriceTag priceUsd={shirt.finalPriceUsd} size="lg" />}
         <p className="bg-paper text-lg">{shirt.description}</p>
-        {retired ? null : <AddToCart slug={shirt.slug} />}
+        {retired ? null : (
+          <AddToCart
+            slug={shirt.slug}
+            placeholderUrl={placeholderUrl}
+            shame={shameFor({ isBland: shirt.tier.isBland, blandShaming, confirmshaming }, ladder)}
+          />
+        )}
       </div>
     </article>
   );

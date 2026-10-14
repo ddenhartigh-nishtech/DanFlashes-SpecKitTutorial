@@ -100,6 +100,8 @@ describe("validateSettings", () => {
     flashCreditPresetsUsd: ["500.00", "1000.00", "5000.00"],
     mediaBaseUrl: "",
     placeholderMediaId: 1,
+    blandShaming: true,
+    confirmshaming: true,
   };
 
   it("accepts the defaults and an https base URL", () => {
@@ -119,6 +121,10 @@ describe("validateSettings", () => {
     ["flashCreditPresetsUsd", { flashCreditPresetsUsd: ["0.00"] }],
     ["mediaBaseUrl", { mediaBaseUrl: "ftp://files.example.com" }],
     ["mediaBaseUrl", { mediaBaseUrl: "C:/media" }],
+    ["blandShaming", { blandShaming: "yes" }],
+    ["blandShaming", { blandShaming: undefined }],
+    ["confirmshaming", { confirmshaming: 1 }],
+    ["confirmshaming", { confirmshaming: undefined }],
   ])("flags an invalid %s", (field, patch) => {
     expect(fields(validateSettings({ ...settings, ...patch } as StoreSettings))).toContain(field);
   });

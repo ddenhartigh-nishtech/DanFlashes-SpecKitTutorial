@@ -1,15 +1,20 @@
 /**
  * Carts (data-model: carts, cart_items). Carts never store prices — every view resolves them live
  * from the catalog (FR-028). Lines for deactivated shirts are removed by the cart audit (FR-016).
+ * While bland-shirt shaming is on, a BLAND shirt can't be in a cart at all (002 FR-010): adds and
+ * quantity raises are refused, sign-in merges leave bland lines behind, and the audit pulls any
+ * that are already there.
  */
 import { randomUUID } from "node:crypto";
 import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { MAX_QUANTITY } from "@/lib/cart/limits";
 import { SIZES, type Size } from "@/lib/catalog/types";
+import { getSettings } from "@/lib/data/settings";
 import {
   findShirtRef,
   getCatalogShirtsByIds,
   getShirtRefsByIds,
+  isBlandShirt,
   toShopperShirt,
   type CatalogShirt,
   type ShopperShirt,
@@ -22,7 +27,12 @@ import type { Err, Ok } from "@/lib/result";
 export { MAX_QUANTITY };
 
 export type CartErrorCode =
-  "SIZE_REQUIRED" | "SHIRT_NOT_FOUND" | "SHIRT_INACTIVE" | "NOT_IN_CART" | "INVALID_QUANTITY";
+  | "SIZE_REQUIRED"
+  | "SHIRT_NOT_FOUND"
+  | "SHIRT_INACTIVE"
+  | "NOT_IN_CART"
+  | "INVALID_QUANTITY"
+  | "BLAND_REFUSED";
 
 export type CartResult = Ok<{ itemCount: number }> | Err<CartErrorCode>;
 
@@ -31,11 +41,15 @@ export interface CartOwner {
   userId: number | null;
 }
 
+/** Why the audit pulled a line: the shirt was retired, or it's bland while shaming is on. */
+export type RemovalReason = "retired" | "bland";
+
 export interface RemovedLine {
   slug: string;
   name: string;
   size: Size;
   quantity: number;
+  reason: RemovalReason;
 }
 
 export interface CartLine {
@@ -113,6 +127,7 @@ export function addItem(db: Db, cartId: string, input: { slug: string; size: str
   const shirt = findShirtRef(db, input.slug);
   if (!shirt) return { ok: false, code: "SHIRT_NOT_FOUND" };
   if (shirt.status !== "active") return { ok: false, code: "SHIRT_INACTIVE" };
+  if (refusesBland(db, shirt.id)) return { ok: false, code: "BLAND_REFUSED" };
 
   db.insert(cartItems)
     .values({ cartId, shirtId: shirt.id, size: input.size, quantity: 1 })
@@ -125,7 +140,12 @@ export function addItem(db: Db, cartId: string, input: { slug: string; size: str
   return { ok: true, itemCount: itemCount(db, cartId) };
 }
 
-function lineWhere(db: Db, cartId: string, slug: string, size: string) {
+/** Bland-shirt shaming (FR-010): while it's on, a BLAND shirt may not enter or grow in a cart. */
+function refusesBland(db: Db, shirtId: number): boolean {
+  return getSettings(db).blandShaming && isBlandShirt(db, shirtId);
+}
+
+function findLine(db: Db, cartId: string, slug: string, size: string) {
   const shirt = findShirtRef(db, slug);
   if (!shirt || !isSize(size)) return null;
   const where = and(
@@ -133,7 +153,8 @@ function lineWhere(db: Db, cartId: string, slug: string, size: string) {
     eq(cartItems.shirtId, shirt.id),
     eq(cartItems.size, size),
   );
-  return db.select().from(cartItems).where(where).get() ? where : null;
+  const line = db.select().from(cartItems).where(where).get();
+  return line ? { where, line } : null;
 }
 
 export function updateItem(
@@ -144,8 +165,12 @@ export function updateItem(
   if (!Number.isInteger(input.quantity) || input.quantity < 0 || input.quantity > MAX_QUANTITY) {
     return { ok: false, code: "INVALID_QUANTITY" };
   }
-  const where = lineWhere(db, cartId, input.slug, input.size);
-  if (!where) return { ok: false, code: "NOT_IN_CART" };
+  const found = findLine(db, cartId, input.slug, input.size);
+  if (!found) return { ok: false, code: "NOT_IN_CART" };
+  const { where, line } = found;
+  if (input.quantity > line.quantity && refusesBland(db, line.shirtId)) {
+    return { ok: false, code: "BLAND_REFUSED" };
+  }
   if (input.quantity === 0) db.delete(cartItems).where(where).run();
   else db.update(cartItems).set({ quantity: input.quantity }).where(where).run();
   touch(db, cartId);
@@ -160,7 +185,7 @@ export function removeItem(
   return updateItem(db, cartId, { ...input, quantity: 0 });
 }
 
-/** Delete lines for deactivated shirts and report them (FR-016). */
+/** Delete lines for deactivated shirts, and bland ones while shaming is on, and report them. */
 export function auditCart(db: Db, cartId: string | null): RemovedLine[] {
   if (!cartId) return [];
   const lines = db.select().from(cartItems).where(eq(cartItems.cartId, cartId)).all();
@@ -168,16 +193,27 @@ export function auditCart(db: Db, cartId: string | null): RemovedLine[] {
     db,
     lines.map((l) => l.shirtId),
   );
-  const doomed = lines
-    .map((line) => ({ line, ref: refs.get(line.shirtId) }))
-    .filter(({ ref }) => !ref || ref.status === "inactive")
-    .map(({ line, ref }) => ({
-      shirtId: line.shirtId,
-      slug: ref?.slug ?? "",
-      name: ref?.name ?? "",
-      size: line.size,
-      quantity: line.quantity,
-    }));
+  const blandShaming = getSettings(db).blandShaming;
+  const reasonFor = (shirtId: number): RemovalReason | null => {
+    const ref = refs.get(shirtId);
+    if (!ref || ref.status === "inactive") return "retired";
+    return blandShaming && isBlandShirt(db, shirtId) ? "bland" : null;
+  };
+  const doomed = lines.flatMap((line) => {
+    const reason = reasonFor(line.shirtId);
+    if (!reason) return [];
+    const ref = refs.get(line.shirtId);
+    return [
+      {
+        shirtId: line.shirtId,
+        slug: ref?.slug ?? "",
+        name: ref?.name ?? "",
+        size: line.size,
+        quantity: line.quantity,
+        reason,
+      },
+    ];
+  });
   if (doomed.length === 0) return [];
   db.delete(cartItems)
     .where(
@@ -190,7 +226,13 @@ export function auditCart(db: Db, cartId: string | null): RemovedLine[] {
       ),
     )
     .run();
-  return doomed.map(({ slug, name, size, quantity }) => ({ slug, name, size, quantity }));
+  return doomed.map(({ slug, name, size, quantity, reason }) => ({
+    slug,
+    name,
+    size,
+    quantity,
+    reason,
+  }));
 }
 
 /** Current lines with live catalog prices, newest first. Does not audit. */
@@ -248,6 +290,22 @@ export function mergeGuestCart(db: Db, guestCartId: string | null, userId: numbe
   if (!guest) return;
 
   db.transaction(() => {
+    // Bland-shirt shaming (FR-010): the guest's bland lines stay behind.
+    if (getSettings(db).blandShaming) {
+      const bland = db
+        .select({ shirtId: cartItems.shirtId })
+        .from(cartItems)
+        .where(eq(cartItems.cartId, guest))
+        .all()
+        .map((r) => r.shirtId)
+        .filter((id) => isBlandShirt(db, id));
+      if (bland.length) {
+        db.delete(cartItems)
+          .where(and(eq(cartItems.cartId, guest), inArray(cartItems.shirtId, bland)))
+          .run();
+      }
+    }
+
     const mine = findCartId(db, { cartId: null, userId });
     if (!mine) {
       db.update(carts).set({ userId }).where(eq(carts.id, guest)).run();

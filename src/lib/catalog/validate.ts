@@ -63,6 +63,8 @@ const settingsSchema = z.object({
     z.string().regex(/^https?:\/\/\S+$/, "Must be http(s)://"),
   ]),
   placeholderMediaId: z.number().int().nullable(),
+  blandShaming: z.boolean(),
+  confirmshaming: z.boolean(),
 });
 
 function toIssues(error: z.ZodError): Issue[] {

@@ -135,6 +135,8 @@ export const storeSettings = sqliteTable(
     placeholderMediaId: integer("placeholder_media_id").references(() => media.id, {
       onDelete: "restrict",
     }),
+    blandShaming: integer("bland_shaming", { mode: "boolean" }).notNull().default(true),
+    confirmshaming: integer("confirmshaming", { mode: "boolean" }).notNull().default(true),
   },
   (t) => [
     check("store_settings_singleton", sql`${t.id} = 1`),

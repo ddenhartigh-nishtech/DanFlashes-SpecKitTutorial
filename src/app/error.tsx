@@ -11,7 +11,11 @@ export default function Error({
   retry: () => void;
 }) {
   useEffect(() => {
-    console.error(error);
+    console.error(
+      `[Dan Flashes] Server error${error.digest ? ` (digest ${error.digest})` : ""}. ` +
+        "The terminal running the server says what broke and how to fix it.",
+      error,
+    );
   }, [error]);
 
   return (

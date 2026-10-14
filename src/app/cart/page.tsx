@@ -9,12 +9,14 @@ import { PriceTag } from "@/components/PriceTag";
 import { ShirtBadge } from "@/components/ShirtBadge";
 import { ShirtCard } from "@/components/ShirtCard";
 import { ShirtImage } from "@/components/ShirtImage";
-import { getCartView, type CartLine, type RemovedLine } from "@/lib/cart/cart";
+import { getCartView, type CartLine, type RemovalReason, type RemovedLine } from "@/lib/cart/cart";
 import { mostExpensive } from "@/lib/catalog/listing";
 import { sortTiers } from "@/lib/catalog/tiers";
 import { copy } from "@/lib/copy";
+import { getSettings } from "@/lib/data/settings";
 import { toShopperShirt } from "@/lib/data/shirts";
 import { getDb } from "@/lib/db/client";
+import { labelFor } from "@/lib/shaming/labels";
 
 export const metadata: Metadata = { title: copy.cart.title };
 
@@ -32,7 +34,9 @@ export default function CartPage() {
 }
 
 async function CartContents() {
-  const view = getCartView(getDb(), await currentCartId());
+  const db = getDb();
+  const view = getCartView(db, await currentCartId());
+  const removeLabel = labelFor("remove", getSettings(db).confirmshaming);
   const { shirts, tiers, placeholderUrl } = await loadStorefront();
 
   if (view.lines.length === 0) {
@@ -79,6 +83,7 @@ async function CartContents() {
               key={`${line.shirt.slug}-${line.size}`}
               line={line}
               placeholderUrl={placeholderUrl}
+              removeLabel={removeLabel}
             />
           ))}
         </ul>
@@ -99,27 +104,47 @@ async function CartContents() {
   );
 }
 
+const REMOVAL_NOTICES: Record<RemovalReason, string> = {
+  retired: copy.cart.removedNotice,
+  bland: copy.cart.blandRemovedNotice,
+};
+
 function RemovedNotice({ removed }: { removed: RemovedLine[] }) {
   if (removed.length === 0) return null;
+  const groups = (Object.keys(REMOVAL_NOTICES) as RemovalReason[])
+    .map((reason) => ({ reason, lines: removed.filter((r) => r.reason === reason) }))
+    .filter((g) => g.lines.length > 0);
   return (
     <div
       role="status"
       data-testid="audit-notice"
-      className="bg-safety-orange border-ink border-4 p-3 font-bold"
+      className="bg-safety-orange border-ink flex flex-col gap-2 border-4 p-3 font-bold"
     >
-      <p>{copy.cart.removedNotice}</p>
-      <ul className="mt-1 list-disc pl-6">
-        {removed.map((r) => (
-          <li key={`${r.slug}-${r.size}`}>
-            {r.name} ({r.size} × {r.quantity})
-          </li>
-        ))}
-      </ul>
+      {groups.map(({ reason, lines }) => (
+        <div key={reason} data-reason={reason}>
+          <p>{REMOVAL_NOTICES[reason]}</p>
+          <ul className="mt-1 list-disc pl-6">
+            {lines.map((r) => (
+              <li key={`${r.slug}-${r.size}`}>
+                {r.name} ({r.size} × {r.quantity})
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
     </div>
   );
 }
 
-function CartLineRow({ line, placeholderUrl }: { line: CartLine; placeholderUrl: string | null }) {
+function CartLineRow({
+  line,
+  placeholderUrl,
+  removeLabel,
+}: {
+  line: CartLine;
+  placeholderUrl: string | null;
+  removeLabel: string;
+}) {
   const image = line.shirt.images[0];
   return (
     <li
@@ -157,7 +182,7 @@ function CartLineRow({ line, placeholderUrl }: { line: CartLine; placeholderUrl:
               type="submit"
               className="font-display min-h-11 px-3 text-sm uppercase underline decoration-4 underline-offset-4"
             >
-              {copy.cart.remove}
+              {removeLabel}
             </button>
           </form>
           <span className="ml-auto">

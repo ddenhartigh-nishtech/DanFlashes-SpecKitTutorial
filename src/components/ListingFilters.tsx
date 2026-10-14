@@ -6,10 +6,14 @@ import { copy } from "@/lib/copy";
 const fieldClass =
   "mt-1 min-h-11 w-full border-4 border-ink bg-paper px-2 font-semibold focus:border-hot-pink";
 
-/** A plain GET form: works without JavaScript and keeps every filter in a shareable URL. */
+/**
+ * A plain GET form: works without JavaScript and keeps every filter in a shareable URL. Keyed on
+ * the query so its uncontrolled inputs start over whenever the URL changes (Reset, back, forward).
+ */
 export function ListingFilters({ tiers, query }: { tiers: Tier[]; query: ListingQuery }) {
   return (
     <form
+      key={JSON.stringify(query)}
       action="/shirts"
       method="get"
       className="flex flex-col gap-5"

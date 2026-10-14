@@ -18,12 +18,28 @@ async function expectNoScore(page: Page, where: string) {
 test("no shopper-facing page reveals a complexity score or scrolls sideways", async ({
   page,
 }, info) => {
+  test.slow(); // ten pages, a sign-up (bcrypt), and a checkout: more than 60 s on a busy machine
   // FR-034's floor: the smallest supported phone width.
   if (info.project.name === "phone") await page.setViewportSize({ width: 360, height: 780 });
-  for (const path of ["/", "/shirts", "/shirts/geo-riot", "/shirts/last-seasons-swirl", "/cart"]) {
+  for (const path of [
+    "/",
+    "/shirts",
+    "/shirts/geo-riot",
+    "/shirts/last-seasons-swirl",
+    "/cart",
+    "/about",
+  ]) {
     await page.goto(path);
     await expectNoScore(page, path);
   }
+
+  // A bland shirt's page ships the shaming ladder (other shirts): still no scores, dialog open.
+  await page.goto("/shirts/beige-regret");
+  await visible(page.locator("label").filter({ hasText: /^S$/ })).click();
+  await visible(page.getByRole("button", { name: "Add to cart" })).click();
+  await expect(visible(page.getByTestId("shame-dialog"))).toBeVisible();
+  await expectNoScore(page, "/shirts/beige-regret (shame dialog open)");
+  await page.keyboard.press("Escape");
 
   await addShirt(page, "dans-masterpiece", "M");
   await page.goto("/cart");

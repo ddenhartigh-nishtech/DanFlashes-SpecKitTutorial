@@ -21,6 +21,8 @@ export function getSettings(db: Db): StoreSettings {
     flashCreditPresetsUsd: row.flashCreditPresetsUsd,
     mediaBaseUrl: row.mediaBaseUrl,
     placeholderMediaId: row.placeholderMediaId,
+    blandShaming: row.blandShaming,
+    confirmshaming: row.confirmshaming,
   };
 }
 
@@ -39,6 +41,8 @@ export function saveSettings(db: Db, settings: StoreSettings): void {
     flashCreditPresetsUsd: settings.flashCreditPresetsUsd,
     mediaBaseUrl: settings.mediaBaseUrl,
     placeholderMediaId: settings.placeholderMediaId,
+    blandShaming: settings.blandShaming,
+    confirmshaming: settings.confirmshaming,
   };
   db.insert(storeSettings)
     .values({ id: 1, ...values })

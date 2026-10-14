@@ -13,6 +13,7 @@ import { getDb } from "@/lib/db/client";
 import { getBalanceUsd, listEntries } from "@/lib/flash-credit/ledger";
 import { formatUsd } from "@/lib/money";
 import { listOrdersForUser, orderNumber } from "@/lib/orders/orders";
+import { labelFor } from "@/lib/shaming/labels";
 
 export const metadata: Metadata = { title: copy.account.title };
 
@@ -49,7 +50,7 @@ async function AccountContents() {
             type="submit"
             className="font-display border-ink min-h-11 border-4 px-4 uppercase"
           >
-            {copy.auth.signOut}
+            {labelFor("signOut", settings.confirmshaming)}
           </button>
         </form>
       </div>

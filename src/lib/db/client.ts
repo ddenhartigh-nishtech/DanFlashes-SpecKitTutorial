@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import Database from "better-sqlite3";
 import { drizzle, type BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
+import { assertCurrent, journalStamp } from "./health";
 import * as schema from "./schema";
 
 export type Db = BetterSQLite3Database<typeof schema>;
@@ -24,10 +25,22 @@ export function openDatabase(file: string = databasePath()): { sqlite: Sqlite; d
 }
 
 // One connection per server process, kept on globalThis so dev hot-reloads don't leak handles.
-const globalForDb = globalThis as unknown as { __danflashesDb?: { sqlite: Sqlite; db: Db } };
+const globalForDb = globalThis as unknown as {
+  __danflashesDb?: { sqlite: Sqlite; db: Db; checkedJournal?: number };
+};
 
-/** The app's shared connection. Scripts and tests open their own with {@link openDatabase}. */
+/**
+ * The app's shared connection. Scripts and tests open their own with {@link openDatabase}.
+ * Throws, with the fix, while the database is behind the code; re-checked whenever the migration
+ * journal changes (a pull), so a running dev server notices and recovers after `db:migrate`.
+ */
 export function getDb(): Db {
   globalForDb.__danflashesDb ??= openDatabase();
-  return globalForDb.__danflashesDb.db;
+  const conn = globalForDb.__danflashesDb;
+  const stamp = journalStamp();
+  if (conn.checkedJournal !== stamp) {
+    assertCurrent(conn.sqlite, databasePath());
+    conn.checkedJournal = stamp;
+  }
+  return conn.db;
 }

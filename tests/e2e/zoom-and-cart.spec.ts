@@ -61,8 +61,29 @@ test.describe("US2 — zoom, enhance, add to cart", () => {
     await expect(line.getByTestId("price")).toHaveText("$1,033.83");
 
     // Remove empties the cart and brings back the pitch.
-    await line.getByRole("button", { name: "Remove" }).click();
+    await line.getByRole("button", { name: "Remove (and lose your edge)" }).click();
     await expect(visible(page.getByTestId("empty-cart"))).toBeVisible();
+  });
+
+  test("clicking the shirt enhances it, like ENHANCE; dragging only pans", async ({ page }) => {
+    await page.goto("/shirts/geo-riot");
+    const frame = visible(page.getByTestId("zoom-frame"));
+    await expect(frame).toHaveAttribute("data-scale", "1.00");
+    // Retry only until hydration attaches the handler; a click before that does nothing.
+    await expect(async () => {
+      await frame.click();
+      await expect(frame).not.toHaveAttribute("data-scale", "1.00", { timeout: 1_000 });
+    }).toPass();
+    await expect(frame).toHaveAttribute("data-scale", "1.50");
+    await frame.click();
+    await expect(frame).toHaveAttribute("data-scale", "2.25");
+
+    const box = (await frame.boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width / 2 + 60, box.y + box.height / 2 + 40, { steps: 6 });
+    await page.mouse.up();
+    await expect(frame).toHaveAttribute("data-scale", "2.25");
   });
 
   test("a retired shirt shows no price and no Add to cart", async ({ page }) => {

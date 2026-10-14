@@ -191,4 +191,11 @@ describe("mostExpensive", () => {
     expect(mostExpensive(SHIRTS)?.slug).toBe("masterpiece");
     expect(mostExpensive([SHIRTS[6]])).toBeNull();
   });
+
+  it("skips a retired priciest shirt for the next priciest active one (Exhibit A)", () => {
+    const retiredMasterpiece = SHIRTS.map((s) =>
+      s.slug === "masterpiece" ? { ...s, status: "inactive" as const } : s,
+    );
+    expect(mostExpensive(retiredMasterpiece)?.slug).toBe("tugger");
+  });
 });

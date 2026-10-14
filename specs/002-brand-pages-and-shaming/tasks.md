@@ -190,23 +190,23 @@ that order.
 
 ### Tests for User Story 3 (write first; they must fail)
 
-- [ ] T029 [P] [US3] e2e journey in tests/e2e/about.spec.ts (desktop and phone):
+- [X] T029 [P] [US3] e2e journey in tests/e2e/about.spec.ts (desktop and phone):
   - **Navigation**: from `/` and from a shirt page, the header's "About" link opens `/about`. On phone, open Menu first.
   - **Bio**: the three bio sections are visible.
   - **Exhibit A**: the `exhibit-a` section shows Dan's Masterpiece with its tier badge and price, and its link opens `/shirts/dans-masterpiece`.
-- [ ] T030 [P] [US3] Add a case to tests/unit/listing.test.ts: when the priciest shirt is inactive, `mostExpensive` returns the next priciest active shirt (Edge Case: Exhibit A deactivated)
+- [X] T030 [P] [US3] Add a case to tests/unit/listing.test.ts: when the priciest shirt is inactive, `mostExpensive` returns the next priciest active shirt (Edge Case: Exhibit A deactivated)
 
 ### Implementation for User Story 3
 
-- [ ] T031 [US3] Add to src/lib/copy.ts, in Dan's egocentric voice and never explaining the joke (FR-002, FR-015):
+- [X] T031 [US3] Add to src/lib/copy.ts, in Dan's egocentric voice and never explaining the joke (FR-002, FR-015):
   - `copy.nav.about` "About"
   - `copy.about`: `title`, `heading`, three `sections` (`{ heading, body }`: who he is, the method — complexity, always more complexity — and why the prices are generous), and `exhibitA` (heading plus a one-line intro)
-- [ ] T032 [US3] Create src/app/about/page.tsx:
+- [X] T032 [US3] Create src/app/about/page.tsx:
   - `metadata.title` from `copy.about.title`
   - the bio sections rendered statically from `copy.about`, so they're in the static shell (R6, constitution VII)
   - a `<Suspense>` Exhibit A section (`data-testid="exhibit-a"`) that calls `loadStorefront()` → `mostExpensive()` → `toShopperShirt()` → `ShirtCard` (`headingLevel={3}`), and is omitted when there's no active shirt
   - loud tokens, responsive from 360px
-- [ ] T033 [US3] Add `{ href: "/about", label: copy.nav.about }` to `links` in src/components/SiteHeader.tsx, which covers both the desktop nav and the phone menu. T029 passes.
+- [X] T033 [US3] Add `{ href: "/about", label: copy.nav.about }` to `links` in src/components/SiteHeader.tsx, which covers both the desktop nav and the phone menu. T029 passes.
 
 **Checkpoint**: all three stories work independently.
 

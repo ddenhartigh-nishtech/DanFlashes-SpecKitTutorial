@@ -12,6 +12,7 @@ export const copy = {
     shirts: "Shirts",
     cart: "Cart",
     account: "Account",
+    about: "About",
     signIn: "Sign in",
     menu: "Menu",
     mainLabel: "Main",
@@ -153,6 +154,41 @@ export const copy = {
     noEntries: "No Flash Credit yet. Load up below.",
     entryTopUp: (brand: string, last4: string) => `Top-up from ${brand} ending ${last4}`,
     entrySpend: (order: string) => `Spent on order ${order}`,
+  },
+
+  /** Dan, in his own words (002 US3). Editing the bio is a code change, on purpose. */
+  about: {
+    title: "About Dan",
+    heading: "Hi. I'm Dan. You know the shirts.",
+    sections: [
+      {
+        heading: "Who I am",
+        body: [
+          'People ask me, "Dan, how did you become the most important man in shirts?" Nobody has actually asked me that. But if they did, I\'d tell them this:',
+          "I looked at a plain shirt once and I felt sick. Physically sick. I had to sit down in the food court. That's the day I knew the world needed more going on.",
+        ],
+      },
+      {
+        heading: "My method: more",
+        body: [
+          "Every Dan Flashes shirt starts as a regular shirt. Then I add a pattern. Then I add a pattern to the pattern. I don't stop until the man standing next to it gets a little dizzy. That's how I know it's ready.",
+          "My team counts every shape. Every triangle. Every squiggle. Every little guy. Each one is a decision, and decisions aren't free.",
+        ],
+      },
+      {
+        heading: "About the prices",
+        body: [
+          'Some guys see a polo for twelve hundred dollars and say "that\'s insane." Those guys are wearing beige.',
+          "Here's the math. Complicated patterns take complicated minds, and complicated minds do not come cheap. You're not paying for a shirt. You're paying for the look on Doug's face at the quarterly kickoff.",
+          "Honestly? At these prices I'm losing money. I'm practically paying you to look this good.",
+        ],
+      },
+    ],
+    exhibitA: {
+      heading: "Exhibit A",
+      intro:
+        "Still not convinced? Look at this and tell me it's too much. You can't. It's exactly enough.",
+    },
   },
 
   shame: {

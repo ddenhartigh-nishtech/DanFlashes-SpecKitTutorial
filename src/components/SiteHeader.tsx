@@ -8,6 +8,7 @@ const links = [
   { href: "/shirts", label: copy.nav.shirts },
   { href: "/cart", label: copy.nav.cart },
   { href: "/account", label: copy.nav.account },
+  { href: "/about", label: copy.nav.about },
 ] as const;
 
 const linkClass =

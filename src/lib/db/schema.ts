@@ -300,10 +300,7 @@ export const revenueStreams = sqliteTable(
       "revenue_streams_amount_positive",
       sql`${t.amountUsd} NOT GLOB '-*' AND ${t.amountUsd} NOT IN ('0.00')`,
     ),
-    check(
-      "revenue_streams_schedule",
-      sql`${t.schedule} IN ('recurring', 'one_time', 'whenever')`,
-    ),
+    check("revenue_streams_schedule", sql`${t.schedule} IN ('recurring', 'one_time', 'whenever')`),
     check("revenue_streams_window", sql`${t.endsAt} IS NULL OR ${t.endsAt} > ${t.startsAt}`),
     check("revenue_streams_payments", sql`${t.paymentsMade} >= 0`),
     uniqueIndex("revenue_streams_one_per_diem")

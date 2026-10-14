@@ -4,8 +4,10 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { signOutAction } from "@/actions/auth";
 import { currentUser } from "@/app/_data/request";
+import { ConnectStreamForm } from "@/components/ConnectStreamForm";
 import { OrderSummary } from "@/components/OrderSummary";
 import { PriceTag } from "@/components/PriceTag";
+import { StreamList } from "@/components/StreamList";
 import { TopUpForm } from "@/components/TopUpForm";
 import { copy } from "@/lib/copy";
 import { getPlaceholderUrl, getSettings } from "@/lib/data/settings";
@@ -14,6 +16,7 @@ import { getBalanceUsd, listEntries } from "@/lib/flash-credit/ledger";
 import { formatUsd } from "@/lib/money";
 import { listOrdersForUser, orderNumber } from "@/lib/orders/orders";
 import { labelFor } from "@/lib/shaming/labels";
+import { listStreams, settleStreams } from "@/lib/streams/streams";
 
 export const metadata: Metadata = { title: copy.account.title };
 
@@ -34,6 +37,8 @@ async function AccountContents() {
   if (!user) redirect("/sign-in?next=/account");
   const db = getDb();
   const settings = getSettings(db);
+  settleStreams(db, user.id); // every payday that came due, before the balance and history below
+  const streams = listStreams(db, user.id);
   const placeholderUrl = getPlaceholderUrl(db, settings);
   const orders = listOrdersForUser(db, user.id);
   const balanceUsd = getBalanceUsd(db, user.id);
@@ -87,6 +92,8 @@ async function AccountContents() {
                     </time>
                     {entry.kind === "top_up" ? (
                       copy.account.entryTopUp(entry.cardBrand ?? "Card", entry.cardLast4 ?? "????")
+                    ) : entry.kind === "stream" ? (
+                      copy.streams.historyEntry(entry.streamName ?? "")
                     ) : (
                       <Link href={`/orders/${entry.orderId}`} className="underline">
                         {copy.account.entrySpend(orderNumber(entry.orderId!))}
@@ -96,7 +103,7 @@ async function AccountContents() {
                   <span
                     className={`font-display tabular-nums ${entry.kind === "spend" ? "text-hot-pink" : ""}`}
                   >
-                    {entry.kind === "top_up" ? "+" : ""}
+                    {entry.kind === "spend" ? "" : "+"}
                     {formatUsd(entry.amountUsd)}
                   </span>
                 </li>
@@ -106,6 +113,23 @@ async function AccountContents() {
         </div>
         <div className="border-ink bg-paper border-4 p-4 shadow-[6px_6px_0_var(--color-ink)]">
           <TopUpForm presetsUsd={settings.flashCreditPresetsUsd} />
+        </div>
+      </section>
+
+      <section
+        id="revenue-streams"
+        aria-labelledby="streams-heading"
+        className="grid scroll-mt-24 gap-6 md:grid-cols-[1fr_22rem] md:items-start"
+      >
+        <div className="flex flex-col gap-4">
+          <h2 id="streams-heading" className="font-display text-2xl md:text-3xl">
+            {copy.streams.heading}
+          </h2>
+          <p className="font-semibold">{copy.streams.intro}</p>
+          <StreamList streams={streams} confirmshaming={settings.confirmshaming} />
+        </div>
+        <div className="border-ink bg-paper border-4 p-4 shadow-[6px_6px_0_var(--color-ink)]">
+          <ConnectStreamForm />
         </div>
       </section>
 

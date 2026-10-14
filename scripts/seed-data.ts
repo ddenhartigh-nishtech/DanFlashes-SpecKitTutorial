@@ -13,6 +13,7 @@ export const DEMO_SHOPPER: DemoShopper = {
   displayName: "Demo Dan",
   creditUsd: "10000.00",
   pastOrder: { slug: "fractal-fury", size: "XL" },
+  perDiem: { amountUsd: "75.00" },
 };
 
 export const SEED: CatalogFixture = {

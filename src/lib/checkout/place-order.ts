@@ -12,6 +12,7 @@ import { getBalanceUsd } from "@/lib/flash-credit/ledger";
 import { add, cmp, isUsdString, sub, sum, ZERO, type Usd } from "@/lib/money";
 import { validateFauxCard, type CardErrorCode, type FauxCardInput } from "@/lib/payments/faux-card";
 import type { Err, Ok } from "@/lib/result";
+import { settleStreams } from "@/lib/streams/streams";
 
 export type PaymentMethod = "card" | "flash_credit";
 
@@ -41,6 +42,9 @@ export function placeOrder(db: Db, input: PlaceOrderInput): PlaceOrderResult {
       if (settings.checkoutGate && input.userId === null) {
         return { ok: false, code: "GATE_SIGN_IN_REQUIRED" };
       }
+
+      // Revenue-stream paydays that came due are his to spend, in this same transaction (003 FR-006).
+      if (input.userId !== null) settleStreams(db, input.userId, input.now ?? new Date());
 
       const replay = db
         .select()

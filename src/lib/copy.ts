@@ -190,6 +190,54 @@ export const copy = {
     },
   },
 
+  /** Revenue streams (003 US1): money that finds its way to shirts on its own. */
+  streams: {
+    heading: "Revenue Streams",
+    intro:
+      "Connect where the money comes from. It goes straight into Flash Credit. You're welcome.",
+    empty: "No revenue streams yet. Money is out there right now, not becoming shirts.",
+    presets: {
+      per_diem: "Per Diem",
+      expense_report: "Expense Report Padding",
+      college_fund: "My Kid's College Fund",
+      garage_sale: "Garage Sale",
+      second_mortgage: "Second Mortgage",
+    },
+    customOption: "Something else…",
+    schedules: {
+      recurring: "Every payday",
+      one_time: "Just once",
+      whenever: "Whenever I want",
+    },
+    form: {
+      heading: "Connect a stream",
+      source: "Where's it coming from?",
+      customName: "What do you call it?",
+      amount: "How much each time",
+      schedule: "When does it pay?",
+      startsNow: "Starts now",
+      startsAt: "Starts",
+      ongoing: "Ongoing (it never stops)",
+      endsAt: "Ends",
+      connect: "Connect it",
+      connecting: "Connecting…",
+    },
+    nextPayment: "Next payday",
+    windowFrom: "From",
+    windowUntil: "until",
+    windowForever: "and it never stops",
+    startsLater: "Not yet. It starts",
+    cashIn: "Cash in",
+    cashingIn: "Cashing in…",
+    done: "Paid in full",
+    endedBadge: "Over",
+    disconnectedBadge: "Disconnected",
+    connected: "Connected. The money is already on its way to shirts.",
+    cashedIn: "Cashed in. Straight to Flash Credit.",
+    disconnected: "Disconnected. Bold move.",
+    historyEntry: (name: string) => `${name}: payday`,
+  },
+
   shame: {
     title: "You sure about that?",
     /** At least 8 (spec Assumptions). Rotated without repeats until the pool is used up. */
@@ -214,6 +262,7 @@ export const copy = {
       insist: { shamed: "Yes, I'd rather blend in", neutral: "Yes, I'm sure" },
       remove: { shamed: "Remove (and lose your edge)", neutral: "Remove" },
       signOut: { shamed: "Sign out (go back to being normal)", neutral: "Sign out" },
+      disconnect: { shamed: "Disconnect (and settle for less)", neutral: "Disconnect" },
     },
   },
 
@@ -239,6 +288,14 @@ export const copy = {
     CARD_INVALID_CVC: "The CVC should be 3 or 4 digits.",
     INSUFFICIENT_FLASH_CREDIT: "Not enough Flash Credit. Top up, or pay by card.",
     INVALID_AMOUNT: "Enter an amount of at least $0.01, in dollars and cents.",
+    INVALID_STREAM_NAME: "Pick where it's coming from, or give it a name (40 characters, tops).",
+    INVALID_STREAM_AMOUNT:
+      "Each payment has to be between $0.01 and $10,000.00. In dollars and cents.",
+    INVALID_WINDOW:
+      "That timing doesn't work. Start now or later, and end after it starts. Or let it run forever.",
+    PER_DIEM_EXISTS: "You already have a per diem running. One at a time. Spend it first.",
+    STREAM_NOT_FOUND: "That stream isn't yours, or it's already gone.",
+    NOT_CASHABLE: "Nothing to cash in there right now.",
   },
 } as const;
 

@@ -109,7 +109,7 @@ pays on demand, and he can disconnect.
 
 ### Tests for User Story 1 (write first; they must fail)
 
-- [ ] T007 [P] [US1] Unit tests in tests/unit/streams-schedule.test.ts for
+- [X] T007 [P] [US1] Unit tests in tests/unit/streams-schedule.test.ts for
   `duePayments({ schedule, nextDueAt, endsAt, now, periodMs, cap })`, table-driven. It returns the
   due ISO times and the new `nextDueAt`.
   - **Recurring with no end**: pays `nextDueAt`, `+p`, `+2p`… ≤ `now`.
@@ -119,7 +119,7 @@ pays on demand, and he can disconnect.
   - **A changed period**: applies from the stored `nextDueAt`.
   - **One time**: pays once, then null.
   - **Whenever**: never due.
-- [ ] T008 [P] [US1] Unit tests in tests/unit/streams-validate.test.ts for
+- [X] T008 [P] [US1] Unit tests in tests/unit/streams-validate.test.ts for
   `validateConnectInput(input, now)`:
   - **The name**: a preset key **or** a custom name trimmed to 1–40 characters → otherwise
     `INVALID_STREAM_NAME`.
@@ -130,7 +130,7 @@ pays on demand, and he can disconnect.
     `INVALID_WINDOW`.
   - **The end**: after the start, or `ongoing` → otherwise `INVALID_WINDOW`.
   - **Result**: normalized ISO strings on success.
-- [ ] T009 [P] [US1] Integration tests in tests/integration/streams-settle.test.ts (seeded test
+- [X] T009 [P] [US1] Integration tests in tests/integration/streams-settle.test.ts (seeded test
   database, injected `now`). Results are `Ok`/`Err` values with the error codes below.
   - **`connectStream`**:
     - a recurring or one-time stream starting now pays its first payment immediately; a whenever
@@ -155,16 +155,16 @@ pays on demand, and he can disconnect.
     - someone else's stream → `STREAM_NOT_FOUND`
   - **`disconnectStream`**: someone else's stream or one already disconnected → `STREAM_NOT_FOUND`
   - **`listStreams`**: returns name, amount, schedule, window, next payment, cashable, and connected
-- [ ] T010 [P] [US1] Integration tests in tests/integration/streams-actions.test.ts:
+- [X] T010 [P] [US1] Integration tests in tests/integration/streams-actions.test.ts:
   - `connectStreamCore`, `disconnectStreamCore` and `cashInCore` with a `FakeCookieJar`
   - guests get `SIGN_IN_REQUIRED`
   - every error code passes through with its `copy.codes` message
   - success states
   - `placeOrder` settles first: a payment due before checkout can be spent, in the same transaction
-- [ ] T011 [P] [US1] Integration test in tests/integration/demo-shopper.test.ts: with a `perDiem`
+- [X] T011 [P] [US1] Integration test in tests/integration/demo-shopper.test.ts: with a `perDiem`
   configured, `ensureDemoShopper` connects an ongoing recurring per diem after the past order, and its
   first payment is in the history
-- [ ] T012 [P] [US1] e2e journey in tests/e2e/revenue-streams.spec.ts (desktop and phone):
+- [X] T012 [P] [US1] e2e journey in tests/e2e/revenue-streams.spec.ts (desktop and phone):
   - **Setup**: sign up, then open Account → Revenue Streams. It shows the empty state, and no field
     anywhere asks for bank, routing or payroll details (SC-007).
   - **Per diem**: connect Per Diem, $75.00, every payday, starts now, Ongoing. It's listed, and the
@@ -181,11 +181,11 @@ pays on demand, and he can disconnect.
 
 ### Implementation for User Story 1
 
-- [ ] T013 [P] [US1] Implement `duePayments` in src/lib/streams/schedule.ts: pure, no framework
+- [X] T013 [P] [US1] Implement `duePayments` in src/lib/streams/schedule.ts: pure, no framework
   imports, with ISO strings and millisecond periods (T007 passes)
-- [ ] T014 [P] [US1] Implement `validateConnectInput` in src/lib/streams/validate.ts, with the money
+- [X] T014 [P] [US1] Implement `validateConnectInput` in src/lib/streams/validate.ts, with the money
   checks through `money.ts` (T008 passes)
-- [ ] T015 [US1] Add brand copy to src/lib/copy.ts, never explaining the joke:
+- [X] T015 [US1] Add brand copy to src/lib/copy.ts, never explaining the joke:
   - `copy.streams`:
     - the 5 preset names
     - the 3 schedule names ("Every payday", "Just once", "Whenever I want")
@@ -197,7 +197,7 @@ pays on demand, and he can disconnect.
     `PER_DIEM_EXISTS`, `STREAM_NOT_FOUND` and `NOT_CASHABLE`
   - `copy.shame.labels.disconnect`: `{ shamed: "Disconnect (and settle for less)", neutral:
     "Disconnect" }`. Add its row to tests/unit/shaming-labels.test.ts.
-- [ ] T016 [US1] Implement src/lib/streams/streams.ts, the only module that writes `revenue_streams`
+- [X] T016 [US1] Implement src/lib/streams/streams.ts, the only module that writes `revenue_streams`
   or `stream` ledger entries:
   - `connectStream`: validate, supersede an ended per diem, insert, then settle
   - `disconnectStream`
@@ -209,38 +209,38 @@ pays on demand, and he can disconnect.
   - `cashIn(db, userId, { streamId, paymentNo, now })`
 
   T009 passes.
-- [ ] T017 [US1] Extend src/lib/flash-credit/ledger.ts. `LedgerEntry.kind` adds `"stream"` with
+- [X] T017 [US1] Extend src/lib/flash-credit/ledger.ts. `LedgerEntry.kind` adds `"stream"` with
   `streamName`, which `listEntries` gets by joining `revenue_streams` (the preset name from copy, or
   the custom name).
-- [ ] T018 [US1] Settle in `placeOrder` in src/lib/checkout/place-order.ts: call `settleStreams` inside
+- [X] T018 [US1] Settle in `placeOrder` in src/lib/checkout/place-order.ts: call `settleStreams` inside
   its transaction before reading the balance, for signed-in shoppers. Settle in the checkout page
   (src/app/checkout/page.tsx) before it shows the balance.
-- [ ] T019 [US1] Add action cores to src/lib/actions/streams.ts (`connectStreamCore`,
+- [X] T019 [US1] Add action cores to src/lib/actions/streams.ts (`connectStreamCore`,
   `disconnectStreamCore`, `cashInCore`, using `sessionUser`, `field` and `failure`). Add thin
   `"use server"` adapters in src/actions/streams.ts that call `refresh()` on success. T010 passes.
-- [ ] T020 [P] [US1] Create src/components/LocalTime.tsx (client): it formats an ISO time in the
+- [X] T020 [P] [US1] Create src/components/LocalTime.tsx (client): it formats an ISO time in the
   shopper's locale with `useSyncExternalStore`, showing UTC on the server and local time on the
   client, with no effect
-- [ ] T021 [US1] Create src/components/ConnectStreamForm.tsx (client, `useActionState(connectStream)`):
+- [X] T021 [US1] Create src/components/ConnectStreamForm.tsx (client, `useActionState(connectStream)`):
   - a preset select plus "Something else…", which reveals the custom name input
   - the amount, and schedule radios
   - "Starts now" (checked by default), otherwise a `datetime-local` start
   - "Ongoing", otherwise a `datetime-local` end
   - a wrapper converts the local inputs to ISO UTC before dispatching
   - brand-voice errors shown in a `role="status"` region
-- [ ] T022 [US1] Create src/components/CashInButton.tsx (client, `useActionState(cashIn)`, with hidden
+- [X] T022 [US1] Create src/components/CashInButton.tsx (client, `useActionState(cashIn)`, with hidden
   `streamId` and `paymentNo`) and src/components/StreamList.tsx (server):
   - each stream shows its name, amount, schedule, `LocalTime` window, and either its next payment,
     "Done", or the Cash in button
   - a Disconnect form labeled `labelFor("disconnect", confirmshaming)`
-- [ ] T023 [US1] Add a request-time loader to src/app/_data/streams.ts (`connection()`, current user,
+- [X] T023 [US1] Add a request-time loader to src/app/_data/streams.ts (`connection()`, current user,
   `settleStreams`, `listStreams`). In src/app/account/page.tsx:
   - add the Revenue Streams section (`id="revenue-streams"`) with the form and the list
   - settle before reading the balance and history
   - label `stream` history entries with `copy.streams.historyEntry(name)`
 
   T012 passes.
-- [ ] T024 [US1] Demo Dan's per diem (R9):
+- [X] T024 [US1] Demo Dan's per diem (R9):
   - `DemoShopper` gains an optional `perDiem: { amountUsd }`
   - `ensureDemoShopper` in src/lib/data/demo-shopper.ts connects an ongoing recurring per diem after
     the past order

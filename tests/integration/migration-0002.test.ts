@@ -82,9 +82,7 @@ describe("migration 0002 (revenue streams, split payment, per diem drain)", () =
       { id: 2, flash_credit_usd: "0.00", per_diem_drained: 0 },
     ]);
     expect(
-      sqlite
-        .prepare("SELECT per_diem_drain, stream_pay_period_minutes FROM store_settings")
-        .get(),
+      sqlite.prepare("SELECT per_diem_drain, stream_pay_period_minutes FROM store_settings").get(),
     ).toEqual({ per_diem_drain: 1, stream_pay_period_minutes: 5 });
     expect(sqlite.pragma("foreign_key_check")).toEqual([]);
   });

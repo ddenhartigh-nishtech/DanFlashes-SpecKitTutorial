@@ -24,6 +24,10 @@ Three additions on top of 001's Flash Credit ledger:
    to the total. If that doesn't cover it, the store shows the split, requires him to confirm putting
    the rest on a card, and lets him remove the credit before placing. The server recomputes the split
    from the live balance and refuses, writing nothing, on any mismatch.
+4. **Drain them all** (owner addition). Every order is counted against the per diem first, then the
+   oldest money from his other streams (one pure allocation engine, R12). Each stream shows what's
+   left, and each one that runs dry unlocks its own achievement, stacked on the order's
+   confirmation.
 
 ## Technical Context
 
@@ -113,7 +117,7 @@ src/
 │   └── LocalTime.tsx                 # new (client): useSyncExternalStore local-time formatting
 └── lib/
     ├── streams/schedule.ts           # new (pure): duePayments
-    ├── streams/meter.ts              # new (pure): perDiemLeft, crossedToZero
+    ├── streams/allocation.ts         # new (pure): lots + orders → left per stream, drains (R12)
     ├── streams/validate.ts           # new (pure): connect-input validation
     ├── streams/streams.ts            # new: connect, disconnect, list, settleStreams, cashIn, getPerDiemMeter
     ├── actions/streams.ts            # new: framework-free action cores

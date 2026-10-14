@@ -178,6 +178,40 @@ Only the new decisions are recorded here.
 - **Alternatives**: typing a partial credit amount was rejected; the owner didn't ask for it, and it
   adds validation. Auto-splitting without asking was rejected; the owner asked for confirmation.
 
+## R12. Drain them all: one allocation engine (US4)
+
+- **Decision**: a pure engine in `src/lib/streams/allocation.ts` replaces the per-diem-only replay.
+  - **Lots**: every stream payment is a lot: `{ streamId, at, amountUsd }`.
+  - **Replay**: lots and orders are merged in time order. A lot lands before an order at the same
+    instant, and among lots at the same instant the earlier payment counts as older.
+  - **Each order consumes**:
+    1. the current per diem's lots, oldest first
+    2. then every other lot, oldest first; that includes other streams and an old per diem's leftovers
+    3. anything beyond is other money, and nothing is owed
+  - **Outputs**:
+    - what's left per stream
+    - the streams a new order would take from above $0 to $0 (`drainedBy`)
+  - **Built on it**:
+    - the per diem gauge is the current per diem's "left", identical to US2's behavior, because the
+      per diem is always consumed first
+    - account "left" amounts
+    - `placeOrder`'s achievements
+- **Storage**:
+  - `orders.per_diem_drained` stays as it is: the current per diem's trophy, which US2 already
+    shipped.
+  - A new `order_drains (order_id, stream_id)` table records every **other** stream the order
+    drained, written at placement only while the drain is on (FR-028).
+  - The confirmation stacks the per diem achievement, if any, with one achievement per
+    `order_drains` row.
+- **Rationale**: one engine for the gauge, the "left" amounts and the achievements, so they can't
+  disagree. Storing drains at placement keeps "turning the drain on later doesn't award old orders"
+  true. Keeping `per_diem_drained` avoids a risky `orders` rebuild.
+- **Alternatives**:
+  - Deriving achievements at render time by replaying was rejected: it would award old orders when
+    the switch flips on, and re-award after refills.
+  - Allocating only Flash Credit spends was rejected: it would change the per diem's established
+    "any payment method" rule.
+
 ## R10. Testing
 
 - **Unit**:

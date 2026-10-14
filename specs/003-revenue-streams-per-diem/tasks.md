@@ -429,7 +429,7 @@ at any time before placing. The server recomputes the split, and any refusal wri
 - [ ] T047 Constitution VII spot check: run Lighthouse (mobile) on `/account` with streams, on `/` with
   the gauge, and on `/checkout`, against a production build. All must have CLS ≤ 0.1 and LCP ≤ 2.5 s
   (applied throttling); the gauge must add no layout shift.
-- [ ] T048 Run quickstart.md scenarios 1–18 and note the results
+- [ ] T048 Run quickstart.md scenarios 1–21 and note the results
 - [ ] T049 Run `npm run format`, then `npm run verify`. It must be fully green, with line coverage
   ≥ 90% on `src/lib`, including `src/lib/streams/` and `src/lib/checkout/split.ts`.
 
@@ -483,6 +483,54 @@ at any time before placing. The server recomputes the split, and any refusal wri
 
 - [X] T058 Make Revenue Streams collapse at its header too, the same `CollapsibleSection` as Flash Credit and Purchase history (owner request). Test: tests/e2e/account-sections.spec.ts covers all three.
 
+## Phase 9: User Story 4 - Drain Them All (Priority: P4, owner addition)
+
+**Goal**: every order is counted against the current per diem first, then the oldest money from his
+other streams. Each stream shows what's left, and every stream an order empties unlocks its own
+achievement, stacked on the confirmation.
+
+**Independent Test**: quickstart scenarios 19–21.
+
+### Tests for User Story 4 (write first; they must fail)
+
+- [ ] T059 [P] [US4] Unit tests in tests/unit/streams-allocation.test.ts for the pure engine. Port US2's meter
+  cases to it, plus:
+  - the per diem is consumed before any other stream
+  - other money is consumed oldest first, and at a tie the earlier payment counts as older
+  - overspending isn't carried into a later lot
+  - `drainedBy` lists every stream taken from above $0 to $0, including several at once, and
+    nothing already at $0
+- [ ] T060 [P] [US4] Integration tests in tests/integration/drain-them-all.test.ts:
+  - the order draws on per diem, then College Fund, then Garage Sale
+  - `getStreamBalances` reports each stream's left, and is null with the drain off
+  - `placeOrder` writes `order_drains` for the other streams it empties (several in one order) and
+    `per_diem_drained` for the current per diem
+  - nothing is recorded with the drain off
+  - the read model exposes every achievement
+  - migration 0004 creates `order_drains`
+- [ ] T061 [P] [US4] e2e journey in tests/e2e/drain-them-all.spec.ts (desktop and phone), per quickstart 19–21:
+  - the "left" amounts
+  - the first order unlocks the per diem achievement only
+  - the second order stacks two achievement cards
+  - no sideways scroll at 360px
+
+### Implementation for User Story 4
+
+- [ ] T062 [US4] Implement src/lib/streams/allocation.ts (`replay`, `drainedBy`, `leftByStream`; T059 passes)
+  and delete src/lib/streams/meter.ts. `getPerDiemMeter` and a new `getStreamBalances` in
+  src/lib/streams/streams.ts use the engine.
+- [ ] T063 [US4] Add `order_drains` to src/lib/db/schema.ts and generate migration 0004
+  (`npx drizzle-kit generate --name order_drains`)
+- [ ] T064 [US4] In `placeOrder`, compute `drainedBy` after settling. Record `per_diem_drained` for the
+  current per diem and `order_drains` rows for the rest (drain on). `OrderView` gains `drainedStreams`
+  (name and preset). T060 passes.
+- [ ] T065 [US4] Add copy (`copy.achievements`: one line per preset, a custom-name line, a "GONE"
+  badge, and a "N achievements" header). Show what's left on each stream record (StreamList, from
+  `getStreamBalances` on the account page). PerDiemCelebration becomes an achievement stack on the
+  order confirmation. Update tests/e2e/per-diem-drain.spec.ts to the stack. T061 passes.
+
+**Checkpoint**: all four stories work, and `npm run verify` is green.
+
 ---
 
 ## Dependencies & Execution Order
@@ -511,7 +559,9 @@ at any time before placing. The server recomputes the split, and any refusal wri
   - T038 → T039 → T040
   - T041 comes before T042, T043 and T044
   - T039 and T030 both edit `placeOrder`, so do them one after the other (US2 first)
-- **Polish (T045–T049)** comes after all three stories.
+- **US4 (T059–T065)** needs US2 (the per diem drain). Within it, the tests (T059–T061) come first, then
+  T062 → T063 → T064 → T065.
+- **Polish (T045–T049)** comes after all four stories.
 
 ### User story dependencies
 

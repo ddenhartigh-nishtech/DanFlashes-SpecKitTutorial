@@ -41,6 +41,13 @@
   - **"Just once" is applied immediately and once.** It has no start, end, or Disconnect, and it
     shows as paid in full straight away.
   - **"Whenever I want" keeps Cash in and Disconnect.**
+- Owner feedback, round 3: **every stream drains, and every drain is an achievement.**
+  - Spending draws down the per diem first, then the oldest money from his other streams.
+  - Each stream shows how much of it is left.
+  - Every stream that runs dry unlocks its own achievement ("You spent your kid's college fund on
+    shirts." "Second Mortgage: GONE").
+  - One big order can drain several streams at once and stacks their achievements on its
+    confirmation.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -161,6 +168,41 @@ Confirm that:
 
 ---
 
+### User Story 4 - Drain Them All (Priority: P4)
+
+The per diem is gone, but he's got a College Fund and a Garage Sale in there too. Every shirt he buys
+comes out of the per diem first, then out of the oldest money he's got. Each stream shows what's
+left of it, and the order that empties one unlocks its achievement. One big enough order empties two
+at once, and the confirmation stacks both: "You spent your kid's college fund on shirts." "Garage
+Sale: GONE."
+
+**Why this priority**: it extends US2's single per diem trophy to every stream. It's the biggest laugh
+per line of code, but US1–US3 stand on their own without it.
+
+**Independent Test**: with a per diem, an older one-time stream and a newer one, place orders and
+confirm that:
+- the per diem drains first, then the older stream, then the newer one
+- each stream shows how much is left
+- the order that empties a stream lists its achievement, and an order that empties two lists both
+
+**Acceptance Scenarios**:
+
+1. **Given** the drain is on and he has several streams, **When** he places an order (any payment
+   method), **Then** it is counted against his current per diem first, then against his other streams'
+   money, oldest payment first.
+2. **Given** his streams, **When** he views his account, **Then** each stream shows how much of its
+   money is left, or that it's gone.
+3. **Given** an order that takes a stream from above $0 to $0, **When** its confirmation opens,
+   **Then** that stream's achievement is on it, in voice.
+4. **Given** an order that empties several streams, **When** its confirmation opens, **Then** every one
+   of their achievements is there, stacked.
+5. **Given** a stream that was drained, **When** it pays again and a later order drains it again,
+   **Then** that order unlocks its achievement again.
+6. **Given** the drain is off, **When** he browses or buys, **Then** no "left" amounts and no
+   achievements appear.
+
+---
+
 ### Edge Cases
 
 - **Paying by card**: an order paid by faux card counts against the per diem, the same as Flash
@@ -187,6 +229,11 @@ Confirm that:
 - **An invalid card in a split**: nothing is placed and no credit is deducted.
 - **The per diem and a split order**: the meter counts the full order total, however it was split.
 - **Replaying a split checkout** (a double submit): it returns the same order, charged once.
+- **Spending past all of his streams**: the rest came from other money (top-ups or a card). It isn't
+  held against later payments, so a stream that pays again starts fresh.
+- **A disconnected stream**: its money still counts and can still be drained.
+- **An old per diem** (replaced by a new one): what's left of it counts as his other money, by age.
+- **Two streams paid at the same moment**: the one connected first is treated as older.
 
 ## Requirements *(mandatory)*
 
@@ -242,8 +289,8 @@ Confirm that:
   drain.
 - **FR-016**: The per diem MUST never block a purchase. Orders are paid by Flash Credit or card
   exactly as in 001.
-- **FR-017**: While the drain is off, no meter and no celebration may appear anywhere. Streams and
-  Flash Credit MUST behave identically either way.
+- **FR-017**: While the drain is off, no meter, no "left" amounts, and no celebration or achievement may
+  appear anywhere. Streams and Flash Credit MUST behave identically either way.
 
 **Split payment**
 
@@ -262,11 +309,26 @@ Confirm that:
 - **FR-023**: This replaces 001 FR-027 for partial coverage. Paying by Flash Credit alone still requires
   a balance that covers the whole total.
 
+**Drain them all**
+
+- **FR-024**: Every Dan Flashes order (any payment method) MUST be counted against his streams in
+  order: his current per diem first, then his other streams' money, oldest payment first. Spending
+  beyond what his streams hold is other money and MUST NOT be held against later payments.
+- **FR-025**: While the drain is on, each of his streams MUST show how much of its money is left, or
+  that it's gone.
+- **FR-026**: An order that takes a stream from above $0 to $0 MUST unlock that stream's achievement:
+  "You spent your [stream] on shirts." in voice, with a badge "[Stream]: GONE". A stream that is paid
+  again can be drained, and celebrated, again.
+- **FR-027**: One order MUST be able to unlock several achievements at once. Its confirmation MUST show
+  all of them, stacked.
+- **FR-028**: Achievements MUST only be recorded while the drain is on. Turning it on later doesn't
+  award old orders.
+
 **Voice**
 
-- **FR-024**: All new copy MUST use the Dan Flashes voice from constitution I and never explain the
+- **FR-029**: All new copy MUST use the Dan Flashes voice from constitution I and never explain the
   joke. That covers preset names, schedule names, the meter, the celebration, the disconnect labels,
-  "Cash in", history entries, and the checkout split.
+  "Cash in", history entries, the checkout split, and every stream's achievement.
 
 ### Key Entities
 
@@ -275,8 +337,10 @@ Confirm that:
   a start, an end or ongoing, how many payments it has made, and whether it's still connected.
 - **Stream Payment**: a Flash Credit history entry made by a stream: amount, the stream it came from,
   and which scheduled payment (or which "Cash in") it is.
-- **Per Diem Meter** (derived, never stored): the per diem paid in, minus Dan Flashes spending since
-  that per diem started, floored at $0.00.
+- **Per Diem Meter** (derived, never stored): what's left of the current per diem (see FR-024).
+- **Stream Left** (derived, never stored): what's left of each stream, after counting every order
+  against the per diem first, then the oldest money.
+- **Order Drain**: a stream that an order took to $0, recorded when the order is placed (drain on).
 - **Store Settings** (from 001/002) gains the per diem drain switch.
 - **Order** (from 001) can now be paid by card, by Flash Credit, or **split**, and records how much
   Flash Credit it used.
@@ -303,6 +367,9 @@ Confirm that:
 - **SC-009**: In 100% of split orders, the credit deducted plus the card portion equals the order total
   to the cent, and the balance drops by exactly the credit applied.
 - **SC-010**: 0 split orders are placed without the shopper confirming the exact amounts he was shown.
+- **SC-011**: After any sequence of payments and orders, every stream's "left" is correct to the cent,
+  and no stream is drawn on while the current per diem still has money.
+- **SC-012**: An order that empties N streams shows exactly N achievements on its confirmation.
 
 ## Assumptions
 

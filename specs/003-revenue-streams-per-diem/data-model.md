@@ -89,6 +89,23 @@ must show every existing order unchanged.
 was removed by 0003, which copied its value into each existing recurring stream's interval.) It is
 validated by `validateSettings` and seeded.
 
+## New table: `order_drains` (migration 0004)
+
+| Column | Type | Rules |
+|---|---|---|
+| `order_id` | integer, NOT NULL | FK → `orders.id`, ON DELETE RESTRICT |
+| `stream_id` | integer, NOT NULL | FK → `revenue_streams.id`, ON DELETE RESTRICT |
+
+PRIMARY KEY (`order_id`, `stream_id`). There is one row for each stream **other than the current
+per diem** that the order took from above $0 to $0, written at placement while the drain is on. The
+current per diem's drain stays `orders.per_diem_drained`.
+
+## Derived: what's left of each stream (R12)
+
+Replay all of his stream payments (lots) and his orders in time order. Each order consumes the current
+per diem's lots first, then all other lots oldest first; anything beyond is other money. A stream's
+"left" is what remains of its lots.
+
 ## Derived: the per diem meter
 
 ```

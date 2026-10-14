@@ -35,4 +35,7 @@ watch payments land quickly, connect one that tops off every 1 minute.
 | 15 | Try to place the order without ticking the confirmation | Refused. Nothing is deducted and no order is created. (US3-3, SC-010) |
 | 16 | Remove Flash Credit | The whole $344.61 goes back on the card, and the balance is untouched. (US3-5) |
 | 17 | Apply again, confirm, and pay with the test card | The confirmation shows both parts. The balance is $0.00, and the history shows −$100.00 linked to the order. (US3-4, SC-009) |
+| 19 | Connect a Per Diem ($100.00, every day), then apply My Kid's College Fund ($300.00), then a Garage Sale ($50.00) | Each record shows its "left": $100.00, $300.00, $50.00. (US4-2) |
+| 20 | Buy Geo Riot ($344.61) by card | The per diem drains first: its achievement shows. College Fund is left $55.39, and Garage Sale is untouched. (US4-1, US4-3) |
+| 21 | Buy Geo Riot again | One order empties both: "You spent your kid's college fund on shirts." and "Garage Sale: GONE" are stacked on the confirmation. (US4-4, SC-012) |
 | 18 | With the split showing, top up in another tab, then place the order | Refused with the new split (`CREDIT_CHANGED`). Nothing is charged. (US3-6) |

@@ -45,3 +45,6 @@
 - Iteration 3 (2026-10-14, after `/speckit-analyze`): the owner added split payment (US3,
   FR-018–FR-023, SC-009, SC-010). Voice moved to FR-024 to keep FRs in document order. This replaces 001
   FR-027 for partial coverage. All items pass.
+- Iteration 4 (2026-10-14): the owner added "drain them all" (US4, FR-024–FR-028, SC-011, SC-012).
+  Voice moved to FR-029. FR-017 now also covers stream "left" amounts and achievements. All items
+  pass.

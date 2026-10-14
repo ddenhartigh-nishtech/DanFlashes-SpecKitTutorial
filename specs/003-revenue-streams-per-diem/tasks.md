@@ -493,14 +493,14 @@ achievement, stacked on the confirmation.
 
 ### Tests for User Story 4 (write first; they must fail)
 
-- [ ] T059 [P] [US4] Unit tests in tests/unit/streams-allocation.test.ts for the pure engine. Port US2's meter
+- [X] T059 [P] [US4] Unit tests in tests/unit/streams-allocation.test.ts for the pure engine. Port US2's meter
   cases to it, plus:
   - the per diem is consumed before any other stream
   - other money is consumed oldest first, and at a tie the earlier payment counts as older
   - overspending isn't carried into a later lot
   - `drainedBy` lists every stream taken from above $0 to $0, including several at once, and
     nothing already at $0
-- [ ] T060 [P] [US4] Integration tests in tests/integration/drain-them-all.test.ts:
+- [X] T060 [P] [US4] Integration tests in tests/integration/drain-them-all.test.ts:
   - the order draws on per diem, then College Fund, then Garage Sale
   - `getStreamBalances` reports each stream's left, and is null with the drain off
   - `placeOrder` writes `order_drains` for the other streams it empties (several in one order) and
@@ -508,7 +508,7 @@ achievement, stacked on the confirmation.
   - nothing is recorded with the drain off
   - the read model exposes every achievement
   - migration 0004 creates `order_drains`
-- [ ] T061 [P] [US4] e2e journey in tests/e2e/drain-them-all.spec.ts (desktop and phone), per quickstart 19–21:
+- [X] T061 [P] [US4] e2e journey in tests/e2e/drain-them-all.spec.ts (desktop and phone), per quickstart 19–21:
   - the "left" amounts
   - the first order unlocks the per diem achievement only
   - the second order stacks two achievement cards
@@ -516,15 +516,15 @@ achievement, stacked on the confirmation.
 
 ### Implementation for User Story 4
 
-- [ ] T062 [US4] Implement src/lib/streams/allocation.ts (`replay`, `drainedBy`, `leftByStream`; T059 passes)
+- [X] T062 [US4] Implement src/lib/streams/allocation.ts (`replay`, `drainedBy`, `leftByStream`; T059 passes)
   and delete src/lib/streams/meter.ts. `getPerDiemMeter` and a new `getStreamBalances` in
   src/lib/streams/streams.ts use the engine.
-- [ ] T063 [US4] Add `order_drains` to src/lib/db/schema.ts and generate migration 0004
+- [X] T063 [US4] Add `order_drains` to src/lib/db/schema.ts and generate migration 0004
   (`npx drizzle-kit generate --name order_drains`)
-- [ ] T064 [US4] In `placeOrder`, compute `drainedBy` after settling. Record `per_diem_drained` for the
+- [X] T064 [US4] In `placeOrder`, compute `drainedBy` after settling. Record `per_diem_drained` for the
   current per diem and `order_drains` rows for the rest (drain on). `OrderView` gains `drainedStreams`
   (name and preset). T060 passes.
-- [ ] T065 [US4] Add copy (`copy.achievements`: one line per preset, a custom-name line, a "GONE"
+- [X] T065 [US4] Add copy (`copy.achievements`: one line per preset, a custom-name line, a "GONE"
   badge, and a "N achievements" header). Show what's left on each stream record (StreamList, from
   `getStreamBalances` on the account page). PerDiemCelebration becomes an achievement stack on the
   order confirmation. Update tests/e2e/per-diem-drain.spec.ts to the stack. T061 passes.

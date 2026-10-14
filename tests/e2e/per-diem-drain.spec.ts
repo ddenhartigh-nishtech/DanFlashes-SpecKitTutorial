@@ -1,19 +1,8 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { copy } from "../../src/lib/copy";
-import { addShirt, signUp, uniqueEmail, visible } from "./helpers";
+import { buyByCard, signUp, uniqueEmail, visible } from "./helpers";
 
 const s = copy.streams;
-
-/** Buy Geo Riot ($344.61) by card and land on its confirmation. */
-async function buyGeoRiotByCard(page: Page) {
-  await addShirt(page, "geo-riot", "M");
-  await page.goto("/checkout");
-  await visible(page.getByLabel("Card number")).fill("4242 4242 4242 4242");
-  await visible(page.getByLabel("Expiry (MM/YY)")).fill("12/29");
-  await visible(page.getByLabel("CVC")).fill("123");
-  await visible(page.getByRole("button", { name: /Place order/ })).click();
-  await expect(page).toHaveURL(/\/orders\/\d+$/);
-}
 
 test.describe("US2 — the per diem drain", () => {
   test("the gauge counts down every order and throws a party at $0", async ({ page }, info) => {
@@ -42,14 +31,14 @@ test.describe("US2 — the per diem drain", () => {
     expect(overflow).toBeLessThanOrEqual(0);
 
     // $500.00 − $344.61: some left, no party yet.
-    await buyGeoRiotByCard(page);
-    await expect(visible(page.getByTestId("per-diem-achievement"))).toHaveCount(0);
+    await buyByCard(page, "geo-riot", "M");
+    await expect(visible(page.getByTestId("achievements"))).toHaveCount(0);
     await expect(gauge).toContainText("$155.39");
 
     // The order that takes it to $0 gets the achievement, and so does the gauge.
-    await buyGeoRiotByCard(page);
-    await expect(visible(page.getByTestId("per-diem-achievement"))).toContainText(
-      copy.celebration.headline,
+    await buyByCard(page, "geo-riot", "M");
+    await expect(visible(page.getByTestId("achievements"))).toContainText(
+      copy.achievements.lines.per_diem,
     );
     await expect(gauge).toContainText(copy.meter.drained);
   });

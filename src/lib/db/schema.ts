@@ -347,3 +347,20 @@ export const flashCreditEntries = sqliteTable(
     index("flash_credit_user_idx").on(t.userId, t.createdAt),
   ],
 );
+
+/**
+ * Every stream other than the current per diem that an order took from above $0 to $0 while the
+ * drain was on (003 US4, R12): one achievement each. The per diem keeps orders.per_diem_drained.
+ */
+export const orderDrains = sqliteTable(
+  "order_drains",
+  {
+    orderId: integer("order_id")
+      .notNull()
+      .references(() => orders.id, { onDelete: "restrict" }),
+    streamId: integer("stream_id")
+      .notNull()
+      .references(() => revenueStreams.id, { onDelete: "restrict" }),
+  },
+  (t) => [primaryKey({ columns: [t.orderId, t.streamId] })],
+);

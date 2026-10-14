@@ -17,7 +17,12 @@ import { getBalanceUsd, listEntries } from "@/lib/flash-credit/ledger";
 import { formatUsd } from "@/lib/money";
 import { describePayment, listOrdersForUser, orderNumber } from "@/lib/orders/orders";
 import { labelFor } from "@/lib/shaming/labels";
-import { getPerDiemMeter, listStreams, settleStreams } from "@/lib/streams/streams";
+import {
+  getPerDiemMeter,
+  getStreamBalances,
+  listStreams,
+  settleStreams,
+} from "@/lib/streams/streams";
 
 export const metadata: Metadata = { title: copy.account.title };
 
@@ -41,6 +46,7 @@ async function AccountContents() {
   settleStreams(db, user.id); // every payday that came due, before the balance and history below
   const streams = listStreams(db, user.id);
   const meter = getPerDiemMeter(db, user.id, settings);
+  const left = getStreamBalances(db, user.id, settings);
   const placeholderUrl = getPlaceholderUrl(db, settings);
   const orders = listOrdersForUser(db, user.id);
   const balanceUsd = getBalanceUsd(db, user.id);
@@ -135,7 +141,7 @@ async function AccountContents() {
       >
         <div className="flex flex-col gap-4">
           <p className="font-semibold">{copy.streams.intro}</p>
-          <StreamList streams={streams} confirmshaming={settings.confirmshaming} />
+          <StreamList streams={streams} left={left} confirmshaming={settings.confirmshaming} />
         </div>
         <div className="border-ink bg-paper border-4 p-4 shadow-[6px_6px_0_var(--color-ink)]">
           <ConnectStreamForm />

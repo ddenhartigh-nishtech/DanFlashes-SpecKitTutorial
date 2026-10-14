@@ -1,35 +1,8 @@
 import { expect, test, type Page } from "@playwright/test";
 import { copy } from "../../src/lib/copy";
-import { signUp, uniqueEmail, visible } from "./helpers";
+import { connect, signUp, uniqueEmail, visible } from "./helpers";
 
 const s = copy.streams;
-
-async function connect(
-  page: Page,
-  stream: {
-    source: string;
-    customName?: string;
-    amount: string;
-    schedule: string;
-    /** A recurring top-off's interval, e.g. ["5", "minutes"]. */
-    every?: [string, keyof typeof copy.streams.units];
-    ongoing?: boolean;
-  },
-) {
-  const section = visible(page.locator("#revenue-streams"));
-  await section.getByLabel(s.form.source).selectOption({ label: stream.source });
-  if (stream.customName) await section.getByLabel(s.form.customName).fill(stream.customName);
-  await section.getByLabel(s.form.amount).fill(stream.amount);
-  await section.getByRole("radio", { name: stream.schedule }).check();
-  if (stream.every) {
-    await section.getByLabel(s.form.intervalCount).fill(stream.every[0]);
-    await section.getByLabel(s.form.intervalUnit).selectOption(stream.every[1]);
-  }
-  if (stream.ongoing) await section.getByLabel(s.form.ongoing).check();
-  // A one-time top-up is applied, not connected.
-  const submit = stream.schedule === s.schedules.one_time ? s.form.apply : s.form.connect;
-  await section.getByRole("button", { name: submit }).click();
-}
 
 const entry = (page: Page, name: string) =>
   visible(page.getByTestId("flash-entry")).filter({ hasText: s.historyEntry(name) });

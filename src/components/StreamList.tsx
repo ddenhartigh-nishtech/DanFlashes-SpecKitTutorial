@@ -2,18 +2,23 @@ import { disconnectStream } from "@/actions/streams";
 import { CashInButton } from "@/components/CashInButton";
 import { LocalTime } from "@/components/LocalTime";
 import { copy } from "@/lib/copy";
-import { formatUsd } from "@/lib/money";
+import { cmp, formatUsd, ZERO, type Usd } from "@/lib/money";
 import { labelFor } from "@/lib/shaming/labels";
 import type { StreamView } from "@/lib/streams/streams";
 
 const s = copy.streams;
 
-/** His revenue streams (003 FR-008): what each pays, when, and what happens next. */
+/**
+ * His revenue streams (003 FR-008): what each pays, when, and what happens next. While the drain is
+ * on, `left` says what his orders haven't spent yet of each (FR-025).
+ */
 export function StreamList({
   streams,
+  left,
   confirmshaming,
 }: {
   streams: StreamView[];
+  left: Map<number, Usd> | null;
   confirmshaming: boolean;
 }) {
   if (streams.length === 0) return <p className="solid-backing p-3">{s.empty}</p>;
@@ -29,6 +34,7 @@ export function StreamList({
             <span className="font-display text-lg leading-tight">{stream.name}</span>
             <span className="font-display tabular-nums">+{formatUsd(stream.amountUsd)}</span>
           </div>
+          <Left leftUsd={left?.get(stream.id)} />
           <p className="text-sm font-semibold uppercase">
             {s.schedules[stream.schedule]}
             {stream.intervalMinutes ? ` · ${s.every(stream.intervalMinutes)}` : ""}
@@ -62,6 +68,23 @@ export function StreamList({
         </li>
       ))}
     </ul>
+  );
+}
+
+/** Nothing until it has paid in; then what's left, or GONE once his orders spent it all. */
+function Left({ leftUsd }: { leftUsd: Usd | undefined }) {
+  if (leftUsd === undefined) return null;
+  return cmp(leftUsd, ZERO) > 0 ? (
+    <p data-testid="stream-left" className="font-display text-sm tabular-nums">
+      {s.left(formatUsd(leftUsd))}
+    </p>
+  ) : (
+    <p
+      data-testid="stream-left"
+      className="font-display bg-hot-pink text-paper self-start px-2 py-1 text-sm"
+    >
+      {s.gone}
+    </p>
   );
 }
 

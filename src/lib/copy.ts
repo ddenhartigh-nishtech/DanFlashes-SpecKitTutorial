@@ -278,6 +278,9 @@ export const copy = {
     cashedIn: "Cashed in. Straight to Flash Credit.",
     disconnected: "Disconnected. Bold move.",
     historyEntry: (name: string) => `${name}: payday`,
+    /** What's left of a stream once his orders have spent it, per diem first (003 US4). */
+    left: (amount: string) => `Left: ${amount}`,
+    gone: "GONE",
   },
 
   /** The per diem drain (003 US2): a gauge that only ever goes one way, and a party at $0. */
@@ -286,9 +289,18 @@ export const copy = {
     drained: "Per diem: GONE",
     drainedTag: "Achievement unlocked",
   },
-  celebration: {
-    badge: "ACHIEVEMENT UNLOCKED",
-    headline: "You spent your entire per diem on shirts.",
+  /** Drain them all (003 US4): every stream an order runs dry is its own achievement. */
+  achievements: {
+    unlocked: (n: number) => (n === 1 ? "ACHIEVEMENT UNLOCKED" : `${n} ACHIEVEMENTS UNLOCKED`),
+    lines: {
+      per_diem: "You spent your entire per diem on shirts.",
+      expense_report: "You spent your padded expense report on shirts.",
+      college_fund: "You spent your kid's college fund on shirts.",
+      garage_sale: "You spent your garage sale money on shirts.",
+      second_mortgage: "You spent your second mortgage on shirts.",
+    },
+    custom: (name: string) => `You spent "${name}" on shirts.`,
+    gone: (name: string) => `${name}: GONE`,
     body: "Every last cent. On complicated shirts. Dan has never been prouder of anyone. Ever.",
     cta: "Keep the streak alive",
   },

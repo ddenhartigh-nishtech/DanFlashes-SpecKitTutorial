@@ -7,14 +7,13 @@ import { eq } from "drizzle-orm";
 import { auditCart, findCartId, loadCheckoutLines, type RemovedLine } from "@/lib/cart/cart";
 import { getSettings } from "@/lib/data/settings";
 import type { Db } from "@/lib/db/client";
-import { cartItems, flashCreditEntries, orderItems, orders } from "@/lib/db/schema";
+import { cartItems, flashCreditEntries, orderDrains, orderItems, orders } from "@/lib/db/schema";
 import { getBalanceUsd } from "@/lib/flash-credit/ledger";
 import { add, cmp, isUsdString, sub, sum, ZERO, type Usd } from "@/lib/money";
 import { validateFauxCard, type CardErrorCode, type FauxCardInput } from "@/lib/payments/faux-card";
 import type { Err, Ok } from "@/lib/result";
 import { splitPayment, type Split } from "@/lib/checkout/split";
-import { afterOrder, crossedToZero } from "@/lib/streams/meter";
-import { getPerDiemMeter, settleStreams } from "@/lib/streams/streams";
+import { settleStreams, streamsDrainedBy } from "@/lib/streams/streams";
 
 export interface PlaceOrderInput {
   userId: number | null;
@@ -50,7 +49,8 @@ export function placeOrder(db: Db, input: PlaceOrderInput): PlaceOrderResult {
       }
 
       // Revenue-stream paydays that came due are his to spend, in this same transaction (003 FR-006).
-      if (input.userId !== null) settleStreams(db, input.userId, input.now ?? new Date());
+      const placedAt = input.now ?? new Date();
+      if (input.userId !== null) settleStreams(db, input.userId, placedAt);
 
       const replay = db
         .select()
@@ -106,10 +106,14 @@ export function placeOrder(db: Db, input: PlaceOrderInput): PlaceOrderResult {
         card = { brand: checked.brand, last4: checked.last4 };
       }
 
-      // The per diem drain (003 R5): does this order take the meter from above $0 to $0?
-      const meter = input.userId !== null ? getPerDiemMeter(db, input.userId, settings) : null;
-      const perDiemDrained =
-        meter !== null && crossedToZero(meter.leftUsd, afterOrder(meter.leftUsd, totalUsd));
+      // Drain them all (003 R12): every stream this order takes from above $0 to $0.
+      const drains =
+        input.userId !== null
+          ? streamsDrainedBy(db, input.userId, settings, {
+              at: placedAt.toISOString(),
+              amountUsd: totalUsd,
+            })
+          : { perDiem: false, others: [] };
 
       const { id: orderId } = db
         .insert(orders)
@@ -124,8 +128,8 @@ export function placeOrder(db: Db, input: PlaceOrderInput): PlaceOrderResult {
           cardBrand: card?.brand ?? null,
           cardLast4: card?.last4 ?? null,
           flashCreditUsd: split.creditUsd,
-          perDiemDrained,
-          createdAt: (input.now ?? new Date()).toISOString(),
+          perDiemDrained: drains.perDiem,
+          createdAt: placedAt.toISOString(),
         })
         .returning({ id: orders.id })
         .get();
@@ -156,6 +160,9 @@ export function placeOrder(db: Db, input: PlaceOrderInput): PlaceOrderResult {
           })
           .run();
       }
+
+      for (const streamId of drains.others)
+        db.insert(orderDrains).values({ orderId, streamId }).run();
 
       db.delete(cartItems).where(eq(cartItems.cartId, cartId)).run();
       return { ok: true, orderId };

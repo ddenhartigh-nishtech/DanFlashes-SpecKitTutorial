@@ -10,8 +10,10 @@ import { copy } from "@/lib/copy";
 import { getCatalogShirtsByIds, type ShirtImageView, type TierBadge } from "@/lib/data/shirts";
 import { listTiers } from "@/lib/data/tiers";
 import type { Db } from "@/lib/db/client";
-import { orderItems, orders } from "@/lib/db/schema";
+import { orderDrains, orderItems, orders, revenueStreams } from "@/lib/db/schema";
 import { formatUsd, mul, sub, type Usd } from "@/lib/money";
+import { streamName } from "@/lib/streams/streams";
+import type { StreamPreset } from "@/lib/streams/types";
 
 export interface SummaryLine {
   slug: string;
@@ -29,6 +31,12 @@ export type OrderPayment =
   | { method: "flash_credit" }
   | { method: "split"; creditUsd: Usd; cardUsd: Usd; brand: string; last4: string };
 
+export interface DrainedStream {
+  streamId: number;
+  name: string;
+  preset: StreamPreset | null;
+}
+
 export interface OrderView {
   id: number;
   number: string;
@@ -40,6 +48,8 @@ export interface OrderView {
   payment: OrderPayment;
   /** This order drained his per diem (003 US2). */
   perDiemDrained: boolean;
+  /** Every other stream this order emptied (003 US4): one achievement each. */
+  drainedStreams: DrainedStream[];
   lines: SummaryLine[];
 }
 
@@ -106,6 +116,24 @@ function hydrateOrders(db: Db, rows: (typeof orders.$inferSelect)[]): OrderView[
     .orderBy(orderItems.id)
     .all();
 
+  const drains = db
+    .select({
+      orderId: orderDrains.orderId,
+      streamId: revenueStreams.id,
+      preset: revenueStreams.preset,
+      customName: revenueStreams.customName,
+    })
+    .from(orderDrains)
+    .innerJoin(revenueStreams, eq(orderDrains.streamId, revenueStreams.id))
+    .where(
+      inArray(
+        orderDrains.orderId,
+        rows.map((r) => r.id),
+      ),
+    )
+    .orderBy(orderDrains.streamId)
+    .all();
+
   const catalog = getCatalogShirtsByIds(db, [...new Set(items.map((i) => i.shirtId))]);
   const tiers = sortTiers(listTiers(db));
   const badge = (name: string): TierBadge => {
@@ -132,6 +160,9 @@ function hydrateOrders(db: Db, rows: (typeof orders.$inferSelect)[]): OrderView[
     totalUsd: order.totalUsd,
     payment: paymentOf(order),
     perDiemDrained: order.perDiemDrained,
+    drainedStreams: drains
+      .filter((d) => d.orderId === order.id)
+      .map((d) => ({ streamId: d.streamId, name: streamName(d), preset: d.preset })),
     lines: items
       .filter((item) => item.orderId === order.id)
       .map((item) => ({

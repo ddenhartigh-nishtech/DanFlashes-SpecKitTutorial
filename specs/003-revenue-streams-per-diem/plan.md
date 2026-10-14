@@ -113,7 +113,7 @@ src/
 │   ├── CashInButton.tsx              # new (client): useActionState(cashIn) with paymentNo
 │   ├── CheckoutForm.tsx              # apply/remove Flash Credit, split breakdown, required confirmation
 │   ├── PerDiemMeter.tsx              # new (server): floating gauge (fixed, no layout shift); settles first
-│   ├── PerDiemCelebration.tsx        # new: the $0 achievement
+│   ├── Achievements.tsx              # new: the stacked drain achievements (US2, US4)
 │   └── LocalTime.tsx                 # new (client): useSyncExternalStore local-time formatting
 └── lib/
     ├── streams/schedule.ts           # new (pure): duePayments

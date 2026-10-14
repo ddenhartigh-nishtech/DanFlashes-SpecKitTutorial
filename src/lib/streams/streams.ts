@@ -4,14 +4,21 @@
  * (R2), and each is credited exactly once: the unique (stream_id, stream_payment_no) index makes a
  * duplicate impossible, not just unlikely (R1).
  */
-import { and, asc, desc, eq, gte, isNotNull, isNull, lte, ne, sql } from "drizzle-orm";
+import { and, asc, desc, eq, isNotNull, isNull, lte, ne, sql } from "drizzle-orm";
 import { copy } from "@/lib/copy";
 import type { Db } from "@/lib/db/client";
 import type { StoreSettings } from "@/lib/catalog/types";
 import { flashCreditEntries, orders, revenueStreams } from "@/lib/db/schema";
 import { cmp, ZERO, type Usd } from "@/lib/money";
 import type { Err, Ok } from "@/lib/result";
-import { perDiemLeft, type PerDiemEvent } from "@/lib/streams/meter";
+import {
+  drainedBy,
+  leftByStream,
+  perDiemAt,
+  type Lot,
+  type Spend,
+  type StreamHistory,
+} from "@/lib/streams/allocation";
 import { duePayments } from "@/lib/streams/schedule";
 import {
   CATCH_UP_CAP,
@@ -272,6 +279,36 @@ export function listStreams(db: Db, userId: number, now: Date = new Date()): Str
     .map((row) => toView(row, now));
 }
 
+/** Everything the allocation engine replays for him (R12): stream payments, orders, per diems. */
+function streamHistory(db: Db, userId: number): StreamHistory {
+  const lots = db
+    .select({
+      streamId: flashCreditEntries.streamId,
+      at: flashCreditEntries.createdAt,
+      amountUsd: flashCreditEntries.amountUsd,
+    })
+    .from(flashCreditEntries)
+    .where(and(eq(flashCreditEntries.userId, userId), eq(flashCreditEntries.kind, "stream")))
+    .orderBy(asc(flashCreditEntries.id))
+    .all() as Lot[]; // a stream entry always has its stream (CHECK)
+  const spends = db
+    .select({ at: orders.createdAt, amountUsd: orders.totalUsd })
+    .from(orders)
+    .where(eq(orders.userId, userId))
+    .orderBy(asc(orders.id))
+    .all();
+  const perDiems = db
+    .select({
+      streamId: revenueStreams.id,
+      from: revenueStreams.startsAt,
+      until: revenueStreams.disconnectedAt,
+    })
+    .from(revenueStreams)
+    .where(and(eq(revenueStreams.userId, userId), eq(revenueStreams.preset, PER_DIEM)))
+    .all();
+  return { lots, spends, perDiems };
+}
+
 export interface PerDiemMeter {
   streamId: number;
   leftUsd: Usd;
@@ -280,9 +317,9 @@ export interface PerDiemMeter {
 }
 
 /**
- * His per diem left (003 FR-013): the connected per diem's payments, minus his orders since it
- * started, by any payment method, never below $0.00. Null while the drain is off or with no per
- * diem. Reads only; callers settle first so a top-off that came due is counted.
+ * His per diem left (003 FR-013): the connected per diem's payments, less every order since, by any
+ * payment method, spent before any other money and never below $0.00. Null while the drain is off
+ * or with no per diem. Reads only; callers settle first so a top-off that came due is counted.
  */
 export function getPerDiemMeter(
   db: Db,
@@ -291,7 +328,7 @@ export function getPerDiemMeter(
 ): PerDiemMeter | null {
   if (!settings.perDiemDrain) return null;
   const stream = db
-    .select({ id: revenueStreams.id, startsAt: revenueStreams.startsAt })
+    .select({ id: revenueStreams.id })
     .from(revenueStreams)
     .where(
       and(
@@ -302,22 +339,46 @@ export function getPerDiemMeter(
     )
     .get();
   if (!stream) return null;
-  const paydays: PerDiemEvent[] = db
-    .select({ at: flashCreditEntries.createdAt, amountUsd: flashCreditEntries.amountUsd })
-    .from(flashCreditEntries)
-    .where(eq(flashCreditEntries.streamId, stream.id))
-    .all()
-    .map((e) => ({ ...e, kind: "payday" }));
-  const spending: PerDiemEvent[] = db
-    .select({ at: orders.createdAt, amountUsd: orders.totalUsd })
-    .from(orders)
-    .where(and(eq(orders.userId, userId), gte(orders.createdAt, stream.startsAt)))
-    .all()
-    .map((o) => ({ ...o, kind: "order" }));
-  const leftUsd = perDiemLeft([...paydays, ...spending]);
+  const left = leftByStream(streamHistory(db, userId));
+  const leftUsd = left.get(stream.id) ?? ZERO;
+  return { streamId: stream.id, leftUsd, drained: left.has(stream.id) && cmp(leftUsd, ZERO) === 0 };
+}
+
+/**
+ * What's left of each of his streams that has paid anything (003 FR-025), by stream id. Null while
+ * the drain is off. Reads only; callers settle first.
+ */
+export function getStreamBalances(
+  db: Db,
+  userId: number,
+  settings: StoreSettings,
+): Map<number, Usd> | null {
+  return settings.perDiemDrain ? leftByStream(streamHistory(db, userId)) : null;
+}
+
+export interface Drains {
+  /** The order empties the per diem connected when it's placed (orders.per_diem_drained). */
+  perDiem: boolean;
+  /** Every other stream it empties (order_drains), oldest money first. */
+  others: number[];
+}
+
+/**
+ * The streams one more order takes from above $0 to $0 (003 FR-026, FR-027). Nothing while the
+ * drain is off (FR-028). Call after settling, before the order is written.
+ */
+export function streamsDrainedBy(
+  db: Db,
+  userId: number,
+  settings: StoreSettings,
+  spend: Spend,
+): Drains {
+  if (!settings.perDiemDrain) return { perDiem: false, others: [] };
+  const history = streamHistory(db, userId);
+  const perDiem = perDiemAt(history.perDiems, spend.at);
+  const drained = drainedBy(history, spend);
   return {
-    streamId: stream.id,
-    leftUsd,
-    drained: paydays.length > 0 && cmp(leftUsd, ZERO) === 0,
+    perDiem: perDiem !== null && drained.includes(perDiem),
+    others: drained.filter((id) => id !== perDiem),
   };
 }

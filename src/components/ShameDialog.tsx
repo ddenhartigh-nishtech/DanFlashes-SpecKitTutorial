@@ -40,7 +40,12 @@ export function ShameDialog({ ladder, insistLabel, placeholderUrl, onClose }: Sh
   useEffect(() => {
     const dialog = ref.current;
     if (dialog && !dialog.open) dialog.showModal();
+    // A modal dialog makes the rest of the document inert. Next keeps a page you navigate away
+    // from mounted but hidden, so close on the way out or the next page can't be clicked.
+    return () => dialog?.close();
   }, []);
+
+  const leave = () => ref.current?.close();
 
   function insist() {
     setLoop(({ round, order, at }) =>
@@ -82,6 +87,7 @@ export function ShameDialog({ ladder, insistLabel, placeholderUrl, onClose }: Sh
             <p className="text-sm font-semibold uppercase">{copy.shame.pitch}</p>
             <Link
               href={`/shirts/${pick.slug}`}
+              onClick={leave}
               data-testid="shame-recommendation"
               className="border-ink bg-paper flex items-center gap-2 border-4 p-2 shadow-[4px_4px_0_var(--color-ink)] sm:gap-3"
             >
@@ -105,13 +111,14 @@ export function ShameDialog({ ladder, insistLabel, placeholderUrl, onClose }: Sh
         <div className="flex flex-col gap-2">
           <Link
             href={pick ? `/shirts/${pick.slug}` : "/shirts"}
+            onClick={leave}
             className="font-display bg-hot-pink text-paper flex min-h-12 items-center justify-center px-4 text-center text-lg uppercase shadow-[4px_4px_0_var(--color-ink)]"
           >
             {pick ? copy.shame.takeIt : copy.shame.nothingBetter}
           </Link>
           <button
             type="button"
-            onClick={() => ref.current?.close()}
+            onClick={leave}
             className="font-display border-ink bg-highlighter min-h-11 border-4 px-4 uppercase"
           >
             {copy.shame.relent}

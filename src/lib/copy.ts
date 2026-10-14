@@ -69,7 +69,7 @@ export const copy = {
     enhance: "ENHANCE",
     zoomOut: "Zoom out",
     reset: "Reset",
-    zoomHint: "Scroll, pinch, or hit ENHANCE. Count every shape.",
+    zoomHint: "Click, scroll, pinch, or hit ENHANCE. Count every shape.",
     viewCart: "View cart",
   },
   cart: {

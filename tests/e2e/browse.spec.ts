@@ -86,6 +86,26 @@ test.describe("US1 — browse and filter by complexity", () => {
     }
   });
 
+  test("Reset clears every filter, not just the URL", async ({ page }) => {
+    await page.goto("/shirts");
+    await openFilters(page);
+    await visible(page.getByRole("checkbox", { name: "BLAND" })).check();
+    await visible(page.getByLabel("Max $")).fill("250");
+    await visible(page.getByLabel("Sort")).selectOption("price-desc");
+    await visible(page.getByRole("button", { name: "Show me" })).click();
+    await expect(page).toHaveURL(/tier=\d+/);
+    await expect(visible(page.getByTestId("shirt-card"))).toHaveCount(2);
+
+    await openFilters(page);
+    await visible(page.getByRole("link", { name: "Reset" })).click();
+    await expect(page).toHaveURL(/\/shirts$/);
+    await expect(visible(page.getByTestId("shirt-card"))).not.toHaveCount(2);
+    await openFilters(page);
+    await expect(visible(page.getByRole("checkbox", { name: "BLAND" }))).not.toBeChecked();
+    await expect(visible(page.getByLabel("Max $"))).toHaveValue("");
+    await expect(visible(page.getByLabel("Sort"))).not.toHaveValue("price-desc");
+  });
+
   test("an empty filter result says so in brand voice", async ({ page }) => {
     await page.goto("/shirts?maxPrice=1.00");
     await expect(visible(page.getByTestId("shirt-card"))).toHaveCount(0);

@@ -84,9 +84,17 @@ test.describe("US1 — You sure about that?", () => {
     await dialog.getByRole("link", { name: copy.shame.takeIt }).click();
     await expect(page).toHaveURL(/\/shirts\/geo-riot$/);
     await expect(visible(page.getByRole("heading", { level: 1, name: "Geo Riot" }))).toBeVisible();
+    await expect(page.locator("dialog[open]")).toHaveCount(0); // no invisible modal left behind
 
-    await page.goto("/cart");
-    await expect(visible(page.getByTestId("empty-cart"))).toBeVisible();
+    // Nothing was added on the way, and the new page works without a reload.
+    await visible(page.locator("label").filter({ hasText: /^M$/ })).click();
+    await visible(page.getByRole("button", { name: "Add to cart" })).click();
+    await expect(visible(page.getByText("It's in the cart. Excellent decision."))).toBeVisible();
+    await visible(page.getByRole("link", { name: "View cart" })).click();
+    await expect(page).toHaveURL(/\/cart$/);
+    const lines = visible(page.getByTestId("cart-line"));
+    await expect(lines).toHaveCount(1);
+    await expect(lines).toContainText("Geo Riot");
   });
 
   test("a shirt with something going on adds in one click, as always", async ({ page }) => {

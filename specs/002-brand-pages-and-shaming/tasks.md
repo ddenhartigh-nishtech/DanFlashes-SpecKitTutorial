@@ -240,6 +240,16 @@ that order.
 
 ---
 
+## Phase 8: Owner Bug Reports (2026-10-14)
+
+Each fix came with a regression e2e test, written first and seen failing.
+
+- [X] T041 Fix the listing's Reset leaving the old filters checked. Reset is a client-side link to `/shirts` and the inputs are uncontrolled (`defaultValue`), so they kept their values. Key the form in src/components/ListingFilters.tsx on the query, so it remounts with fresh defaults on every URL change (Reset, back, forward). Test: tests/e2e/browse.spec.ts "Reset clears every filter, not just the URL".
+- [X] T042 Fix the page frozen after taking the dialog's recommendation. A modal `<dialog>` makes the rest of the document inert, and Next keeps the page you leave mounted (hidden), so the open dialog blocked every click until a reload. `ShameDialog` now closes in its effect cleanup and when either link is followed. Test: tests/e2e/shaming.spec.ts "taking the recommendation…" now adds Geo Riot and opens the cart without a reload, and asserts no `dialog[open]` remains.
+- [X] T043 Make clicking the shirt image enhance it, like ENHANCE: the magnifier cursor now does what it promises. In src/components/ZoomViewer.tsx a click runs the same `zoomTo(scale × 1.5)`, while a press that moves more than 6 px (a pan) or a pinch doesn't count. The cursor stays a magnifier until 8×, and the hint copy mentions clicking. Test: tests/e2e/zoom-and-cart.spec.ts "clicking the shirt enhances it, like ENHANCE; dragging only pans".
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase dependencies

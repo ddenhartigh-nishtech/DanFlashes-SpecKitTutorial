@@ -7,6 +7,8 @@ import { copy } from "@/lib/copy";
 const MIN = 1;
 const MAX = 8;
 const STEP = 1.5;
+/** A press that travels further than this is a drag (pan), not a click (enhance). */
+const CLICK_SLOP = 6;
 
 interface ZoomViewerProps {
   src: string | null;
@@ -20,13 +22,14 @@ const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v
 const distance = (a: { x: number; y: number }, b: { x: number; y: number }) =>
   Math.hypot(a.x - b.x, a.y - b.y);
 
-/** Zoom/enhance up to 8×: mouse wheel, touch pinch, drag to pan, and big ENHANCE buttons. */
+/** Zoom/enhance up to 8×: click or ENHANCE, mouse wheel, touch pinch, and drag to pan. */
 export function ZoomViewer({ src, alt, placeholderSrc, overlay }: ZoomViewerProps) {
   const [scale, setScale] = useState(MIN);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const frame = useRef<HTMLDivElement>(null);
   const pointers = useRef(new Map<number, { x: number; y: number }>());
   const pinch = useRef<{ distance: number; scale: number } | null>(null);
+  const press = useRef<{ x: number; y: number; dragged: boolean } | null>(null);
 
   const clampOffset = useCallback((o: { x: number; y: number }, s: number) => {
     const el = frame.current;
@@ -60,10 +63,14 @@ export function ZoomViewer({ src, alt, placeholderSrc, overlay }: ZoomViewerProp
     return () => el.removeEventListener("wheel", onWheel);
   }, [clampOffset]);
 
+  const enhance = () => zoomTo(scale * STEP);
+
   const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
     e.currentTarget.setPointerCapture(e.pointerId);
     pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointers.current.size === 1) press.current = { x: e.clientX, y: e.clientY, dragged: false };
     if (pointers.current.size === 2) {
+      if (press.current) press.current.dragged = true; // a pinch is never a click
       const [a, b] = [...pointers.current.values()];
       pinch.current = { distance: distance(a, b), scale };
     }
@@ -73,6 +80,9 @@ export function ZoomViewer({ src, alt, placeholderSrc, overlay }: ZoomViewerProp
     const previous = pointers.current.get(e.pointerId);
     if (!previous) return;
     pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (press.current && distance(press.current, { x: e.clientX, y: e.clientY }) > CLICK_SLOP) {
+      press.current.dragged = true;
+    }
     if (pointers.current.size === 2 && pinch.current) {
       const [a, b] = [...pointers.current.values()];
       zoomTo((pinch.current.scale * distance(a, b)) / pinch.current.distance);
@@ -101,8 +111,17 @@ export function ZoomViewer({ src, alt, placeholderSrc, overlay }: ZoomViewerProp
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
+        // The magnifier means it: a click enhances, exactly like the ENHANCE button.
+        onClick={() => {
+          if (!press.current?.dragged) enhance();
+          press.current = null;
+        }}
         className={`border-ink bg-ink relative aspect-square touch-none overflow-hidden border-4 select-none ${
-          scale > MIN ? "cursor-grab active:cursor-grabbing" : "cursor-zoom-in"
+          scale >= MAX
+            ? "cursor-grab active:cursor-grabbing"
+            : scale > MIN
+              ? "cursor-zoom-in active:cursor-grabbing"
+              : "cursor-zoom-in"
         }`}
       >
         <div
@@ -123,7 +142,7 @@ export function ZoomViewer({ src, alt, placeholderSrc, overlay }: ZoomViewerProp
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
-          onClick={() => zoomTo(scale * STEP)}
+          onClick={enhance}
           disabled={scale >= MAX}
           className={`${button} bg-highlighter`}
         >

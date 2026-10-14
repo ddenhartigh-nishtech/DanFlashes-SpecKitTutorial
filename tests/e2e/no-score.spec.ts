@@ -18,9 +18,17 @@ async function expectNoScore(page: Page, where: string) {
 test("no shopper-facing page reveals a complexity score or scrolls sideways", async ({
   page,
 }, info) => {
+  test.slow(); // ten pages, a sign-up (bcrypt), and a checkout: more than 60 s on a busy machine
   // FR-034's floor: the smallest supported phone width.
   if (info.project.name === "phone") await page.setViewportSize({ width: 360, height: 780 });
-  for (const path of ["/", "/shirts", "/shirts/geo-riot", "/shirts/last-seasons-swirl", "/cart"]) {
+  for (const path of [
+    "/",
+    "/shirts",
+    "/shirts/geo-riot",
+    "/shirts/last-seasons-swirl",
+    "/cart",
+    "/about",
+  ]) {
     await page.goto(path);
     await expectNoScore(page, path);
   }

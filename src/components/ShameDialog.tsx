@@ -65,7 +65,12 @@ export function ShameDialog({ ladder, insistLabel, placeholderUrl, onClose }: Sh
       data-testid="shame-dialog"
       data-round={loop.round}
       aria-labelledby="shame-title"
-      onClose={onClose}
+      // `close` fires a tick after close(). React Strict Mode (dev) runs the effect twice, so the
+      // cleanup's close() arrives after the dialog has reopened: only a dialog that is still
+      // closed has really been closed.
+      onClose={() => {
+        if (!ref.current?.open) onClose();
+      }}
       className="border-ink bg-paper backdrop:bg-ink/80 m-auto max-h-[90dvh] w-[min(36rem,calc(100vw-2rem))] overflow-y-auto border-4 p-0 shadow-[8px_8px_0_var(--color-hot-pink)]"
     >
       <div className="loud-stripes border-ink border-b-4 p-3">
@@ -78,7 +83,7 @@ export function ShameDialog({ ladder, insistLabel, placeholderUrl, onClose }: Sh
       </div>
 
       <div className="flex flex-col gap-4 p-4">
-        <p data-testid="shame-line" className="text-lg font-bold">
+        <p data-testid="shame-line" className="min-h-[3lh] text-lg font-bold">
           {line}
         </p>
 

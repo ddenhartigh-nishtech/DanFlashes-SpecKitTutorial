@@ -9,6 +9,26 @@ async function clickNav(page: Page, name: string) {
   await visible(page.getByRole("navigation", { name: "Main" }).getByRole("link", { name })).click();
 }
 
+test.describe("header", () => {
+  test("reads About, Shirts, Account, then the cart icon; the logo goes home", async ({ page }) => {
+    await page.goto("/shirts");
+    const menu = page.locator("summary", { hasText: "Menu" });
+    if (await menu.isVisible()) await menu.click();
+    const nav = visible(page.getByRole("navigation", { name: "Main" }));
+    await expect(nav.getByRole("link")).toHaveText(["About", "Shirts", "Account"]);
+    await expect(page.getByRole("link", { name: "Home", exact: true })).toHaveCount(0);
+
+    const cart = visible(page.getByTestId("cart-link"));
+    await expect(cart).toHaveAccessibleName(/^Cart/);
+    await expect(cart.locator("svg")).toBeVisible();
+    await cart.click();
+    await expect(page).toHaveURL(/\/cart$/);
+
+    await visible(page.getByRole("link", { name: copy.brand.name })).click();
+    await expect(page).toHaveURL(/\/$/);
+  });
+});
+
 test.describe("US3 — About Dan", () => {
   for (const from of ["/", "/shirts/geo-riot"]) {
     test(`About is one click from ${from}`, async ({ page }) => {

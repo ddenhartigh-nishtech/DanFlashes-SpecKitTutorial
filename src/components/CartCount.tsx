@@ -9,7 +9,7 @@ export async function CartCount() {
   return (
     <span
       data-testid="cart-count"
-      className="bg-hot-pink text-paper ml-1 inline-flex min-w-6 items-center justify-center rounded-full px-1.5 text-xs"
+      className="bg-hot-pink text-paper border-ink inline-flex min-w-6 items-center justify-center rounded-full border-2 px-1.5 text-xs font-bold"
     >
       {count}
     </span>

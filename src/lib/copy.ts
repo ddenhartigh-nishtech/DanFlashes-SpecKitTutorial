@@ -8,7 +8,6 @@ export const copy = {
     tagline: "Complicated shirts. Complicated prices.",
   },
   nav: {
-    home: "Home",
     shirts: "Shirts",
     cart: "Cart",
     account: "Account",

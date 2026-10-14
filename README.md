@@ -46,6 +46,14 @@ npm run catalog:audit   # checks the catalog: errors exit 1, warnings exit 0
   deleted.
 - **Images** live in `public/media/` and are referenced by relative key. To move them to a CDN,
   change `store_settings.media_base_url`.
+- **Manipulation switches** (constitution IV). Each tactic is its own `store_settings` column: set it
+  to `1` for on and `0` for off, then reload the page.
+
+  | Column | Default | When on |
+  |---|---|---|
+  | `checkout_gate` | on | Guests can build a cart but must sign in to check out |
+  | `bland_shaming` | on | BLAND shirts can't be in a cart at all. Add to Cart opens the endless "You sure about that?" loop, the store refuses bland adds and raises, sign-in merges leave bland lines behind, and lines already in a cart are pulled with a notice. |
+  | `confirmshaming` | on | Decline buttons make him feel it: "Yes, I'd rather blend in", "Remove (and lose your edge)", "Sign out (go back to being normal)" |
 
 ## Scripts
 

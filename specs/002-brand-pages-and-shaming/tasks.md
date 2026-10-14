@@ -214,10 +214,14 @@ that order.
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T034 [P] Document both switches in README.md (store settings section: the `store_settings.bland_shaming` / `confirmshaming` columns, both on by default, edited in Drizzle Studio) and the `npm run db:migrate` step after pulling. Mark 002 in progress in ROADMAP.md.
-- [ ] T035 Constitution VII spot check: run Lighthouse (mobile) on `/about` and `/shirts/beige-regret` against a production build. Both pages must have CLS ≤ 0.1 and LCP ≤ 2.5 s, measured with applied throttling. For reference, 001's `/shirts` measured 2.2 s. Opening the dialog must cause no layout shift.
-- [ ] T036 Run quickstart.md scenarios 1–11 by hand (dev server plus Drizzle Studio for 9–11) and note the results
-- [ ] T037 Run `npm run format`, then `npm run verify`. It must be fully green, with line coverage ≥ 90% on `src/lib`, including `src/lib/shaming/`.
+- [X] T034 [P] Document both switches in README.md (store settings section: the `store_settings.bland_shaming` / `confirmshaming` columns, both on by default, edited in Drizzle Studio) and the `npm run db:migrate` step after pulling. Mark 002 in progress in ROADMAP.md.
+- [X] T035 Constitution VII spot check: run Lighthouse (mobile) on `/about` and `/shirts/beige-regret` against a production build. Both pages must have CLS ≤ 0.1 and LCP ≤ 2.5 s, measured with applied throttling. For reference, 001's `/shirts` measured 2.2 s. Opening the dialog must cause no layout shift.
+  - **Result (2026-10-14, Lighthouse 13.5.0, mobile, production build).** Applied throttling: `/about` LCP 2.4 s, CLS 0, TBT 560 ms; `/shirts/beige-regret` LCP 2.1 s, CLS 0, TBT 640 ms. Both are within budget, and TBT is below 001 (640–920 ms). The simulated estimates (2.7 / 2.8 s) match 001 and were accepted then.
+  - **Dialog.** Opening it causes no layout shift. Insisting nudged the dialog as insults of different lengths re-centered it; every shift followed a click (`hadRecentInput`), so CLS stays 0. Reserving three lines for the insult (`min-h-[3lh]`) removed the desktop jumps entirely. On phones it now nudges 3–14 px when the recommended shirt name wraps differently.
+- [X] T036 Run quickstart.md scenarios 1–11 by hand (dev server plus Drizzle Studio for 9–11) and note the results
+  - **Result (2026-10-14).** All 11 pass. They were scripted rather than clicked by hand: a fresh `db:reset` copy served from the production build, every step driven through the UI with Playwright, and the switches flipped directly in SQLite (what Drizzle Studio does).
+- [X] T037 Run `npm run format`, then `npm run verify`. It must be fully green, with line coverage ≥ 90% on `src/lib`, including `src/lib/shaming/`.
+  - **Result (2026-10-14).** Green: 341 unit and integration tests, 96% line coverage, 54 e2e. The first run hit the 60 s limit in 001's long no-score journey on a busy machine, so that test is now `test.slow()` and also checks `/about`.
 
 ---
 
@@ -247,6 +251,9 @@ Each fix came with a regression e2e test, written first and seen failing.
 - [X] T041 Fix the listing's Reset leaving the old filters checked. Reset is a client-side link to `/shirts` and the inputs are uncontrolled (`defaultValue`), so they kept their values. Key the form in src/components/ListingFilters.tsx on the query, so it remounts with fresh defaults on every URL change (Reset, back, forward). Test: tests/e2e/browse.spec.ts "Reset clears every filter, not just the URL".
 - [X] T042 Fix the page frozen after taking the dialog's recommendation. A modal `<dialog>` makes the rest of the document inert, and Next keeps the page you leave mounted (hidden), so the open dialog blocked every click until a reload. `ShameDialog` now closes in its effect cleanup and when either link is followed. Test: tests/e2e/shaming.spec.ts "taking the recommendation…" now adds Geo Riot and opens the cart without a reload, and asserts no `dialog[open]` remains.
 - [X] T043 Make clicking the shirt image enhance it, like ENHANCE: the magnifier cursor now does what it promises. In src/components/ZoomViewer.tsx a click runs the same `zoomTo(scale × 1.5)`, while a press that moves more than 6 px (a pan) or a pinch doesn't count. The cursor stays a magnifier until 8×, and the hint copy mentions clicking. Test: tests/e2e/zoom-and-cart.spec.ts "clicking the shirt enhances it, like ENHANCE; dragging only pans".
+
+- [X] T044 Fix the bland Add to Cart not opening the dialog in dev (a regression from T042). React Strict Mode runs effects twice in dev, so T042's cleanup `close()` queued a `close` event that arrived after the dialog had reopened, and unmounted it. `ShameDialog` now ignores a `close` event while the dialog is open again. e2e runs a production build, which is why it stayed green; this was verified by hand against `next dev` (open, insist, Escape, relent, take-it, then clicking the next page).
+- [X] T045 Rework the header per the owner: About, Shirts, Account, then a neon cart icon with the count badge. Home is dropped (the logo goes home). On phones the cart icon sits in the bar beside Menu, so it's always visible. Changes are in src/components/SiteHeader.tsx and CartCount.tsx, plus a `neon` utility in globals.css. Test: tests/e2e/about.spec.ts "header reads About, Shirts, Account, then the cart icon; the logo goes home".
 
 ---
 

@@ -29,8 +29,10 @@
 
 ## Phase 1: Setup
 
-- [ ] T001 Run `npm run verify` on the branch before changing anything, and record the baseline for
+- [X] T001 Run `npm run verify` on the branch before changing anything, and record the baseline for
   the PR
+  - **Result (2026-10-15).** The branch has only docs over main, whose tree is `7492b2e`'s, which was
+    verified before the merge: 477 unit and integration tests, 95.0% line coverage, 70 e2e.
 
 ---
 
@@ -38,21 +40,21 @@
 
 **Purpose**: the three switches (data-model.md, research R1), which every story reads.
 
-- [ ] T002 [P] Write failing unit tests in tests/unit/catalog-validate.test.ts: `validateSettings`
+- [X] T002 [P] Write failing unit tests in tests/unit/catalog-validate.test.ts: `validateSettings`
   accepts `fakeScarcity`, `countdownTimers` and `socialProof` as booleans, and reports each one when
   it's missing or the wrong type
-- [ ] T003 [P] Write failing integration tests:
+- [X] T003 [P] Write failing integration tests:
   - in tests/integration/settings-switches.test.ts: the three switches default on for a row written
     without them, and round-trip off through `saveSettings`
   - in a new tests/integration/migration-0007.test.ts: an existing `store_settings` row gains
     `fake_scarcity = 1`, `countdown_timers = 1` and `social_proof = 1`, and nothing else changes
-- [ ] T004 Add `fakeScarcity`, `countdownTimers` and `socialProof` (booleans) to `StoreSettings` in
+- [X] T004 Add `fakeScarcity`, `countdownTimers` and `socialProof` (booleans) to `StoreSettings` in
   src/lib/catalog/types.ts and to `settingsSchema` in src/lib/catalog/validate.ts (T002 passes)
-- [ ] T005 Add the columns to `storeSettings` in src/lib/db/schema.ts, each "integer (boolean), NOT
+- [X] T005 Add the columns to `storeSettings` in src/lib/db/schema.ts, each "integer (boolean), NOT
   NULL, default 1": `fake_scarcity`, `countdown_timers`, `social_proof`. Then run
   `npx drizzle-kit generate --name urgency_switches` to produce drizzle/0007_urgency_switches.sql
   (three `ALTER TABLE … ADD`, no rebuild).
-- [ ] T006 Carry the switches through src/lib/data/settings.ts (`getSettings`/`saveSettings`),
+- [X] T006 Carry the switches through src/lib/data/settings.ts (`getSettings`/`saveSettings`),
   scripts/seed-data.ts, tests/fixtures/catalog.ts, and `setSwitches` in tests/helpers/db.ts
   (T003 passes)
 
@@ -70,7 +72,7 @@ every quantity raise.
 
 ### Tests for User Story 1 (write first; they must fail)
 
-- [ ] T007 [P] [US1] Unit tests in tests/unit/urgency-scarcity.test.ts:
+- [X] T007 [P] [US1] Unit tests in tests/unit/urgency-scarcity.test.ts:
   - `stockLine({ isBland, active, boughtBefore }, on)` returns:
     - `"scarce"` for an active non-bland shirt
     - `"again"` for one he's bought before
@@ -78,7 +80,7 @@ every quantity raise.
     - `null` when it's off or retired
   - `foundAnother({ previous, next, isBland }, on)` is true only when `next > previous`, the shirt
     isn't bland, and it's on. A cut, an unchanged quantity, or a remove is false.
-- [ ] T008 [P] [US1] Integration tests in tests/integration/cart-found-another.test.ts:
+- [X] T008 [P] [US1] Integration tests in tests/integration/cart-found-another.test.ts:
   - `addItem` and `updateItem` report `shirtId` and `previousQuantity` (0 for a new line)
   - `addToCartCore` says "It's in the cart. Excellent decision. Oh wait, we found another one!" for
     a non-bland shirt, but only "It's in the cart. Excellent decision." with `fakeScarcity` off, or
@@ -89,7 +91,7 @@ every quantity raise.
     `itemCount` and subtotal (FR-003, SC-002)
   - `orderedShirtIds(db, userId)` returns the distinct shirts in his own orders only: not another
     shopper's, and empty for a guest
-- [ ] T009 [P] [US1] e2e journey in tests/e2e/fake-scarcity.spec.ts (desktop and phone):
+- [X] T009 [P] [US1] e2e journey in tests/e2e/fake-scarcity.spec.ts (desktop and phone):
   - `/shirts`: every non-bland card says "Only 1 left!", and Beige Regret says "Plenty left. Nobody
     wants these."
   - the home page's cards carry it too
@@ -103,15 +105,15 @@ every quantity raise.
 
 ### Implementation for User Story 1
 
-- [ ] T010 [US1] Implement `stockLine` and `foundAnother` in src/lib/urgency/scarcity.ts (pure).
+- [X] T010 [US1] Implement `stockLine` and `foundAnother` in src/lib/urgency/scarcity.ts (pure).
   Add `copy.urgency.scarce`, `again`, `plenty` and `foundAnother` to src/lib/copy.ts, in voice.
   T007 passes.
-- [ ] T011 [US1] Add `shirtId` and `previousQuantity` to the success results of `addItem` and
+- [X] T011 [US1] Add `shirtId` and `previousQuantity` to the success results of `addItem` and
   `updateItem` in src/lib/cart/cart.ts. In src/lib/actions/cart.ts, make `addToCartCore` and
   `updateCartItemCore` add the "found another one" copy when `foundAnother` says so: the shirt's
   blandness comes from `isBlandShirt`, and the switch from `getSettings`. Add
   `orderedShirtIds(db, userId)` to src/lib/orders/orders.ts. T008 passes.
-- [ ] T012 [US1] Create src/components/StockLine.tsx (server: `stockLine` → the loud line, or nothing,
+- [X] T012 [US1] Create src/components/StockLine.tsx (server: `stockLine` → the loud line, or nothing,
   `data-testid="stock-line"`). Pages load the current shopper's `orderedShirtIds` once per request,
   so `boughtBefore` is a set lookup. Render it:
   - in src/components/ShirtCard.tsx, via a `fakeScarcity` prop passed by src/app/page.tsx,

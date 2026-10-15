@@ -40,7 +40,16 @@ export function createSeededTestDb(): TestDb {
 export function setSwitches(
   db: Db,
   patch: Partial<
-    Pick<StoreSettings, "blandShaming" | "confirmshaming" | "perDiemDrain" | "drainJokes">
+    Pick<
+      StoreSettings,
+      | "blandShaming"
+      | "confirmshaming"
+      | "perDiemDrain"
+      | "drainJokes"
+      | "fakeScarcity"
+      | "countdownTimers"
+      | "socialProof"
+    >
   >,
 ): void {
   saveSettings(db, { ...getSettings(db), ...patch });

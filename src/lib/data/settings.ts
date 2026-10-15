@@ -25,6 +25,9 @@ export function getSettings(db: Db): StoreSettings {
     confirmshaming: row.confirmshaming,
     perDiemDrain: row.perDiemDrain,
     drainJokes: row.drainJokes,
+    fakeScarcity: row.fakeScarcity,
+    countdownTimers: row.countdownTimers,
+    socialProof: row.socialProof,
   };
 }
 
@@ -47,6 +50,9 @@ export function saveSettings(db: Db, settings: StoreSettings): void {
     confirmshaming: settings.confirmshaming,
     perDiemDrain: settings.perDiemDrain,
     drainJokes: settings.drainJokes,
+    fakeScarcity: settings.fakeScarcity,
+    countdownTimers: settings.countdownTimers,
+    socialProof: settings.socialProof,
   };
   db.insert(storeSettings)
     .values({ id: 1, ...values })

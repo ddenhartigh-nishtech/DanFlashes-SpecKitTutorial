@@ -43,9 +43,15 @@ describe("guest cart", () => {
   it("adds a shirt with a size, and the same shirt+size increments quantity", () => {
     const { db } = createSeededTestDb();
     const { id } = getOrCreateCart(db, { cartId: null, userId: null });
-    expect(addItem(db, id, { slug: "geo-riot", size: "L" })).toEqual({ ok: true, itemCount: 1 });
+    expect(addItem(db, id, { slug: "geo-riot", size: "L" })).toMatchObject({
+      ok: true,
+      itemCount: 1,
+    });
     const before = getCartView(db, id).lines[0].addedAt;
-    expect(addItem(db, id, { slug: "geo-riot", size: "L" })).toEqual({ ok: true, itemCount: 2 });
+    expect(addItem(db, id, { slug: "geo-riot", size: "L" })).toMatchObject({
+      ok: true,
+      itemCount: 2,
+    });
     const view = getCartView(db, id);
     expect(view.lines).toHaveLength(1);
     expect(view.lines[0]).toMatchObject({ size: "L", quantity: 2, addedAt: before });
@@ -76,7 +82,7 @@ describe("guest cart", () => {
     const { db } = createSeededTestDb();
     const { id } = getOrCreateCart(db, { cartId: null, userId: null });
     addItem(db, id, { slug: "geo-riot", size: "M" });
-    expect(updateItem(db, id, { slug: "geo-riot", size: "M", quantity: 3 })).toEqual({
+    expect(updateItem(db, id, { slug: "geo-riot", size: "M", quantity: 3 })).toMatchObject({
       ok: true,
       itemCount: 3,
     });
@@ -92,7 +98,7 @@ describe("guest cart", () => {
       ok: false,
       code: "NOT_IN_CART",
     });
-    expect(updateItem(db, id, { slug: "geo-riot", size: "M", quantity: 0 })).toEqual({
+    expect(updateItem(db, id, { slug: "geo-riot", size: "M", quantity: 0 })).toMatchObject({
       ok: true,
       itemCount: 0,
     });
@@ -102,7 +108,10 @@ describe("guest cart", () => {
     const { db } = createSeededTestDb();
     const { id } = getOrCreateCart(db, { cartId: null, userId: null });
     addItem(db, id, { slug: "geo-riot", size: "M" });
-    expect(removeItem(db, id, { slug: "geo-riot", size: "M" })).toEqual({ ok: true, itemCount: 0 });
+    expect(removeItem(db, id, { slug: "geo-riot", size: "M" })).toMatchObject({
+      ok: true,
+      itemCount: 0,
+    });
     expect(removeItem(db, id, { slug: "geo-riot", size: "M" })).toEqual({
       ok: false,
       code: "NOT_IN_CART",

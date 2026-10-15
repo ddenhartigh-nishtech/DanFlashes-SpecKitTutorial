@@ -35,6 +35,9 @@ export type CartErrorCode =
   | "BLAND_REFUSED";
 
 export type CartResult = Ok<{ itemCount: number }> | Err<CartErrorCode>;
+/** An add or an update also says which shirt changed and what its quantity was (004 R3). */
+export type CartChange =
+  Ok<{ itemCount: number; shirtId: number; previousQuantity: number }> | Err<CartErrorCode>;
 
 export interface CartOwner {
   cartId: string | null;
@@ -122,13 +125,25 @@ export function itemCount(db: Db, cartId: string | null): number {
   return row?.n ?? 0;
 }
 
-export function addItem(db: Db, cartId: string, input: { slug: string; size: string }): CartResult {
+export function addItem(db: Db, cartId: string, input: { slug: string; size: string }): CartChange {
   if (!isSize(input.size)) return { ok: false, code: "SIZE_REQUIRED" };
   const shirt = findShirtRef(db, input.slug);
   if (!shirt) return { ok: false, code: "SHIRT_NOT_FOUND" };
   if (shirt.status !== "active") return { ok: false, code: "SHIRT_INACTIVE" };
   if (refusesBland(db, shirt.id)) return { ok: false, code: "BLAND_REFUSED" };
 
+  const previousQuantity =
+    db
+      .select({ quantity: cartItems.quantity })
+      .from(cartItems)
+      .where(
+        and(
+          eq(cartItems.cartId, cartId),
+          eq(cartItems.shirtId, shirt.id),
+          eq(cartItems.size, input.size),
+        ),
+      )
+      .get()?.quantity ?? 0;
   db.insert(cartItems)
     .values({ cartId, shirtId: shirt.id, size: input.size, quantity: 1 })
     .onConflictDoUpdate({
@@ -137,7 +152,7 @@ export function addItem(db: Db, cartId: string, input: { slug: string; size: str
     })
     .run();
   touch(db, cartId);
-  return { ok: true, itemCount: itemCount(db, cartId) };
+  return { ok: true, itemCount: itemCount(db, cartId), shirtId: shirt.id, previousQuantity };
 }
 
 /** Bland-shirt shaming (FR-010): while it's on, a BLAND shirt may not enter or grow in a cart. */
@@ -161,7 +176,7 @@ export function updateItem(
   db: Db,
   cartId: string,
   input: { slug: string; size: string; quantity: number },
-): CartResult {
+): CartChange {
   if (!Number.isInteger(input.quantity) || input.quantity < 0 || input.quantity > MAX_QUANTITY) {
     return { ok: false, code: "INVALID_QUANTITY" };
   }
@@ -174,7 +189,12 @@ export function updateItem(
   if (input.quantity === 0) db.delete(cartItems).where(where).run();
   else db.update(cartItems).set({ quantity: input.quantity }).where(where).run();
   touch(db, cartId);
-  return { ok: true, itemCount: itemCount(db, cartId) };
+  return {
+    ok: true,
+    itemCount: itemCount(db, cartId),
+    shirtId: line.shirtId,
+    previousQuantity: line.quantity,
+  };
 }
 
 export function removeItem(

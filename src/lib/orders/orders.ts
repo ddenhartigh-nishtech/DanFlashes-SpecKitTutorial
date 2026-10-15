@@ -196,3 +196,17 @@ export function listOrdersForUser(db: Db, userId: number): OrderView[] {
     .all();
   return hydrateOrders(db, rows);
 }
+
+/** The shirts he has ordered, by id (004 FR-008): his own orders only, and none for a guest. */
+export function orderedShirtIds(db: Db, userId: number | null): Set<number> {
+  if (userId === null) return new Set();
+  return new Set(
+    db
+      .selectDistinct({ shirtId: orderItems.shirtId })
+      .from(orderItems)
+      .innerJoin(orders, eq(orderItems.orderId, orders.id))
+      .where(eq(orders.userId, userId))
+      .all()
+      .map((row) => row.shirtId),
+  );
+}

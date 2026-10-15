@@ -47,8 +47,13 @@ test.describe("US1 — browse and filter by complexity", () => {
       await expect(card.getByTestId("tier-badge")).toHaveCount(1);
       await expect(card.getByTestId("price")).toHaveCount(1);
       const price = await card.getByTestId("price").innerText();
-      const rest = (await card.innerText()).replace(price, "");
-      expect(rest, "no score digits outside the price").not.toMatch(/\d/);
+      // "Only 1 left!" (004) is a stock line, not a score: strip it like the price.
+      const stock = await card.getByTestId("stock-line").allInnerTexts();
+      const rest = [price, ...stock].reduce(
+        (text, part) => text.replace(part, ""),
+        await card.innerText(),
+      );
+      expect(rest, "no score digits outside the price and the stock line").not.toMatch(/\d/);
     }
 
     // Not even in the serialized React payload shipped to the browser.

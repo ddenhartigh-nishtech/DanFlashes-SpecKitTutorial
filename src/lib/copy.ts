@@ -292,6 +292,14 @@ export const copy = {
     dismiss: (trophy: string) => `Put away "${trophy}". Dan will still know.`,
     dismissed: "Put away. It still happened.",
   },
+  /** The urgency engine (004): every sales trick, played straight. */
+  urgency: {
+    scarce: "Only 1 left!",
+    again: "Just kidding, we actually found another one! One more left!",
+    plenty: "Plenty left. Nobody wants these.",
+    foundAnother: "Oh wait, we found another one!",
+  },
+
   /** Drain them all (003 US4): every stream that runs dry is its own trophy in the corner. */
   achievements: {
     gone: (name: string) => `${name}: GONE`,

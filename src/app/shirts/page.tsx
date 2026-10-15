@@ -23,7 +23,7 @@ export default function ShirtsPage({ searchParams }: PageProps<"/shirts">) {
 
 async function Listing({ searchParams }: Pick<PageProps<"/shirts">, "searchParams">) {
   const query = parseListingQuery(await searchParams);
-  const { shirts, tiers, placeholderUrl } = await loadStorefront();
+  const { shirts, tiers, placeholderUrl, stockOf } = await loadStorefront();
   const results = applyListing(shirts, query).map(toShopperShirt);
 
   return (
@@ -47,6 +47,7 @@ async function Listing({ searchParams }: Pick<PageProps<"/shirts">, "searchParam
                   placeholderUrl={placeholderUrl}
                   priority={i < 2}
                   headingLevel={2}
+                  stock={stockOf(shirt)}
                 />
               </li>
             ))}

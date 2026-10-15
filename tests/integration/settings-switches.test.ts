@@ -32,3 +32,31 @@ describe("store_settings.drain_jokes (003 round 6, migration 0006)", () => {
     });
   });
 });
+
+describe("store_settings urgency switches (004, migration 0007)", () => {
+  it("default all three on, and round-trip them off", () => {
+    const { db, sqlite } = createTestDb();
+    sqlite.prepare("INSERT INTO store_settings (id) VALUES (1)").run();
+    expect(getSettings(db)).toMatchObject({
+      fakeScarcity: true,
+      countdownTimers: true,
+      socialProof: true,
+    });
+    saveSettings(db, {
+      ...getSettings(db),
+      fakeScarcity: false,
+      countdownTimers: false,
+      socialProof: false,
+    });
+    expect(getSettings(db)).toMatchObject({
+      fakeScarcity: false,
+      countdownTimers: false,
+      socialProof: false,
+    });
+    expect(
+      sqlite
+        .prepare("SELECT fake_scarcity, countdown_timers, social_proof FROM store_settings")
+        .get(),
+    ).toEqual({ fake_scarcity: 0, countdown_timers: 0, social_proof: 0 });
+  });
+});

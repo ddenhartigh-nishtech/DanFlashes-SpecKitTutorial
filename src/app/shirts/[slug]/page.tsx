@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { loadShirt } from "@/app/_data/storefront";
 import { AddToCart } from "@/components/AddToCart";
 import { PriceTag } from "@/components/PriceTag";
+import { StockLine } from "@/components/StockLine";
 import { ShirtBadge } from "@/components/ShirtBadge";
 import { ZoomViewer } from "@/components/ZoomViewer";
 import { copy } from "@/lib/copy";
@@ -25,6 +26,7 @@ async function ShirtDetail({ params }: Pick<PageProps<"/shirts/[slug]">, "params
     blandShaming,
     confirmshaming,
     ladder,
+    stock,
   } = await loadShirt(slug);
   if (!catalogShirt) notFound();
   const shirt = toShopperShirt(catalogShirt);
@@ -54,7 +56,12 @@ async function ShirtDetail({ params }: Pick<PageProps<"/shirts/[slug]">, "params
           <ShirtBadge tier={shirt.tier} showTagline />
           <span className="text-sm font-semibold uppercase">{copy.styles[shirt.style]}</span>
         </div>
-        {retired ? null : <PriceTag priceUsd={shirt.finalPriceUsd} size="lg" />}
+        {retired ? null : (
+          <div className="flex flex-wrap items-center gap-3">
+            <PriceTag priceUsd={shirt.finalPriceUsd} size="lg" />
+            <StockLine line={stock} />
+          </div>
+        )}
         <p className="bg-paper text-lg">{shirt.description}</p>
         {retired ? null : (
           <AddToCart

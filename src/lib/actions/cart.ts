@@ -6,11 +6,16 @@ import {
   getOrCreateCart,
   removeItem,
   updateItem,
+  type CartChange,
   type CartResult,
 } from "@/lib/cart/cart";
+import { MAX_QUANTITY } from "@/lib/cart/limits";
 import { copy } from "@/lib/copy";
+import { getSettings } from "@/lib/data/settings";
+import { isBlandShirt } from "@/lib/data/shirts";
 import type { Db } from "@/lib/db/client";
 import { CART_COOKIE, cookieOptions, type CookieJar } from "@/lib/http/cookies";
+import { foundAnother } from "@/lib/urgency/scarcity";
 
 const GUEST_CART_DAYS = 30;
 
@@ -19,6 +24,15 @@ function toState(result: CartResult, message?: string): ActionState {
   return message
     ? { ok: true, itemCount: result.itemCount, message }
     : { ok: true, itemCount: result.itemCount };
+}
+
+/** Fake scarcity (004 FR-009): did this add or raise just "find another one"? */
+function found(db: Db, result: Extract<CartChange, { ok: true }>, next: number): boolean {
+  const isBland = isBlandShirt(db, result.shirtId);
+  return foundAnother(
+    { previous: result.previousQuantity, next, isBland },
+    getSettings(db).fakeScarcity,
+  );
 }
 
 function owner(db: Db, jar: CookieJar) {
@@ -32,7 +46,12 @@ export function addToCartCore(db: Db, jar: CookieJar, form: FormData): ActionSta
     jar.set(CART_COOKIE, cart.id, cookieOptions(GUEST_CART_DAYS));
   }
   const result = addItem(db, cart.id, { slug: field(form, "slug"), size: field(form, "size") });
-  return toState(result, copy.product.added);
+  if (!result.ok) return failure(result.code);
+  const next = Math.min(result.previousQuantity + 1, MAX_QUANTITY);
+  const message = found(db, result, next)
+    ? `${copy.product.added} ${copy.urgency.foundAnother}`
+    : copy.product.added;
+  return { ok: true, itemCount: result.itemCount, message };
 }
 
 export function updateCartItemCore(db: Db, jar: CookieJar, form: FormData): ActionState {
@@ -40,9 +59,15 @@ export function updateCartItemCore(db: Db, jar: CookieJar, form: FormData): Acti
   if (!cartId) return failure("NOT_IN_CART");
   const raw = field(form, "quantity").trim();
   const quantity = /^\d+$/.test(raw) ? Number(raw) : Number.NaN;
-  return toState(
-    updateItem(db, cartId, { slug: field(form, "slug"), size: field(form, "size"), quantity }),
-  );
+  const result = updateItem(db, cartId, {
+    slug: field(form, "slug"),
+    size: field(form, "size"),
+    quantity,
+  });
+  if (!result.ok) return failure(result.code);
+  return found(db, result, quantity)
+    ? { ok: true, itemCount: result.itemCount, message: copy.urgency.foundAnother }
+    : { ok: true, itemCount: result.itemCount };
 }
 
 export function removeCartItemCore(db: Db, jar: CookieJar, form: FormData): ActionState {

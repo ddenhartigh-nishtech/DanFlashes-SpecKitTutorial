@@ -12,7 +12,8 @@ describe("migration 0006 (the drain jokes setting)", () => {
 
     runMigrations(db);
 
-    expect(sqlite.prepare("SELECT * FROM store_settings").get()).toEqual({
+    // Later migrations add more columns; this one only adds drain_jokes.
+    expect(sqlite.prepare("SELECT * FROM store_settings").get()).toMatchObject({
       ...before,
       drain_jokes: 1,
     });

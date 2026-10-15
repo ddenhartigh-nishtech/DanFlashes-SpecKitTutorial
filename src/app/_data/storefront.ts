@@ -1,5 +1,6 @@
 import "server-only";
 import { connection } from "next/server";
+import { loadStockOf } from "@/app/_data/urgency";
 import { getPlaceholderUrl, getSettings } from "@/lib/data/settings";
 import { getShirtBySlug, listCatalogShirts } from "@/lib/data/shirts";
 import { listTiers } from "@/lib/data/tiers";
@@ -19,6 +20,8 @@ export async function loadStorefront() {
     shirts: listCatalogShirts(db),
     tiers: listTiers(db),
     placeholderUrl: getPlaceholderUrl(db, settings),
+    /** Each shirt's stock line for this shopper (004 US1). */
+    stockOf: await loadStockOf(db, settings),
   };
 }
 
@@ -33,8 +36,10 @@ export async function loadShirt(slug: string) {
   const settings = getSettings(db);
   const shirt = getShirtBySlug(db, slug);
   const shamed = Boolean(shirt?.tier.isBland && settings.blandShaming);
+  const stockOf = await loadStockOf(db, settings);
   return {
     shirt,
+    stock: shirt ? stockOf(shirt) : null,
     placeholderUrl: getPlaceholderUrl(db, settings),
     blandShaming: settings.blandShaming,
     confirmshaming: settings.confirmshaming,

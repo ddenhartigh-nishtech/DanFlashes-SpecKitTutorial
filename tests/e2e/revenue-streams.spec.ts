@@ -1,6 +1,6 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 import { copy } from "../../src/lib/copy";
-import { connect, signUp, uniqueEmail, visible } from "./helpers";
+import { connect, signUp, test, uniqueEmail, visible } from "./helpers";
 
 const s = copy.streams;
 

@@ -1,6 +1,6 @@
-import { expect, test } from "@playwright/test";
+import { expect } from "@playwright/test";
 import { copy } from "../../src/lib/copy";
-import { signUp, uniqueEmail, visible } from "./helpers";
+import { signUp, test, uniqueEmail, visible } from "./helpers";
 
 const u = copy.urgency;
 
@@ -8,6 +8,7 @@ test.describe("US1 — fake scarcity", () => {
   test("only 1 left, we found another one, and just kidding once he's bought it", async ({
     page,
   }, info) => {
+    test.slow(); // a sign-up, the cart and a checkout: more than 60 s on a busy machine
     if (info.project.name === "phone") await page.setViewportSize({ width: 360, height: 780 });
     await page.goto("/sign-up");
     await signUp(page, uniqueEmail(info.project.name));

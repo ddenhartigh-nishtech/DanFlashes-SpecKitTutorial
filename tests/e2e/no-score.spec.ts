@@ -1,5 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
-import { addShirt, signUp, uniqueEmail, visible } from "./helpers";
+import { expect, type Page } from "@playwright/test";
+import { addShirt, signUp, test, uniqueEmail, visible } from "./helpers";
 
 /**
  * SC-003: shoppers never see a complexity score — not in the visible text, and not in the

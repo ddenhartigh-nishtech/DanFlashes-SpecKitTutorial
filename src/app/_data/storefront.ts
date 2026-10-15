@@ -6,6 +6,7 @@ import { getShirtBySlug, listCatalogShirts } from "@/lib/data/shirts";
 import { listTiers } from "@/lib/data/tiers";
 import { getDb } from "@/lib/db/client";
 import { buildLadder } from "@/lib/shaming/ladder";
+import { socialProofFor } from "@/lib/urgency/social-proof";
 
 /**
  * Request-time catalog read for pages. `connection()` is required: better-sqlite3 is synchronous,
@@ -41,6 +42,14 @@ export async function loadShirt(slug: string) {
     shirt,
     stock: shirt ? stockOf(shirt) : null,
     countdownTimers: settings.countdownTimers,
+    /** Who's looking and who just bought it (004 US3), worked out at request time. */
+    proof: shirt
+      ? socialProofFor(
+          settings,
+          { id: shirt.id, isBland: shirt.tier.isBland, active: shirt.status === "active" },
+          Date.now(),
+        )
+      : null,
     placeholderUrl: getPlaceholderUrl(db, settings),
     blandShaming: settings.blandShaming,
     confirmshaming: settings.confirmshaming,

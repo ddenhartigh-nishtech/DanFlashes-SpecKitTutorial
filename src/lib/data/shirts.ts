@@ -203,3 +203,17 @@ export function toShopperShirt(shirt: CatalogShirt): ShopperShirt {
     images: shirt.images,
   };
 }
+
+/**
+ * The shirts a fake purchase pop-up may name (004 FR-015, FR-016): active and non-bland, by name
+ * and slug only. It reads the catalog alone, never orders or shoppers. Empty while it's off.
+ */
+export function listPopCandidates(
+  db: Db,
+  settings: Pick<StoreSettings, "socialProof">,
+): { name: string; slug: string }[] {
+  if (!settings.socialProof) return [];
+  return listCatalogShirts(db)
+    .filter((shirt) => !shirt.tier.isBland)
+    .map((shirt) => ({ name: shirt.name, slug: shirt.slug }));
+}

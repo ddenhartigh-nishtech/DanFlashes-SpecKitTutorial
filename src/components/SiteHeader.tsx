@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import { loadPopCandidates } from "@/app/_data/urgency";
 import { CartCount } from "@/components/CartCount";
+import { PurchasePops } from "@/components/PurchasePops";
 import { copy } from "@/lib/copy";
 
 /** The logo is the way home; the cart is an icon that's always in the bar, phones included. */
@@ -61,8 +63,17 @@ export function SiteHeader() {
           </details>
         </div>
       </div>
+      <Suspense fallback={null}>
+        <Pops />
+      </Suspense>
     </header>
   );
+}
+
+/** Fake purchase pop-ups (004 US3): mounted in the sticky header so a phone's banner rides under it. */
+async function Pops() {
+  const candidates = await loadPopCandidates();
+  return candidates.length ? <PurchasePops candidates={candidates} /> : null;
 }
 
 function CartLink() {

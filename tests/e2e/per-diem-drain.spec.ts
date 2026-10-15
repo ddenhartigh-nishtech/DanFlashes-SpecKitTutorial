@@ -1,11 +1,12 @@
-import { expect, test } from "@playwright/test";
+import { expect } from "@playwright/test";
 import { copy } from "../../src/lib/copy";
-import { buyByCard, signUp, uniqueEmail, visible } from "./helpers";
+import { buyByCard, signUp, test, uniqueEmail, visible } from "./helpers";
 
 const s = copy.streams;
 
 test.describe("US2 — the per diem drain", () => {
   test("the gauge counts down every order and throws a party at $0", async ({ page }, info) => {
+    test.slow(); // a sign-up and two checkouts: more than 60 s on a busy machine
     if (info.project.name === "phone") await page.setViewportSize({ width: 360, height: 780 });
     await page.goto("/sign-up");
     await signUp(page, uniqueEmail(info.project.name));

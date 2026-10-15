@@ -300,6 +300,25 @@ export const copy = {
     foundAnother: "Oh wait, we found another one!",
     deal: "This price won't last.",
     hold: "Your shirts are reserved for",
+    looking: (n: number) => `${n} people are looking at this shirt right now.`,
+    nobodyLooking: "0 people are looking at this shirt right now.",
+    boughtThis: (name: string, department: string) =>
+      `${name} from ${department} just bought this pattern.`,
+    bought: (name: string, department: string) => `${name} from ${department} just bought`,
+    dismissPop: "Close it. Everyone's still buying.",
+    /** The people in his office who are buying everything (fake, every one of them). */
+    cast: [
+      { name: "Gary", department: "Accounts Payable" },
+      { name: "Craig", department: "Regional Sales" },
+      { name: "Todd", department: "IT" },
+      { name: "Brent", department: "Compliance" },
+      { name: "Doug", department: "Facilities" },
+      { name: "Rick", department: "Middle Management" },
+      { name: "Kyle", department: "Loss Prevention" },
+      { name: "Phil", department: "Corporate Travel" },
+      { name: "Dale", department: "Logistics" },
+      { name: "Mitch", department: "the Fourth Floor" },
+    ],
   },
 
   /** Drain them all (003 US4): every stream that runs dry is its own trophy in the corner. */

@@ -1,6 +1,6 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 import { copy } from "../../src/lib/copy";
-import { visible } from "./helpers";
+import { test, visible } from "./helpers";
 
 /** Click a main-nav link the way a shopper would: phones open the Menu first. */
 async function clickNav(page: Page, name: string) {

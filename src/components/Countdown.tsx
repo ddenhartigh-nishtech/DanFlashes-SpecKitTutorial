@@ -32,8 +32,8 @@ export function Countdown({ kind, label }: { kind: "deal" | "hold"; label: strin
     let frame = 0;
     let written = 0;
     const tick = (at: number) => {
-      // ~30 writes a second still reads as a blur of milliseconds, at half the work.
-      if (at - written >= 32 && time.current) {
+      // ~20 writes a second still reads as a blur of milliseconds, at a third of the work.
+      if (at - written >= 50 && time.current) {
         time.current.textContent = formatCountdown(remainingMs(Date.now(), anchor));
         written = at;
       }

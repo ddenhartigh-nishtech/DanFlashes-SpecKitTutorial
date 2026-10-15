@@ -1,8 +1,10 @@
 import "server-only";
+import { connection } from "next/server";
 import { currentUser } from "@/app/_data/request";
 import type { StoreSettings } from "@/lib/catalog/types";
-import type { ShopperShirt } from "@/lib/data/shirts";
-import type { Db } from "@/lib/db/client";
+import { getSettings } from "@/lib/data/settings";
+import { listPopCandidates, type ShopperShirt } from "@/lib/data/shirts";
+import { getDb, type Db } from "@/lib/db/client";
 import { orderedShirtIds } from "@/lib/orders/orders";
 import { stockLine, type StockLine } from "@/lib/urgency/scarcity";
 
@@ -25,4 +27,11 @@ export async function loadStockOf(db: Db, settings: StoreSettings): Promise<Stoc
       },
       settings.fakeScarcity,
     );
+}
+
+/** The shirts a purchase pop-up may name (004 R6); empty while social proof is off. */
+export async function loadPopCandidates() {
+  await connection();
+  const db = getDb();
+  return listPopCandidates(db, getSettings(db));
 }

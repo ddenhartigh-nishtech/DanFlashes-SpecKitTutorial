@@ -184,7 +184,7 @@ bottom-right on wider screens, under the header on phones, each with an (x).
 
 ### Tests for User Story 3 (write first; they must fail)
 
-- [ ] T018 [P] [US3] Unit tests in tests/unit/urgency-social-proof.test.ts:
+- [X] T018 [P] [US3] Unit tests in tests/unit/urgency-social-proof.test.ts:
   - `lookingNow(shirtId, now)` stays within 3–40 and is never 0, sampled every minute for a day
     across several shirts. It's deterministic, and it changes by at most 3 people per minute.
   - `buyerFor(shirtId, now)` is stable within a 10-minute window and is always a member of
@@ -192,17 +192,17 @@ bottom-right on wider screens, under the header on phones, each with an (x).
   - `socialProofFor(settings, shirt, now)` is null when off or retired. For a bland shirt it's
     `{ looking: 0, buyer: null }`.
   - the cast has at least 8 unique coworkers, each with a department
-- [ ] T019 [P] [US3] Unit tests in tests/unit/urgency-pops.test.ts:
+- [X] T019 [P] [US3] Unit tests in tests/unit/urgency-pops.test.ts:
   - `nextDelay(rand)` is in [20000, 40000] for `rand` in [0, 1)
   - `popDue({ now, nextAt, visible })` is false while hidden, and true once when overdue
   - `scheduleNext(now, rand)`, used after a pop-up ends or is dismissed, puts `nextAt` 20–40 s ahead,
     so closing one never stops the next
   - `pickPop(candidates, cast, rand)` names a candidate and a cast member, or returns null when there
     are no candidates
-- [ ] T020 [P] [US3] Integration test in tests/integration/urgency-candidates.test.ts:
+- [X] T020 [P] [US3] Integration test in tests/integration/urgency-candidates.test.ts:
   `listPopCandidates(db, settings)` returns only active, non-bland shirts (name and slug), never
   reads orders or users, and is empty with `socialProof` off
-- [ ] T021 [P] [US3] e2e journey in tests/e2e/social-proof.spec.ts (desktop and phone):
+- [X] T021 [P] [US3] e2e journey in tests/e2e/social-proof.spec.ts (desktop and phone):
   - Geo Riot shows "N people are looking at this shirt right now" (3–40) and a "just bought this
     pattern" line
   - Beige Regret shows 0 and no buyer
@@ -218,7 +218,7 @@ bottom-right on wider screens, under the header on phones, each with an (x).
 
 ### Implementation for User Story 3
 
-- [ ] T022 [US3] Implement `lookingNow`, `buyerFor` and `socialProofFor` in
+- [X] T022 [US3] Implement `lookingNow`, `buyerFor` and `socialProofFor` in
   src/lib/urgency/social-proof.ts, and `nextDelay`, `popDue`, `scheduleNext` and `pickPop` in src/lib/urgency/pops.ts
   (pure). Add to `copy.urgency`:
   - `looking(n)`, `nobodyLooking`
@@ -227,12 +227,12 @@ bottom-right on wider screens, under the header on phones, each with an (x).
   - `cast`: at least 8 `{ name, department }`, in voice
 
   T018 and T019 pass.
-- [ ] T023 [US3] Implement `listPopCandidates` in src/lib/data/shirts.ts, and the request-time loader
+- [X] T023 [US3] Implement `listPopCandidates` in src/lib/data/shirts.ts, and the request-time loader
   `loadPopCandidates()` in a new src/app/_data/urgency.ts (`connection()`, settings, candidates).
   T020 passes.
-- [ ] T024 [US3] Create src/components/SocialProof.tsx (server: the looking line and the buyer line,
+- [X] T024 [US3] Create src/components/SocialProof.tsx (server: the looking line and the buyer line,
   `data-testid="social-proof"`), and render it below Add to Cart in src/app/shirts/[slug]/page.tsx
-- [ ] T025 [US3] Create src/components/PurchasePops.tsx (client):
+- [X] T025 [US3] Create src/components/PurchasePops.tsx (client):
   - **schedule**: `sessionStorage['df-pop-next']` (try/catch), `nextDelay`; it pauses while hidden
     and shows one when overdue
   - **behavior**: one pop-up at a time (`data-testid="purchase-pop"`), about 6 s, then it slides

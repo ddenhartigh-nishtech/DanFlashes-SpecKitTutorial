@@ -1,6 +1,6 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 import { copy } from "../../src/lib/copy";
-import { addShirt, signUp, uniqueEmail, visible } from "./helpers";
+import { addShirt, signUp, test, uniqueEmail, visible } from "./helpers";
 
 const dollars = (text: string) => Number(text.replace(/[$,]/g, ""));
 

@@ -1,6 +1,6 @@
-import { expect, test, type Locator, type Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 import { copy } from "../../src/lib/copy";
-import { addShirt, signUp, uniqueEmail, visible } from "./helpers";
+import { addShirt, signUp, test, uniqueEmail, visible } from "./helpers";
 
 const u = copy.urgency;
 const CLOCK = /^\d{2}:\d{2}\.\d{3}$/;
@@ -26,6 +26,7 @@ async function readsTrue(page: Page, locator: Locator) {
 
 test.describe("US2 — countdown timers that reset", () => {
   test("one shared clock, to the millisecond, that never runs out", async ({ page }, info) => {
+    test.slow(); // a sign-up, four clock pages and a second tab: more than 60 s on a busy machine
     if (info.project.name === "phone") await page.setViewportSize({ width: 360, height: 780 });
     await page.goto("/sign-up");
     await signUp(page, uniqueEmail(info.project.name));
@@ -65,13 +66,15 @@ test.describe("US2 — countdown timers that reset", () => {
     );
     expect(overflow).toBeLessThanOrEqual(0);
 
-    // 6: at zero it quietly starts over: no "expired", and the cart is untouched.
-    await page.evaluate(() =>
-      localStorage.setItem("df-countdown-anchor", String(Date.now() - 597_000)),
-    );
+    // 6: at zero it quietly starts over, with no write: an anchor three cycles back still reads
+    // as a fresh countdown. There's no "expired", and the cart is untouched. (The edge itself is
+    // unit-tested in urgency-countdown.)
+    const old = String(Date.now() - 3 * 600_000 - 2_000);
+    await page.evaluate((at) => localStorage.setItem("df-countdown-anchor", at), old);
     await page.goto("/cart");
-    await expect(clock(page, "hold")).toHaveText(/^00:0[0-3]\.\d{3}$/);
-    await expect(clock(page, "hold")).toHaveText(/^09:5\d\.\d{3}$/, { timeout: 8000 });
+    await readsTrue(page, clock(page, "hold"));
+    await expect(clock(page, "hold")).toHaveText(/^09:\d{2}\.\d{3}$/);
+    expect(await page.evaluate(() => localStorage.getItem("df-countdown-anchor"))).toBe(old);
     await expect(page.getByText(/expired/i)).toHaveCount(0);
     await expect(visible(page.getByTestId("cart-line"))).toHaveCount(1);
   });

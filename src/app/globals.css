@@ -1,6 +1,13 @@
 @import "tailwindcss";
 
 /* Dan Flashes brand tokens (constitution V: maximum visual assault). */
+@keyframes df-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
 @theme {
   --color-ink: #111111;
   --color-paper: #fff8e7;

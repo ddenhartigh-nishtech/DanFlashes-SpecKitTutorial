@@ -4,6 +4,7 @@ import { loadShirt } from "@/app/_data/storefront";
 import { AddToCart } from "@/components/AddToCart";
 import { Countdown } from "@/components/Countdown";
 import { PriceTag } from "@/components/PriceTag";
+import { SocialProof } from "@/components/SocialProof";
 import { StockLine } from "@/components/StockLine";
 import { ShirtBadge } from "@/components/ShirtBadge";
 import { ZoomViewer } from "@/components/ZoomViewer";
@@ -30,6 +31,7 @@ async function ShirtDetail({ params }: Pick<PageProps<"/shirts/[slug]">, "params
     ladder,
     stock,
     countdownTimers,
+    proof,
   } = await loadShirt(slug);
   if (!catalogShirt) notFound();
   const shirt = toShopperShirt(catalogShirt);
@@ -76,6 +78,7 @@ async function ShirtDetail({ params }: Pick<PageProps<"/shirts/[slug]">, "params
             shame={shameFor({ isBland: shirt.tier.isBland, blandShaming, confirmshaming }, ladder)}
           />
         )}
+        <SocialProof proof={proof} />
       </div>
     </article>
   );

@@ -39,7 +39,9 @@ export function createSeededTestDb(): TestDb {
 /** Flip the manipulation-tactic switches on a test database. */
 export function setSwitches(
   db: Db,
-  patch: Partial<Pick<StoreSettings, "blandShaming" | "confirmshaming" | "perDiemDrain">>,
+  patch: Partial<
+    Pick<StoreSettings, "blandShaming" | "confirmshaming" | "perDiemDrain" | "drainJokes">
+  >,
 ): void {
   saveSettings(db, { ...getSettings(db), ...patch });
 }

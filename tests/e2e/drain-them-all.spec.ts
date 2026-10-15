@@ -65,8 +65,11 @@ test.describe("US4 — drain them all", () => {
     );
     expect(overflow).toBeLessThanOrEqual(0);
 
-    // 22: the pops stack above the per diem gauge.
+    // 22: the pops stack above the per diem gauge, and each says what he did (round 6).
     await expect(gauge).toContainText(copy.meter.drained);
+    await expect(gauge).toContainText(a.lines.per_diem);
+    await expect(pop(s.presets.college_fund)).toContainText(a.lines.college_fund);
+    await expect(pop(s.presets.garage_sale)).toContainText(a.lines.garage_sale);
     const gaugeTop = (await gauge.boundingBox())!.y;
     for (const name of [s.presets.college_fund, s.presets.garage_sale]) {
       const box = (await pop(name).boundingBox())!;

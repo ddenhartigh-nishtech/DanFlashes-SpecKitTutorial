@@ -12,7 +12,8 @@ import { formatUsd, type Usd } from "@/lib/money";
 export async function DrainCorner() {
   const corner = await loadDrainCorner();
   if (!corner) return null;
-  const { meter, pops } = corner;
+  const { jokes, meter, pops } = corner;
+  const a = copy.achievements;
   const gauge = meter && !meter.dismissed ? meter : null;
   if (!gauge && pops.length === 0) return null;
   return (
@@ -26,6 +27,7 @@ export async function DrainCorner() {
           streamId={gauge.streamId}
           paymentNo={gauge.paymentNo}
           trophy={copy.meter.drained}
+          joke={jokes ? a.lines.per_diem : null}
         />
       ) : gauge ? (
         <Countdown leftUsd={gauge.leftUsd} />
@@ -36,7 +38,8 @@ export async function DrainCorner() {
           testId="drain-pop"
           streamId={pop.streamId}
           paymentNo={pop.paymentNo}
-          trophy={copy.achievements.gone(pop.name)}
+          trophy={a.gone(pop.name)}
+          joke={jokes ? (pop.preset ? a.lines[pop.preset] : a.custom(pop.name)) : null}
         />
       ))}
     </div>
@@ -60,25 +63,33 @@ function Countdown({ leftUsd }: { leftUsd: Usd }) {
   );
 }
 
-/** A trophy in the corner, with an (x) that clears this drain for his account (R13). */
+/**
+ * A trophy in the corner, with an (x) that clears this drain for his account (R13). With the jokes
+ * on it also says what he did, wrapped at 20rem so it never stretches across the page (round 6).
+ */
 function Gone({
   testId,
   streamId,
   paymentNo,
   trophy,
+  joke,
 }: {
   testId: string;
   streamId: number;
   paymentNo: number;
   trophy: string;
+  joke: string | null;
 }) {
   return (
-    <div data-testid={testId} className={`${box} loud-stripes relative`}>
+    <div data-testid={testId} className={`${box} loud-stripes relative ${joke ? "w-80" : ""}`}>
       <Link
         href="/account#revenue-streams"
         className="solid-backing font-display block px-2 py-1 pr-5 text-sm [overflow-wrap:anywhere] uppercase"
       >
         🏆 {trophy}
+        {joke ? (
+          <span className="block py-0.5 font-sans text-sm font-bold normal-case">{joke}</span>
+        ) : null}
         <span className="text-highlighter block text-xs">{copy.meter.drainedTag}</span>
       </Link>
       <form action={dismissDrain} className="absolute -top-3 -right-3">

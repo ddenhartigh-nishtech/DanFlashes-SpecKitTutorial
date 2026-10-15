@@ -66,6 +66,7 @@ const settingsSchema = z.object({
   blandShaming: z.boolean(),
   confirmshaming: z.boolean(),
   perDiemDrain: z.boolean(),
+  drainJokes: z.boolean(),
 });
 
 function toIssues(error: z.ZodError): Issue[] {

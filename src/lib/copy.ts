@@ -295,6 +295,15 @@ export const copy = {
   /** Drain them all (003 US4): every stream that runs dry is its own trophy in the corner. */
   achievements: {
     gone: (name: string) => `${name}: GONE`,
+    /** What he did, on each GONE while `drain_jokes` is on (owner, round 6). */
+    lines: {
+      per_diem: "You spent your entire per diem on shirts.",
+      expense_report: "You spent your padded expense report on shirts.",
+      college_fund: "You spent your kid's college fund on shirts.",
+      garage_sale: "You spent your garage sale money on shirts.",
+      second_mortgage: "You spent your second mortgage on shirts.",
+    },
+    custom: (name: string) => `You spent "${name}" on shirts.`,
   },
 
   shame: {

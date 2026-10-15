@@ -638,7 +638,7 @@ shirts."), behind `store_settings.drain_jokes`, on by default (FR-031).
 
 ### Tests (write first; they must fail)
 
-- [ ] T073 [P] Tests:
+- [X] T073 [P] Tests:
   - tests/integration/settings-switches.test.ts: `drainJokes` defaults to on and saves
   - tests/integration/drain-pops.test.ts: each pop carries its `preset`
   - a new tests/integration/migration-0006.test.ts: the existing settings row gets `drain_jokes = 1`
@@ -647,14 +647,14 @@ shirts."), behind `store_settings.drain_jokes`, on by default (FR-031).
 
 ### Implementation
 
-- [ ] T074 Add `drain_jokes` ("integer (boolean), NOT NULL, default 1") to `store_settings` in
+- [X] T074 Add `drain_jokes` ("integer (boolean), NOT NULL, default 1") to `store_settings` in
   src/lib/db/schema.ts, and generate migration 0006 (`npx drizzle-kit generate --name drain_jokes`).
   Carry it through:
   - `StoreSettings` (src/lib/catalog/types.ts) and its validation
   - src/lib/data/settings.ts
   - the seed and the test fixture
   - `setSwitches`
-- [ ] T075 Restore the joke lines in `copy.achievements` (one per preset, plus a custom name). The
+- [X] T075 Restore the joke lines in `copy.achievements` (one per preset, plus a custom name). The
   corner shows each GONE's line while `drainJokes` is on, in a pop capped at 20rem wide.
   `getDrainPops` returns each pop's `preset`. Add `drain_jokes` to the README's switches table.
   T073 passes; then `npm run verify`.

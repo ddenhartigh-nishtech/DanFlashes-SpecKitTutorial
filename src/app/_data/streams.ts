@@ -17,6 +17,7 @@ export async function loadDrainCorner() {
   if (!settings.perDiemDrain) return null;
   settleStreams(db, user.id);
   return {
+    jokes: settings.drainJokes,
     meter: getPerDiemMeter(db, user.id, settings),
     pops: getDrainPops(db, user.id, settings) ?? [],
   };

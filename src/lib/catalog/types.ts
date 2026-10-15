@@ -26,6 +26,8 @@ export interface StoreSettings {
   confirmshaming: boolean;
   /** The per diem drain (constitution IV): the per diem gauge and its $0 celebration. */
   perDiemDrain: boolean;
+  /** Each GONE in the corner also says what he did (003 round 6). Only matters with the drain on. */
+  drainJokes: boolean;
 }
 
 /** An owner-defined band of complexity scores. The tier with minScore 0 is the BLAND tier. */

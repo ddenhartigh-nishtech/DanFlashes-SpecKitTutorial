@@ -362,6 +362,8 @@ export function getPerDiemMeter(
 export interface DrainPop {
   streamId: number;
   name: string;
+  /** Picks its joke line (round 6); null for a stream he named himself. */
+  preset: StreamPreset | null;
   /** Its payment count: what the (x) clears (R13). */
   paymentNo: number;
 }
@@ -387,7 +389,12 @@ export function getDrainPops(db: Db, userId: number, settings: StoreSettings): D
         cmp(left.get(row.id)!, ZERO) === 0 &&
         row.dismissedDrainPaymentNo !== row.paymentsMade,
     )
-    .map((row) => ({ streamId: row.id, name: streamName(row), paymentNo: row.paymentsMade }));
+    .map((row) => ({
+      streamId: row.id,
+      name: streamName(row),
+      preset: row.preset,
+      paymentNo: row.paymentsMade,
+    }));
 }
 
 /**

@@ -139,6 +139,8 @@ export const storeSettings = sqliteTable(
     blandShaming: integer("bland_shaming", { mode: "boolean" }).notNull().default(true),
     confirmshaming: integer("confirmshaming", { mode: "boolean" }).notNull().default(true),
     perDiemDrain: integer("per_diem_drain", { mode: "boolean" }).notNull().default(true),
+    /** Each GONE in the corner also says what he did (003 round 6). A look, not a tactic. */
+    drainJokes: integer("drain_jokes", { mode: "boolean" }).notNull().default(true),
   },
   (t) => [
     check("store_settings_singleton", sql`${t.id} = 1`),

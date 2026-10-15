@@ -103,6 +103,7 @@ describe("validateSettings", () => {
     blandShaming: true,
     confirmshaming: true,
     perDiemDrain: true,
+    drainJokes: true,
   };
 
   it("accepts the defaults and an https base URL", () => {

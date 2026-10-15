@@ -97,9 +97,9 @@ describe("getDrainPops", () => {
     disconnectStream(db, userId, craig, at(1)); // its money still counts, and still drains
     buy(at(2)); // $410.00 of stream money against $424.26: everything runs dry
     expect(pops(at(2))).toEqual([
-      { streamId: college, name: "My Kid's College Fund", paymentNo: 1 },
-      { streamId: garage, name: "Garage Sale", paymentNo: 1 },
-      { streamId: craig, name: "Craig owes me", paymentNo: 1 },
+      { streamId: college, name: "My Kid's College Fund", preset: "college_fund", paymentNo: 1 },
+      { streamId: garage, name: "Garage Sale", preset: "garage_sale", paymentNo: 1 },
+      { streamId: craig, name: "Craig owes me", preset: null, paymentNo: 1 },
     ]);
   });
 
@@ -128,8 +128,8 @@ describe("dismissDrain", () => {
     expect(pops(at(2))!.map((p) => p.streamId)).toEqual([garage]); // money again: no pop
     buy(at(3));
     expect(pops(at(3))).toEqual([
-      { streamId: garage, name: "Garage Sale", paymentNo: 1 },
-      { streamId: craig, name: "Craig owes me", paymentNo: 2 },
+      { streamId: garage, name: "Garage Sale", preset: "garage_sale", paymentNo: 1 },
+      { streamId: craig, name: "Craig owes me", preset: null, paymentNo: 2 },
     ]);
   });
 
@@ -141,7 +141,9 @@ describe("dismissDrain", () => {
     cashIn(db, userId, { streamId: craig, paymentNo: 2, now: at(2) });
     buy(at(3)); // …and it drains again before he clicks
     dismissDrain(db, userId, { streamId: craig, paymentNo: 1 });
-    expect(pops(at(3))).toEqual([{ streamId: craig, name: "Craig owes me", paymentNo: 2 }]);
+    expect(pops(at(3))).toEqual([
+      { streamId: craig, name: "Craig owes me", preset: null, paymentNo: 2 },
+    ]);
 
     dismissDrain(db, userId, { streamId: craig, paymentNo: 2 });
     dismissDrain(db, userId, { streamId: craig, paymentNo: 1 }); // a late, older click lowers nothing

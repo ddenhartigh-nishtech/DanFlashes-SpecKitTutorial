@@ -58,6 +58,10 @@
   big achievement box is gone, because it covered the order summary. The moment an order drains a
   stream, the per diem gauge turns GONE or the stream pops in the corner. Each order's achievements
   are still recorded with it.
+- Owner feedback, round 6 (2026-10-15): **the jokes come back, on the pops, behind a setting.**
+  - Each GONE in the corner can also say what he did: "You spent your kid's college fund on shirts."
+  - An owner setting turns those lines on or off. It's on by default, so the owner can see how the
+    extra text looks and choose.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -347,10 +351,13 @@ confirm that:
 - **FR-030**: The per diem gauge's GONE state and every stream's GONE pop MUST have an (x) that clears
   it for his account, on every page and device. A cleared pop MUST stay cleared until that stream is
   paid again and drained again. The countdown ("Per diem left $X") can't be cleared.
+- **FR-031**: While the drain jokes setting is on (on by default), each GONE in the corner MUST also
+  say what he did, in voice: "You spent your [stream] on shirts.", with a line for each preset and one
+  for a custom name. With it off, a GONE shows only its badge.
 
 **Voice**
 
-- **FR-031**: All new copy MUST use the Dan Flashes voice from constitution I and never explain the
+- **FR-032**: All new copy MUST use the Dan Flashes voice from constitution I and never explain the
   joke. That covers preset names, schedule names, the meter, the celebration, the disconnect labels,
   "Cash in", history entries, the checkout split, every stream's achievement, and the GONE pops.
 
@@ -366,7 +373,7 @@ confirm that:
 - **Stream Left** (derived, never stored): what's left of each stream, after counting every order
   against the per diem first, then the oldest money.
 - **Order Drain**: a stream that an order took to $0, recorded when the order is placed (drain on).
-- **Store Settings** (from 001/002) gains the per diem drain switch.
+- **Store Settings** (from 001/002) gains the per diem drain switch and the drain jokes setting.
 - **Order** (from 001) can now be paid by card, by Flash Credit, or **split**, and records how much
   Flash Credit it used.
 - **Brand Copy** gains the preset names, the schedule names, the meter, the celebration, the
@@ -418,6 +425,8 @@ confirm that:
 - **Where the celebration shows**: in the corner, from the confirmation of the order that drained
   it onward (owner, round 5).
 - **Disconnect labels**: shamed "Disconnect (and settle for less)", neutral "Disconnect".
+- **The drain jokes setting is a look, not a tactic.** It only matters while the drain is on, and it
+  needs no constitution IV switch of its own.
 - **Revenue streams are a store feature, not a manipulation tactic**: they have no switch of their
   own. The per diem drain is the tactic, and it has one.
 - **Changing a stream**: disconnect and reconnect. There is no editing in this feature.

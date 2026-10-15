@@ -30,7 +30,8 @@ Three additions on top of 001's Flash Credit ledger:
 5. **GONE pops** (owner, round 4). Every stream that runs dry also pops in the corner, stacked above
    the per diem gauge. Every GONE pop has an (x) that clears it for his account, per drain (R13,
    migration 0005). Since round 5 the corner is the whole celebration: the confirmation has no
-   achievement box.
+   achievement box. Since round 6, each GONE also carries its joke line, behind
+   `store_settings.drain_jokes` (on by default, migration 0006).
 
 ## Technical Context
 

@@ -631,6 +631,36 @@ gauge's GONE and the corner pops carry the celebration (FR-014, FR-026, FR-027).
 
 **Checkpoint**: quickstart 1–23 hold, and `npm run verify` is green.
 
+## Phase 12: Owner Feedback, Round 6 (2026-10-15): The Jokes Come Back, Behind a Setting
+
+**Goal**: each GONE in the corner can also say what he did ("You spent your kid's college fund on
+shirts."), behind `store_settings.drain_jokes`, on by default (FR-031).
+
+### Tests (write first; they must fail)
+
+- [ ] T073 [P] Tests:
+  - tests/integration/settings-switches.test.ts: `drainJokes` defaults to on and saves
+  - tests/integration/drain-pops.test.ts: each pop carries its `preset`
+  - a new tests/integration/migration-0006.test.ts: the existing settings row gets `drain_jokes = 1`
+  - tests/e2e/drain-them-all.spec.ts: the College Fund pop says "You spent your kid's college fund on
+    shirts.", and the per diem's GONE says its own line
+
+### Implementation
+
+- [ ] T074 Add `drain_jokes` ("integer (boolean), NOT NULL, default 1") to `store_settings` in
+  src/lib/db/schema.ts, and generate migration 0006 (`npx drizzle-kit generate --name drain_jokes`).
+  Carry it through:
+  - `StoreSettings` (src/lib/catalog/types.ts) and its validation
+  - src/lib/data/settings.ts
+  - the seed and the test fixture
+  - `setSwitches`
+- [ ] T075 Restore the joke lines in `copy.achievements` (one per preset, plus a custom name). The
+  corner shows each GONE's line while `drainJokes` is on, in a pop capped at 20rem wide.
+  `getDrainPops` returns each pop's `preset`. Add `drain_jokes` to the README's switches table.
+  T073 passes; then `npm run verify`.
+
+**Checkpoint**: quickstart 1–24 hold, and `npm run verify` is green.
+
 ---
 
 ## Dependencies & Execution Order
@@ -665,6 +695,7 @@ gauge's GONE and the corner pops carry the celebration (FR-014, FR-026, FR-027).
 - **Round 4 (T066–T070)** needs US4's allocation engine. Tests (T066, T067) first, then T068 → T069 →
   T070.
 - **Round 5 (T071–T072)** needs round 4's corner. T071 first, then T072.
+- **Round 6 (T073–T075)** needs round 5. T073 first, then T074 → T075.
 
 ### User story dependencies
 

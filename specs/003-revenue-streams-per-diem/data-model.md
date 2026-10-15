@@ -107,6 +107,12 @@ Replay all of his stream payments (lots) and his orders in time order. Each orde
 per diem's lots first, then all other lots oldest first; anything beyond is other money. A stream's
 "left" is what remains of its lots.
 
+## Changed: `store_settings` (migration 0006)
+
+| Column | Type | Rules |
+|---|---|---|
+| `drain_jokes` | integer (boolean), NOT NULL, default 1 | each GONE also says what he did (FR-031); only matters while `per_diem_drain` is on |
+
 ## Derived: the GONE pops (R13)
 
 Every stream other than a per diem whose "left" is $0.00 after paying in, and whose

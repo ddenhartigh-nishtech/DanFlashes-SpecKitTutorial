@@ -41,3 +41,4 @@ watch payments land quickly, connect one that tops off every 1 minute.
 | 21 | Buy Geo Riot again | One order empties both: "My Kid's College Fund: GONE" and "Garage Sale: GONE" pop in the corner on its confirmation. (US4-4, SC-012) |
 | 22 | Look at the bottom-left corner, on any page | The "Per diem: GONE" gauge, with a "My Kid's College Fund: GONE" pop and a "Garage Sale: GONE" pop stacked above it. Each has an (x). (US4-7, FR-029) |
 | 23 | Click Garage Sale's (x), reload, and visit another page; then clear the per diem's | Each pop disappears and stays gone everywhere. The account still shows Garage Sale as GONE. (US4-8, FR-030, SC-013) |
+| 24 | With the pops showing, set `store_settings.drain_jokes = 0` in Studio and reload, then set it back to 1 | Off: each GONE shows only its badge. On: each also says what he did, e.g. "You spent your kid's college fund on shirts." (FR-031) |

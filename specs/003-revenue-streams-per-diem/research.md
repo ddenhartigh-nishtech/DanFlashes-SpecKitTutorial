@@ -237,6 +237,11 @@ Only the new decisions are recorded here.
   celebration. `orders.per_diem_drained` and `order_drains` still record which order earned
   which achievement (FR-026–FR-028). No page reads them now; they're kept as each order's trophy
   record.
+- **Round 6 (2026-10-15)**: each GONE can carry its joke line ("You spent your kid's college fund on
+  shirts."). `store_settings.drain_jokes` (migration 0006, on by default) turns the lines on or
+  off. It's a column like the switches, so it's edited in Studio until the Admin Console (008). A pop
+  that carries its line is capped at 20rem wide, so the line wraps rather than stretching across the
+  page.
 
 ## R10. Testing
 

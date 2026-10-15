@@ -213,8 +213,10 @@ activity over time, which makes it the most to build.
 
 **Fake scarcity**
 
-- **FR-007**: While it's on, every active, non-bland shirt MUST say "Only 1 left!" on its detail page
-  (beside the price and Add to Cart), on its listing card, and on its cart line.
+- **FR-007**: While it's on, every active, non-bland shirt MUST say "Only 1 left!":
+  - on its detail page, beside the price and Add to Cart
+  - on its shirt card, wherever one appears (the listing, the home page, About's Exhibit A)
+  - on its cart line
 - **FR-008**: There MUST always be exactly 1 left. Nothing anyone buys changes it, it never says sold
   out, and it never limits the quantity (1 to 99, as before).
 - **FR-009**: Adding a shirt that says "Only 1 left!", or raising its quantity in the cart, MUST add
@@ -300,7 +302,7 @@ activity over time, which makes it the most to build.
 - **No real inventory.** The store has never counted stock, and this feature doesn't start. Scarcity
   is copy.
 - **Where the tactics show**:
-  - scarcity: the listing, the detail page, and the cart
+  - scarcity: every shirt card (the listing, the home page, About), the detail page, and the cart
   - the countdown: the detail page, the cart, and checkout
   - social proof: lines on the detail page, and pop-ups on every page
 - **The countdown** is 10 minutes and isn't owner-tunable in this feature. Milliseconds tick

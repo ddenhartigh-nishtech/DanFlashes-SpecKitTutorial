@@ -21,7 +21,8 @@
   beside the price on shirt pages ("This price won't last."), and a cart hold sits on the cart and
   checkout ("Your shirts are reserved for…"). It shows **milliseconds** too, for extra intensity.
 - Q2: How do the fake purchases show up? → A: **Both.** There's a line on each shirt's page, and
-  pop-ups in the bottom-right corner of every page every 20–40 seconds. The pop-ups slide away on
+  pop-ups on every page every 20–40 seconds: bottom-right on a wider screen, and at the top on a
+  phone (see below). The pop-ups slide away on
   their own, and each has an (x) to close it early.
 - Q3: What happens on BLAND shirts? → A: **Inverted.**
   - "Plenty left. Nobody wants these."
@@ -32,6 +33,11 @@
 - Owner addition: when he adds a shirt that's "Only 1 left!", the store adds **"Oh wait, we found
   another one!"** It says it again whenever he raises the quantity in his cart. There's still only 1
   left.
+- Q: On a phone, where should the fake-purchase pop-ups appear, given that the bottom-left corner
+  already holds the per diem gauge and GONE pops? → A: **At the top on phones.**
+  - On phones (the layout with the Menu button), each pop-up is a short, full-width banner that drops
+    in just under the header. It may briefly cover the page, but never the header.
+  - On wider screens it sits bottom-right, clear of everything.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -139,7 +145,8 @@ activity over time, which makes it the most to build.
    **Then** it names a fake coworker who just bought it: "[Name] from [Department] just bought this
    pattern."
 3. **Given** the social proof switch is on, **When** he's on any page for 20–40 seconds, **Then** a pop-up
-   slides in from the bottom-right: "[Name] from [Department] just bought [shirt]." It slides away by
+   slides in (bottom-right on a wider screen, just under the header on a phone): "[Name] from
+   [Department] just bought [shirt]." It slides away by
    itself after a few seconds, and the next one follows 20–40 seconds later.
 4. **Given** a pop-up, **When** he clicks its (x), **Then** it closes at once. The next one still
    comes.
@@ -164,8 +171,12 @@ activity over time, which makes it the most to build.
   pages still show the deal clock.
 - **Found another one, again and again**: every add and every raise says it. Lowering the quantity, or
   removing the shirt, says nothing.
-- **A pop-up over a button**: pop-ups stay in the bottom-right corner and never cover the price, the
-  tier badge, or Add to Cart. On a phone they sit above the page's bottom edge and fit within 360px.
+- **A pop-up over a button**:
+  - On a wider screen, pop-ups stay in the bottom-right corner, clear of the price, the tier badge,
+    and Add to Cart.
+  - On a phone, they drop in just under the header as a full-width banner, within 360px. A banner
+    may briefly cover the page, for about 6 seconds or until its (x), but never the header or the
+    bottom-left corner.
 - **Pop-ups while he's away**: a tab in the background doesn't pile up pop-ups. He sees one at a time.
 - **A sleeping tab**: when he comes back to a tab that sat in the background, the countdown shows the
   right time left (or has quietly restarted), not where it was when he left.
@@ -196,8 +207,9 @@ activity over time, which makes it the most to build.
   or a shirt's complexity score.
 - **FR-005**: The tactics MUST work the same for guests and for signed-in shoppers.
 - **FR-006**: No urgency element may shift the page's layout as it appears or updates. Nothing
-  floating may cover the bottom-left corner (003's gauge and pops), or a shirt's price, tier badge or
-  Add to Cart. Everything MUST fit from a 360px phone up.
+  floating may cover the header or the bottom-left corner (003's gauge and pops). On a wider screen,
+  nothing floating may cover a shirt's price, tier badge or Add to Cart. On a phone, only a pop-up may
+  briefly overlap the page below the header (FR-015). Everything MUST fit from a 360px phone up.
 
 **Fake scarcity**
 
@@ -232,8 +244,10 @@ activity over time, which makes it the most to build.
   - which fake coworker just bought it: "[Name] from [Department] just bought this pattern."
 
   A bland shirt's page MUST say "0 people are looking at this shirt right now," and name no buyer.
-- **FR-015**: While it's on, every page MUST show fake purchases as pop-ups in the bottom-right corner:
-  "[Name] from [Department] just bought [shirt]," naming an active, non-bland shirt.
+- **FR-015**: While it's on, every page MUST show fake purchases as pop-ups: "[Name] from [Department]
+  just bought [shirt]," naming an active, non-bland shirt.
+  - Where: in the bottom-right corner on a wider screen. On a phone (the layout with the Menu button),
+    as a short, full-width banner just under the header.
   - A new one comes every 20–40 seconds, one at a time.
   - Each slides away by itself after a few seconds.
   - Each has an (x) that closes it at once. Closing one doesn't stop the next.
@@ -272,8 +286,9 @@ activity over time, which makes it the most to build.
   the time.
 - **SC-005**: 0 real shopper names, emails or orders appear in any fake activity.
 - **SC-006**: Pages showing urgency never visibly jump as it appears or ticks; they stay within the
-  store's performance budget (constitution VII). Nothing urgent covers a price, a tier badge, Add to
-  Cart, or the bottom-left corner.
+  store's performance budget (constitution VII). Nothing urgent ever covers the header or the
+  bottom-left corner. On a wider screen nothing urgent covers a price, a tier badge or Add to Cart,
+  and on a phone only a pop-up does, briefly.
 - **SC-007**: With a tactic's switch off, 0 of its elements appear on any page.
 - **SC-009**: With social proof on, a shopper on any page sees a fake purchase pop-up within 40 seconds,
   never more than one at a time, and its (x) closes it within half a second.

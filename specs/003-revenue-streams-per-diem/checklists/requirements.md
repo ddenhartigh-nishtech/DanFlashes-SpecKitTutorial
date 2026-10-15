@@ -48,3 +48,6 @@
 - Iteration 4 (2026-10-14): the owner added "drain them all" (US4, FR-024–FR-028, SC-011, SC-012).
   Voice moved to FR-029. FR-017 now also covers stream "left" amounts and achievements. All items
   pass.
+- Iteration 5 (2026-10-15): owner feedback round 4 added the GONE pops in the corner and an (x) to
+  clear each one (FR-029, FR-030, US4 AC7–AC8, SC-013). FR-014 now ends at "until he clears it".
+  Voice moved to FR-031. All items pass.

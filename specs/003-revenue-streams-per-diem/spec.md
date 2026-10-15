@@ -48,6 +48,12 @@
     shirts." "Second Mortgage: GONE").
   - One big order can drain several streams at once and stacks their achievements on its
     confirmation.
+- Owner feedback, round 4 (2026-10-15): **every GONE is a pop in the corner, and every pop has an (x).**
+  - Each stream that runs dry gets a "[Stream]: GONE" pop in the bottom-left corner, stacked above
+    the per diem gauge. The confirmation still stacks the order's achievements too.
+  - The per diem gauge's GONE state and every stream's pop have an (x) that clears it. A cleared pop
+    stays cleared until that stream is paid again and drained again.
+  - The countdown itself ("Per diem left $X") can't be cleared. It's the meter, not a trophy.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -200,6 +206,11 @@ confirm that:
    **Then** that order unlocks its achievement again.
 6. **Given** the drain is off, **When** he browses or buys, **Then** no "left" amounts and no
    achievements appear.
+7. **Given** a stream other than the per diem has paid in and is spent to $0, **When** he browses
+   any page, **Then** a "[Stream]: GONE" pop shows in the bottom-left corner, stacked above the per
+   diem gauge.
+8. **Given** a GONE pop (the per diem's or any stream's), **When** he clicks its (x), **Then** it
+   disappears on every page and stays gone, until that stream is paid again and drained again.
 
 ---
 
@@ -234,6 +245,9 @@ confirm that:
 - **A disconnected stream**: its money still counts and can still be drained.
 - **An old per diem** (replaced by a new one): what's left of it counts as his other money, by age.
 - **Two streams paid at the same moment**: the one connected first is treated as older.
+- **An old per diem** that runs dry gets no pop. It left the corner with its gauge.
+- **Clearing a pop as a payday lands**: the (x) clears only the drain he saw. If the stream was paid
+  in the meantime, its next drain pops again.
 
 ## Requirements *(mandatory)*
 
@@ -284,7 +298,7 @@ confirm that:
   so it isn't held against the next top-off, which refills the meter by its whole amount (US2 AC4).
 - **FR-014**: When an order takes the meter from above $0 to $0, the store MUST celebrate loudly and
   as an achievement, once, at that moment. The meter MUST show the achievement for as long as it stays
-  at $0.
+  at $0, until he clears it (FR-030).
 - **FR-015**: A per diem payment that refills the meter MUST arm the celebration again for the next
   drain.
 - **FR-016**: The per diem MUST never block a purchase. Orders are paid by Flash Credit or card
@@ -323,18 +337,25 @@ confirm that:
   all of them, stacked.
 - **FR-028**: Achievements MUST only be recorded while the drain is on. Turning it on later doesn't
   award old orders.
+- **FR-029**: While the drain is on, every stream other than a per diem that has paid in and is spent
+  to $0 MUST show a "[Stream]: GONE" pop on every page, stacked above the per diem gauge in the same
+  corner. Like the gauge, it shifts no layout.
+- **FR-030**: The per diem gauge's GONE state and every stream's GONE pop MUST have an (x) that clears
+  it for his account, on every page and device. A cleared pop MUST stay cleared until that stream is
+  paid again and drained again. The countdown ("Per diem left $X") can't be cleared.
 
 **Voice**
 
-- **FR-029**: All new copy MUST use the Dan Flashes voice from constitution I and never explain the
+- **FR-031**: All new copy MUST use the Dan Flashes voice from constitution I and never explain the
   joke. That covers preset names, schedule names, the meter, the celebration, the disconnect labels,
-  "Cash in", history entries, the checkout split, and every stream's achievement.
+  "Cash in", history entries, the checkout split, every stream's achievement, and the GONE pops.
 
 ### Key Entities
 
 - **Revenue Stream**: one shopper's source of money. It has a name (a preset, or his own custom name),
   whether it's the per diem, an amount per payment, a schedule (recurring, one time, or whenever),
-  a start, an end or ongoing, how many payments it has made, and whether it's still connected.
+  a start, an end or ongoing, how many payments it has made, whether it's still connected, and
+  which drain's GONE pop he cleared.
 - **Stream Payment**: a Flash Credit history entry made by a stream: amount, the stream it came from,
   and which scheduled payment (or which "Cash in") it is.
 - **Per Diem Meter** (derived, never stored): what's left of the current per diem (see FR-024).
@@ -370,6 +391,8 @@ confirm that:
 - **SC-011**: After any sequence of payments and orders, every stream's "left" is correct to the cent,
   and no stream is drawn on while the current per diem still has money.
 - **SC-012**: An order that empties N streams shows exactly N achievements on its confirmation.
+- **SC-013**: Every drained stream's GONE pop shows on 100% of pages until he clears it, and 0 cleared
+  pops come back without a new payment and a new drain.
 
 ## Assumptions
 
@@ -386,6 +409,7 @@ confirm that:
   payment method. Top-ups and other streams don't affect it; only per diem payments raise it.
 - **Where the meter shows**: as a floating gauge pinned to a bottom corner of every page, for
   signed-in shoppers with a per diem (desktop and phone), and in the account next to Flash Credit.
+  Other streams' GONE pops stack above it in the same corner.
 - **Where the celebration shows**: on the order confirmation for the order that drained the per diem.
 - **Disconnect labels**: shamed "Disconnect (and settle for less)", neutral "Disconnect".
 - **Revenue streams are a store feature, not a manipulation tactic**: they have no switch of their

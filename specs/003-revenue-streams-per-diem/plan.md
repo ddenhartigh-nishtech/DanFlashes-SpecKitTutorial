@@ -28,6 +28,9 @@ Three additions on top of 001's Flash Credit ledger:
    oldest money from his other streams (one pure allocation engine, R12). Each stream shows what's
    left, and each one that runs dry unlocks its own achievement, stacked on the order's
    confirmation.
+5. **GONE pops** (owner, round 4). Every stream that runs dry also pops in the corner, stacked above
+   the per diem gauge. Every GONE pop has an (x) that clears it for his account, per drain (R13,
+   migration 0005).
 
 ## Technical Context
 
@@ -112,7 +115,7 @@ src/
 │   ├── StreamList.tsx                # new: streams, next payment, Cash in, Disconnect (confirmshaming)
 │   ├── CashInButton.tsx              # new (client): useActionState(cashIn) with paymentNo
 │   ├── CheckoutForm.tsx              # apply/remove Flash Credit, split breakdown, required confirmation
-│   ├── PerDiemMeter.tsx              # new (server): floating gauge (fixed, no layout shift); settles first
+│   ├── PerDiemMeter.tsx              # new (server): the bottom-left corner: per diem gauge + GONE pops, each with an (x) (R13)
 │   ├── Achievements.tsx              # new: the stacked drain achievements (US2, US4)
 │   └── LocalTime.tsx                 # new (client): useSyncExternalStore local-time formatting
 └── lib/

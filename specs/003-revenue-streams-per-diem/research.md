@@ -212,6 +212,27 @@ Only the new decisions are recorded here.
   - Allocating only Flash Credit spends was rejected: it would change the per diem's established
     "any payment method" rule.
 
+## R13. GONE pops in the corner, cleared per drain (owner, round 4)
+
+- **Decision**: one fixed bottom-left stack. The per diem gauge sits at the bottom, with a pop above
+  it for every non-per-diem stream that has paid in and is at $0 (R12's "left").
+  - **The (x)** posts `dismissDrain(streamId, paymentNo)`, with the payment count the page rendered,
+    as Cash in does (R4).
+  - **Storage**: `revenue_streams.dismissed_drain_payment_no` keeps the highest one cleared.
+  - **Showing it**: a pop shows while `dismissed_drain_payment_no ≠ payments_made`. The next
+    payment makes the old dismissal stale, so the next drain pops again.
+  - **A stale (x)** can only clear the drain he saw: if a payday lands before he clicks, the new
+    drain still pops.
+- **Rationale**:
+  - It's saved on his account, so it holds on every page and device.
+  - It's read on the server, so the corner renders right the first time, with no flash of a cleared
+    pop before hydration.
+  - No new table: one nullable column (`ALTER TABLE ADD COLUMN`, no rebuild).
+- **Alternatives**:
+  - A cookie or localStorage was rejected: it's per browser and it flashes.
+  - Keying on the draining order (`order_drains`) was rejected: a stream drained while the switch
+    was off has no order to key on, but still shows GONE, like the per diem gauge.
+
 ## R10. Testing
 
 - **Unit**:

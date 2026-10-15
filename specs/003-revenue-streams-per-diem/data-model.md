@@ -22,6 +22,7 @@ All changes ship in one migration, `drizzle/0002_*.sql`. `npm run db:migrate` ba
 | `next_due_at` | text, nullable | the next scheduled payment (recurring or one time); NULL when finished or `whenever` |
 | `payments_made` | integer, NOT NULL, default 0 | CHECK `>= 0` |
 | `disconnected_at` | text, nullable | set once; never cleared |
+| `dismissed_drain_payment_no` | integer, nullable | migration 0005: the payment count when he last cleared this stream's GONE pop (R13). The pop shows while it differs from `payments_made`. |
 | `created_at` | text, NOT NULL | 001's `timestamps` |
 
 Constraints and indexes:
@@ -105,6 +106,12 @@ current per diem's drain stays `orders.per_diem_drained`.
 Replay all of his stream payments (lots) and his orders in time order. Each order consumes the current
 per diem's lots first, then all other lots oldest first; anything beyond is other money. A stream's
 "left" is what remains of its lots.
+
+## Derived: the GONE pops (R13)
+
+Every stream other than a per diem whose "left" is $0.00 after paying in, and whose
+`dismissed_drain_payment_no` isn't its `payments_made`. The per diem gauge's GONE state follows the
+same rule for the connected per diem. Null while the drain is off.
 
 ## Derived: the per diem meter
 

@@ -566,6 +566,50 @@ achievement, stacked on the confirmation.
 
 **Checkpoint**: all four stories work, and `npm run verify` is green.
 
+## Phase 10: Owner Feedback, Round 4 (2026-10-15): GONE Pops in the Corner
+
+**Goal**: every stream that runs dry pops in the bottom-left corner, stacked above the per diem
+gauge. Every GONE pop, the per diem's included, has an (x) that clears it until that stream drains
+again (FR-029, FR-030, R13).
+
+**Independent Test**: quickstart scenarios 22–23.
+
+### Tests (write first; they must fail)
+
+- [ ] T066 [P] Integration tests in tests/integration/drain-pops.test.ts:
+  - `getDrainPops` lists every non-per-diem stream at $0 after paying in, disconnected ones
+    included, but no per diem; it's null with the drain off
+  - `dismissDrain` clears one pop
+  - paying in again and draining again brings it back
+  - a stale `paymentNo` can't clear a newer drain
+  - the per diem meter reports `dismissed`
+  - `dismissDrainCore` refuses guests (`SIGN_IN_REQUIRED`) and unknown streams or payments
+    (`STREAM_NOT_FOUND`)
+  - migration 0005 adds `dismissed_drain_payment_no` as NULL on existing rows
+- [ ] T067 [P] Extend tests/e2e/drain-them-all.spec.ts (quickstart 22–23):
+  - after the second order, the corner stacks the per diem's GONE gauge with the College Fund and
+    Garage Sale pops above it
+  - Garage Sale's (x) clears it, and it stays cleared after a reload and on another page
+  - the per diem's (x) clears the gauge
+  - no sideways scroll at 360px
+
+### Implementation
+
+- [ ] T068 Add `dismissed_drain_payment_no` (integer, nullable) to `revenue_streams` in
+  src/lib/db/schema.ts, and generate migration 0005 (`npx drizzle-kit generate --name drain_dismissals`)
+- [ ] T069 In src/lib/streams/streams.ts:
+  - `getDrainPops`
+  - `dismissDrain` (keeps the highest `paymentNo`; refuses one the stream hasn't made)
+  - `getPerDiemMeter` gains `paymentNo` and `dismissed`
+
+  Then `dismissDrainCore` in src/lib/actions/streams.ts, and the `dismissDrain` adapter in
+  src/actions/streams.ts. Copy: the (x)'s label in voice. T066 passes.
+- [ ] T070 The corner (src/components/PerDiemMeter.tsx, loaded by src/app/_data/streams.ts): one fixed
+  bottom-left stack. The per diem gauge is at the bottom, with a GONE pop above it for each drained
+  stream, and an (x) form on every GONE. T067 passes; then `npm run verify`.
+
+**Checkpoint**: quickstart 1–23 hold, and `npm run verify` is green.
+
 ---
 
 ## Dependencies & Execution Order
@@ -597,6 +641,8 @@ achievement, stacked on the confirmation.
 - **US4 (T059–T065)** needs US2 (the per diem drain). Within it, the tests (T059–T061) come first, then
   T062 → T063 → T064 → T065.
 - **Polish (T045–T049)** comes after all four stories.
+- **Round 4 (T066–T070)** needs US4's allocation engine. Tests (T066, T067) first, then T068 → T069 →
+  T070.
 
 ### User story dependencies
 

@@ -175,19 +175,17 @@ activity over time, which makes it the most to build.
   pages still show the deal clock.
 - **Found another one, again and again**: every add and every raise says it. Lowering the quantity, or
   removing the shirt, says nothing.
-- **A pop-up over a button**:
-  - On a wider screen, pop-ups stay in the bottom-right corner, clear of the price, the tier badge,
-    and Add to Cart.
-  - On a phone, they drop in just under the header as a full-width banner, within 360px. A banner
-    may briefly cover the page, for about 6 seconds or until its (x), but never the header or the
-    bottom-left corner.
+- **A pop-up over a button**: a pop-up may briefly cover the page, a price or Add to Cart included,
+  for about 6 seconds or until its (x). It never covers the header or the bottom-left corner.
+  - On a wider screen it sits in the bottom-right corner.
+  - On a phone it drops in just under the header as a full-width banner, within 360px.
 - **Pop-ups while he's away**: a tab in the background doesn't pile up pop-ups. He sees one at a time.
 - **A sleeping tab**: when he comes back to a tab that sat in the background, the countdown shows the
   right time left (or has quietly restarted), not where it was when he left.
 - **Several tabs**: every tab shows the same countdown.
 - **The corner**: nothing floating may cover the bottom-left corner, where the per diem gauge and its
-  GONE pops live (003). On a wider screen nothing may cover a shirt's price, tier badge, or Add to
-  Cart. On a phone a pop-up may, briefly, because it's easy to dismiss.
+  GONE pops live (003). Only a pop-up may cover a shirt's price, tier badge, or Add to Cart, and
+  only briefly, because it's easy to dismiss (owner, after analysis).
 - **A 360px phone**: every urgency element fits without sideways scrolling.
 - **All switches off**: the store looks and behaves exactly as it did after 003.
 - **Prices**: no urgency copy ever shows a price other than the real one: no "was" price, no
@@ -215,9 +213,9 @@ activity over time, which makes it the most to build.
 - **FR-005**: The tactics MUST work the same for guests and for signed-in shoppers, except where they
   read his own order history (FR-008).
 - **FR-006**: No urgency element may shift the page's layout as it appears or updates. Nothing
-  floating may cover the header or the bottom-left corner (003's gauge and pops). On a wider screen,
-  nothing floating may cover a shirt's price, tier badge or Add to Cart. On a phone, only a pop-up may
-  briefly overlap the page below the header (FR-015). Everything MUST fit from a 360px phone up.
+  floating may cover the header or the bottom-left corner (003's gauge and pops). Only a pop-up may
+  briefly overlap the rest of the page, a price or Add to Cart included, because it slides away on its
+  own and closes at once with its (x) (FR-015). Everything MUST fit from a 360px phone up.
 
 **Fake scarcity**
 
@@ -300,8 +298,8 @@ activity over time, which makes it the most to build.
 - **SC-005**: 0 real shopper names, emails or orders appear in any fake activity.
 - **SC-006**: Pages showing urgency never visibly jump as it appears or ticks; they stay within the
   store's performance budget (constitution VII). Nothing urgent ever covers the header or the
-  bottom-left corner. On a wider screen nothing urgent covers a price, a tier badge or Add to Cart,
-  and on a phone only a pop-up does, briefly.
+  bottom-left corner. Only a pop-up ever covers a price, a tier badge or Add to Cart, and only
+  until it slides away or he closes it.
 - **SC-007**: With a tactic's switch off, 0 of its elements appear on any page.
 - **SC-008**: With social proof on, a shopper on any page sees a fake purchase pop-up within 40 seconds,
   never more than one at a time, and its (x) closes it within half a second.

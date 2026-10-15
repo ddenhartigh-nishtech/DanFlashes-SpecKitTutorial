@@ -52,4 +52,8 @@
   - I3: the SCs are renumbered in document order (the pop-up SC is SC-008, the laugh test SC-009)
 
   All items pass.
+- Iteration 4 (2026-10-15, `/speckit-converge` F1): FR-006, SC-006 and two Edge Cases now let a
+  dismissible pop-up briefly cover the page on any screen, per the owner's I1 answer ("less
+  concerned about it covering stuff up if it can be easily dismissed"). It still never covers the
+  header or the drain corner. All items pass.
 - Items marked incomplete require spec updates before `/speckit-clarify` or `/speckit-plan`

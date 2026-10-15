@@ -331,3 +331,9 @@ Task: "e2e journey in tests/e2e/social-proof.spec.ts"
 3. **Increment 3**: US3 (social proof). Everyone in his office is buying.
 4. **Polish**: the README, the Strict Mode check, Lighthouse, the quickstart, then verify. Then
    converge, and a PR.
+
+---
+
+## Phase 7: Convergence
+
+- [X] T031 Reconcile FR-006, SC-006 and the Edge Cases ("A pop-up over a button", "The corner") with the dismissible bottom-right pop-up on wider screens. Per the owner's analysis answer (I1), a pop-up may briefly cover the page on any screen, but never the header or the bottom-left drain corner. Code is unchanged. per FR-006, SC-006 (contradicts)

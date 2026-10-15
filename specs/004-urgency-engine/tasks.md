@@ -251,15 +251,43 @@ bottom-right on wider screens, under the header on phones, each with an (x).
 
 - [X] T026 [P] Add `fake_scarcity`, `countdown_timers` and `social_proof` to the switches table in
   README.md
-- [ ] T027 Check the client components (Countdown, PurchasePops, CartQuantityForm, AddToCart) against
+- [X] T027 Check the client components (Countdown, PurchasePops, CartQuantityForm, AddToCart) against
   `next dev` under React Strict Mode: the clock ticks once per frame (no double loops), there's one
   pop-up at a time with no doubled timers, and "found another one" shows (002 R7, known gap)
-- [ ] T028 Constitution VII spot check: run Lighthouse (mobile) on `/shirts/geo-riot`, `/cart` (with
+  - **Result (2026-10-15).** Clean under `next dev` on a throwaway database:
+    - the deal clock wrote 38 times in 2 s: one loop at about 20 a second, not two
+    - one pop-up, gone after about 6 s, and the next due 44.6 s after it appeared (6 s plus a
+      38.6 s gap)
+    - "found another one" on the add and on a raise
+    - no console errors
+
+    One pop-up check first missed because the script set the schedule on a live page before
+    reloading. That's the race the e2e fixture now avoids by arming the next load.
+- [X] T028 Constitution VII spot check: run Lighthouse (mobile) on `/shirts/geo-riot`, `/cart` (with
   a line) and `/` against a production build. Each must have CLS ≤ 0.1 and LCP ≤ 2.5 s (applied
   throttling), with TBT noted. The ticking clock and the pop-ups must cause no layout shift.
-- [ ] T029 Run quickstart.md scenarios 1–14 and note the results
-- [ ] T030 Run `npm run format`, then `npm run verify`. It must be fully green, with line coverage
+  - **Result (2026-10-15, Lighthouse 13.5.0, mobile, production build, applied throttling, two
+    runs each)**:
+    - `/shirts/geo-riot` (with the ticking deal clock): LCP 2.2 s, CLS 0, TBT 190–280 ms
+    - `/cart` (a line and the hold clock): LCP 1.7–1.8 s, CLS 0, TBT 180 ms
+    - `/`: LCP 2.1–2.2 s, CLS 0.005, TBT 150–270 ms
+
+    Pop-ups are overlays, `fixed` or `absolute`, so they can't shift layout. The first one comes
+    20–40 s in, after Lighthouse has finished.
+- [X] T029 Run quickstart.md scenarios 1–14 and note the results
+  - **Result (2026-10-15).** All 14 pass, scripted through the UI against the production build on a
+    fresh `db:reset` copy, with the switches flipped in SQLite. Highlights:
+    - the clock went from 00:03.680 to 09:59.996 on its own
+    - the first desktop pop-up came at 22 s ("Rick from Middle Management just bought Confetti
+      Cannon.")
+    - the phone banner sits 0 px under the header, 360 px wide
+    - checkout's total was exactly 2 × $344.61, and Geo Riot then said "Just kidding, we actually
+      found another one! One more left!" on its page and its card
+- [X] T030 Run `npm run format`, then `npm run verify`. It must be fully green, with line coverage
   ≥ 90% on `src/lib`, including `src/lib/urgency/`.
+  - **Result (2026-10-15).** Green: 533 unit and integration tests at 95.0% line coverage (all four
+    `src/lib/urgency/` modules at 100% lines and branches), and 76 e2e tests in 2.2 minutes, level
+    with main's 2.3 minutes the same day.
 
 ---
 

@@ -2,7 +2,6 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import { currentUser } from "@/app/_data/request";
-import { Achievements } from "@/components/Achievements";
 import { OrderSummary } from "@/components/OrderSummary";
 import { copy } from "@/lib/copy";
 import { getPlaceholderUrl, getSettings } from "@/lib/data/settings";
@@ -27,12 +26,8 @@ async function OrderContents({ params }: Pick<PageProps<"/orders/[id]">, "params
   const order = /^\d+$/.test(id) ? getOrderForUser(db, Number(id), user.id) : null;
   if (!order) notFound(); // someone else's order looks exactly like a missing one
 
-  const celebrate = getSettings(db).perDiemDrain; // the achievements live and die with the switch
   return (
     <div className="flex flex-col gap-6">
-      {celebrate ? (
-        <Achievements perDiem={order.perDiemDrained} streams={order.drainedStreams} />
-      ) : null}
       <title>{`${copy.order.title(order.number)} · ${copy.brand.name}`}</title>
       <section className="loud-stripes border-ink border-4 p-4">
         <div className="solid-backing p-6">

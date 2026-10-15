@@ -35,11 +35,10 @@ test.describe("US2 — the per diem drain", () => {
     await expect(visible(page.getByTestId("achievements"))).toHaveCount(0);
     await expect(gauge).toContainText("$155.39");
 
-    // The order that takes it to $0 gets the achievement, and so does the gauge.
+    // The order that takes it to $0 turns the gauge GONE. No box covers the order (owner, round 5).
     await buyByCard(page, "geo-riot", "M");
-    await expect(visible(page.getByTestId("achievements"))).toContainText(
-      copy.achievements.lines.per_diem,
-    );
+    await expect(visible(page.getByTestId("payment"))).toBeVisible();
+    await expect(page.getByTestId("achievements")).toHaveCount(0);
     await expect(gauge).toContainText(copy.meter.drained);
   });
 

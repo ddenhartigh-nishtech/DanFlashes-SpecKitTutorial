@@ -61,7 +61,7 @@ npm run catalog:audit   # checks the catalog: errors exit 1, warnings exit 0
   | `checkout_gate` | on | Guests can build a cart but must sign in to check out |
   | `bland_shaming` | on | BLAND shirts can't be in a cart at all. Add to Cart opens the endless "You sure about that?" loop, the store refuses bland adds and raises, sign-in merges leave bland lines behind, and lines already in a cart are pulled with a notice. |
   | `confirmshaming` | on | Decline buttons make him feel it: "Yes, I'd rather blend in", "Remove (and lose your edge)", "Sign out (go back to being normal)", "Disconnect (and settle for less)" |
-  | `per_diem_drain` | on | A gauge in the corner counts his per diem down with every order, by any payment method, and throws a party at $0. Every order spends the per diem first, then the oldest stream money. Each stream shows what's left, and every stream an order empties is its own achievement on that order's confirmation ("You spent your kid's college fund on shirts."). While it's off, the gauge, the amounts left and the achievements are hidden, and orders placed then never earn one. |
+  | `per_diem_drain` | on | A gauge in the corner counts his per diem down with every order, by any payment method, and throws a party at $0. Every order spends the per diem first, then the oldest stream money. Each stream shows what's left. Every stream that runs dry pops a "[Stream]: GONE" trophy in the same corner, above the gauge, and each has an (x) to clear it until that stream pays in and drains again. While it's off, the gauge, the amounts left and the trophies are hidden, and orders placed then never earn one. |
 
 ## Scripts
 

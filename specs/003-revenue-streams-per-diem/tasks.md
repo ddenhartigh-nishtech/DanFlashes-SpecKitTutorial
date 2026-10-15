@@ -617,14 +617,14 @@ gauge's GONE and the corner pops carry the celebration (FR-014, FR-026, FR-027).
 
 ### Tests (update first; they must fail)
 
-- [ ] T071 [P] Update tests/e2e/per-diem-drain.spec.ts and tests/e2e/drain-them-all.spec.ts (quickstart
+- [X] T071 [P] Update tests/e2e/per-diem-drain.spec.ts and tests/e2e/drain-them-all.spec.ts (quickstart
   9, 20, 21):
   - a draining order's confirmation has no `achievements` box
   - its corner shows the GONE: the gauge for the per diem, pops for the rest
 
 ### Implementation
 
-- [ ] T072 Remove src/components/Achievements.tsx and its use on src/app/orders/[id]/page.tsx. Drop
+- [X] T072 Remove src/components/Achievements.tsx and its use on src/app/orders/[id]/page.tsx. Drop
   the copy only it used (`copy.achievements` keeps `gone`). Keep `per_diem_drained`,
   `order_drains` and `OrderView.drainedStreams` as each order's record (R13). Update the README.
   T071 passes; then `npm run verify`.

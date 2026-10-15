@@ -38,6 +38,9 @@
   - On phones (the layout with the Menu button), each pop-up is a short, full-width banner that drops
     in just under the header. It may briefly cover the page, but never the header.
   - On wider screens it sits bottom-right, clear of everything.
+- Owner, after analysis: **once he's bought a shirt, the store admits it found another one.** Its
+  warning becomes "Just kidding, we actually found another one! One more left!" everywhere he sees
+  it. A pop-up covering something briefly is fine, as long as it's easy to dismiss.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -71,8 +74,9 @@ two stand on their own, but this one makes the whole catalog feel like it's runn
 4. **Given** "Only 1 left!", **When** he adds the shirt to his cart, **Then** the confirmation also
    says "Oh wait, we found another one!" **When** he raises its quantity in the cart, **Then** the
    cart says it again.
-5. **Given** he (or anyone else) has bought the shirt, **When** he views it again, **Then** there is
-   still only 1 left. It never sells out.
+5. **Given** he has bought the shirt, **When** he views it again (its card, its page, or a cart line),
+   **Then** it says "Just kidding, we actually found another one! One more left!" It never sells out,
+   and no other shopper's purchase changes anything.
 6. **Given** a bland shirt, **When** he views it (detail page, listing card, or a cart line while bland
    shaming is off), **Then** it says "Plenty left. Nobody wants these." instead, and adding it never
    finds another one.
@@ -182,11 +186,14 @@ activity over time, which makes it the most to build.
   right time left (or has quietly restarted), not where it was when he left.
 - **Several tabs**: every tab shows the same countdown.
 - **The corner**: nothing floating may cover the bottom-left corner, where the per diem gauge and its
-  GONE pops live (003), and nothing may cover a shirt's price, tier badge, or Add to Cart.
+  GONE pops live (003). On a wider screen nothing may cover a shirt's price, tier badge, or Add to
+  Cart. On a phone a pop-up may, briefly, because it's easy to dismiss.
 - **A 360px phone**: every urgency element fits without sideways scrolling.
 - **All switches off**: the store looks and behaves exactly as it did after 003.
 - **Prices**: no urgency copy ever shows a price other than the real one: no "was" price, no
   percentage off, and no complexity score.
+- **A guest who bought something** (only possible with the checkout gate off) has no order history,
+  so he keeps seeing "Only 1 left!".
 - **A catalog with no active, non-bland shirts**: fake purchases still need a shirt to name. If there
   isn't one, none appear.
 
@@ -205,7 +212,8 @@ activity over time, which makes it the most to build.
   or the complexity MSRP).
 - **FR-004**: No urgency copy may show a price other than the real one (no "was" prices, no discounts),
   or a shirt's complexity score.
-- **FR-005**: The tactics MUST work the same for guests and for signed-in shoppers.
+- **FR-005**: The tactics MUST work the same for guests and for signed-in shoppers, except where they
+  read his own order history (FR-008).
 - **FR-006**: No urgency element may shift the page's layout as it appears or updates. Nothing
   floating may cover the header or the bottom-left corner (003's gauge and pops). On a wider screen,
   nothing floating may cover a shirt's price, tier badge or Add to Cart. On a phone, only a pop-up may
@@ -217,8 +225,10 @@ activity over time, which makes it the most to build.
   - on its detail page, beside the price and Add to Cart
   - on its shirt card, wherever one appears (the listing, the home page, About's Exhibit A)
   - on its cart line
-- **FR-008**: There MUST always be exactly 1 left. Nothing anyone buys changes it, it never says sold
-  out, and it never limits the quantity (1 to 99, as before).
+- **FR-008**: There MUST always be exactly 1 left. It never says sold out, and it never limits the
+  quantity (1 to 99, as before). Once he has bought a shirt, its warning MUST read "Just kidding, we
+  actually found another one! One more left!" wherever "Only 1 left!" would. Only his own orders
+  count; nothing other shoppers buy changes anything.
 - **FR-009**: Adding a shirt that says "Only 1 left!", or raising its quantity in the cart, MUST add
   "Oh wait, we found another one!" to the confirmation. The warning stays "Only 1 left!".
 - **FR-010**: A BLAND shirt MUST instead say "Plenty left. Nobody wants these." wherever the warning
@@ -271,7 +281,7 @@ activity over time, which makes it the most to build.
   whenever it runs out.
 - **Fake Coworker** (brand copy, not data): a first name and a department, for example "Gary from
   Accounts Payable".
-- **Brand Copy** gains the stock warnings (scarce and bland), "found another one", the deadline lines,
+- **Brand Copy** gains the stock warnings (scarce, found again, and bland), "found another one", the deadline lines,
   the "looking right now" lines, the fake cast, and the purchase lines.
 
 ## Success Criteria *(mandatory)*
@@ -279,7 +289,8 @@ activity over time, which makes it the most to build.
 ### Measurable Outcomes
 
 - **SC-001**: With scarcity on, 100% of active, non-bland shirts say "Only 1 left!" on their detail
-  page, listing card and cart line, before and after any number of purchases.
+  page, shirt cards and cart line. Once he has bought one, it says "Just kidding, we actually found
+  another one! One more left!" instead.
 - **SC-002**: With every tactic on, 100% of carts, totals and orders come out identical to the same
   purchases with every tactic off. 0 purchases are blocked or delayed.
 - **SC-003**: The countdown never shows less than 00:00.000 or an expired state. At zero it's back to
@@ -292,9 +303,9 @@ activity over time, which makes it the most to build.
   bottom-left corner. On a wider screen nothing urgent covers a price, a tier badge or Add to Cart,
   and on a phone only a pop-up does, briefly.
 - **SC-007**: With a tactic's switch off, 0 of its elements appear on any page.
-- **SC-009**: With social proof on, a shopper on any page sees a fake purchase pop-up within 40 seconds,
+- **SC-008**: With social proof on, a shopper on any page sees a fake purchase pop-up within 40 seconds,
   never more than one at a time, and its (x) closes it within half a second.
-- **SC-008**: When 5 people browse the store cold for two minutes, at least 4 say they felt rushed, or
+- **SC-009**: When 5 people browse the store cold for two minutes, at least 4 say they felt rushed, or
   call it "way too much."
 
 ## Assumptions

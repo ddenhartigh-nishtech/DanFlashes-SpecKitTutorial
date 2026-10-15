@@ -44,4 +44,12 @@
 
   He also added "Oh wait, we found another one!" on every add and every quantity raise. FR-009 and
   FR-015 are new, and FRs are renumbered FR-001–FR-017 in document order. All items pass.
+- Iteration 3 (2026-10-15, after `/speckit-analyze`):
+  - I1: "The corner" now allows a brief, dismissible pop-up over the page on phones
+  - C1: once he's bought a shirt, it reads "Just kidding, we actually found another one! One more
+    left!" (FR-008, US1 AC5, SC-001), and FR-005 notes the order-history exception
+  - I2: SC-001 says "shirt cards"
+  - I3: the SCs are renumbered in document order (the pop-up SC is SC-008, the laugh test SC-009)
+
+  All items pass.
 - Items marked incomplete require spec updates before `/speckit-clarify` or `/speckit-plan`

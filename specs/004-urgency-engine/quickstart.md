@@ -25,7 +25,7 @@ npm run dev
 | 8 | Open Beige Regret | "0 people are looking at this shirt right now", and no buyer. (US3-5) |
 | 9 | Stay on any page for up to 40 seconds (desktop) | A pop-up slides in at the bottom-right: "[Name] from [Department] just bought [shirt]." It slides away after about 6 s, and another follows 20–40 s later. Click one's (x): it closes at once. (US3-3, US3-4) |
 | 10 | Same on a 360px phone | The pop-up drops in just under the header, full width. The header and the bottom-left drain corner stay clear, and there's no sideways scroll. (FR-006, FR-015) |
-| 11 | Check out and place the order | Totals and the payment are exactly what they'd be with every switch off. Nothing blocked or delayed it. (FR-003, SC-002) |
+| 11 | Check out and place the order, then open Geo Riot and `/shirts` | Totals and the payment are exactly what they'd be with every switch off, and nothing blocked or delayed it. Geo Riot now says "Just kidding, we actually found another one! One more left!" on its page and its card. (FR-003, FR-008, SC-002, US1-5) |
 | 12 | In Studio set `fake_scarcity = 0`, reload `/shirts`, Geo Riot and the cart, and add another | No stock lines anywhere, and the add says only "It's in the cart. Excellent decision." (US1-7, FR-002) |
 | 13 | Set `countdown_timers = 0` | No deal clock and no hold. (US2-5) |
 | 14 | Set `social_proof = 0` | No "looking", no buyer, and no pop-ups on any page. Set all three back to 1. (US3-7, SC-007) |

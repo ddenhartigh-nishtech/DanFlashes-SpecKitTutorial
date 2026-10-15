@@ -18,9 +18,12 @@ Components, SQLite via Drizzle, Vitest and Playwright). There are no new package
 
 ## R2. Fake scarcity is copy, decided by one pure function
 
-- **Decision**: `src/lib/urgency/scarcity.ts` holds `stockLine({ isBland, active }, on)`, which
-  returns:
+- **Decision**: `src/lib/urgency/scarcity.ts` holds `stockLine({ isBland, active, boughtBefore }, on)`,
+  which returns:
   - `"scarce"` ("Only 1 left!")
+  - `"again"` ("Just kidding, we actually found another one! One more left!"), for an active
+    non-bland shirt he has bought before. `boughtBefore` comes from `orderedShirtIds(db, userId)`
+    (his own orders only, and empty for a guest), which the pages load once per request.
   - `"plenty"` ("Plenty left. Nobody wants these.")
   - `null`: when the switch is off, or the shirt is retired
 
@@ -83,6 +86,7 @@ Components, SQLite via Drizzle, Vitest and Playwright). There are no new package
   - `lookingNow(shirtId, now)`: a per-shirt base (a hash of the id, from 3 to 40), plus a slow
     sine drift over about 20 minutes, clamped to 3–40. It changes gradually between reloads and is
     never zero (FR-014).
+  - It changes by at most 3 people per minute (the analysis's U1 bound).
   - `buyerFor(shirtId, now)`: picks a coworker from the fake cast for each 10-minute window, so
     "Todd from IT just bought this pattern" holds still while he reads it.
 

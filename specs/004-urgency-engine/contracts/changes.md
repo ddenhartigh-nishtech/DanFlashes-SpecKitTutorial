@@ -13,7 +13,7 @@ Every change below appears only while its switch is on: `fake_scarcity`, `countd
 | Route | Change | Spec |
 |---|---|---|
 | *every page* | **Purchase pop-ups** (social proof), one at a time, every 20–40 s: "[Name] from [Department] just bought [shirt]", linking to the shirt. At `md` and up they're fixed bottom-right. Below `md` they're a full-width banner just under the sticky header. Each slides away after about 6 s and has an (x). They never cover the header or the bottom-left drain corner. | US3, FR-006, FR-015 |
-| `/`, `/shirts`, `/about` | Every shirt card carries its stock line: "Only 1 left!", or "Plenty left. Nobody wants these." on a bland shirt (scarcity). | US1, FR-007, FR-010 |
+| `/`, `/shirts`, `/about` | Every shirt card carries its stock line: "Only 1 left!"; "Just kidding, we actually found another one! One more left!" once he's bought it; or "Plenty left. Nobody wants these." on a bland shirt (scarcity). | US1, FR-007, FR-008, FR-010 |
 | `/shirts/[slug]` | Beside the price, and never replacing it: the stock line (scarcity), and the deal countdown "This price won't last." `MM:SS.mmm` (countdown). Below Add to Cart: "N people are looking at this shirt right now" and "[Name] from [Department] just bought this pattern" (social proof). A bland shirt says "0 people are looking at this shirt right now" and names no buyer. A retired shirt shows none of it. | US1–US3, FR-007, FR-011, FR-014 |
 | `/cart` | Each line's stock line (scarcity). While the cart has lines, "Your shirts are reserved for `MM:SS.mmm`" (countdown), on the same clock as the deal. | US1, US2, FR-007, FR-011 |
 | `/checkout` | The same hold countdown. | US2, FR-011 |

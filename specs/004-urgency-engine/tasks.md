@@ -71,8 +71,11 @@ every quantity raise.
 ### Tests for User Story 1 (write first; they must fail)
 
 - [ ] T007 [P] [US1] Unit tests in tests/unit/urgency-scarcity.test.ts:
-  - `stockLine({ isBland, active }, on)` returns `"scarce"` for an active non-bland shirt, `"plenty"`
-    for an active bland one, and `null` when it's off or retired
+  - `stockLine({ isBland, active, boughtBefore }, on)` returns:
+    - `"scarce"` for an active non-bland shirt
+    - `"again"` for one he's bought before
+    - `"plenty"` for an active bland one (bought or not)
+    - `null` when it's off or retired
   - `foundAnother({ previous, next, isBland }, on)` is true only when `next > previous`, the shirt
     isn't bland, and it's on. A cut, an unchanged quantity, or a remove is false.
 - [ ] T008 [P] [US1] Integration tests in tests/integration/cart-found-another.test.ts:
@@ -82,6 +85,10 @@ every quantity raise.
     for a bland shirt with bland shaming off
   - `updateCartItemCore` says "Oh wait, we found another one!" on a raise. It says nothing on a cut,
     an unchanged quantity, a remove, a bland shirt, or with the switch off.
+  - with `fakeScarcity` on vs off, the same adds and updates leave identical quantities,
+    `itemCount` and subtotal (FR-003, SC-002)
+  - `orderedShirtIds(db, userId)` returns the distinct shirts in his own orders only: not another
+    shopper's, and empty for a guest
 - [ ] T009 [P] [US1] e2e journey in tests/e2e/fake-scarcity.spec.ts (desktop and phone):
   - `/shirts`: every non-bland card says "Only 1 left!", and Beige Regret says "Plenty left. Nobody
     wants these."
@@ -90,18 +97,23 @@ every quantity raise.
   - Add to cart shows "found another one", and the page still says "Only 1 left!"
   - the cart line says it
   - raising to 3 shows "found another one", and lowering to 2 shows nothing
+  - after checking out, Geo Riot's page and card say "Just kidding, we actually found another one!
+    One more left!" (US1 AC5)
   - no sideways scroll at 360px
 
 ### Implementation for User Story 1
 
 - [ ] T010 [US1] Implement `stockLine` and `foundAnother` in src/lib/urgency/scarcity.ts (pure).
-  Add `copy.urgency.scarce`, `plenty` and `foundAnother` to src/lib/copy.ts, in voice. T007 passes.
+  Add `copy.urgency.scarce`, `again`, `plenty` and `foundAnother` to src/lib/copy.ts, in voice.
+  T007 passes.
 - [ ] T011 [US1] Add `shirtId` and `previousQuantity` to the success results of `addItem` and
   `updateItem` in src/lib/cart/cart.ts. In src/lib/actions/cart.ts, make `addToCartCore` and
   `updateCartItemCore` add the "found another one" copy when `foundAnother` says so: the shirt's
-  blandness comes from `isBlandShirt`, and the switch from `getSettings`. T008 passes.
+  blandness comes from `isBlandShirt`, and the switch from `getSettings`. Add
+  `orderedShirtIds(db, userId)` to src/lib/orders/orders.ts. T008 passes.
 - [ ] T012 [US1] Create src/components/StockLine.tsx (server: `stockLine` → the loud line, or nothing,
-  `data-testid="stock-line"`), and render it:
+  `data-testid="stock-line"`). Pages load the current shopper's `orderedShirtIds` once per request,
+  so `boughtBefore` is a set lookup. Render it:
   - in src/components/ShirtCard.tsx, via a `fakeScarcity` prop passed by src/app/page.tsx,
     src/app/shirts/page.tsx and src/app/about/page.tsx
   - beside the price in src/app/shirts/[slug]/page.tsx (not for retired shirts)
@@ -137,6 +149,7 @@ zero.
   - with the anchor set to 595 s ago (`addInitScript`), it reaches zero and shows `09:5x.xxx` again
     within a few seconds, with no "expired" text and an unchanged cart
   - an empty cart has no hold
+  - a second page in the same browser shows the same time, to within 1 s (several tabs)
   - no sideways scroll at 360px
 
 ### Implementation for User Story 2
@@ -171,7 +184,7 @@ bottom-right on wider screens, under the header on phones, each with an (x).
 
 - [ ] T018 [P] [US3] Unit tests in tests/unit/urgency-social-proof.test.ts:
   - `lookingNow(shirtId, now)` stays within 3–40 and is never 0, sampled every minute for a day
-    across several shirts. It's deterministic, and it moves at most a few people per minute.
+    across several shirts. It's deterministic, and it changes by at most 3 people per minute.
   - `buyerFor(shirtId, now)` is stable within a 10-minute window and is always a member of
     `copy.urgency.cast`
   - `socialProofFor(settings, shirt, now)` is null when off or retired. For a bland shirt it's
@@ -180,6 +193,8 @@ bottom-right on wider screens, under the header on phones, each with an (x).
 - [ ] T019 [P] [US3] Unit tests in tests/unit/urgency-pops.test.ts:
   - `nextDelay(rand)` is in [20000, 40000] for `rand` in [0, 1)
   - `popDue({ now, nextAt, visible })` is false while hidden, and true once when overdue
+  - `scheduleNext(now, rand)`, used after a pop-up ends or is dismissed, puts `nextAt` 20–40 s ahead,
+    so closing one never stops the next
   - `pickPop(candidates, cast, rand)` names a candidate and a cast member, or returns null when there
     are no candidates
 - [ ] T020 [P] [US3] Integration test in tests/integration/urgency-candidates.test.ts:
@@ -195,12 +210,14 @@ bottom-right on wider screens, under the header on phones, each with an (x).
     bottom edge and it doesn't overlap the header.
   - its (x) closes it within 0.5 s
   - only one pop-up at a time
+  - signed in (after sign-up), the page lines and a pop-up show up just as they do for a guest
+    (FR-005)
   - no sideways scroll at 360px
 
 ### Implementation for User Story 3
 
 - [ ] T022 [US3] Implement `lookingNow`, `buyerFor` and `socialProofFor` in
-  src/lib/urgency/social-proof.ts, and `nextDelay`, `popDue` and `pickPop` in src/lib/urgency/pops.ts
+  src/lib/urgency/social-proof.ts, and `nextDelay`, `popDue`, `scheduleNext` and `pickPop` in src/lib/urgency/pops.ts
   (pure). Add to `copy.urgency`:
   - `looking(n)`, `nobodyLooking`
   - `boughtThis(name, department)`, `bought(name, department, shirt)`

@@ -15,8 +15,9 @@ validated as booleans like 001–003's switches, and seeded on (`scripts/seed-da
 
 ## Derived (never stored on the server)
 
-- **Stock line** (R2): `stockLine({ isBland, active }, fakeScarcity)` → `"scarce"`, `"plenty"` or
-  `null`. Off, or retired, means `null`.
+- **Stock line** (R2): `stockLine({ isBland, active, boughtBefore }, fakeScarcity)` → `"scarce"`,
+  `"again"`, `"plenty"` or `null`. Off, or retired, means `null`. `boughtBefore` comes from
+  `orderedShirtIds(db, userId)`: the distinct shirt ids in his own `order_items`.
 - **Countdown** (R4): `remainingMs(now, anchor) = COUNTDOWN_MS − ((now − anchor) mod COUNTDOWN_MS)`,
   where `COUNTDOWN_MS = 600_000`. It's shown as `MM:SS.mmm`, from `10:00.000` down to `00:00.001`, and
   never negative.
@@ -40,7 +41,7 @@ for the page.
 ## Brand copy additions (`src/lib/copy.ts`, not data)
 
 `copy.urgency`:
-- `scarce`, `plenty`
+- `scarce`, `again`, `plenty`
 - `foundAnother`
 - `deal`, `hold`
 - `looking(n)`, `nobodyLooking`

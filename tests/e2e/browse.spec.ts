@@ -8,7 +8,9 @@ async function openFilters(page: Page) {
   const toggle = visible(page.getByRole("button", { name: "Filters" }));
   // Phones: tap the toggle (retrying until hydration makes it interactive). Desktop: already open.
   await expect(async () => {
-    if (!(await form.isVisible())) await toggle.click();
+    // Only phones have the toggle. On desktop a click on it would wait (until the test times out)
+    // for a button that is never shown, if the form simply hadn't streamed in yet.
+    if (!(await form.isVisible()) && (await toggle.isVisible())) await toggle.click();
     await expect(form).toBeVisible({ timeout: 1_000 });
   }).toPass();
 }

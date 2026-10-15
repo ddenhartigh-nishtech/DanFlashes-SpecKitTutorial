@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { signIn } from "@/lib/auth/accounts";
 import { ensureDemoShopper, type DemoShopper } from "@/lib/data/demo-shopper";
-import { getBalanceUsd } from "@/lib/flash-credit/ledger";
+import { getBalanceUsd, listEntries } from "@/lib/flash-credit/ledger";
 import { listOrdersForUser } from "@/lib/orders/orders";
+import { listStreams } from "@/lib/streams/streams";
 import { createSeededTestDb } from "../helpers/db";
 
 const DEMO: DemoShopper = {
@@ -14,6 +15,23 @@ const DEMO: DemoShopper = {
 };
 
 describe("ensureDemoShopper", () => {
+  it("connects an ongoing per diem after the past order, and its first payday lands", async () => {
+    const { db } = createSeededTestDb();
+    const { userId } = await ensureDemoShopper(db, { ...DEMO, perDiem: { amountUsd: "75.00" } });
+    expect(listStreams(db, userId, new Date())).toMatchObject([
+      {
+        name: "Per Diem",
+        isPerDiem: true,
+        amountUsd: "75.00",
+        schedule: "recurring",
+        intervalMinutes: 1440, // a per diem tops off daily
+        endsAt: null,
+      },
+    ]);
+    expect(getBalanceUsd(db, userId)).toBe("10075.00");
+    expect(listEntries(db, userId)[0]).toMatchObject({ kind: "stream", amountUsd: "75.00" });
+  });
+
   it("creates a shopper who can sign in, with $10,000 credit and one past card order", async () => {
     const { db } = createSeededTestDb();
     const { created, userId } = await ensureDemoShopper(db, DEMO);

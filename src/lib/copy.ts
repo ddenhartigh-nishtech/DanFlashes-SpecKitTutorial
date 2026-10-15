@@ -108,7 +108,18 @@ export const copy = {
     priceChanged: (total: string) =>
       `Dan adjusted a price. Your new total is ${total}. Check it, then place the order again.`,
     topUpLink: "Top up Flash Credit",
+    streamsLink: "connect a revenue stream",
     useCard: "or pay by card",
+    // Split payment (003 US3)
+    applyCredit: (available: string) => `Apply my Flash Credit (${available} available)`,
+    removeCredit: "Remove Flash Credit",
+    creditLine: (amount: string) => `Flash Credit: −${amount}`,
+    cardLine: (amount: string) => `On your card: ${amount}`,
+    coveredByCredit: "Flash Credit covers the whole thing. No card needed. Look at you.",
+    confirmSplit: (cardAmount: string) => `Put the remaining ${cardAmount} on my card`,
+    noCredit: "You have $0.00 of Flash Credit.",
+    creditChanged: (credit: string, card: string) =>
+      `Your Flash Credit changed. It now covers ${credit}, leaving ${card} for your card. Confirm and place it again.`,
     signedInAs: (who: string) => `Checking out as ${who}`,
   },
   order: {
@@ -117,6 +128,8 @@ export const copy = {
     body: "Your shirts are complicated, your decision was not. Dan is proud of you.",
     paidCard: (brand: string, last4: string) => `Charged to ${brand} ending ${last4}`,
     paidFlash: "Paid with Flash Credit",
+    paidSplit: (credit: string, brand: string, last4: string, card: string) =>
+      `${credit} in Flash Credit, ${card} charged to ${brand} ending ${last4}`,
     keepShopping: "Keep shopping",
     viewAccount: "See all your orders",
   },
@@ -190,6 +203,109 @@ export const copy = {
     },
   },
 
+  /** Revenue streams (003 US1): money that finds its way to shirts on its own. */
+  streams: {
+    heading: "Revenue Streams",
+    intro:
+      "Connect where the money comes from. It goes straight into Flash Credit. You're welcome.",
+    empty: "No revenue streams yet. Money is out there right now, not becoming shirts.",
+    presets: {
+      per_diem: "Per Diem",
+      expense_report: "Expense Report Padding",
+      college_fund: "My Kid's College Fund",
+      garage_sale: "Garage Sale",
+      second_mortgage: "Second Mortgage",
+    },
+    customOption: "Something else…",
+    schedules: {
+      recurring: "Recurring top-off",
+      one_time: "Just once",
+      whenever: "Whenever I want",
+    },
+    /** What each schedule actually does, so a recurring top-off and "whenever" can't be confused. */
+    hints: {
+      recurring:
+        "Tops off on its own, on the interval you set. The first top-off sets the day and time it repeats.",
+      one_time: "Applied once, right now. That's it.",
+      whenever: "Pays each time you hit Cash in. Never on its own.",
+    },
+    /** An interval in words: "5 minutes", "hour", "2 days", "2 weeks". */
+    period: (minutes: number) => {
+      const [n, unit] =
+        minutes % 10080 === 0
+          ? [minutes / 10080, "week"]
+          : minutes % 1440 === 0
+            ? [minutes / 1440, "day"]
+            : minutes % 60 === 0
+              ? [minutes / 60, "hour"]
+              : [minutes, "minute"];
+      return n === 1 ? unit : `${n} ${unit}s`;
+    },
+    every: (minutes: number) => `every ${copy.streams.period(minutes)}`,
+    units: { minutes: "minutes", hours: "hours", days: "days", weeks: "weeks" },
+    form: {
+      heading: "Connect a stream",
+      source: "Where's it coming from?",
+      customName: "What do you call it?",
+      amount: "How much each time",
+      schedule: "When does it pay?",
+      interval: "Tops off every",
+      intervalCount: "How many",
+      intervalUnit: "Minutes, hours, days or weeks",
+      intervalExample:
+        "Paycheck? Every 2 weeks, starting a Friday at 5:00 PM. Per diem? Every 1 day, starting at 8:00 AM.",
+      startsNow: "Starts now",
+      startsAt: "Starts",
+      ongoing: "Ongoing (it never stops)",
+      endsAt: "Ends",
+      connect: "Connect it",
+      connecting: "Connecting…",
+      apply: "Apply it",
+      applying: "Applying…",
+    },
+    nextPayment: "Next payday",
+    windowFrom: "From",
+    windowUntil: "until",
+    windowForever: "and it never stops",
+    startsLater: "Not yet. It starts",
+    cashIn: "Cash in",
+    cashingIn: "Cashing in…",
+    done: "Paid in full",
+    endedBadge: "Over",
+    disconnectedBadge: "Disconnected",
+    connected: "Connected. The money is already on its way to shirts.",
+    applied: "Applied. It's already in your Flash Credit.",
+    cashedIn: "Cashed in. Straight to Flash Credit.",
+    disconnected: "Disconnected. Bold move.",
+    historyEntry: (name: string) => `${name}: payday`,
+    /** What's left of a stream once his orders have spent it, per diem first (003 US4). */
+    left: (amount: string) => `Left: ${amount}`,
+    gone: "GONE",
+  },
+
+  /** The per diem drain (003 US2): a gauge that only ever goes one way, and a party at $0. */
+  meter: {
+    label: "Per diem left",
+    drained: "Per diem: GONE",
+    drainedTag: "Achievement unlocked",
+    /** The (x) on a GONE pop (owner, round 4). */
+    dismiss: (trophy: string) => `Put away "${trophy}". Dan will still know.`,
+    dismissed: "Put away. It still happened.",
+  },
+  /** Drain them all (003 US4): every stream that runs dry is its own trophy in the corner. */
+  achievements: {
+    gone: (name: string) => `${name}: GONE`,
+    /** What he did, on each GONE while `drain_jokes` is on (owner, round 6). */
+    lines: {
+      per_diem: "You spent your entire per diem on shirts.",
+      expense_report: "You spent your padded expense report on shirts.",
+      college_fund: "You spent your kid's college fund on shirts.",
+      garage_sale: "You spent your garage sale money on shirts.",
+      second_mortgage: "You spent your second mortgage on shirts.",
+    },
+    custom: (name: string) => `You spent "${name}" on shirts.`,
+  },
+
   shame: {
     title: "You sure about that?",
     /** At least 8 (spec Assumptions). Rotated without repeats until the pool is used up. */
@@ -214,6 +330,7 @@ export const copy = {
       insist: { shamed: "Yes, I'd rather blend in", neutral: "Yes, I'm sure" },
       remove: { shamed: "Remove (and lose your edge)", neutral: "Remove" },
       signOut: { shamed: "Sign out (go back to being normal)", neutral: "Sign out" },
+      disconnect: { shamed: "Disconnect (and settle for less)", neutral: "Disconnect" },
     },
   },
 
@@ -237,8 +354,18 @@ export const copy = {
     CARD_INVALID_NUMBER: "That card number doesn't check out.",
     CARD_EXPIRED: "That card has expired. Dan doesn't accept the past.",
     CARD_INVALID_CVC: "The CVC should be 3 or 4 digits.",
-    INSUFFICIENT_FLASH_CREDIT: "Not enough Flash Credit. Top up, or pay by card.",
+    SPLIT_CONFIRMATION_REQUIRED: "Confirm putting the rest on your card first.",
+    CREDIT_CHANGED: "Your Flash Credit changed. Check the new split and place the order again.",
     INVALID_AMOUNT: "Enter an amount of at least $0.01, in dollars and cents.",
+    INVALID_STREAM_NAME: "Pick where it's coming from, or give it a name (40 characters, tops).",
+    INVALID_STREAM_AMOUNT:
+      "Each payment has to be at least $0.01, in dollars and cents. There's no upper limit. Dream big.",
+    INVALID_INTERVAL: "How often? A whole number of minutes, hours, days or weeks, 1 to 1,000.",
+    INVALID_WINDOW:
+      "That timing doesn't work. Start now or later, and end after it starts. Or let it run forever.",
+    PER_DIEM_EXISTS: "You already have a per diem running. One at a time. Spend it first.",
+    STREAM_NOT_FOUND: "That stream isn't yours, or it's already gone.",
+    NOT_CASHABLE: "Nothing to cash in there right now.",
   },
 } as const;
 

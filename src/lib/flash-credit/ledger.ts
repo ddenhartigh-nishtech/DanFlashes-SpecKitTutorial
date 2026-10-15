@@ -1,14 +1,15 @@
 /**
- * Flash Credit is a ledger (constitution): every top-up and spend is an entry, the balance is
+ * Flash Credit is a ledger (constitution): every top-up, spend, and revenue-stream payment is an entry, the balance is
  * their exact decimal sum (computed here, never with SQL SUM, which would use floats), and it can
  * never go negative.
  */
 import { desc, eq } from "drizzle-orm";
 import type { Db } from "@/lib/db/client";
-import { flashCreditEntries } from "@/lib/db/schema";
+import { flashCreditEntries, revenueStreams } from "@/lib/db/schema";
 import { cmp, sum, tryParseUsd, type Usd } from "@/lib/money";
 import { validateFauxCard, type CardErrorCode, type FauxCardInput } from "@/lib/payments/faux-card";
 import type { Err, Ok } from "@/lib/result";
+import { streamName } from "@/lib/streams/streams";
 
 export function getBalanceUsd(db: Db, userId: number): Usd {
   const rows = db
@@ -40,11 +41,13 @@ export function topUp(
 
 export interface LedgerEntry {
   id: number;
-  kind: "top_up" | "spend";
+  kind: "top_up" | "spend" | "stream";
   amountUsd: Usd;
   orderId: number | null;
   cardBrand: string | null;
   cardLast4: string | null;
+  /** For "stream" entries: the stream it came from (a preset name, or his own). */
+  streamName: string | null;
   createdAt: string;
 }
 
@@ -57,10 +60,17 @@ export function listEntries(db: Db, userId: number): LedgerEntry[] {
       orderId: flashCreditEntries.orderId,
       cardBrand: flashCreditEntries.cardBrand,
       cardLast4: flashCreditEntries.cardLast4,
+      preset: revenueStreams.preset,
+      customName: revenueStreams.customName,
       createdAt: flashCreditEntries.createdAt,
     })
     .from(flashCreditEntries)
+    .leftJoin(revenueStreams, eq(flashCreditEntries.streamId, revenueStreams.id))
     .where(eq(flashCreditEntries.userId, userId))
     .orderBy(desc(flashCreditEntries.createdAt), desc(flashCreditEntries.id))
-    .all();
+    .all()
+    .map(({ preset, customName, ...entry }) => ({
+      ...entry,
+      streamName: entry.kind === "stream" ? streamName({ preset, customName }) : null,
+    }));
 }

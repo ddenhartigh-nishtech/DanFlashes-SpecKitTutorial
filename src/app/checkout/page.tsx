@@ -11,6 +11,7 @@ import { getPlaceholderUrl, getSettings } from "@/lib/data/settings";
 import { getDb } from "@/lib/db/client";
 import { getBalanceUsd } from "@/lib/flash-credit/ledger";
 import { cartSummaryLines } from "@/lib/orders/orders";
+import { settleStreams } from "@/lib/streams/streams";
 
 export const metadata: Metadata = { title: copy.checkout.title };
 
@@ -35,6 +36,7 @@ async function CheckoutContents() {
 
   const view = getCartView(db, await currentCartId());
   if (view.lines.length === 0) redirect("/cart");
+  if (user) settleStreams(db, user.id); // the balance below includes every payday that came due
 
   const totalUsd = view.subtotalUsd; // shipping and tax are $0.00 (FR-029)
   return (

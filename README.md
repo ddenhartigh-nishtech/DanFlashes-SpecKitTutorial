@@ -19,7 +19,8 @@ Requires Node 22+.
 ```bash
 npm install
 npm run db:reset        # creates data/danflashes.db: demo catalog + demo@danflashes.local / password123
-                        # ($10,000 of Flash Credit). After pulling, use db:migrate instead: it keeps your data.
+                        # ($10,000 of Flash Credit and a $75.00 daily per diem).
+                        # After pulling, use db:migrate instead: it keeps your data.
 npm run dev             # http://localhost:3000
 ```
 
@@ -46,6 +47,12 @@ npm run catalog:audit   # checks the catalog: errors exit 1, warnings exit 0
   deleted.
 - **Images** live in `public/media/` and are referenced by relative key. To move them to a CDN,
   change `store_settings.media_base_url`.
+- **Revenue streams** are connected by shoppers on their account page and feed Flash Credit. A
+  "Recurring top-off" pays on its own interval (for a demo, connect one that tops off every 1
+  minute). "Just once" is applied immediately and is final. "Whenever I want" pays each time he hits
+  Cash in. Payments that came due are credited whenever his money is shown, exactly once each.
+- **Checkout splits the bill.** "Apply my Flash Credit" covers what it can. He confirms putting the
+  rest on a card, and Remove puts the whole total back on the card.
 - **Manipulation switches** (constitution IV). Each tactic is its own `store_settings` column: set it
   to `1` for on and `0` for off, then reload the page.
 
@@ -53,7 +60,9 @@ npm run catalog:audit   # checks the catalog: errors exit 1, warnings exit 0
   |---|---|---|
   | `checkout_gate` | on | Guests can build a cart but must sign in to check out |
   | `bland_shaming` | on | BLAND shirts can't be in a cart at all. Add to Cart opens the endless "You sure about that?" loop, the store refuses bland adds and raises, sign-in merges leave bland lines behind, and lines already in a cart are pulled with a notice. |
-  | `confirmshaming` | on | Decline buttons make him feel it: "Yes, I'd rather blend in", "Remove (and lose your edge)", "Sign out (go back to being normal)" |
+  | `confirmshaming` | on | Decline buttons make him feel it: "Yes, I'd rather blend in", "Remove (and lose your edge)", "Sign out (go back to being normal)", "Disconnect (and settle for less)" |
+  | `per_diem_drain` | on | A gauge in the corner counts his per diem down with every order, by any payment method, and throws a party at $0. Every order spends the per diem first, then the oldest stream money. Each stream shows what's left. Every stream that runs dry pops a "[Stream]: GONE" trophy in the same corner, above the gauge, and each has an (x) to clear it until that stream pays in and drains again. While it's off, the gauge, the amounts left and the trophies are hidden, and orders placed then never earn one. |
+  | `drain_jokes` | on | Each GONE in the corner also says what he did: "You spent your kid's college fund on shirts." A look, not a tactic: it only matters while `per_diem_drain` is on. |
 
 ## Scripts
 

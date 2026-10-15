@@ -102,6 +102,8 @@ describe("validateSettings", () => {
     placeholderMediaId: 1,
     blandShaming: true,
     confirmshaming: true,
+    perDiemDrain: true,
+    drainJokes: true,
   };
 
   it("accepts the defaults and an https base URL", () => {
@@ -125,6 +127,8 @@ describe("validateSettings", () => {
     ["blandShaming", { blandShaming: undefined }],
     ["confirmshaming", { confirmshaming: 1 }],
     ["confirmshaming", { confirmshaming: undefined }],
+    ["perDiemDrain", { perDiemDrain: "on" }],
+    ["perDiemDrain", { perDiemDrain: undefined }],
   ])("flags an invalid %s", (field, patch) => {
     expect(fields(validateSettings({ ...settings, ...patch } as StoreSettings))).toContain(field);
   });

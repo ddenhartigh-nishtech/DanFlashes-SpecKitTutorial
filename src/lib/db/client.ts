@@ -5,8 +5,9 @@ import { drizzle, type BetterSQLite3Database } from "drizzle-orm/better-sqlite3"
 import { assertCurrent, journalStamp } from "./health";
 import * as schema from "./schema";
 
-export type Db = BetterSQLite3Database<typeof schema>;
 export type Sqlite = Database.Database;
+/** Drizzle over better-sqlite3, with the raw handle (`$client`) that pragmas and migrations need. */
+export type Db = BetterSQLite3Database<typeof schema> & { $client: Sqlite };
 
 export const DEFAULT_DATABASE_PATH = "data/danflashes.db";
 

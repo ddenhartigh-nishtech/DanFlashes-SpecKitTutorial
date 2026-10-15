@@ -10,6 +10,7 @@ import { placeOrder } from "@/lib/checkout/place-order";
 import type { Db } from "@/lib/db/client";
 import { users } from "@/lib/db/schema";
 import { topUp } from "@/lib/flash-credit/ledger";
+import { connectStream } from "@/lib/streams/streams";
 
 const DEMO_CARD = { number: "4242424242424242", expiry: "12/39", cvc: "123" };
 
@@ -19,6 +20,8 @@ export interface DemoShopper {
   displayName: string;
   creditUsd: string;
   pastOrder: { slug: string; size: string };
+  /** An ongoing, recurring per diem connected after the past order, so the gauge shows (003 R9). */
+  perDiem?: { amountUsd: string };
 }
 
 /** Idempotent: an existing account with the same email is left untouched. */
@@ -48,10 +51,25 @@ export async function ensureDemoShopper(
     cartId: null,
     checkoutToken: randomUUID(),
     expectedTotalUsd: getCartView(db, cartId).subtotalUsd,
-    method: "card",
+    useFlashCredit: false,
     card: DEMO_CARD,
   });
   if (!order.ok) throw new Error(`Demo order failed: ${order.code}`);
+
+  if (demo.perDiem) {
+    const stream = connectStream(db, userId, {
+      preset: "per_diem",
+      customName: "",
+      amountUsd: demo.perDiem.amountUsd,
+      schedule: "recurring",
+      intervalCount: "1", // a per diem tops off daily
+      intervalUnit: "days",
+      startsAt: "",
+      endsAt: "",
+      ongoing: true,
+    });
+    if (!stream.ok) throw new Error(`Demo per diem failed: ${stream.code}`);
+  }
 
   return { created: true, userId };
 }

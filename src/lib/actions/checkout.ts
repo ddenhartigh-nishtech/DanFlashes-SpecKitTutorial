@@ -17,7 +17,9 @@ export function placeOrderCore(db: Db, jar: CookieJar, form: FormData, now?: Dat
     cartId: jar.get(CART_COOKIE) ?? null,
     checkoutToken,
     expectedTotalUsd: field(form, "expectedTotalUsd"),
-    method: field(form, "method") === "flash_credit" ? "flash_credit" : "card",
+    useFlashCredit: field(form, "useFlashCredit") === "on",
+    expectedCreditUsd: field(form, "expectedCreditUsd"),
+    confirmSplit: field(form, "confirmSplit") === "on",
     card: {
       number: field(form, "cardNumber"),
       expiry: field(form, "expiry"),
@@ -33,8 +35,17 @@ export function placeOrderCore(db: Db, jar: CookieJar, form: FormData, now?: Dat
         totalUsd: result.totalUsd,
         message: copy.checkout.priceChanged(formatUsd(result.totalUsd)),
       });
-    case "INSUFFICIENT_FLASH_CREDIT":
-      return failure(result.code, { balanceUsd: result.balanceUsd });
+    case "CREDIT_CHANGED":
+      return failure(result.code, {
+        creditUsd: result.creditUsd,
+        cardUsd: result.cardUsd,
+        message: copy.checkout.creditChanged(
+          formatUsd(result.creditUsd),
+          formatUsd(result.cardUsd),
+        ),
+      });
+    case "SPLIT_CONFIRMATION_REQUIRED":
+      return failure(result.code, { creditUsd: result.creditUsd, cardUsd: result.cardUsd });
     default:
       return failure(result.code);
   }

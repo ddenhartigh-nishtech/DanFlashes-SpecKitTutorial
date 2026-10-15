@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { copy } from "../../src/lib/copy";
 import { addShirt, signUp, uniqueEmail, visible } from "./helpers";
 
 const dollars = (text: string) => Number(text.replace(/[$,]/g, ""));
@@ -38,8 +39,10 @@ test.describe("US4 — Flash Credit", () => {
     await addShirt(page, "geo-riot", "L");
     await page.goto("/checkout");
     const total = dollars(await visible(page.getByTestId("total")).innerText());
-    await visible(page.getByRole("radio", { name: /Flash Credit/ })).check();
-    await expect(visible(page.getByTestId("checkout-balance"))).toContainText("$5,000.00");
+    await visible(
+      page.getByRole("button", { name: copy.checkout.applyCredit("$5,000.00") }),
+    ).click();
+    await expect(visible(page.getByTestId("split"))).toContainText(copy.checkout.coveredByCredit);
     await visible(page.getByRole("button", { name: /Place order/ })).click();
     await expect(page).toHaveURL(/\/orders\/\d+$/);
     await expect(visible(page.getByTestId("payment"))).toHaveText("Paid with Flash Credit");
@@ -54,25 +57,20 @@ test.describe("US4 — Flash Credit", () => {
     await expect(spend.getByRole("link")).toHaveAttribute("href", orderPath);
   });
 
-  test("a short balance is refused and nothing is charged", async ({ page }, info) => {
+  test("with $0.00 of Flash Credit, checkout offers a top-up instead of Apply", async ({
+    page,
+  }, info) => {
     await page.goto("/sign-up");
     await signUp(page, uniqueEmail(info.project.name));
     await expect(page).toHaveURL(/\/account$/);
 
     await addShirt(page, "dans-masterpiece", "XL");
     await page.goto("/checkout");
-    await visible(page.getByRole("radio", { name: /Flash Credit/ })).check();
-    await expect(
-      visible(page.getByText("Not enough Flash Credit. Top up, or pay by card.")).first(),
-    ).toBeVisible();
-    await visible(page.getByRole("button", { name: /Place order/ })).click();
-    await expect(visible(page.getByTestId("checkout-error"))).toContainText(
-      "Not enough Flash Credit",
-    );
-    await expect(page).toHaveURL(/\/checkout$/);
-
-    await page.goto("/account");
-    await expect(visible(page.getByTestId("flash-balance"))).toHaveText("$0.00");
-    await expect(visible(page.getByText("No orders yet."))).toBeVisible();
+    const prompt = visible(page.getByTestId("no-credit"));
+    await expect(prompt).toContainText(copy.checkout.noCredit);
+    await expect(prompt.getByRole("link", { name: copy.checkout.topUpLink })).toBeVisible();
+    await expect(prompt.getByRole("link", { name: copy.checkout.streamsLink })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Apply my Flash Credit/ })).toHaveCount(0);
+    await expect(visible(page.getByLabel("Card number"))).toBeVisible();
   });
 });

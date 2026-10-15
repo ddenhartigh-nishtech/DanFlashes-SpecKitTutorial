@@ -1,0 +1,1 @@
+ALTER TABLE `revenue_streams` ADD `dismissed_drain_payment_no` integer;

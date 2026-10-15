@@ -1,0 +1,1 @@
+ALTER TABLE `store_settings` ADD `drain_jokes` integer DEFAULT true NOT NULL;

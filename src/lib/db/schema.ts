@@ -15,6 +15,7 @@ import {
   uniqueIndex,
 } from "drizzle-orm/sqlite-core";
 import type { AnySQLiteColumn } from "drizzle-orm/sqlite-core";
+import { STREAM_PRESETS, STREAM_SCHEDULES } from "@/lib/streams/types";
 
 const nowIso = sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`;
 
@@ -137,6 +138,9 @@ export const storeSettings = sqliteTable(
     }),
     blandShaming: integer("bland_shaming", { mode: "boolean" }).notNull().default(true),
     confirmshaming: integer("confirmshaming", { mode: "boolean" }).notNull().default(true),
+    perDiemDrain: integer("per_diem_drain", { mode: "boolean" }).notNull().default(true),
+    /** Each GONE in the corner also says what he did (003 round 6). A look, not a tactic. */
+    drainJokes: integer("drain_jokes", { mode: "boolean" }).notNull().default(true),
   },
   (t) => [
     check("store_settings_singleton", sql`${t.id} = 1`),
@@ -210,9 +214,13 @@ export const orders = sqliteTable(
     shippingUsd: text("shipping_usd").notNull().default("0.00"),
     taxUsd: text("tax_usd").notNull().default("0.00"),
     totalUsd: text("total_usd").notNull(),
-    paymentMethod: text("payment_method", { enum: ["card", "flash_credit"] }).notNull(),
+    paymentMethod: text("payment_method", { enum: ["card", "flash_credit", "split"] }).notNull(),
     cardBrand: text("card_brand"),
     cardLast4: text("card_last4"),
+    /** Flash Credit applied to this order (003 split payment); the card covers the rest. */
+    flashCreditUsd: text("flash_credit_usd").notNull().default("0.00"),
+    /** This order took the per diem meter from above $0 to $0 while the drain was on (003 R5). */
+    perDiemDrained: integer("per_diem_drained", { mode: "boolean" }).notNull().default(false),
     ...timestamps,
   },
   (t) => [
@@ -220,11 +228,13 @@ export const orders = sqliteTable(
     check("orders_shipping", money(t.shippingUsd)),
     check("orders_tax", money(t.taxUsd)),
     check("orders_total", money(t.totalUsd)),
-    check("orders_method", sql`${t.paymentMethod} IN ('card', 'flash_credit')`),
+    check("orders_method", sql`${t.paymentMethod} IN ('card', 'flash_credit', 'split')`),
+    check("orders_flash_credit", money(t.flashCreditUsd)),
     check(
-      "orders_card_fields",
-      sql`(${t.paymentMethod} = 'card' AND ${t.cardBrand} IS NOT NULL AND length(${t.cardLast4}) = 4 AND ${t.cardLast4} NOT GLOB '*[^0-9]*')
-        OR (${t.paymentMethod} = 'flash_credit' AND ${t.cardBrand} IS NULL AND ${t.cardLast4} IS NULL)`,
+      "orders_payment",
+      sql`(${t.paymentMethod} = 'card' AND ${t.flashCreditUsd} = '0.00' AND ${t.cardBrand} IS NOT NULL AND length(${t.cardLast4}) = 4 AND ${t.cardLast4} NOT GLOB '*[^0-9]*')
+        OR (${t.paymentMethod} = 'flash_credit' AND ${t.flashCreditUsd} = ${t.totalUsd} AND ${t.cardBrand} IS NULL AND ${t.cardLast4} IS NULL)
+        OR (${t.paymentMethod} = 'split' AND ${t.flashCreditUsd} NOT IN ('0.00') AND ${t.flashCreditUsd} NOT GLOB '-*' AND ${t.cardBrand} IS NOT NULL AND length(${t.cardLast4}) = 4 AND ${t.cardLast4} NOT GLOB '*[^0-9]*')`,
     ),
     index("orders_user_created_idx").on(t.userId, t.createdAt),
   ],
@@ -256,6 +266,59 @@ export const orderItems = sqliteTable(
   ],
 );
 
+/** A shopper's connected source of money (003). Its payments land in flash_credit_entries. */
+export const revenueStreams = sqliteTable(
+  "revenue_streams",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "restrict" }),
+    preset: text("preset", { enum: STREAM_PRESETS }),
+    customName: text("custom_name"),
+    amountUsd: text("amount_usd").notNull(),
+    schedule: text("schedule", { enum: STREAM_SCHEDULES }).notNull(),
+    /** A recurring top-off's own interval (owner, 2026-10-14); NULL for the other schedules. */
+    intervalMinutes: integer("interval_minutes"),
+    startsAt: text("starts_at").notNull(),
+    endsAt: text("ends_at"),
+    nextDueAt: text("next_due_at"),
+    paymentsMade: integer("payments_made").notNull().default(0),
+    disconnectedAt: text("disconnected_at"),
+    /** He cleared this stream's GONE pop when it had made this many payments (003 R13). */
+    dismissedDrainPaymentNo: integer("dismissed_drain_payment_no"),
+    ...timestamps,
+  },
+  (t) => [
+    check("revenue_streams_name", sql`(${t.preset} IS NULL) <> (${t.customName} IS NULL)`),
+    check(
+      "revenue_streams_preset",
+      sql`${t.preset} IS NULL OR ${t.preset} IN ('per_diem', 'expense_report', 'college_fund', 'garage_sale', 'second_mortgage')`,
+    ),
+    check(
+      "revenue_streams_custom_name",
+      sql`${t.customName} IS NULL OR length(trim(${t.customName})) BETWEEN 1 AND 40`,
+    ),
+    check("revenue_streams_amount", money(t.amountUsd)),
+    check(
+      "revenue_streams_amount_positive",
+      sql`${t.amountUsd} NOT GLOB '-*' AND ${t.amountUsd} NOT IN ('0.00')`,
+    ),
+    check("revenue_streams_schedule", sql`${t.schedule} IN ('recurring', 'one_time', 'whenever')`),
+    check("revenue_streams_window", sql`${t.endsAt} IS NULL OR ${t.endsAt} > ${t.startsAt}`),
+    check(
+      "revenue_streams_interval",
+      sql`(${t.schedule} = 'recurring' AND ${t.intervalMinutes} IS NOT NULL AND ${t.intervalMinutes} >= 1)
+        OR (${t.schedule} <> 'recurring' AND ${t.intervalMinutes} IS NULL)`,
+    ),
+    check("revenue_streams_payments", sql`${t.paymentsMade} >= 0`),
+    uniqueIndex("revenue_streams_one_per_diem")
+      .on(t.userId)
+      .where(sql`${t.preset} = 'per_diem' AND ${t.disconnectedAt} IS NULL`),
+    index("revenue_streams_due_idx").on(t.userId, t.nextDueAt),
+  ],
+);
+
 export const flashCreditEntries = sqliteTable(
   "flash_credit_entries",
   {
@@ -264,10 +327,13 @@ export const flashCreditEntries = sqliteTable(
       .notNull()
       .references(() => users.id, { onDelete: "restrict" }),
     amountUsd: text("amount_usd").notNull(),
-    kind: text("kind", { enum: ["top_up", "spend"] }).notNull(),
+    kind: text("kind", { enum: ["top_up", "spend", "stream"] }).notNull(),
     orderId: integer("order_id").references(() => orders.id, { onDelete: "restrict" }),
     cardBrand: text("card_brand"),
     cardLast4: text("card_last4"),
+    streamId: integer("stream_id").references(() => revenueStreams.id, { onDelete: "restrict" }),
+    /** The stream's 1-based payment number: (stream_id, stream_payment_no) is paid at most once. */
+    streamPaymentNo: integer("stream_payment_no"),
     ...timestamps,
   },
   (t) => [
@@ -276,8 +342,29 @@ export const flashCreditEntries = sqliteTable(
     check(
       "flash_credit_kind",
       sql`(${t.kind} = 'top_up' AND ${t.amountUsd} NOT GLOB '-*' AND ${t.cardBrand} IS NOT NULL AND length(${t.cardLast4}) = 4)
-        OR (${t.kind} = 'spend' AND ${t.amountUsd} GLOB '-*' AND ${t.orderId} IS NOT NULL)`,
+        OR (${t.kind} = 'spend' AND ${t.amountUsd} GLOB '-*' AND ${t.orderId} IS NOT NULL)
+        OR (${t.kind} = 'stream' AND ${t.amountUsd} NOT GLOB '-*' AND ${t.streamId} IS NOT NULL
+            AND ${t.streamPaymentNo} IS NOT NULL AND ${t.streamPaymentNo} >= 1
+            AND ${t.orderId} IS NULL AND ${t.cardBrand} IS NULL AND ${t.cardLast4} IS NULL)`,
     ),
+    uniqueIndex("flash_credit_stream_payment_unique").on(t.streamId, t.streamPaymentNo),
     index("flash_credit_user_idx").on(t.userId, t.createdAt),
   ],
+);
+
+/**
+ * Every stream other than the current per diem that an order took from above $0 to $0 while the
+ * drain was on (003 US4, R12): one achievement each. The per diem keeps orders.per_diem_drained.
+ */
+export const orderDrains = sqliteTable(
+  "order_drains",
+  {
+    orderId: integer("order_id")
+      .notNull()
+      .references(() => orders.id, { onDelete: "restrict" }),
+    streamId: integer("stream_id")
+      .notNull()
+      .references(() => revenueStreams.id, { onDelete: "restrict" }),
+  },
+  (t) => [primaryKey({ columns: [t.orderId, t.streamId] })],
 );

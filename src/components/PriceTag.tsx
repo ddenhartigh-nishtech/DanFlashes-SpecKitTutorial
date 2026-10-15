@@ -5,7 +5,8 @@ export function PriceTag({ priceUsd, size = "md" }: { priceUsd: Usd; size?: "md"
   return (
     <span
       data-testid="price"
-      className={`font-display solid-backing inline-block px-3 py-1 tabular-nums ${text}`}
+      // max-w-full + overflow-wrap: a sky's-the-limit total wraps instead of spilling out of its box.
+      className={`font-display solid-backing inline-block max-w-full px-3 py-1 [overflow-wrap:anywhere] tabular-nums ${text}`}
     >
       {formatUsd(priceUsd)}
     </span>

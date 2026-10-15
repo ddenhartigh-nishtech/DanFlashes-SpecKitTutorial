@@ -23,6 +23,8 @@ export function getSettings(db: Db): StoreSettings {
     placeholderMediaId: row.placeholderMediaId,
     blandShaming: row.blandShaming,
     confirmshaming: row.confirmshaming,
+    perDiemDrain: row.perDiemDrain,
+    drainJokes: row.drainJokes,
   };
 }
 
@@ -43,6 +45,8 @@ export function saveSettings(db: Db, settings: StoreSettings): void {
     placeholderMediaId: settings.placeholderMediaId,
     blandShaming: settings.blandShaming,
     confirmshaming: settings.confirmshaming,
+    perDiemDrain: settings.perDiemDrain,
+    drainJokes: settings.drainJokes,
   };
   db.insert(storeSettings)
     .values({ id: 1, ...values })

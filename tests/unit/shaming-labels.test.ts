@@ -6,6 +6,7 @@ describe("labelFor", () => {
     ["insist", "Yes, I'd rather blend in", "Yes, I'm sure"],
     ["remove", "Remove (and lose your edge)", "Remove"],
     ["signOut", "Sign out (go back to being normal)", "Sign out"],
+    ["disconnect", "Disconnect (and settle for less)", "Disconnect"],
   ] as const)("%s: shamed when confirmshaming is on, neutral when off", (key, shamed, neutral) => {
     expect(labelFor(key, true)).toBe(shamed);
     expect(labelFor(key, false)).toBe(neutral);

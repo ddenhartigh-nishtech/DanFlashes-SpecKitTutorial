@@ -65,6 +65,8 @@ const settingsSchema = z.object({
   placeholderMediaId: z.number().int().nullable(),
   blandShaming: z.boolean(),
   confirmshaming: z.boolean(),
+  perDiemDrain: z.boolean(),
+  drainJokes: z.boolean(),
 });
 
 function toIssues(error: z.ZodError): Issue[] {

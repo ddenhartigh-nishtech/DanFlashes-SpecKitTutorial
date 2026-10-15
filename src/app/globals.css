@@ -57,8 +57,8 @@
   box-shadow: 4px 4px 0 var(--color-hot-pink);
 }
 
-/* Mall-signage neon: a cyan tube with a hot-pink halo. */
+/* Mall-signage neon: the glow is the tube's own color, so it changes with it (hover included). */
 @utility neon {
-  filter: drop-shadow(0 0 1px var(--color-electric-cyan))
-    drop-shadow(0 0 6px var(--color-electric-cyan)) drop-shadow(0 0 12px var(--color-hot-pink));
+  filter: drop-shadow(0 0 1px currentColor) drop-shadow(0 0 6px currentColor)
+    drop-shadow(0 0 12px currentColor);
 }

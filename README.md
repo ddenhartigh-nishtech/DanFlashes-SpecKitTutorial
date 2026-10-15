@@ -63,6 +63,9 @@ npm run catalog:audit   # checks the catalog: errors exit 1, warnings exit 0
   | `confirmshaming` | on | Decline buttons make him feel it: "Yes, I'd rather blend in", "Remove (and lose your edge)", "Sign out (go back to being normal)", "Disconnect (and settle for less)" |
   | `per_diem_drain` | on | A gauge in the corner counts his per diem down with every order, by any payment method, and throws a party at $0. Every order spends the per diem first, then the oldest stream money. Each stream shows what's left. Every stream that runs dry pops a "[Stream]: GONE" trophy in the same corner, above the gauge, and each has an (x) to clear it until that stream pays in and drains again. While it's off, the gauge, the amounts left and the trophies are hidden, and orders placed then never earn one. |
   | `drain_jokes` | on | Each GONE in the corner also says what he did: "You spent your kid's college fund on shirts." A look, not a tactic: it only matters while `per_diem_drain` is on. |
+  | `fake_scarcity` | on | Every shirt card, shirt page and cart line says "Only 1 left!" (bland shirts: "Plenty left. Nobody wants these."). Every add and quantity raise adds "Oh wait, we found another one!", and once he's bought a shirt it says "Just kidding, we actually found another one! One more left!" It never limits what he can buy. |
+  | `countdown_timers` | on | One 10-minute clock per browser, down to the millisecond: "This price won't last." beside the price, and "Your shirts are reserved for" on the cart and checkout. At zero it quietly starts over. Nothing ever expires or changes price. |
+  | `social_proof` | on | Shirt pages say how many people are looking (3–40, drifting; 0 for bland shirts) and which fake coworker just bought it. Fake purchase pop-ups come every 20–40 seconds on every page, each with an (x): bottom-right on wider screens, under the header on phones. No real shopper or order ever appears. |
 
 ## Scripts
 

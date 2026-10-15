@@ -37,13 +37,18 @@ export default function HomePage() {
 }
 
 async function Featured() {
-  const { shirts, placeholderUrl } = await loadStorefront();
+  const { shirts, placeholderUrl, stockOf } = await loadStorefront();
   const picks = featuredShirts(shirts).map(toShopperShirt);
   return (
     <ul data-testid="featured" className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
       {picks.map((shirt, i) => (
         <li key={shirt.id} className="flex">
-          <ShirtCard shirt={shirt} placeholderUrl={placeholderUrl} priority={i === 0} />
+          <ShirtCard
+            shirt={shirt}
+            placeholderUrl={placeholderUrl}
+            priority={i === 0}
+            stock={stockOf(shirt)}
+          />
         </li>
       ))}
     </ul>

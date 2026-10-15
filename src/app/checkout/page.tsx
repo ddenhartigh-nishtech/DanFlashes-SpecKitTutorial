@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { currentCartId, currentUser } from "@/app/_data/request";
 import { CheckoutForm } from "@/components/CheckoutForm";
+import { Countdown } from "@/components/Countdown";
 import { OrderSummary } from "@/components/OrderSummary";
 import { getCartView } from "@/lib/cart/cart";
 import { copy } from "@/lib/copy";
@@ -11,6 +12,7 @@ import { getPlaceholderUrl, getSettings } from "@/lib/data/settings";
 import { getDb } from "@/lib/db/client";
 import { getBalanceUsd } from "@/lib/flash-credit/ledger";
 import { cartSummaryLines } from "@/lib/orders/orders";
+import { showCountdown } from "@/lib/urgency/countdown";
 import { settleStreams } from "@/lib/streams/streams";
 
 export const metadata: Metadata = { title: copy.checkout.title };
@@ -42,6 +44,11 @@ async function CheckoutContents() {
   return (
     <div className="grid gap-6 md:grid-cols-[1fr_22rem] md:items-start">
       <div className="flex flex-col gap-3">
+        {showCountdown(settings, "hold", view.lines.length) ? (
+          <div>
+            <Countdown kind="hold" label={copy.urgency.hold} />
+          </div>
+        ) : null}
         {user ? (
           <p className="font-semibold">
             {copy.checkout.signedInAs(user.displayName ?? user.email)}

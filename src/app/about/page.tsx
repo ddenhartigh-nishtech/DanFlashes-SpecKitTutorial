@@ -46,7 +46,7 @@ export default function AboutPage() {
 }
 
 async function ExhibitA() {
-  const { shirts, placeholderUrl } = await loadStorefront();
+  const { shirts, placeholderUrl, stockOf } = await loadStorefront();
   const shirt = mostExpensive(shirts);
   if (!shirt) return null;
   return (
@@ -61,7 +61,12 @@ async function ExhibitA() {
         </h2>
         <p className="mt-2 font-semibold">{copy.about.exhibitA.intro}</p>
       </div>
-      <ShirtCard shirt={toShopperShirt(shirt)} placeholderUrl={placeholderUrl} headingLevel={3} />
+      <ShirtCard
+        shirt={toShopperShirt(shirt)}
+        placeholderUrl={placeholderUrl}
+        headingLevel={3}
+        stock={stockOf(shirt)}
+      />
     </section>
   );
 }

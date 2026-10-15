@@ -104,6 +104,9 @@ describe("validateSettings", () => {
     confirmshaming: true,
     perDiemDrain: true,
     drainJokes: true,
+    fakeScarcity: true,
+    countdownTimers: true,
+    socialProof: true,
   };
 
   it("accepts the defaults and an https base URL", () => {
@@ -129,6 +132,12 @@ describe("validateSettings", () => {
     ["confirmshaming", { confirmshaming: undefined }],
     ["perDiemDrain", { perDiemDrain: "on" }],
     ["perDiemDrain", { perDiemDrain: undefined }],
+    ["fakeScarcity", { fakeScarcity: "on" }],
+    ["fakeScarcity", { fakeScarcity: undefined }],
+    ["countdownTimers", { countdownTimers: 1 }],
+    ["countdownTimers", { countdownTimers: undefined }],
+    ["socialProof", { socialProof: "yes" }],
+    ["socialProof", { socialProof: undefined }],
   ])("flags an invalid %s", (field, patch) => {
     expect(fields(validateSettings({ ...settings, ...patch } as StoreSettings))).toContain(field);
   });

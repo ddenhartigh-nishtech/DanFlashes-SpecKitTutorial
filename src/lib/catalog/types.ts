@@ -28,6 +28,12 @@ export interface StoreSettings {
   perDiemDrain: boolean;
   /** Each GONE in the corner also says what he did (003 round 6). Only matters with the drain on. */
   drainJokes: boolean;
+  /** Fake scarcity (constitution IV): "Only 1 left!", and "found another one" on every add. */
+  fakeScarcity: boolean;
+  /** Countdown timers that reset (constitution IV): the shared deal and hold clock. */
+  countdownTimers: boolean;
+  /** Fabricated social proof (constitution IV): "looking right now", the buyer, the pop-ups. */
+  socialProof: boolean;
 }
 
 /** An owner-defined band of complexity scores. The tier with minScore 0 is the BLAND tier. */

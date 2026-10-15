@@ -1,5 +1,5 @@
-import { expect, test } from "@playwright/test";
-import { addShirt, signUp, uniqueEmail, visible } from "./helpers";
+import { expect } from "@playwright/test";
+import { addShirt, signUp, test, uniqueEmail, visible } from "./helpers";
 
 test.describe("US3 — checkout gate, account, faux card", () => {
   test("guest cart → gate → sign up → card checkout → history", async ({ page }, info) => {

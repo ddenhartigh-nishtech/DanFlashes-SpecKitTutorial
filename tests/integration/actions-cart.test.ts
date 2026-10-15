@@ -13,7 +13,12 @@ describe("addToCart action", () => {
     const { db } = createSeededTestDb();
     const jar = new FakeCookieJar();
     const state = addToCartCore(db, jar, form({ slug: "geo-riot", size: "M" }));
-    expect(state).toEqual({ ok: true, itemCount: 1, message: copy.product.added });
+    // Fake scarcity is on by default (004): every add finds another one.
+    expect(state).toEqual({
+      ok: true,
+      itemCount: 1,
+      message: `${copy.product.added} ${copy.urgency.foundAnother}`,
+    });
     expect(jar.get(CART_COOKIE)).toEqual(expect.any(String));
     expect(jar.options.get(CART_COOKIE)).toMatchObject({
       httpOnly: true,
@@ -70,6 +75,7 @@ describe("updateCartItem / removeCartItem actions", () => {
     ).toEqual({
       ok: true,
       itemCount: 4,
+      message: copy.urgency.foundAnother, // a raise finds another one (004)
     });
     expect(
       updateCartItemCore(db, jar, form({ slug: "geo-riot", size: "M", quantity: "lots" })),

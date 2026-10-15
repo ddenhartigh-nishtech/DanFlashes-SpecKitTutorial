@@ -1,6 +1,6 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 import { copy } from "../../src/lib/copy";
-import { addShirt, visible } from "./helpers";
+import { addShirt, test, visible } from "./helpers";
 
 /** The seed's active non-bland shirts, least to most complicated (the shaming ladder). */
 const LADDER = [

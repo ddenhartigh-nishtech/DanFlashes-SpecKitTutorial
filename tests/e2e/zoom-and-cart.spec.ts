@@ -1,5 +1,5 @@
-import { expect, test } from "@playwright/test";
-import { addShirt, visible } from "./helpers";
+import { expect } from "@playwright/test";
+import { addShirt, test, visible } from "./helpers";
 
 test.describe("US2 — zoom, enhance, add to cart", () => {
   test("empty cart pitches the most expensive shirt", async ({ page }) => {

@@ -5,10 +5,12 @@ import { removeCartItem } from "@/actions/cart";
 import { currentCartId } from "@/app/_data/request";
 import { loadStorefront } from "@/app/_data/storefront";
 import { CartQuantityForm } from "@/components/CartQuantityForm";
+import { Countdown } from "@/components/Countdown";
 import { PriceTag } from "@/components/PriceTag";
 import { ShirtBadge } from "@/components/ShirtBadge";
 import { ShirtCard } from "@/components/ShirtCard";
 import { ShirtImage } from "@/components/ShirtImage";
+import { StockLine } from "@/components/StockLine";
 import { getCartView, type CartLine, type RemovalReason, type RemovedLine } from "@/lib/cart/cart";
 import { mostExpensive } from "@/lib/catalog/listing";
 import { sortTiers } from "@/lib/catalog/tiers";
@@ -16,6 +18,8 @@ import { copy } from "@/lib/copy";
 import { getSettings } from "@/lib/data/settings";
 import { toShopperShirt } from "@/lib/data/shirts";
 import { getDb } from "@/lib/db/client";
+import { showCountdown } from "@/lib/urgency/countdown";
+import type { StockLine as Line } from "@/lib/urgency/scarcity";
 import { labelFor } from "@/lib/shaming/labels";
 
 export const metadata: Metadata = { title: copy.cart.title };
@@ -36,8 +40,9 @@ export default function CartPage() {
 async function CartContents() {
   const db = getDb();
   const view = getCartView(db, await currentCartId());
-  const removeLabel = labelFor("remove", getSettings(db).confirmshaming);
-  const { shirts, tiers, placeholderUrl } = await loadStorefront();
+  const settings = getSettings(db);
+  const removeLabel = labelFor("remove", settings.confirmshaming);
+  const { shirts, tiers, placeholderUrl, stockOf } = await loadStorefront();
 
   if (view.lines.length === 0) {
     const spotlight = mostExpensive(shirts);
@@ -65,7 +70,11 @@ async function CartContents() {
           </div>
           {spotlight ? (
             <div data-testid="spotlight" className="flex">
-              <ShirtCard shirt={toShopperShirt(spotlight)} placeholderUrl={placeholderUrl} />
+              <ShirtCard
+                shirt={toShopperShirt(spotlight)}
+                placeholderUrl={placeholderUrl}
+                stock={stockOf(spotlight)}
+              />
             </div>
           ) : null}
         </section>
@@ -84,6 +93,7 @@ async function CartContents() {
               line={line}
               placeholderUrl={placeholderUrl}
               removeLabel={removeLabel}
+              stock={stockOf(line.shirt)}
             />
           ))}
         </ul>
@@ -92,6 +102,9 @@ async function CartContents() {
         data-testid="cart-summary"
         className="border-ink bg-paper flex min-w-0 flex-col gap-3 border-4 p-4 shadow-[6px_6px_0_var(--color-ink)]"
       >
+        {showCountdown(settings, "hold", view.lines.length) ? (
+          <Countdown kind="hold" label={copy.urgency.hold} />
+        ) : null}
         <p className="font-display flex flex-wrap items-center justify-between gap-3 uppercase">
           {copy.cart.subtotal}
           <PriceTag priceUsd={view.subtotalUsd} />
@@ -143,10 +156,12 @@ function CartLineRow({
   line,
   placeholderUrl,
   removeLabel,
+  stock,
 }: {
   line: CartLine;
   placeholderUrl: string | null;
   removeLabel: string;
+  stock: Line | null;
 }) {
   const image = line.shirt.images[0];
   return (
@@ -176,6 +191,7 @@ function CartLineRow({
           <ShirtBadge tier={line.shirt.tier} />
           <span className="font-display text-sm">{copy.cart.size(line.size)}</span>
         </div>
+        <StockLine line={stock} />
         <div className="flex flex-wrap items-end gap-3">
           <CartQuantityForm slug={line.shirt.slug} size={line.size} quantity={line.quantity} />
           <form action={removeCartItem}>

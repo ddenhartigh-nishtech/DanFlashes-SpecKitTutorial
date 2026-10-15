@@ -1,6 +1,6 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 import { copy } from "../../src/lib/copy";
-import { buyByCard, connect, signUp, uniqueEmail, visible } from "./helpers";
+import { buyByCard, connect, signUp, test, uniqueEmail, visible } from "./helpers";
 
 const s = copy.streams;
 const a = copy.achievements;
@@ -12,6 +12,7 @@ test.describe("US4 — drain them all", () => {
   test("per diem first, then the oldest money; every stream an order empties pops in the corner", async ({
     page,
   }, info) => {
+    test.slow(); // three streams, two checkouts, and the corner: more than 60 s on a busy machine
     if (info.project.name === "phone") await page.setViewportSize({ width: 360, height: 780 });
     await page.goto("/sign-up");
     await signUp(page, uniqueEmail(info.project.name));

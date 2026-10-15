@@ -1,10 +1,12 @@
 import "server-only";
 import { connection } from "next/server";
+import { loadStockOf } from "@/app/_data/urgency";
 import { getPlaceholderUrl, getSettings } from "@/lib/data/settings";
 import { getShirtBySlug, listCatalogShirts } from "@/lib/data/shirts";
 import { listTiers } from "@/lib/data/tiers";
 import { getDb } from "@/lib/db/client";
 import { buildLadder } from "@/lib/shaming/ladder";
+import { socialProofFor } from "@/lib/urgency/social-proof";
 
 /**
  * Request-time catalog read for pages. `connection()` is required: better-sqlite3 is synchronous,
@@ -19,6 +21,8 @@ export async function loadStorefront() {
     shirts: listCatalogShirts(db),
     tiers: listTiers(db),
     placeholderUrl: getPlaceholderUrl(db, settings),
+    /** Each shirt's stock line for this shopper (004 US1). */
+    stockOf: await loadStockOf(db, settings),
   };
 }
 
@@ -33,8 +37,19 @@ export async function loadShirt(slug: string) {
   const settings = getSettings(db);
   const shirt = getShirtBySlug(db, slug);
   const shamed = Boolean(shirt?.tier.isBland && settings.blandShaming);
+  const stockOf = await loadStockOf(db, settings);
   return {
     shirt,
+    stock: shirt ? stockOf(shirt) : null,
+    countdownTimers: settings.countdownTimers,
+    /** Who's looking and who just bought it (004 US3), worked out at request time. */
+    proof: shirt
+      ? socialProofFor(
+          settings,
+          { id: shirt.id, isBland: shirt.tier.isBland, active: shirt.status === "active" },
+          Date.now(),
+        )
+      : null,
     placeholderUrl: getPlaceholderUrl(db, settings),
     blandShaming: settings.blandShaming,
     confirmshaming: settings.confirmshaming,

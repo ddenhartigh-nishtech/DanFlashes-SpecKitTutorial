@@ -1,5 +1,36 @@
-import { expect, type Locator, type Page } from "@playwright/test";
+import { test as base, expect, type Locator, type Page } from "@playwright/test";
 import { copy } from "../../src/lib/copy";
+
+/**
+ * Every journey starts with the fake-purchase pop-ups (004 R6) pushed an hour out, through the
+ * feature's own schedule key, so a pop-up never lands on a button mid-test. The social proof
+ * journey brings one in on purpose with `popOnNextLoad`. A key that's already set is left alone.
+ */
+export const test = base.extend({
+  page: async ({ page }, provide) => {
+    await page.addInitScript(() => {
+      try {
+        if (sessionStorage.getItem("df-pop-arm")) {
+          sessionStorage.removeItem("df-pop-arm");
+          sessionStorage.setItem("df-pop-next", String(Date.now() - 1));
+        } else if (sessionStorage.getItem("df-pop-next") === null) {
+          sessionStorage.setItem("df-pop-next", String(Date.now() + 3_600_000));
+        }
+      } catch {
+        // no storage: nothing to schedule
+      }
+    });
+    await provide(page);
+  },
+});
+
+/**
+ * Make a pop-up due on the next page load. Armed before the page's scripts run, so the current
+ * page's own schedule can't race it.
+ */
+export async function popOnNextLoad(page: Page) {
+  await page.evaluate(() => sessionStorage.setItem("df-pop-arm", "1"));
+}
 
 /**
  * Next 16 keeps previously visited routes mounted but hidden (React <Activity>), so a locator can
@@ -65,5 +96,6 @@ export async function buyByCard(page: Page, slug: string, size: string) {
   await visible(page.getByLabel("Expiry (MM/YY)")).fill("12/29");
   await visible(page.getByLabel("CVC")).fill("123");
   await visible(page.getByRole("button", { name: /Place order/ })).click();
-  await expect(page).toHaveURL(/\/orders\/\d+$/);
+  // Placing an order is the step that queues behind a busy machine: give it room.
+  await expect(page).toHaveURL(/\/orders\/\d+$/, { timeout: 30_000 });
 }

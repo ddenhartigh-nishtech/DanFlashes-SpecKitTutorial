@@ -53,7 +53,7 @@ describe("bland-shirt shaming on (the default): the store refuses bland shirts",
   it("adds non-bland shirts exactly as before", () => {
     const { db } = createSeededTestDb();
     const cartId = getOrCreateCart(db, { cartId: null, userId: null }).id;
-    expect(addItem(db, cartId, { slug: "geo-riot", size: "S" })).toEqual({
+    expect(addItem(db, cartId, { slug: "geo-riot", size: "S" })).toMatchObject({
       ok: true,
       itemCount: 1,
     });
@@ -74,7 +74,7 @@ describe("bland-shirt shaming on (the default): the store refuses bland shirts",
 
   it("still lets a bland line be removed", () => {
     const { db, cartId } = blandCart();
-    expect(removeItem(db, cartId, { slug: "beige-regret", size: "S" })).toEqual({
+    expect(removeItem(db, cartId, { slug: "beige-regret", size: "S" })).toMatchObject({
       ok: true,
       itemCount: 1,
     });

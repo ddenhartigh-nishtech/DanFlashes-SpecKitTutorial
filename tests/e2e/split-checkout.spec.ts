@@ -1,6 +1,6 @@
-import { expect, test } from "@playwright/test";
+import { expect } from "@playwright/test";
 import { copy } from "../../src/lib/copy";
-import { addShirt, signUp, uniqueEmail, visible } from "./helpers";
+import { addShirt, signUp, test, uniqueEmail, visible } from "./helpers";
 
 const c = copy.checkout;
 

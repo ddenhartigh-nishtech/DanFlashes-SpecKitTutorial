@@ -141,6 +141,10 @@ export const storeSettings = sqliteTable(
     perDiemDrain: integer("per_diem_drain", { mode: "boolean" }).notNull().default(true),
     /** Each GONE in the corner also says what he did (003 round 6). A look, not a tactic. */
     drainJokes: integer("drain_jokes", { mode: "boolean" }).notNull().default(true),
+    /** The urgency engine (004): one switch per tactic (constitution IV). */
+    fakeScarcity: integer("fake_scarcity", { mode: "boolean" }).notNull().default(true),
+    countdownTimers: integer("countdown_timers", { mode: "boolean" }).notNull().default(true),
+    socialProof: integer("social_proof", { mode: "boolean" }).notNull().default(true),
   },
   (t) => [
     check("store_settings_singleton", sql`${t.id} = 1`),

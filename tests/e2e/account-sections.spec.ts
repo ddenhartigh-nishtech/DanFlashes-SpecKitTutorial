@@ -1,6 +1,6 @@
-import { expect, test } from "@playwright/test";
+import { expect } from "@playwright/test";
 import { copy } from "../../src/lib/copy";
-import { signUp, uniqueEmail, visible } from "./helpers";
+import { signUp, test, uniqueEmail, visible } from "./helpers";
 
 test.describe("account sections", () => {
   test("Flash Credit, Revenue Streams and Purchase history collapse at their headers", async ({

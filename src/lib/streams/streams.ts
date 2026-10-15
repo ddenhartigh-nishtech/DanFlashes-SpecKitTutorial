@@ -4,7 +4,7 @@
  * (R2), and each is credited exactly once: the unique (stream_id, stream_payment_no) index makes a
  * duplicate impossible, not just unlikely (R1).
  */
-import { and, asc, desc, eq, isNotNull, isNull, lte, ne, sql } from "drizzle-orm";
+import { and, asc, desc, eq, isNotNull, isNull, lt, lte, ne, or, sql } from "drizzle-orm";
 import { copy } from "@/lib/copy";
 import type { Db } from "@/lib/db/client";
 import type { StoreSettings } from "@/lib/catalog/types";
@@ -314,6 +314,10 @@ export interface PerDiemMeter {
   leftUsd: Usd;
   /** At $0.00 after paying in: the achievement state. */
   drained: boolean;
+  /** Its payment count: what the GONE's (x) clears (R13). */
+  paymentNo: number;
+  /** He cleared this drain's GONE (R13). The countdown itself can't be cleared. */
+  dismissed: boolean;
 }
 
 /**
@@ -328,7 +332,11 @@ export function getPerDiemMeter(
 ): PerDiemMeter | null {
   if (!settings.perDiemDrain) return null;
   const stream = db
-    .select({ id: revenueStreams.id })
+    .select({
+      id: revenueStreams.id,
+      paymentsMade: revenueStreams.paymentsMade,
+      dismissedDrainPaymentNo: revenueStreams.dismissedDrainPaymentNo,
+    })
     .from(revenueStreams)
     .where(
       and(
@@ -341,7 +349,77 @@ export function getPerDiemMeter(
   if (!stream) return null;
   const left = leftByStream(streamHistory(db, userId));
   const leftUsd = left.get(stream.id) ?? ZERO;
-  return { streamId: stream.id, leftUsd, drained: left.has(stream.id) && cmp(leftUsd, ZERO) === 0 };
+  const drained = left.has(stream.id) && cmp(leftUsd, ZERO) === 0;
+  return {
+    streamId: stream.id,
+    leftUsd,
+    drained,
+    paymentNo: stream.paymentsMade,
+    dismissed: drained && stream.dismissedDrainPaymentNo === stream.paymentsMade,
+  };
+}
+
+export interface DrainPop {
+  streamId: number;
+  name: string;
+  /** Its payment count: what the (x) clears (R13). */
+  paymentNo: number;
+}
+
+/**
+ * The GONE pops in the corner (003 FR-029, R13): every stream but a per diem that has paid in and is
+ * spent to $0.00, connected or not, oldest stream first, unless he cleared that drain. Null while
+ * the drain is off. Reads only; callers settle first.
+ */
+export function getDrainPops(db: Db, userId: number, settings: StoreSettings): DrainPop[] | null {
+  if (!settings.perDiemDrain) return null;
+  const left = leftByStream(streamHistory(db, userId));
+  return db
+    .select()
+    .from(revenueStreams)
+    .where(eq(revenueStreams.userId, userId))
+    .orderBy(asc(revenueStreams.id))
+    .all()
+    .filter(
+      (row) =>
+        row.preset !== PER_DIEM && // the current one is the gauge; an old one left with it
+        left.has(row.id) &&
+        cmp(left.get(row.id)!, ZERO) === 0 &&
+        row.dismissedDrainPaymentNo !== row.paymentsMade,
+    )
+    .map((row) => ({ streamId: row.id, name: streamName(row), paymentNo: row.paymentsMade }));
+}
+
+/**
+ * The (x) on a GONE (003 FR-030, R13). `paymentNo` is the payment count the page rendered, so a
+ * payday that lands before the click makes a new drain that still pops. The highest one cleared wins.
+ */
+export function dismissDrain(
+  db: Db,
+  userId: number,
+  input: { streamId: number; paymentNo: number },
+): Ok | Err<"STREAM_NOT_FOUND"> {
+  const row = db
+    .select({ id: revenueStreams.id, paymentsMade: revenueStreams.paymentsMade })
+    .from(revenueStreams)
+    .where(and(eq(revenueStreams.id, input.streamId), eq(revenueStreams.userId, userId)))
+    .get();
+  if (!row || input.paymentNo < 1 || input.paymentNo > row.paymentsMade) {
+    return { ok: false, code: "STREAM_NOT_FOUND" };
+  }
+  db.update(revenueStreams)
+    .set({ dismissedDrainPaymentNo: input.paymentNo })
+    .where(
+      and(
+        eq(revenueStreams.id, row.id),
+        or(
+          isNull(revenueStreams.dismissedDrainPaymentNo),
+          lt(revenueStreams.dismissedDrainPaymentNo, input.paymentNo),
+        ),
+      ),
+    )
+    .run();
+  return { ok: true };
 }
 
 /**

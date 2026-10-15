@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Bungee, Geist } from "next/font/google";
 import { Suspense } from "react";
-import { PerDiemMeter } from "@/components/PerDiemMeter";
+import { DrainCorner } from "@/components/DrainCorner";
 import { SiteHeader } from "@/components/SiteHeader";
 import { copy } from "@/lib/copy";
 import "./globals.css";
@@ -37,7 +37,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <SiteHeader />
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 md:py-10">{children}</main>
         <Suspense fallback={null}>
-          <PerDiemMeter />
+          <DrainCorner />
         </Suspense>
         <footer className="loud-dots border-ink border-t-4">
           <p className="mx-auto max-w-6xl px-4 py-3">

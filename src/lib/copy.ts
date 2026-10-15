@@ -288,6 +288,9 @@ export const copy = {
     label: "Per diem left",
     drained: "Per diem: GONE",
     drainedTag: "Achievement unlocked",
+    /** The (x) on a GONE pop (owner, round 4). */
+    dismiss: (trophy: string) => `Put away "${trophy}". Dan will still know.`,
+    dismissed: "Put away. It still happened.",
   },
   /** Drain them all (003 US4): every stream an order runs dry is its own achievement. */
   achievements: {

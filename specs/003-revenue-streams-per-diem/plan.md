@@ -115,7 +115,7 @@ src/
 │   ├── StreamList.tsx                # new: streams, next payment, Cash in, Disconnect (confirmshaming)
 │   ├── CashInButton.tsx              # new (client): useActionState(cashIn) with paymentNo
 │   ├── CheckoutForm.tsx              # apply/remove Flash Credit, split breakdown, required confirmation
-│   ├── PerDiemMeter.tsx              # new (server): the bottom-left corner: per diem gauge + GONE pops, each with an (x) (R13)
+│   ├── DrainCorner.tsx               # new (server): the bottom-left corner: per diem gauge + GONE pops, each with an (x) (R13)
 │   ├── Achievements.tsx              # new: the stacked drain achievements (US2, US4)
 │   └── LocalTime.tsx                 # new (client): useSyncExternalStore local-time formatting
 └── lib/

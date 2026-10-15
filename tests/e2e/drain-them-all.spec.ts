@@ -60,5 +60,36 @@ test.describe("US4 — drain them all", () => {
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );
     expect(overflow).toBeLessThanOrEqual(0);
+
+    // 22: every GONE pops in the corner, stacked above the per diem gauge.
+    const corner = visible(page.getByTestId("drain-corner"));
+    const gauge = corner.getByTestId("per-diem-meter");
+    const pop = (name: string) => corner.getByTestId("drain-pop").filter({ hasText: a.gone(name) });
+    await expect(gauge).toContainText(copy.meter.drained);
+    await expect(pop(s.presets.college_fund)).toBeVisible();
+    await expect(pop(s.presets.garage_sale)).toBeVisible();
+    const gaugeTop = (await gauge.boundingBox())!.y;
+    for (const name of [s.presets.college_fund, s.presets.garage_sale]) {
+      const box = (await pop(name).boundingBox())!;
+      expect(box.y + box.height).toBeLessThanOrEqual(gaugeTop);
+    }
+
+    // 23: Garage Sale's (x) clears it on every page, and it stays cleared.
+    const dismiss = (name: string) => ({ name: copy.meter.dismiss(name) });
+    await pop(s.presets.garage_sale)
+      .getByRole("button", dismiss(a.gone(s.presets.garage_sale)))
+      .click();
+    await expect(pop(s.presets.garage_sale)).toHaveCount(0);
+    await page.reload();
+    await expect(pop(s.presets.college_fund)).toBeVisible();
+    await expect(pop(s.presets.garage_sale)).toHaveCount(0);
+    await page.goto("/shirts");
+    await expect(pop(s.presets.college_fund)).toBeVisible();
+    await expect(pop(s.presets.garage_sale)).toHaveCount(0);
+
+    // …and the per diem's GONE clears the same way.
+    await gauge.getByRole("button", dismiss(copy.meter.drained)).click();
+    await expect(visible(page.getByTestId("per-diem-meter"))).toHaveCount(0);
+    await expect(pop(s.presets.college_fund)).toBeVisible();
   });
 });

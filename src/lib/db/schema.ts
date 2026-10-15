@@ -283,6 +283,8 @@ export const revenueStreams = sqliteTable(
     nextDueAt: text("next_due_at"),
     paymentsMade: integer("payments_made").notNull().default(0),
     disconnectedAt: text("disconnected_at"),
+    /** He cleared this stream's GONE pop when it had made this many payments (003 R13). */
+    dismissedDrainPaymentNo: integer("dismissed_drain_payment_no"),
     ...timestamps,
   },
   (t) => [

@@ -3,7 +3,7 @@ import { field, failure, sessionUser, type ActionState } from "@/lib/actions/sta
 import { copy } from "@/lib/copy";
 import type { Db } from "@/lib/db/client";
 import type { CookieJar } from "@/lib/http/cookies";
-import { cashIn, connectStream, disconnectStream } from "@/lib/streams/streams";
+import { cashIn, connectStream, disconnectStream, dismissDrain } from "@/lib/streams/streams";
 
 const id = (form: FormData, name: string): number => {
   const value = Number(field(form, name));
@@ -65,4 +65,15 @@ export function cashInCore(
     now,
   });
   return result.ok ? { ok: true, message: copy.streams.cashedIn } : failure(result.code);
+}
+
+/** The (x) on a GONE pop (003 FR-030, R13). */
+export function dismissDrainCore(db: Db, jar: CookieJar, form: FormData): ActionState {
+  const user = sessionUser(db, jar);
+  if (!user) return failure("SIGN_IN_REQUIRED");
+  const result = dismissDrain(db, user.id, {
+    streamId: id(form, "streamId"),
+    paymentNo: id(form, "paymentNo"),
+  });
+  return result.ok ? { ok: true, message: copy.meter.dismissed } : failure(result.code);
 }

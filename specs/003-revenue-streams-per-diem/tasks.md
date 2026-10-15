@@ -576,7 +576,7 @@ again (FR-029, FR-030, R13).
 
 ### Tests (write first; they must fail)
 
-- [ ] T066 [P] Integration tests in tests/integration/drain-pops.test.ts:
+- [X] T066 [P] Integration tests in tests/integration/drain-pops.test.ts:
   - `getDrainPops` lists every non-per-diem stream at $0 after paying in, disconnected ones
     included, but no per diem; it's null with the drain off
   - `dismissDrain` clears one pop
@@ -586,7 +586,7 @@ again (FR-029, FR-030, R13).
   - `dismissDrainCore` refuses guests (`SIGN_IN_REQUIRED`) and unknown streams or payments
     (`STREAM_NOT_FOUND`)
   - migration 0005 adds `dismissed_drain_payment_no` as NULL on existing rows
-- [ ] T067 [P] Extend tests/e2e/drain-them-all.spec.ts (quickstart 22–23):
+- [X] T067 [P] Extend tests/e2e/drain-them-all.spec.ts (quickstart 22–23):
   - after the second order, the corner stacks the per diem's GONE gauge with the College Fund and
     Garage Sale pops above it
   - Garage Sale's (x) clears it, and it stays cleared after a reload and on another page
@@ -595,16 +595,16 @@ again (FR-029, FR-030, R13).
 
 ### Implementation
 
-- [ ] T068 Add `dismissed_drain_payment_no` (integer, nullable) to `revenue_streams` in
+- [X] T068 Add `dismissed_drain_payment_no` (integer, nullable) to `revenue_streams` in
   src/lib/db/schema.ts, and generate migration 0005 (`npx drizzle-kit generate --name drain_dismissals`)
-- [ ] T069 In src/lib/streams/streams.ts:
+- [X] T069 In src/lib/streams/streams.ts:
   - `getDrainPops`
   - `dismissDrain` (keeps the highest `paymentNo`; refuses one the stream hasn't made)
   - `getPerDiemMeter` gains `paymentNo` and `dismissed`
 
   Then `dismissDrainCore` in src/lib/actions/streams.ts, and the `dismissDrain` adapter in
   src/actions/streams.ts. Copy: the (x)'s label in voice. T066 passes.
-- [ ] T070 The corner (src/components/PerDiemMeter.tsx, loaded by src/app/_data/streams.ts): one fixed
+- [X] T070 The corner (src/components/DrainCorner.tsx, which replaces PerDiemMeter.tsx, loaded by src/app/_data/streams.ts): one fixed
   bottom-left stack. The per diem gauge is at the bottom, with a GONE pop above it for each drained
   stream, and an (x) form on every GONE. T067 passes; then `npm run verify`.
 

@@ -610,6 +610,27 @@ again (FR-029, FR-030, R13).
 
 **Checkpoint**: quickstart 1–23 hold, and `npm run verify` is green.
 
+## Phase 11: Owner Feedback, Round 5 (2026-10-15): The Corner Is the Celebration
+
+**Goal**: remove the order confirmation's achievement box, which covered the order summary. The
+gauge's GONE and the corner pops carry the celebration (FR-014, FR-026, FR-027).
+
+### Tests (update first; they must fail)
+
+- [ ] T071 [P] Update tests/e2e/per-diem-drain.spec.ts and tests/e2e/drain-them-all.spec.ts (quickstart
+  9, 20, 21):
+  - a draining order's confirmation has no `achievements` box
+  - its corner shows the GONE: the gauge for the per diem, pops for the rest
+
+### Implementation
+
+- [ ] T072 Remove src/components/Achievements.tsx and its use on src/app/orders/[id]/page.tsx. Drop
+  the copy only it used (`copy.achievements` keeps `gone`). Keep `per_diem_drained`,
+  `order_drains` and `OrderView.drainedStreams` as each order's record (R13). Update the README.
+  T071 passes; then `npm run verify`.
+
+**Checkpoint**: quickstart 1–23 hold, and `npm run verify` is green.
+
 ---
 
 ## Dependencies & Execution Order
@@ -643,6 +664,7 @@ again (FR-029, FR-030, R13).
 - **Polish (T045–T049)** comes after all four stories.
 - **Round 4 (T066–T070)** needs US4's allocation engine. Tests (T066, T067) first, then T068 → T069 →
   T070.
+- **Round 5 (T071–T072)** needs round 4's corner. T071 first, then T072.
 
 ### User story dependencies
 

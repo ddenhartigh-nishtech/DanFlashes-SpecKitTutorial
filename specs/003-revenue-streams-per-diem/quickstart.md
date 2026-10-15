@@ -26,8 +26,8 @@ watch payments land quickly, connect one that tops off every 1 minute.
 | 6 | Connect a custom stream "Craig owes me" for $40.00, whenever I want, ongoing; press Cash in twice quickly, then once more | Each separate press adds +$40.00. A double-click counts once. (US1-4, FR-007) |
 | 7 | Try a start in the past, an end before the start, $0.00, $1.234, or a 41-character name | Refused in brand voice. Nothing is created. (FR-002, FR-005) |
 | 8 | Try a second per diem while the first is running | Refused (`PER_DIEM_EXISTS`). (FR-010) |
-| 9 | Buy shirts until the meter would go below $0, by Flash Credit or card | The meter drops by each order total. The order that takes it to $0 opens with the per diem achievement, and the gauge shows the achievement state. (US2-2, US2-3) |
-| 10 | Let a payday arrive, then drain it again | The meter refills and the next drain celebrates again. (US2-4) |
+| 9 | Buy shirts until the meter would go below $0, by Flash Credit or card | The meter drops by each order total. On the confirmation of the order that takes it to $0, the gauge turns to "Per diem: GONE". There's no achievement box on the page. (US2-2, US2-3) |
+| 10 | Let a payday arrive, then drain it again | The meter refills, and the next drain turns it GONE again. (US2-4) |
 | 11 | Disconnect the per diem | The label reads "Disconnect (and settle for less)". Payments stop, history stays, and the meter disappears. (US1-6, FR-009) |
 | 12 | In Studio set `store_settings.per_diem_drain = 0`, then reload and buy | No meter and no celebration anywhere. Streams still pay. (US2-5, SC-006) |
 | 13 | In Studio set `confirmshaming = 0` | The disconnect button reads "Disconnect". (FR-009) |
@@ -37,7 +37,7 @@ watch payments land quickly, connect one that tops off every 1 minute.
 | 17 | Apply again, confirm, and pay with the test card | The confirmation shows both parts. The balance is $0.00, and the history shows −$100.00 linked to the order. (US3-4, SC-009) |
 | 18 | With the split showing, top up in another tab, then place the order | Refused with the new split (`CREDIT_CHANGED`). Nothing is charged. (US3-6) |
 | 19 | Connect a Per Diem ($100.00, every day), then apply My Kid's College Fund ($300.00), then a Garage Sale ($50.00) | Each record shows its "left": $100.00, $300.00, $50.00. (US4-2) |
-| 20 | Buy Geo Riot ($344.61) by card | The per diem drains first: its achievement shows. College Fund is left $55.39, and Garage Sale is untouched. (US4-1, US4-3) |
-| 21 | Buy Geo Riot again | One order empties both: "You spent your kid's college fund on shirts." and "Garage Sale: GONE" are stacked on the confirmation. (US4-4, SC-012) |
+| 20 | Buy Geo Riot ($344.61) by card | The per diem drains first: the gauge turns GONE. College Fund is left $55.39, and Garage Sale is untouched. (US4-1, US4-3) |
+| 21 | Buy Geo Riot again | One order empties both: "My Kid's College Fund: GONE" and "Garage Sale: GONE" pop in the corner on its confirmation. (US4-4, SC-012) |
 | 22 | Look at the bottom-left corner, on any page | The "Per diem: GONE" gauge, with a "My Kid's College Fund: GONE" pop and a "Garage Sale: GONE" pop stacked above it. Each has an (x). (US4-7, FR-029) |
 | 23 | Click Garage Sale's (x), reload, and visit another page; then clear the per diem's | Each pop disappears and stays gone everywhere. The account still shows Garage Sale as GONE. (US4-8, FR-030, SC-013) |

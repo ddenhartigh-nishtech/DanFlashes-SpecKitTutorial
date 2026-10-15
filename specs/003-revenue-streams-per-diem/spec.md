@@ -54,6 +54,10 @@
   - The per diem gauge's GONE state and every stream's pop have an (x) that clears it. A cleared pop
     stays cleared until that stream is paid again and drained again.
   - The countdown itself ("Per diem left $X") can't be cleared. It's the meter, not a trophy.
+- Owner feedback, round 5 (2026-10-15): **the corner is the celebration.** The order confirmation's
+  big achievement box is gone, because it covered the order summary. The moment an order drains a
+  stream, the per diem gauge turns GONE or the stream pops in the corner. Each order's achievements
+  are still recorded with it.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -123,8 +127,9 @@ feature, but it needs P1's money to measure.
    started, never below $0.00.
 2. **Given** the meter shows an amount, **When** he places an order by any payment method, **Then**
    the meter drops by the order total, or to $0.00 if the order is bigger.
-3. **Given** the meter is above $0, **When** an order takes it to $0, **Then** the store celebrates
-   loudly, once, right when it happens, and the meter shows the achievement while it stays at $0.
+3. **Given** the meter is above $0, **When** an order takes it to $0, **Then** the gauge turns into
+   its "Per diem: GONE" achievement right then, on that order's confirmation, and stays that way
+   while it's at $0, until he clears it.
 4. **Given** the meter is at $0, **When** a new per diem payment arrives, **Then** the meter refills
    by that amount, and the next drain to $0 celebrates again.
 5. **Given** the drain is off, **When** he browses or buys, **Then** no meter and no celebration
@@ -179,8 +184,7 @@ Confirm that:
 The per diem is gone, but he's got a College Fund and a Garage Sale in there too. Every shirt he buys
 comes out of the per diem first, then out of the oldest money he's got. Each stream shows what's
 left of it, and the order that empties one unlocks its achievement. One big enough order empties two
-at once, and the confirmation stacks both: "You spent your kid's college fund on shirts." "Garage
-Sale: GONE."
+at once, and both pop in the corner, stacked: "My Kid's College Fund: GONE." "Garage Sale: GONE."
 
 **Why this priority**: it extends US2's single per diem trophy to every stream. It's the biggest laugh
 per line of code, but US1–US3 stand on their own without it.
@@ -199,9 +203,9 @@ confirm that:
 2. **Given** his streams, **When** he views his account, **Then** each stream shows how much of its
    money is left, or that it's gone.
 3. **Given** an order that takes a stream from above $0 to $0, **When** its confirmation opens,
-   **Then** that stream's achievement is on it, in voice.
-4. **Given** an order that empties several streams, **When** its confirmation opens, **Then** every one
-   of their achievements is there, stacked.
+   **Then** that stream's GONE is in the corner (the gauge for the per diem, a pop for any other).
+4. **Given** an order that empties several streams, **When** its confirmation opens, **Then** each
+   of them is GONE in the corner, stacked.
 5. **Given** a stream that was drained, **When** it pays again and a later order drains it again,
    **Then** that order unlocks its achievement again.
 6. **Given** the drain is off, **When** he browses or buys, **Then** no "left" amounts and no
@@ -230,7 +234,7 @@ confirm that:
   has been disconnected. An ended per diem doesn't block a new one; the new one takes over the meter.
 - **Disconnect**: the meter disappears with the per diem. Its payments and history stay.
 - **Switch flipped while at $0**: turning the drain off hides the meter. Turning it back on shows the
-  current amount, without replaying an old celebration.
+  current amount and any GONE he hasn't cleared. No old order earns an achievement.
 - **Changing an interval**: disconnect and reconnect. A top-off keeps the interval it was connected
   with.
 - **Daylight saving**: a daily or weekly top-off repeats every 24 hours or 7 days of real time, so a
@@ -296,9 +300,9 @@ confirm that:
   since the per diem started, each top-off adds to it and each Dan Flashes order (any payment method)
   takes from it, and it never drops below $0.00 at any point. Spending past $0 came from other money,
   so it isn't held against the next top-off, which refills the meter by its whole amount (US2 AC4).
-- **FR-014**: When an order takes the meter from above $0 to $0, the store MUST celebrate loudly and
-  as an achievement, once, at that moment. The meter MUST show the achievement for as long as it stays
-  at $0, until he clears it (FR-030).
+- **FR-014**: When an order takes the meter from above $0 to $0, the gauge MUST turn into its GONE
+  achievement at that moment, on that order's confirmation. It MUST stay that way for as long as the
+  meter stays at $0, until he clears it (FR-030).
 - **FR-015**: A per diem payment that refills the meter MUST arm the celebration again for the next
   drain.
 - **FR-016**: The per diem MUST never block a purchase. Orders are paid by Flash Credit or card
@@ -330,11 +334,11 @@ confirm that:
   beyond what his streams hold is other money and MUST NOT be held against later payments.
 - **FR-025**: While the drain is on, each of his streams MUST show how much of its money is left, or
   that it's gone.
-- **FR-026**: An order that takes a stream from above $0 to $0 MUST unlock that stream's achievement:
-  "You spent your [stream] on shirts." in voice, with a badge "[Stream]: GONE". A stream that is paid
-  again can be drained, and celebrated, again.
-- **FR-027**: One order MUST be able to unlock several achievements at once. Its confirmation MUST show
-  all of them, stacked.
+- **FR-026**: An order that takes a stream from above $0 to $0 MUST unlock that stream's achievement,
+  recorded with the order: its "[Stream]: GONE" in the corner (FR-029). A stream that is paid again
+  can be drained, and celebrated, again.
+- **FR-027**: One order MUST be able to unlock several achievements at once, each recorded and each
+  GONE in the corner, stacked. The confirmation itself has no achievement box (owner, round 5).
 - **FR-028**: Achievements MUST only be recorded while the drain is on. Turning it on later doesn't
   award old orders.
 - **FR-029**: While the drain is on, every stream other than a per diem that has paid in and is spent
@@ -380,8 +384,8 @@ confirm that:
   missed, 0 duplicates, and 0 outside the window, including across visits and simultaneous page
   loads.
 - **SC-004**: The meter is correct to the cent after any sequence of payments and orders.
-- **SC-005**: The celebration appears on 100% of orders that take the meter from above $0 to $0, and
-  on no other order.
+- **SC-005**: The gauge turns GONE on the confirmation of 100% of orders that take the meter from
+  above $0 to $0, and never while the per diem has money left.
 - **SC-006**: With the drain off, 0 meters and 0 celebrations appear on any page.
 - **SC-007**: 0 fields anywhere ask for bank, routing, or payroll details.
 - **SC-008**: When 5 people watch the $0 celebration cold, at least 4 laugh or call it "way too much."
@@ -390,7 +394,8 @@ confirm that:
 - **SC-010**: 0 split orders are placed without the shopper confirming the exact amounts he was shown.
 - **SC-011**: After any sequence of payments and orders, every stream's "left" is correct to the cent,
   and no stream is drawn on while the current per diem still has money.
-- **SC-012**: An order that empties N streams shows exactly N achievements on its confirmation.
+- **SC-012**: An order that empties N streams records exactly N achievements, and its confirmation's
+  corner shows each of them GONE.
 - **SC-013**: Every drained stream's GONE pop shows on 100% of pages until he clears it, and 0 cleared
   pops come back without a new payment and a new drain.
 
@@ -410,7 +415,8 @@ confirm that:
 - **Where the meter shows**: as a floating gauge pinned to a bottom corner of every page, for
   signed-in shoppers with a per diem (desktop and phone), and in the account next to Flash Credit.
   Other streams' GONE pops stack above it in the same corner.
-- **Where the celebration shows**: on the order confirmation for the order that drained the per diem.
+- **Where the celebration shows**: in the corner, from the confirmation of the order that drained
+  it onward (owner, round 5).
 - **Disconnect labels**: shamed "Disconnect (and settle for less)", neutral "Disconnect".
 - **Revenue streams are a store feature, not a manipulation tactic**: they have no switch of their
   own. The per diem drain is the tactic, and it has one.

@@ -51,3 +51,6 @@
 - Iteration 5 (2026-10-15): owner feedback round 4 added the GONE pops in the corner and an (x) to
   clear each one (FR-029, FR-030, US4 AC7–AC8, SC-013). FR-014 now ends at "until he clears it".
   Voice moved to FR-031. All items pass.
+- Iteration 6 (2026-10-15): owner feedback round 5 dropped the confirmation's achievement box. The
+  corner is the celebration now (FR-014, FR-026, FR-027, US2 AC3, US4 AC3–AC4, SC-005, SC-012). All
+  items pass.

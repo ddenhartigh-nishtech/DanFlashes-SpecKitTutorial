@@ -233,6 +233,11 @@ Only the new decisions are recorded here.
   - Keying on the draining order (`order_drains`) was rejected: a stream drained while the switch
     was off has no order to key on, but still shows GONE, like the per diem gauge.
 
+- **Round 5 (2026-10-15)**: the confirmation's achievement box is gone, so the corner is the whole
+  celebration. `orders.per_diem_drained` and `order_drains` still record which order earned
+  which achievement (FR-026–FR-028). No page reads them now; they're kept as each order's trophy
+  record.
+
 ## R10. Testing
 
 - **Unit**:

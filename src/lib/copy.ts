@@ -298,6 +298,8 @@ export const copy = {
     again: "Just kidding, we actually found another one! One more left!",
     plenty: "Plenty left. Nobody wants these.",
     foundAnother: "Oh wait, we found another one!",
+    deal: "This price won't last.",
+    hold: "Your shirts are reserved for",
   },
 
   /** Drain them all (003 US4): every stream that runs dry is its own trophy in the corner. */

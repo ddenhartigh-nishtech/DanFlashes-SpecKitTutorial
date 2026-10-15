@@ -137,14 +137,14 @@ zero.
 
 ### Tests for User Story 2 (write first; they must fail)
 
-- [ ] T013 [P] [US2] Unit tests in tests/unit/urgency-countdown.test.ts:
+- [X] T013 [P] [US2] Unit tests in tests/unit/urgency-countdown.test.ts:
   - `remainingMs(now, anchor)` is 600000 at the anchor, 1 at anchor + 599999, and 600000 again at
     anchor + 600000. It stays in (0, 600000] for any time, including a `now` before the anchor.
   - `formatCountdown`: 600000 → "10:00.000", 1 → "00:00.001", 59999 → "00:59.999", 61001 →
     "01:01.001". It never shows "60" seconds and never goes negative.
   - `showCountdown(settings, "deal" | "hold", cartLines)` is false when off, and false for a hold on
     an empty cart
-- [ ] T014 [P] [US2] e2e journey in tests/e2e/countdown.spec.ts (desktop and phone):
+- [X] T014 [P] [US2] e2e journey in tests/e2e/countdown.spec.ts (desktop and phone):
   - Geo Riot's deal clock matches `/^\d{2}:\d{2}\.\d{3}$/` and goes down
   - after an add, the cart's and checkout's hold show the same time as the deal, to within 1 s
   - navigating doesn't restart it
@@ -156,17 +156,17 @@ zero.
 
 ### Implementation for User Story 2
 
-- [ ] T015 [US2] Implement `COUNTDOWN_MS`, `remainingMs`, `formatCountdown` and `showCountdown` in
+- [X] T015 [US2] Implement `COUNTDOWN_MS`, `remainingMs`, `formatCountdown` and `showCountdown` in
   src/lib/urgency/countdown.ts (pure). Add `copy.urgency.deal` ("This price won't last.") and
   `hold` ("Your shirts are reserved for"). T013 passes.
-- [ ] T016 [US2] Create src/components/Countdown.tsx (client):
+- [X] T016 [US2] Create src/components/Countdown.tsx (client):
   - it reads or creates `localStorage['df-countdown-anchor']` inside try/catch, falling back to an
     in-memory value
   - it writes `formatCountdown(remainingMs(Date.now(), anchor))` to its element on every
     `requestAnimationFrame`, with no React state per frame
   - before hydration it renders the fixed-width placeholder "10:00.000" in tabular figures
   - `data-testid="countdown"`, `data-kind="deal" | "hold"`
-- [ ] T017 [US2] Render the deal countdown beside the price in src/app/shirts/[slug]/page.tsx, and
+- [X] T017 [US2] Render the deal countdown beside the price in src/app/shirts/[slug]/page.tsx, and
   the hold in src/app/cart/page.tsx and src/app/checkout/page.tsx when the cart has lines, each under
   its line and guarded by `showCountdown`. T014 passes.
 

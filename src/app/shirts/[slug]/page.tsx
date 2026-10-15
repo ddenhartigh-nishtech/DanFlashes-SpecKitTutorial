@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { loadShirt } from "@/app/_data/storefront";
 import { AddToCart } from "@/components/AddToCart";
+import { Countdown } from "@/components/Countdown";
 import { PriceTag } from "@/components/PriceTag";
 import { StockLine } from "@/components/StockLine";
 import { ShirtBadge } from "@/components/ShirtBadge";
@@ -9,6 +10,7 @@ import { ZoomViewer } from "@/components/ZoomViewer";
 import { copy } from "@/lib/copy";
 import { toShopperShirt } from "@/lib/data/shirts";
 import { shameFor } from "@/lib/shaming/loop";
+import { showCountdown } from "@/lib/urgency/countdown";
 
 export default function ShirtPage({ params }: PageProps<"/shirts/[slug]">) {
   return (
@@ -27,6 +29,7 @@ async function ShirtDetail({ params }: Pick<PageProps<"/shirts/[slug]">, "params
     confirmshaming,
     ladder,
     stock,
+    countdownTimers,
   } = await loadShirt(slug);
   if (!catalogShirt) notFound();
   const shirt = toShopperShirt(catalogShirt);
@@ -60,6 +63,9 @@ async function ShirtDetail({ params }: Pick<PageProps<"/shirts/[slug]">, "params
           <div className="flex flex-wrap items-center gap-3">
             <PriceTag priceUsd={shirt.finalPriceUsd} size="lg" />
             <StockLine line={stock} />
+            {showCountdown({ countdownTimers }, "deal", 0) ? (
+              <Countdown kind="deal" label={copy.urgency.deal} />
+            ) : null}
           </div>
         )}
         <p className="bg-paper text-lg">{shirt.description}</p>

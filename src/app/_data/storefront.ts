@@ -40,6 +40,7 @@ export async function loadShirt(slug: string) {
   return {
     shirt,
     stock: shirt ? stockOf(shirt) : null,
+    countdownTimers: settings.countdownTimers,
     placeholderUrl: getPlaceholderUrl(db, settings),
     blandShaming: settings.blandShaming,
     confirmshaming: settings.confirmshaming,

@@ -5,6 +5,7 @@ import { removeCartItem } from "@/actions/cart";
 import { currentCartId } from "@/app/_data/request";
 import { loadStorefront } from "@/app/_data/storefront";
 import { CartQuantityForm } from "@/components/CartQuantityForm";
+import { Countdown } from "@/components/Countdown";
 import { PriceTag } from "@/components/PriceTag";
 import { ShirtBadge } from "@/components/ShirtBadge";
 import { ShirtCard } from "@/components/ShirtCard";
@@ -17,6 +18,7 @@ import { copy } from "@/lib/copy";
 import { getSettings } from "@/lib/data/settings";
 import { toShopperShirt } from "@/lib/data/shirts";
 import { getDb } from "@/lib/db/client";
+import { showCountdown } from "@/lib/urgency/countdown";
 import type { StockLine as Line } from "@/lib/urgency/scarcity";
 import { labelFor } from "@/lib/shaming/labels";
 
@@ -38,7 +40,8 @@ export default function CartPage() {
 async function CartContents() {
   const db = getDb();
   const view = getCartView(db, await currentCartId());
-  const removeLabel = labelFor("remove", getSettings(db).confirmshaming);
+  const settings = getSettings(db);
+  const removeLabel = labelFor("remove", settings.confirmshaming);
   const { shirts, tiers, placeholderUrl, stockOf } = await loadStorefront();
 
   if (view.lines.length === 0) {
@@ -99,6 +102,9 @@ async function CartContents() {
         data-testid="cart-summary"
         className="border-ink bg-paper flex min-w-0 flex-col gap-3 border-4 p-4 shadow-[6px_6px_0_var(--color-ink)]"
       >
+        {showCountdown(settings, "hold", view.lines.length) ? (
+          <Countdown kind="hold" label={copy.urgency.hold} />
+        ) : null}
         <p className="font-display flex flex-wrap items-center justify-between gap-3 uppercase">
           {copy.cart.subtotal}
           <PriceTag priceUsd={view.subtotalUsd} />

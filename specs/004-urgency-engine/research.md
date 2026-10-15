@@ -64,8 +64,12 @@ Components, SQLite via Drizzle, Vitest and Playwright). There are no new package
   - **The math** is pure, in `src/lib/urgency/countdown.ts` (`remainingMs`, `formatCountdown` →
     "09:59.873"), and unit-tested at the cycle edges.
   - **The display**: a client component, `Countdown`, ticks with `requestAnimationFrame`. It writes
-    the text straight to its element, so there's no React render 60 times a second (constitution VII,
-    INP). The browser pauses it in background tabs.
+    the text straight to its element, so there's no React render per frame (constitution VII, INP).
+    The browser pauses it in background tabs.
+    - **Measured (2026-10-15)**: at 30 writes a second, the e2e suite slowed noticeably under
+      parallel load. It now writes about 20 times a second (every 50 ms), which still blurs the
+      milliseconds, inside a fixed-width box with `contain: layout paint`, so a write never
+      re-lays out the page.
   - **Before hydration** it shows a placeholder with the same characters ("10:00.000") in tabular
     figures, so nothing shifts (FR-006).
   - **Where**: the deal clock ("This price won't last.") beside the price on the detail page, and the
@@ -121,8 +125,11 @@ Components, SQLite via Drizzle, Vitest and Playwright). There are no new package
   `sessionStorage` holds a timestamp only.
 - **Alternatives**: server-sent events or polling were rejected: a stream for fake data is far too
   much (constitution VIII). Real recent orders were rejected outright: that's a privacy leak.
-- **Testing hook**: e2e sets `df-pop-next` to "now" with `addInitScript`, so a pop appears at once.
-  It's the same key the feature uses, not a test-only switch.
+- **Testing hook**: the e2e `test` fixture (tests/e2e/helpers.ts) pushes `df-pop-next` an hour out
+  on every page, so a pop-up never lands on a button mid-journey. The social proof journey arms one
+  for the next load (`popOnNextLoad`). It's the feature's own key, not a test-only switch.
+- **Phone placement**: `top-full` measures from inside the header's 4px bottom border, so the
+  banner adds `mt-1` to sit just below it.
 
 ## R7. Off means gone, and e2e never toggles switches
 

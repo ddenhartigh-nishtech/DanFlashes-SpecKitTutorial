@@ -96,5 +96,6 @@ export async function buyByCard(page: Page, slug: string, size: string) {
   await visible(page.getByLabel("Expiry (MM/YY)")).fill("12/29");
   await visible(page.getByLabel("CVC")).fill("123");
   await visible(page.getByRole("button", { name: /Place order/ })).click();
-  await expect(page).toHaveURL(/\/orders\/\d+$/);
+  // Placing an order is the step that queues behind a busy machine: give it room.
+  await expect(page).toHaveURL(/\/orders\/\d+$/, { timeout: 30_000 });
 }

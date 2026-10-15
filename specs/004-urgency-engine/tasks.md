@@ -249,7 +249,7 @@ bottom-right on wider screens, under the header on phones, each with an (x).
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T026 [P] Add `fake_scarcity`, `countdown_timers` and `social_proof` to the switches table in
+- [X] T026 [P] Add `fake_scarcity`, `countdown_timers` and `social_proof` to the switches table in
   README.md
 - [ ] T027 Check the client components (Countdown, PurchasePops, CartQuantityForm, AddToCart) against
   `next dev` under React Strict Mode: the clock ticks once per frame (no double loops), there's one

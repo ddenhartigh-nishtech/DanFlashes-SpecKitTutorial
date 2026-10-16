@@ -51,6 +51,12 @@ describe("the strobe (006 R7)", () => {
     }
   });
 
+  it("the button's rainbow hops no faster than the strobe, never per frame (FR-011)", () => {
+    const decl = /animation:\s*df-awesome-slide\s+(\d+)ms\s+steps\((\d+)\)\s+infinite/.exec(css);
+    expect(decl, "animation: df-awesome-slide <ms> steps(<n>) infinite").not.toBeNull();
+    expect(Number(decl![1]) / Number(decl![2])).toBeGreaterThanOrEqual(STROBE_HOLD_MS);
+  });
+
   it("only ever sets the strobe's own variables, never a theme color token", () => {
     for (const { props } of keyframes()) {
       for (const name of Object.keys(props)) {

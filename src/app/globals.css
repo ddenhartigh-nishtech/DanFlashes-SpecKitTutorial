@@ -132,8 +132,10 @@
 }
 
 /*
- * The most exciting button on the site (FR-007): a rainbow frame that never stops sliding. It moves
- * with transform only, so the compositor runs it without repainting the page every frame.
+ * The most exciting button on the site (FR-007): a rainbow frame that never stops chasing. It hops
+ * 2.5 times a second, like mall signage, rather than sliding at 60 frames a second: a smooth slide
+ * on every page doubled the e2e suite's time in software-rendered headless Chromium. It moves with
+ * transform only, and never faster than the strobe (FR-011).
  */
 @keyframes df-awesome-slide {
   to {
@@ -168,7 +170,7 @@
     var(--color-acid),
     var(--color-hot-pink)
   );
-  animation: df-awesome-slide 3s linear infinite;
+  animation: df-awesome-slide 4000ms steps(10) infinite;
 }
 
 .df-awesome-on {

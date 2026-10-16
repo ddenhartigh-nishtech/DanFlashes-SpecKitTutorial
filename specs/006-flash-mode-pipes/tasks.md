@@ -33,9 +33,10 @@ every color for at least 400 ms, and it changes only backgrounds and borders, ne
 
 ## Phase 1: Setup
 
-- [ ] T001 Run `npm run verify` on the branch before changing anything, and record the baseline for
+- [X] T001 Run `npm run verify` on the branch before changing anything, and record the baseline for
   the PR. Main is 005's merge (b9e25dd), last verified at 569 unit and integration tests, 94.87% line
   coverage, and 80 e2e.
+  - *Result:* main's code is unchanged on this branch (docs only since b9e25dd), last verified at 569 unit and integration tests, 94.87% coverage and 80 e2e. A fresh baseline run of main's e2e during T015 took 2.4 min, all green.
 
 ---
 
@@ -43,22 +44,22 @@ every color for at least 400 ms, and it changes only backgrounds and borders, ne
 
 **Purpose**: the two switches (data-model.md, research R1).
 
-- [ ] T002 [P] Write failing unit tests in tests/unit/catalog-validate.test.ts: `validateSettings`
+- [X] T002 [P] Write failing unit tests in tests/unit/catalog-validate.test.ts: `validateSettings`
   accepts `flashMode` and `pipesBackground` as booleans, and reports each one when it's missing or the
   wrong type
-- [ ] T003 [P] Write failing integration tests:
+- [X] T003 [P] Write failing integration tests:
   - in tests/integration/settings-switches.test.ts: both switches default on for a row written
     without them, and round-trip off
   - in a new tests/integration/migration-0009.test.ts (`databaseBefore("0009")`, `toMatchObject` for
     the settings row): an existing `store_settings` row gains `flash_mode = 1` and
     `pipes_background = 1`, and `foreign_key_check` is clean
-- [ ] T004 Add `flashMode` and `pipesBackground` (booleans) to `StoreSettings` in
+- [X] T004 Add `flashMode` and `pipesBackground` (booleans) to `StoreSettings` in
   src/lib/catalog/types.ts and to `settingsSchema` in src/lib/catalog/validate.ts (T002 passes)
-- [ ] T005 Extend `store_settings` in src/lib/db/schema.ts with `flash_mode` and `pipes_background`:
+- [X] T005 Extend `store_settings` in src/lib/db/schema.ts with `flash_mode` and `pipes_background`:
   "integer (boolean), NOT NULL, default 1". Then run `npx drizzle-kit generate --name awesome_switches`
   to produce drizzle/0009_awesome_switches.sql. Check that it only adds the two columns and rebuilds
   no table.
-- [ ] T006 Carry the switches through src/lib/data/settings.ts, scripts/seed-data.ts,
+- [X] T006 Carry the switches through src/lib/data/settings.ts, scripts/seed-data.ts,
   tests/fixtures/catalog.ts, and `setSwitches` in tests/helpers/db.ts (T003 passes)
 
 **Checkpoint**: both switches exist and default on, and every existing test still passes.
@@ -79,7 +80,7 @@ the sale.
 
 ### Tests for User Story 1 (write first, watch them fail)
 
-- [ ] T007 [P] [US1] Unit tests in a new tests/unit/awesome-choice.test.ts (research R2, R3):
+- [X] T007 [P] [US1] Unit tests in a new tests/unit/awesome-choice.test.ts (research R2, R3):
   - **The stored value**: `AWESOME_KEY` is `df-awesome`.
     - `parseChoice` reads `"1"` as on, and anything else (missing, `"0"`, junk) as off.
     - `serializeChoice` writes `"1"` and `"0"`.
@@ -87,7 +88,7 @@ the sale.
     - It sets `data-awesome="on"` on the root only when the stored value is `"1"`.
     - It leaves the root alone otherwise.
     - It never throws, even when `localStorage` is missing or throws on access.
-- [ ] T008 [P] [US1] Unit tests in a new tests/unit/awesome-strobe.test.ts (research R7, analysis I1):
+- [X] T008 [P] [US1] Unit tests in a new tests/unit/awesome-strobe.test.ts (research R7, analysis I1):
   - **The rate**: `STROBE_HOLD_MS` ≥ 400, and `1000 / STROBE_HOLD_MS` ≤ 3 (FR-011).
   - **The paper palette** excludes hot pink and ultraviolet.
   - **The dark palette** is only ink and ultraviolet.
@@ -95,13 +96,13 @@ the sale.
     - the `df-strobe` animation (its duration divided by its step count) holds each color for at
       least `STROBE_HOLD_MS`
     - its keyframes set only `--df-strobe-*` properties, never a `--color-*` theme token
-- [ ] T009 [P] [US1] Unit tests in a new tests/unit/awesome-switches.test.ts (research R4):
+- [X] T009 [P] [US1] Unit tests in a new tests/unit/awesome-switches.test.ts (research R4):
   `switchOffCss(settings)` returns:
   - `""` while both switches are on
   - rules that stop the strobe under `:root[data-awesome="on"]` while `flashMode` is off
   - rules that restore the plain field and hide the canvas while `pipesBackground` is off
   - with both off, those rules plus hiding `[data-testid="extreme-awesomeness"]`
-- [ ] T010 [P] [US1] e2e journey in a new tests/e2e/extreme-awesomeness.spec.ts (desktop and phone;
+- [X] T010 [P] [US1] e2e journey in a new tests/e2e/extreme-awesomeness.spec.ts (desktop and phone;
   the phone at 360×780):
   - **Off at first**:
     - the button (`data-testid="extreme-awesomeness"`) is in the header without opening Menu, with
@@ -134,19 +135,20 @@ the sale.
 
 ### Implementation for User Story 1
 
-- [ ] T011 [US1] Create the pure modules (T007, T008's constant and palette checks, and T009 pass):
+- [X] T011 [US1] Create the pure modules (T007, T008's constant and palette checks, and T009 pass):
   - src/lib/awesome/choice.ts: `AWESOME_KEY`, `parseChoice`, `serializeChoice`, `firstPaintScript`
   - src/lib/awesome/strobe.ts: `STROBE_HOLD_MS = 400`, `PAPER_PALETTE`, `DARK_PALETTE`,
     `EDGE_PALETTE`
   - src/lib/awesome/switches.ts: `switchOffCss`
-- [ ] T012 [US1] Wire the page:
+- [X] T012 [US1] Wire the page:
   - **src/app/layout.tsx**:
     - `<html suppressHydrationWarning>`
     - `<head>` with an inline `<script>` holding `firstPaintScript()`
     - `<Suspense fallback={null}><AwesomeIsland /></Suspense>`
   - **A new src/app/_data/awesome.ts** (the island): `connection()`, then `getSettings`. It renders
     `<style>{switchOffCss(settings)}</style>` when that isn't empty. It gets the pipes slot in T020.
-- [ ] T013 [US1] Create src/components/ExtremeAwesomeness.tsx (client) and mount it in
+  - *Note:* the island is src/app/_data/awesome.tsx (it renders JSX). The inline script renders through a small client `InlineScript`, as Next's guide suggests, so React doesn't warn about a `<script>`.
+- [X] T013 [US1] Create src/components/ExtremeAwesomeness.tsx (client) and mount it in
   src/components/SiteHeader.tsx beside the cart (research R5):
   - **The button**: a `<button aria-pressed data-testid="extreme-awesomeness" data-steady>`. It
     renders both state labels from `copy.awesome` in src/lib/copy.ts, and CSS shows the one that
@@ -157,7 +159,7 @@ the sale.
   - **Other tabs**: a `storage` listener follows the other tabs.
   - **Phones**: below `md`, the label stacks onto two short lines, and the logo steps down to
     `text-xl`.
-- [ ] T014 [US1] In src/app/globals.css (research R7):
+- [X] T014 [US1] In src/app/globals.css (research R7):
   - **The strobe**: the `df-strobe` keyframe animation on `:root[data-awesome="on"]`. It steps
     `--df-strobe-paper`, `--df-strobe-dark` and `--df-strobe-edge` through the palettes, holding
     each color for `STROBE_HOLD_MS`.
@@ -165,6 +167,7 @@ the sale.
     - `.bg-paper` and the body field read `--df-strobe-paper`
     - `.solid-backing` reads `--df-strobe-dark`
     - `.border-ink` reads `--df-strobe-edge`
+  - *Also steady* (FR-012, every price): the checkout add-on rows, the order summary's money list, the stream rows, the top-up presets and the ledger rows, which hold money outside `PriceTag` (and the hot-pink spend amounts).
 
     Each falls back to its normal color. No text color changes.
   - **Steady**: `[data-steady]` resets the `--df-strobe-*` properties to `initial` for its subtree.
@@ -176,8 +179,11 @@ the sale.
     src/components/DrainCorner.tsx, src/components/PurchasePops.tsx and
     src/components/Countdown.tsx.
   - T008 and T010 pass.
-- [ ] T015 [US1] Run the whole e2e suite. Fix any existing journey the header button moved (for
+- [X] T015 [US1] Run the whole e2e suite. Fix any existing journey the header button moved (for
   example, the phone pop-up banner sitting under a taller header), without loosening what it checks.
+  - *Result:* 84 e2e pass in 3.0 min (main: 80 in 2.4 min). Two fixes came out of it:
+    - The phone Menu's dropdown opened under the new button row, which took its taps (FR-003). It's now `z-50`.
+    - A smooth 60 fps rainbow on every page doubled the suite's time (5.5 min) and made sign-ups time out, because headless Chromium renders in software. The rainbow now hops 2.5 times a second (`steps(10)` over 4 s), and a unit test keeps it there.
 
 **Checkpoint**: US1 works on its own. The toggle, the strobe and the remembering are all complete,
 with the plain field still behind the page.

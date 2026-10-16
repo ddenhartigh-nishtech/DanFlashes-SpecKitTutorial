@@ -4,12 +4,12 @@
 
 **Created**: 2026-10-16
 
-**Status**: Draft (Q1–Q3 resolved and clarified 2026-10-16)
+**Status**: Draft (Q1–Q3 resolved, clarified, and analysis remediation applied 2026-10-16)
 
 **Input**: User description: "Flash Mode & Pipes Background (ROADMAP 006). Two visual-assault features from constitution V, each its own named feature with its own owner on/off switch, on by default: (1) Flash Mode: the strobe/flash mode constitution V requires. It sits behind a shopper toggle that starts off, and the button that turns it on must be the most exciting button on the site. While it's on, the site strobes and flashes, but the price, the tier badge and Add to Cart stay readable (constitution V, "the sale still closes"). (2) Pipes Background: an animated Windows "3D Pipes" screensaver as the page background in place of the plain field, with pipes growing, turning at elbow joints and filling the screen, then starting over. Both work from a 360px phone up, never cover or block the header, prices, the cart, checkout, the per diem corner or the pop-ups, and must not break the Lighthouse budgets (constitution VII). Played completely straight, never explaining the joke. No money paths change."
 
 **Builds on**:
-- 001-core-storefront: every page, the header, accounts and sign-in, the store settings
+- 001-core-storefront: every page, the header, the store settings
 - 002-brand-pages-and-shaming: the switch-per-tactic pattern, the header nav, the dialogs
 - 003-revenue-streams-per-diem: the per diem corner (bottom-left)
 - 004-urgency-engine: the purchase pop-ups (bottom-right, or under the header on phones) and the
@@ -24,8 +24,9 @@
   cards all cycle through the store's colors. Prices, tier badges and Add to Cart never flash.
 - Q2: How long does Flash Mode stay on? → A: **Until he turns it off** (revised by the owner during
   clarify; it was "for the visit").
-  - It isn't per tab. It's remembered and kept for him.
-  - Signed in, it's saved to his account. As a guest, his browser remembers it.
+  - It isn't per tab: his browser remembers it in every tab and on later visits.
+  - It's his browser's choice, not his account's: different browsers don't sync (owner, after
+    analysis; this replaces the account sync he first asked for).
 - Q3: When do the pipes start? → A: **With the toggle** (revised by the owner during clarify; it was
   "always"). The pipes are tied to the same shopper toggle as the strobe.
 - Q: When Flash Mode is on and the pipes are running, should the pipes join the strobe? → A: **No.**
@@ -33,11 +34,10 @@
     strobe.
   - One shopper toggle, branded **"Extreme Awesomeness"** on the site, turns on the strobe and the
     pipes together. "Flash Mode" stays the feature's name in the constitution and the specs.
-- Owner, on the toggle: signed in, the choice follows him to any device he signs in on.
-  - When he signs in, his account's choice takes over.
-  - A brand-new account keeps whatever he chose as a guest, the way the guest cart carries over.
+- Owner, on the toggle:
   - It's off until he first turns it on. That's how this spec reads the constitution's "it starts
     off".
+  - Pressing the button applies the styling immediately, with no page load (after analysis).
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -47,7 +47,7 @@ Up in the header, next to the cart, there's a button that won't sit still. It cy
 color the store owns and it's louder than Add to Cart, which is saying something. It says EXTREME
 AWESOMENESS. He presses it. The store strobes. Everything that can flash, flashes. The price doesn't:
 Geo Riot is still $344.61, clear as day, and Add to Cart is right where he left it. He comes back
-tomorrow on his phone, signs in, and it's still on. He presses the button again, and the store calms
+tomorrow, and it's still on. He presses the button again, and the store calms
 down, relatively speaking.
 
 **Why this priority**: constitution V requires it ("the site MUST offer a strobe/flash mode"), and the
@@ -59,8 +59,7 @@ toggle it brings also turns on the pipes (US2).
   off
 - the button is the loudest control on the site
 - pressing it starts the strobe, and pressing it again stops it
-- it stays on across pages, tabs, reloads and later visits, and follows a signed-in shopper to
-  another browser
+- it stays on across pages, tabs, reloads and later visits in the same browser
 - nothing ever flashes more than 3 times a second
 - the price, the tier badge and Add to Cart never flash and stay readable
 - with both switches off, there's no button and nothing flashes
@@ -72,7 +71,7 @@ toggle it brings also turns on the pipes (US2).
 2. **Given** any page, **When** he looks at the controls, **Then** the Extreme Awesomeness button is
    the most exciting one. It's the only control that animates on its own, cycling through at least
    three of the store's colors, even while it's off.
-3. **Given** it's off, **When** he presses the button, **Then** it's on:
+3. **Given** it's off, **When** he presses the button, **Then** it's on at once, with no page load:
    - backgrounds, borders, headings and shirt cards all cycle through the store's colors
    - the pipes start growing (US2)
    - the button shows that it's on
@@ -82,13 +81,10 @@ toggle it brings also turns on the pipes (US2).
    every price, every tier badge and Add to Cart stay steady and readable. They never flash or change
    color, and nothing covers them.
 5. **Given** it's on, **When** anything flashes, **Then** it flashes no more than 3 times in any second.
-6. **Given** he turned it on as a guest, **When** he moves to another page, opens another tab, reloads,
-   or comes back days later in the same browser, **Then** it's still on, until he turns it off.
-7. **Given** he turned it on while signed in, **When** he signs in on another browser or device,
-   **Then** it's on there too. **Given** he signs in to an existing account, **Then** that account's
-   choice takes over. **Given** he creates a new account, **Then** the account keeps what he chose
-   as a guest.
-8. **Given** the Flash Mode switch is off, **When** he presses Extreme Awesomeness (still there for
+6. **Given** he turned it on, **When** he moves to another page, opens another tab, reloads, signs in
+   or out, or comes back days later in the same browser, **Then** it's still on, until he turns it
+   off. His other open tabs follow along. Another browser has its own choice.
+7. **Given** the Flash Mode switch is off, **When** he presses Extreme Awesomeness (still there for
    the pipes), **Then** nothing strobes. **Given** both switches are off, **Then** there's no button
    at all. Everything else is exactly as before.
 
@@ -157,9 +153,11 @@ without it.
 - **The button on a phone**: it fits in the header beside the Menu button and the cart at 360px,
   without pushing anything off the screen. "Extreme Awesomeness" may shorten or stack to fit, but it
   stays the loudest thing up there.
-- **Signing out**: the browser keeps the last choice he made, so the page doesn't change under him.
-- **Two people, one browser**: each account keeps its own choice. Signing in as the other one shows
-  theirs.
+- **Signing in or out**: changes nothing. The choice belongs to the browser, so two people on one
+  browser share it.
+- **Another browser**: it has its own choice, and nothing syncs between browsers.
+- **A switch the owner just turned off**: for the moment before a page finishes arriving, a shopper
+  with it on can still see that feature. Then it's gone.
 - **The first paint**: a page he opens with it on arrives already on. There's no flash of the plain
   store first, and no layout jump.
 - **A slow phone**: the pipes slow down rather than make the page stutter. Scrolling and tapping come
@@ -192,17 +190,17 @@ without it.
 - **FR-006**: While either setting is on, every page MUST show the Extreme Awesomeness button in the
   header, at every screen size, without opening a menu.
 - **FR-007**: The button MUST be the most exciting button on the site: the only control that animates
-  on its own, cycling through at least three of the store's colors, whether it's on or off.
-- **FR-008**: It MUST be off until he first turns it on. Pressing the button turns it on, and pressing
-  it again turns it off. The button shows which it is. Turning it on starts every feature the owner
+  on its own (apart from the strobe itself), cycling through at least three of the store's colors,
+  whether it's on or off.
+- **FR-008**: It MUST be off until he first turns it on. Pressing the button turns it on at once, with
+  no page load, and pressing it again turns it off the same way. The button shows which it is. Turning it on starts every feature the owner
   has on: the strobe, the pipes, or both.
-- **FR-009**: His choice MUST be remembered until he changes it. It isn't per tab or per visit.
-  - **As a guest**, his browser remembers it in every tab and on later visits.
-  - **Signed in**, pressing the button MUST save it to his account and to his browser. It follows him
-    to any browser or device where he signs in.
-  - **When he signs in** to an existing account, that account's choice takes over. A brand-new
-    account starts with whatever he chose as a guest.
-  - **Each account** keeps its own choice.
+- **FR-009**: His choice MUST be remembered by his browser until he changes it. It isn't per tab or
+  per visit.
+  - **Every tab and later visit**: his browser remembers it. His other open tabs follow along when
+    he presses the button.
+  - **His browser's alone**: it's never sent to the store or saved to his account. Signing in or out
+    doesn't change it, and other browsers don't sync.
   - **A page opened with it on** MUST arrive already on, with no flash of the plain store first.
 
 **Flash Mode (the strobe)**
@@ -246,9 +244,8 @@ without it.
 ### Key Entities
 
 - **Store Settings** (from 001–005): gains two switches, Flash Mode and the Pipes Background.
-- **Account** (from 001): gains his Extreme Awesomeness choice, on or off, off by default.
-- **His browser's choice**: the same on or off, remembered by his browser for a guest, and kept in
-  step with his account while he's signed in.
+- **His browser's choice**: Extreme Awesomeness on or off, off by default, remembered by his browser.
+  It's never sent to the store or saved to his account.
 - **Brand Copy** gains the Extreme Awesomeness button's labels.
 
 ## Success Criteria *(mandatory)*
@@ -268,8 +265,8 @@ without it.
   - checkout, by every payment method
   - the account
 - **SC-006**: With a feature's switch off, 0 of its elements appear anywhere.
-- **SC-007**: His choice survives 100% of reloads, new tabs and later visits. Signed in, it's on any
-  browser he signs in on.
+- **SC-007**: His choice survives 100% of reloads, new tabs, sign-ins, sign-outs and later visits in
+  the same browser.
 - **SC-008**: When 5 people use the site cold, at least 4 press Extreme Awesomeness within their
   first minute without being told to.
 
@@ -283,7 +280,10 @@ without it.
   - The pipes use the classic screensaver's colors: red, green, blue, yellow, cyan, magenta and
     white.
 - **The pipes' look**: shaded tubes with a highlight, so they read as "3D", with a ball at every
-  joint, as in the original. Now and then, a joint is a teapot, also as in the original.
+  joint, as in the original.
+  - They grow on a black field, the original screensaver's backdrop, in place of the plain paper
+    field.
+  - Now and then, a joint is a teapot, also as in the original.
 - **One shopper toggle.** The pipes have no toggle of their own, and the owner turns each feature off
   in Studio until the Admin Console (008).
 - **"It starts off"** (constitution V) means off for anyone who hasn't turned it on. Once he does,

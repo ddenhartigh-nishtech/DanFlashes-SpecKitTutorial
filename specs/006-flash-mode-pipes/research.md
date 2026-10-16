@@ -4,102 +4,91 @@ Decisions that turn the spec into a buildable design. The stack is 001's (Next.j
 Components, React 19, SQLite via Drizzle, Tailwind 4, Vitest and Playwright). There are no new
 packages: the strobe is CSS, and the pipes are a 2D canvas.
 
-## R1. Storage: two switches and one account column, one migration
+## R1. Storage: two switches, one migration
 
-- **Decision**: migration `0009` adds:
-  - **`store_settings`**: `flash_mode` and `pipes_background`, booleans, NOT NULL, default 1. They're
-    carried through `StoreSettings`, `settingsSchema`, `getSettings`/`saveSettings`, the seed
-    fixture, the test fixture and `setSwitches`, like every switch since 002.
-  - **`users`**: `extreme_awesomeness`, boolean, NOT NULL, default 0. It's his saved choice.
-- **Rationale**: switches are store data the owner edits in Studio (constitution IV pattern). A
-  signed-in choice that follows him to another device has to live on the account (clarify).
-- **Alternatives**: a separate preferences table was rejected: it's one boolean, and `users` already
-  carries per-account display data (`display_name`).
+- **Decision**: migration `0009` adds `flash_mode` and `pipes_background` to `store_settings`
+  (booleans, NOT NULL, default 1).
+  - They're carried through `StoreSettings`, `settingsSchema`, `getSettings`/`saveSettings`, the
+    seed fixture, the test fixture and `setSwitches`, like every switch since 002.
+  - Nothing is added to `users`: his choice belongs to his browser (R2).
+- **Rationale**: switches are store data the owner edits in Studio (constitution IV pattern).
 
-## R2. His choice: a cookie, kept in step with his account
+## R2. His choice: his browser's local storage
 
-- **Decision**: the browser's copy is a cookie, `df_awesome` (`1` or `0`).
-  - It lasts a year, with `SameSite=Lax` and `path=/`. It's **not** `httpOnly`, because the inline
-    script (R3) reads it before first paint.
-  - It's a cookie rather than `localStorage` because it's sent with every request. Sign-up can then
-    read a guest's choice without the form carrying it.
-- **The rules** (spec FR-009):
-  - **Pressing the button** sets the attribute and the cookie in the browser at once, then calls a
-    Server Action, `saveExtremeAwesomeness(on)`.
-    - The action sets the cookie again, and saves to `users.extreme_awesomeness` when he's signed
-      in.
-    - A guest's call only refreshes the cookie.
-  - **Sign-in** (`signInCore`): after the session starts, the cookie is set to the account's choice.
-    The account takes over.
-  - **Sign-up** (`signUpCore`): the new account is saved with the cookie's current value. It keeps
-    what he chose as a guest.
-  - **Sign-out**: the cookie stays, so the page doesn't change under him.
-  - **Two devices**: if he changes it on one device, the other catches up on its next page. The
-    island (R4) sees that the signed-in account differs from the cookie and applies the account.
-- **Rationale**: the owner asked for a toggle scoped to the user, remembered and persisted, and not
-  per tab. One cookie covers every tab and visit. The account carries it across devices.
+- **Decision**: `localStorage["df-awesome"]` holds `"1"` while it's on. It's missing (or `"0"`) when
+  it's off.
+  - **Pressing the button** sets the `<html>` attribute (R3) and the stored value at once. There's
+    no server call and no page load (FR-008).
+  - **Other open tabs** listen for the `storage` event and follow along (FR-009).
+  - **Signing in and out** don't touch it. Two people on one browser share it, and other browsers
+    keep their own (owner, after analysis).
+  - **When storage isn't available** (some private modes), reads and writes are wrapped. It then
+    behaves as off and doesn't throw.
+- **Rationale**: the owner asked for a toggle that's remembered and not per tab, and confirmed that
+  it can be specific to the browser. Local storage is shared by every tab of a browser and survives
+  later visits. It never reaches the server, so there's no action, no cookie, and no account column.
 - **Alternatives**:
-  - `sessionStorage` (per tab) and `localStorage` (invisible to the server at sign-up) were both
-    rejected.
-  - Reading the cookie on the server to render the page was also rejected. Reading it in the root
-    layout would make every segment block under Cache Components (R3).
+  - `sessionStorage` was rejected: it's per tab.
+  - A cookie was rejected: no server ever needs to read it.
+  - An account column was rejected: the owner doesn't want browsers to sync.
 
 ## R3. First paint: an inline script sets `data-awesome` on `<html>`
 
-- **Decision**: follow Next's "preventing flash before hydration" guide (themes, "Storing the theme
-  in a cookie").
-  - **The script**: the root layout's `<head>` has a tiny inline script. It reads `df_awesome` from
-    `document.cookie` and sets `data-awesome="on"` on `<html>` while the HTML is still parsing.
+- **Decision**: follow Next's "preventing flash before hydration" guide (Themes).
+  - **The script**: the root layout's `<head>` has a tiny inline script. It reads
+    `localStorage["df-awesome"]` inside a `try` and sets `data-awesome="on"` on `<html>` while the
+    HTML is still parsing.
   - **Hydration**: `<html>` gets `suppressHydrationWarning`.
   - **Dev remount**: the toggle re-applies the attribute in a `useLayoutEffect` after React's
     Strict Mode remount in dev. In production it's a no-op.
   - **The CSS**: everything in Flash Mode keys off `:root[data-awesome="on"]`: the strobe, the
     black field, and which button label shows. A page opened with it on is painted on from the
-    first frame (spec FR-009, edge case "The first paint").
+    first frame (FR-009).
 - **Rationale**: it's the documented way to avoid a flash and a hydration error. It keeps the layout
   prerenderable.
-- **Alternatives**:
-  - A `useEffect` was rejected: it paints the plain store first.
-  - `cookies()` in the layout was rejected: it blocks every page under Cache Components.
+- **Alternatives**: a `useEffect` was rejected: it paints the plain store first.
 
-## R4. Owner switches reach the page through one island
+## R4. Owner switches arrive with the page, as CSS
 
-- **Decision**: the layout renders `<Suspense fallback={null}><AwesomeIsland /></Suspense>`.
-  - **The island** (server) reads the settings and the signed-in user's choice at request time
-    (`connection()`, as in CLAUDE.md). It renders:
-    - `<AwesomeState switches={…} account={…} />`, a client component with no UI. In a
-      `useLayoutEffect`, it:
-      - sets `data-strobe="off"` and `data-pipes="off"` on `<html>` while those switches are off
-      - hides the button while both are off
-      - applies the account's choice when it differs from the cookie (R2)
-    - `<PipesBackground />`, only while the Pipes switch is on (R6).
-  - **The CSS** reads the switches as exclusions: the strobe is
-    `:root[data-awesome="on"]:not([data-strobe="off"])`, and the pipes and the black field are
-    `…:not([data-pipes="off"])`.
-- **Trade-off**: the switches can't be known before the island streams in. While a switch is off and
-  he has it on, the strobe or the black field can show for the moment before hydration, then goes.
+- **Decision**: the layout renders `<Suspense fallback={null}><AwesomeIsland /></Suspense>`
+  (src/app/_data/awesome.ts).
+  - **The read**: the island (server) reads the settings at request time (`connection()`, as in
+    CLAUDE.md).
+  - **What it renders**:
+    - `<style>{switchOffCss(settings)}</style>`, while a switch is off
+    - `<PipesBackground />`, while the Pipes switch is on (R6)
+  - **`switchOffCss`** is pure (src/lib/awesome/switches.ts). It returns nothing while both are on.
+    Otherwise it returns the rules that undo a feature under `:root[data-awesome="on"]`:
+    - Flash Mode off: no strobe animation.
+    - Pipes off: the plain field instead of the black one.
+    - Both off: the button is hidden as well.
+  - **Timing**: a `<style>` in the streamed HTML applies as soon as that part of the page arrives,
+    before any script has loaded. It stays put through client navigations, because the layout
+    persists.
+- **Trade-off**: the switches can't be known before the island streams in. For the moment before
+  that part of the page arrives, a shopper with it on can see a feature the owner just turned off
+  (spec Edge Cases).
   - The switches default on and are for demos, so the common case paints correctly from the first
     frame.
   - Studio edits stay instant: no caching (001, owner).
-- **Rationale**: one place reads the request-time facts, and the rest of the layout stays static.
+- **Rationale**: one request-time read covers the switches. The rest of the layout stays static, and
+  no client code is needed to apply them.
 - **Alternatives**:
   - Caching the switches into the static shell was rejected: Studio edits would need revalidation.
-  - A second cookie mirroring the switches was rejected: it's another source of truth for a demo
-    control.
+  - A client component that sets attributes after hydration was rejected: it leaves a longer window.
 
 ## R5. The toggle: the loudest button, in the header
 
 - **Decision**: `ExtremeAwesomeness`, a client component in `SiteHeader`, beside the cart, on every
   screen size.
-  - **Behavior**: a `<button aria-pressed>`. Pressing it flips the `<html>` attribute and the
-    cookie at once, then calls `saveExtremeAwesomeness` in a transition (R2). No page refresh is
-    needed.
+  - **Behavior**: a `<button aria-pressed>`. Pressing it flips the `<html>` attribute and
+    `localStorage` at once (R2).
   - **Labels**: it renders both state labels, and CSS shows the one that matches `data-awesome`.
     The server HTML is then correct for either state, with no hydration mismatch and no flash.
-    `aria-pressed` follows the same attribute after hydration.
+    `aria-pressed` follows the attribute after hydration.
   - **Loudest**: a rainbow gradient in the brand palette that slides, plus a slow pulse. It's the
-    only self-animating control on the site (FR-007). Its colors move smoothly rather than
-    flashing, so it doesn't count toward FR-011's flash limit.
+    only self-animating control on the site, apart from the strobe itself (FR-007). Its colors move
+    smoothly rather than flashing, so it doesn't count toward FR-011's flash limit.
   - **Phones**: at 360px the label stacks onto two short lines in a smaller display size, and the
     logo steps down a size so the bar still fits the logo, the button, the cart and Menu. e2e
     checks there's no sideways scroll.
@@ -109,32 +98,39 @@ packages: the strobe is CSS, and the pipes are a 2D canvas.
 ## R6. The pipes: a 2D canvas behind the page, a pure growth engine
 
 - **Decision**:
-  - **The engine**: `src/lib/pipes/` holds a pure, seeded engine.
-    - It works on a grid sized from the viewport. Cells are about 28 px on phones and about 40 px
-      on desktops.
-    - Several pipes (up to 4) grow at once, one cell per step.
-    - Each pipe goes straight, or turns 90° with some chance, only into free cells. A turn leaves a
-      joint.
+  - **The engine**: `src/lib/pipes/engine.ts` is a pure, seeded engine. Its constants are exact
+    (analysis A2):
+
+    | Constant | Value | Meaning |
+    |---|---|---|
+    | `CELL_PX_PHONE` | 28 | cell size below 768 px wide |
+    | `CELL_PX` | 40 | cell size otherwise |
+    | `MAX_PIPES` | 4 | pipes growing at once |
+    | `CLEAR_AT` | 0.7 | how full the grid gets before it clears |
+    | `TEAPOT_ODDS` | 1/60 | the share of joints that are teapots |
+    | `STEPS_PER_SECOND` | 25 | growth speed |
+
+    - Each pipe moves one cell per step: straight, or turned 90°, only into free cells. A turn
+      leaves a joint.
     - A pipe that has nowhere to go ends, and a new one starts in a free cell.
-    - When the grid is about 70% full, or nothing can start, the engine says "clear", and the
+    - When the grid reaches `CLEAR_AT`, or nothing can start, the engine says "clear", and the
       screen starts over.
-    - Every so often (about 1 in 60 joints) a joint is a teapot.
     - Colors come from the classic set: red, green, blue, yellow, cyan, magenta and white.
     - It's pure, with no DOM or canvas, so unit tests cover the turn rules, occupancy, endings,
       clearing, teapots, and the determinism of a seed.
-  - **The canvas**: `PipesBackground` (client) is a `<canvas>` that's `position: fixed`, `inset: 0`,
-    `z-index: -1` and `pointer-events: none`, so it can never cover or catch a tap (FR-003). It
-    sits on a black field, the original screensaver's backdrop. The black field and the canvas show
-    only under `:root[data-awesome="on"]:not([data-pipes="off"])`. A `MutationObserver` on `<html>`
-    starts and stops it as he toggles.
+  - **Pacing**: `src/lib/pipes/loop.ts` holds `stepsDue(elapsedMs, stepsPerSecond, maxPerFrame)`.
+    It's time-based, and never more than `maxPerFrame`, so on a slow device the pipes fall behind
+    rather than stealing frames from scrolling (FR-018).
+  - **The canvas**: `PipesBackground` (client, mounted by the island in src/app/_data/awesome.ts) is
+    a `<canvas>` that's `position: fixed`, `inset: 0`, `z-index: -1` and `pointer-events: none`, so it
+    can never cover or catch a tap (FR-003). It sits on a black field, the original screensaver's
+    backdrop, under `:root[data-awesome="on"]`. A `MutationObserver` on `<html>` starts and stops it as
+    he toggles.
   - **The look**: each segment is a tube, drawn as a band with a linear gradient across it (dark
     edge, colored body, bright highlight), so it reads as "3D". Joints are radial-gradient balls,
     and teapots are a small drawn silhouette.
-  - **Drawing**: it's incremental. Each step draws only the new segment, so a frame costs one small
-    draw, never a repaint of the whole screen.
-  - **Timing**: steps are time-based (about 25 a second) through `requestAnimationFrame`. A frame
-    never draws more than a few steps, so on a slow device the pipes fall behind rather than
-    stealing frames from scrolling (FR-018).
+  - **Drawing**: it's incremental. Each step draws only the new segment, never a repaint of the
+    whole screen.
   - **Pausing and resizing**: `visibilitychange` pauses and resumes (FR-017). A debounced resize
     clears and starts over for the new size (FR-015).
   - **Sizing**: the device pixel ratio is capped at 2.
@@ -148,30 +144,46 @@ packages: the strobe is CSS, and the pipes are a 2D canvas.
     background.
   - SVG or DOM pipes were rejected: thousands of nodes, and layout work on every step.
 
-## R7. The strobe: CSS custom properties on a stepped clock
+## R7. The strobe: strobe-only variables on backgrounds and borders
 
-- **Decision**:
-  - **What changes**: under `:root[data-awesome="on"]:not([data-strobe="off"])`, a keyframe
-    animation on `:root` steps a few of the theme's custom properties through the brand palette:
-    - the page and card background (`--color-paper`, which is what `bg-paper` uses)
-    - the border color (an override on `.border-ink` that reads a cycling variable)
-    - the heading backing
-  - **Readability**: ink text stays ink, and paper backgrounds cycle only through colors that ink
-    reads on (hot pink, electric cyan, highlighter, acid, safety orange; not ultraviolet). Text on an
-    ink backing cycles through the light colors. Text stays readable at every step (FR-010).
-  - **Rate**: every color holds for at least 400 ms. That's at most 2.5 changes a second on any
-    element, under FR-011's limit of 3. The duration and step count are constants in one module,
-    with a unit test asserting the rate.
-  - **The sale stays steady**: prices (`PriceTag`), tier badges (`ShirtBadge`) and Add to Cart
-    carry a `data-steady` marker that pins the custom properties back to their fixed values for
-    their subtree, with no animation (FR-012). So do the dialogs, the per diem corner, the pop-ups,
-    the countdowns and the Extreme Awesomeness button.
+- **Decision** (revised by analysis I1). The strobe never touches the theme's color tokens. Text in
+  paper or any brand color keeps its color, so the strobe can't make it match its button.
+  - **The clock**: one stepped keyframe animation, `df-strobe`, on
+    `:root[data-awesome="on"]`. It cycles a few strobe-only custom properties:
+    - `--df-strobe-paper`
+    - `--df-strobe-dark`
+    - `--df-strobe-edge`
+  - **What reads them**: override rules, under the same selector, applied only to backgrounds and
+    borders:
+    - `.bg-paper` and the page field read `--df-strobe-paper`
+    - `.solid-backing` (heading and label backings) reads `--df-strobe-dark`
+    - `.border-ink` reads `--df-strobe-edge`
+
+    Each falls back to its normal color when the variable isn't set.
+  - **The palettes** are per backing (constants in src/lib/awesome/strobe.ts):
+
+    | Palette | Colors | Leaves out |
+    |---|---|---|
+    | Paper | highlighter, acid, electric cyan, safety orange, paper | hot pink (hot-pink text sits on paper) and ultraviolet (too dark for ink) |
+    | Dark | ink, ultraviolet | hot pink and the light colors (paper and highlighter text sit on these) |
+    | Edge | any brand color | (only borders read it) |
+
+    Text stays readable at every step (FR-010).
+  - **Rate**: every color holds for at least `STROBE_HOLD_MS = 400`. That's at most 2.5 changes a
+    second on any element, under FR-011's limit of 3. A unit test checks the CSS against the
+    constant.
+  - **The sale stays steady**: prices (`PriceTag`), tier badges (`ShirtBadge`) and Add to Cart carry
+    `data-steady`. So do the dialogs, the per diem corner, the pop-ups, the countdowns and the
+    Extreme Awesomeness button.
+    - `[data-steady]` resets the strobe-only properties to `initial` for its subtree, so the
+      overrides fall back to the normal colors (FR-012).
 - **Rationale**: one animation on `:root` drives every color change. That's one style recalculation
-  per step, not hundreds of animations, and it's cheap enough for phones.
+  per step, cheap enough for phones. Strobing backgrounds and borders only, never the tokens text
+  reads, is what keeps text readable.
 - **Alternatives**:
-  - Per-element JavaScript color cycling was rejected: it's costly, and it fights React.
-  - Full-screen white flashes were rejected: the owner chose Q1 B, and they're the riskiest kind of
-    flash.
+  - Animating the theme tokens was rejected (analysis I1). For example, `--color-paper` is also the
+    text color of every hot-pink button, so that text would vanish.
+  - Per-element JavaScript was rejected: it's costly, and it fights React.
 
 ## R8. Text never sits on a pipe
 
@@ -179,14 +191,14 @@ packages: the strobe is CSS, and the pipes are a 2D canvas.
   - **The marker**: a `field-backing` utility, opt-in, goes on every text block that sits straight
     on the page field: page titles, intro lines, "Signed in as…", empty states, and so on.
     - On the plain paper field it's `bg-paper`, so it's invisible and changes nothing.
-    - Under the pipes it gains a little padding and an ink border, so it's a solid backing (FR-016).
-  - **The audit**: an e2e check walks every visible text node in `<main>` with the pipes on, on
-    every route. It fails when it reaches `<main>` without finding an ancestor with a solid
-    background, like 001's no-score audit.
+    - Under the black field it gains a little padding and an ink border, so it's a solid backing
+      (FR-016).
+  - **The audit**: an e2e check walks every visible text node in `<main>` with it on, on every route.
+    It fails when it reaches `<main>` without finding an ancestor with a solid background, like
+    001's no-score audit.
 - **Rationale**: opt-in keeps cards and buttons as they are. The audit catches any page added later.
-- **Alternatives**:
-  - One paper panel behind the whole column was rejected: at 360px it would hide the pipes
-    completely (US2 AC6).
+- **Alternatives**: one paper panel behind the whole column was rejected: at 360px it would hide the
+  pipes completely (US2 AC6).
 
 ## R9. Which pages get it
 
@@ -194,44 +206,45 @@ packages: the strobe is CSS, and the pipes are a 2D canvas.
   - **Every page under the root layout**, including 404 (`not-found`) and 500 (`error`), gets the
     button, the strobe and the pipes.
   - **Unchanged**: the 418 teapot page (a route handler with its own HTML) and the last-resort
-    `global-error` screen. Both stand alone, without the header. The spec's edge case was corrected
-    to match.
+    `global-error` screen. Both stand alone, without the header.
 
 ## R10. Testing and verification
 
 - **Unit**:
-  - the pipes engine (R6)
-  - the strobe rate constants (R7)
-  - the cookie value parsing and serialization, and the inline script's source (R2, R3)
-- **Integration**:
-  - migration `0009`
-  - the switches round-trip
-  - `saveExtremeAwesomenessCore`: guest versus signed in
-  - sign-up carries the guest's choice, and sign-in applies the account's choice
-  - sign-out keeps the cookie
-  - the island's props, for each switch combination
+  - the pipes engine, with its exact constants, and `stepsDue` (R6)
+  - the strobe constants and palettes, checked against the CSS (R7)
+  - the stored-value helpers and the inline script's source (R2, R3)
+  - `switchOffCss` (R4)
+- **Integration**: migration `0009`, and the switches round-trip.
 - **e2e** (desktop and phone, production build):
   - **US1**:
     - the button in the header, and off at first
-    - press it: `aria-pressed`, the attribute, and a card's background changing over time, at no
-      more than 3 changes in any second by sampling
-    - prices, badges and Add to Cart keep their computed colors
-    - a reload, a new tab, and a later visit (a new page in the same context) are all still on
-    - sign-up keeps it, and another context that signs in gets it
+    - **press it**:
+      - it's on at once
+      - a card's background changes, at no more than 3 changes in any second by sampling
+      - prices, badges and Add to Cart keep their computed colors
+      - no text gets harder to read than it was, or below 3:1 if it started higher, at any sampled
+        step. That includes hot-pink buttons like Check out (analysis I1).
+    - no shopper-visible "strobe" (analysis C4)
+    - **it stays**: reload, a new tab, another open tab following along, signing in and out
+    - a fresh browser context is off
     - no sideways scroll at 360px
   - **US2**:
-    - with it on, the canvas is present and drawing (pixels change over a second)
-    - it's behind everything: `elementFromPoint` at the cart and at Add to Cart returns the
-      control, not the canvas
+    - with it on, the canvas is present and drawing
+    - it pauses while hidden, and starts over on resize (analysis C2)
+    - it's behind everything: `elementFromPoint` returns the controls, never the canvas
     - the text-backing audit across routes (R8)
     - it stops when he turns it off
-  - **Load**: the e2e journeys never toggle owner switches (002 R7), and the toggle only changes
-    that test's own browser context. The pipes run only in the journeys that turn Extreme
-    Awesomeness on, so the rest of the suite carries no extra load.
+  - **Everything on** (analysis C1): one smoke journey with it on: browse, zoom, add, a roach-motel
+    lower in the cart, checkout by card, then the account.
+  - **Load**: the toggle changes only that test's own browser context (its local storage), and the
+    e2e journeys never toggle owner switches (002 R7). The pipes run only in the three journeys that
+    turn it on.
 - **React Strict Mode** (`next dev`), per 002's lesson:
   - one animation loop
   - one observer
   - the attribute re-applied after the dev remount
   - a clean console
-- **Lighthouse** (polish): mobile, with `df_awesome=1`, on `/`, `/shirts/geo-riot` and `/checkout`.
-  The budget is LCP ≤ 2.5 s and CLS ≤ 0.1, with TBT noted (SC-004, constitution VII).
+- **Lighthouse** (polish): mobile, with it on (`df-awesome=1` set before load), on `/`,
+  `/shirts/geo-riot` and `/checkout`. The budget is LCP ≤ 2.5 s and CLS ≤ 0.1, with TBT noted (SC-004,
+  constitution VII).

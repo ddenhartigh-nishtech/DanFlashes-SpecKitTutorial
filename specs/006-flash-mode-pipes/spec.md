@@ -164,7 +164,9 @@ without it.
   store first, and no layout jump.
 - **A slow phone**: the pipes slow down rather than make the page stutter. Scrolling and tapping come
   first.
-- **The error pages** (404, 500, 418): they get the button, the strobe and the pipes too. They're pages.
+- **The error pages** (404 and 500): they get the button, the strobe and the pipes too. They're pages.
+  The 418 teapot page and the last-resort crash screen stand alone, with no header, so they stay as
+  they are.
 - **Printing a page**: no pipes, and no strobe.
 - **All switches off**: the store looks and behaves exactly as it did after 005.
 

@@ -185,8 +185,45 @@
   display: none;
 }
 
+/*
+ * Text that sits straight on the page field (006 FR-016, research R8): invisible on the plain
+ * field, a solid backing once the pipes run behind it.
+ */
+@utility field-backing {
+  background-color: var(--df-strobe-paper, var(--color-paper));
+}
+
+:root[data-awesome="on"] .field-backing {
+  padding: 0.125rem 0.5rem;
+  border: 4px solid var(--df-strobe-edge, var(--color-ink));
+}
+
+/*
+ * The Pipes Background (006 US2, research R6): the old screensaver's black field, with the canvas
+ * growing on it. The canvas only exists while the owner's switch is on.
+ */
+.df-pipes {
+  display: none;
+}
+
+:root[data-awesome="on"] .df-pipes {
+  display: block;
+}
+
+:root[data-awesome="on"] body {
+  background-color: #000;
+}
+
 @media print {
   :root[data-awesome="on"] {
     animation: none;
+  }
+
+  :root[data-awesome="on"] .df-pipes {
+    display: none;
+  }
+
+  :root[data-awesome="on"] body {
+    background-color: var(--color-paper);
   }
 }

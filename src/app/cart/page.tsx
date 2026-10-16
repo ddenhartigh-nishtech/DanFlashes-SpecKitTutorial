@@ -28,7 +28,9 @@ export const metadata: Metadata = { title: copy.cart.title };
 export default function CartPage() {
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="font-display text-3xl leading-tight md:text-5xl">{copy.cart.heading}</h1>
+      <h1 className="font-display field-backing w-fit text-3xl leading-tight md:text-5xl">
+        {copy.cart.heading}
+      </h1>
       <Suspense
         fallback={<div className="loud-dots border-ink h-64 animate-pulse border-4 opacity-60" />}
       >

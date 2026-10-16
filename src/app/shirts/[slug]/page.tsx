@@ -56,10 +56,14 @@ async function ShirtDetail({ params }: Pick<PageProps<"/shirts/[slug]">, "params
             </span>
           </p>
         ) : null}
-        <h1 className="font-display text-3xl leading-tight md:text-5xl">{shirt.name}</h1>
+        <h1 className="font-display field-backing w-fit text-3xl leading-tight md:text-5xl">
+          {shirt.name}
+        </h1>
         <div className="flex flex-wrap items-center gap-3">
           <ShirtBadge tier={shirt.tier} showTagline />
-          <span className="text-sm font-semibold uppercase">{copy.styles[shirt.style]}</span>
+          <span className="field-backing text-sm font-semibold uppercase">
+            {copy.styles[shirt.style]}
+          </span>
         </div>
         {retired ? null : (
           <div className="flex flex-wrap items-center gap-3">

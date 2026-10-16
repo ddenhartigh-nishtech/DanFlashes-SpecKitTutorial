@@ -13,7 +13,9 @@ export const metadata: Metadata = { title: copy.nav.shirts };
 export default function ShirtsPage({ searchParams }: PageProps<"/shirts">) {
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="font-display text-3xl leading-tight md:text-5xl">{copy.listing.heading}</h1>
+      <h1 className="font-display field-backing w-fit text-3xl leading-tight md:text-5xl">
+        {copy.listing.heading}
+      </h1>
       <Suspense fallback={<ListingFallback />}>
         <Listing searchParams={searchParams} />
       </Suspense>

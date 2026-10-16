@@ -62,7 +62,7 @@ async function OrderContents({ params }: Pick<PageProps<"/orders/[id]">, "params
         </Link>
         <Link
           href="/account"
-          className="font-display border-ink inline-flex min-h-11 items-center border-4 px-4 uppercase"
+          className="font-display border-ink bg-paper inline-flex min-h-11 items-center border-4 px-4 uppercase"
         >
           {copy.order.viewAccount}
         </Link>

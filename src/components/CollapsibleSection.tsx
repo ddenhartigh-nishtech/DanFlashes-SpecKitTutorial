@@ -19,7 +19,7 @@ export function CollapsibleSection({
   return (
     <details id={id} open className="group scroll-mt-24">
       <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 [&::-webkit-details-marker]:hidden">
-        <h2 className="font-display text-2xl md:text-3xl">{heading}</h2>
+        <h2 className="font-display field-backing text-2xl md:text-3xl">{heading}</h2>
         <span
           data-testid="section-indicator"
           aria-hidden

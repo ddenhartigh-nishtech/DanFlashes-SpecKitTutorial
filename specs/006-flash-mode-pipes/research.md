@@ -108,7 +108,7 @@ packages: the strobe is CSS, and the pipes are a 2D canvas.
     | `MAX_PIPES` | 4 | pipes growing at once |
     | `CLEAR_AT` | 0.7 | how full the grid gets before it clears |
     | `TEAPOT_ODDS` | 1/60 | the share of joints that are teapots |
-    | `STEPS_PER_SECOND` | 25 | growth speed |
+    | `STEPS_PER_SECOND` | 6 | growth speed: a desktop fills in about 20 s (it was 25, which cleared every 5 s; tuned in T020) |
 
     - Each pipe moves one cell per step: straight, or turned 90°, only into free cells. A turn
       leaves a joint.

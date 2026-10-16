@@ -204,7 +204,7 @@ page:
 
 ### Tests for User Story 2 (write first, watch them fail)
 
-- [ ] T016 [P] [US2] Unit tests in a new tests/unit/pipes-engine.test.ts (research R6, exact
+- [X] T016 [P] [US2] Unit tests in a new tests/unit/pipes-engine.test.ts (research R6, exact
   constants per analysis A2):
   - **`gridFor(width, height)`**: `CELL_PX_PHONE = 28` below 768 px wide and `CELL_PX = 40`
     otherwise, with at least one cell each way.
@@ -221,9 +221,9 @@ page:
   - **Teapots**: over 6,000 seeded joints, the teapot share is within ±1.5 percentage points of
     `TEAPOT_ODDS = 1/60`.
   - **Determinism**: the same seed gives the same commands.
-  - **`stepsDue(elapsedMs, STEPS_PER_SECOND = 25, maxPerFrame)`**: time-based, and never more than
+  - **`stepsDue(elapsedMs, STEPS_PER_SECOND = 6, maxPerFrame)`** (25 at first; see T020): time-based, and never more than
     `maxPerFrame`, so a slow frame falls behind instead of bursting (FR-018).
-- [ ] T017 [P] [US2] e2e journey in a new tests/e2e/pipes.spec.ts (desktop and phone; it turns
+- [X] T017 [P] [US2] e2e journey in a new tests/e2e/pipes.spec.ts (desktop and phone; it turns
   Extreme Awesomeness on in its own context):
   - **The canvas**: `canvas[data-testid="pipes"]` is fixed, fills the viewport, has `z-index` below
     the page and `pointer-events: none`, and sits on a black field.
@@ -241,7 +241,8 @@ page:
     background.
   - **No sideways scroll** at 360 px.
   - **Turning it off**: the canvas is hidden and the field is plain again.
-- [ ] T018 [P] [US2] e2e smoke journey in a new tests/e2e/everything-on.spec.ts (desktop and phone,
+  - *Notes:* the canvas carries `data-generation` (incremented on every fresh start) so the resize check can see it start over. The audit waits for `networkidle`, so streamed parts are checked too, not their loading placeholders.
+- [X] T018 [P] [US2] e2e smoke journey in a new tests/e2e/everything-on.spec.ts (desktop and phone,
   `test.slow()`; analysis C1, SC-005). With Extreme Awesomeness on:
   - browse the listing
   - zoom and add Geo Riot
@@ -253,12 +254,12 @@ page:
 
 ### Implementation for User Story 2
 
-- [ ] T019 [US2] Create the pure pipes modules. T016 passes.
+- [X] T019 [US2] Create the pure pipes modules. T016 passes.
   - src/lib/pipes/engine.ts: `gridFor`, `createEngine`, the classic colors, and the constants
     `CELL_PX_PHONE`, `CELL_PX`, `MAX_PIPES`, `CLEAR_AT` and `TEAPOT_ODDS`
   - src/lib/pipes/loop.ts: `stepsDue` and `STEPS_PER_SECOND`
   - They're pure, with no DOM.
-- [ ] T020 [US2] Create src/components/PipesBackground.tsx (client, research R6), after T012:
+- [X] T020 [US2] Create src/components/PipesBackground.tsx (client, research R6), after T012:
   - **The canvas**: `<canvas data-testid="pipes">`, fixed, `inset: 0`, `z-index: -1`,
     `pointer-events: none`.
   - **Drawing**: tube segments with a linear gradient across them, radial-gradient ball joints, and
@@ -273,7 +274,8 @@ page:
     Pipes switch is on.
   - **In src/app/globals.css**: the black field and the visible canvas under
     `:root[data-awesome="on"]`, and neither in print.
-- [ ] T021 [US2] Text backings (FR-016, research R8):
+  - *Tuned after looking at it:* 25 steps a second cleared a desktop screen every ~5 s (a phone every ~2.5 s). `STEPS_PER_SECOND` is now 6, about 20 s to fill a desktop. Research R6 is updated to match.
+- [X] T021 [US2] Text backings (FR-016, research R8):
   - **The utility**: a `field-backing` utility in src/app/globals.css. It's `bg-paper` always, and
     gains padding and an ink border on the black field.
   - **Where it goes**: every loose text block on the page field:
@@ -284,6 +286,7 @@ page:
     - src/app/_data/auth-page.tsx, src/app/not-found.tsx and src/app/error.tsx
     - any component that renders text straight on the field
   - T017 and T018 pass.
+  - *Result:* the audit found 18 bare lines on 7 pages: page titles, the account's headings, balance and lines, "Checking out as…", the zoom hint, the style, "Pick your size", and two outline buttons. They now have `field-backing`, or `bg-paper` for the two buttons. All 11 routes pass on desktop and phone.
 
 **Checkpoint**: both stories work. Extreme Awesomeness strobes the store and grows the pipes, and each
 switch removes its own feature.

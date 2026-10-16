@@ -55,13 +55,13 @@ async function AccountContents() {
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="font-display text-3xl leading-tight md:text-5xl">
+        <h1 className="font-display field-backing w-fit text-3xl leading-tight md:text-5xl">
           {copy.account.heading(user.displayName ?? user.email)}
         </h1>
         <form action={signOutAction}>
           <button
             type="submit"
-            className="font-display border-ink min-h-11 border-4 px-4 uppercase"
+            className="font-display border-ink bg-paper min-h-11 border-4 px-4 uppercase"
           >
             {labelFor("signOut", settings.confirmshaming)}
           </button>
@@ -74,7 +74,7 @@ async function AccountContents() {
         className="mt-4 grid gap-6 md:grid-cols-[1fr_22rem] md:items-start"
       >
         <div className="flex flex-col gap-4">
-          <p className="font-display flex items-center gap-3 uppercase">
+          <p className="font-display field-backing flex w-fit items-center gap-3 uppercase">
             {copy.account.balance}
             <span data-testid="flash-balance">
               <PriceTag priceUsd={balanceUsd} size="lg" />
@@ -83,7 +83,7 @@ async function AccountContents() {
           {meter ? (
             <p
               data-testid="account-per-diem"
-              className="font-display flex flex-wrap items-center gap-3 uppercase"
+              className="font-display field-backing flex w-fit flex-wrap items-center gap-3 uppercase"
             >
               {copy.meter.label}
               {meter.drained ? (
@@ -93,13 +93,14 @@ async function AccountContents() {
               )}
             </p>
           ) : null}
-          <h3 className="font-display text-lg">{copy.account.history}</h3>
+          <h3 className="font-display field-backing w-fit text-lg">{copy.account.history}</h3>
           {entries.length === 0 ? (
             <p className="solid-backing p-3">{copy.account.noEntries}</p>
           ) : (
             <ul data-testid="flash-history" className="border-ink divide-ink divide-y-2 border-4">
               {entries.map((entry) => (
                 <li
+                  data-steady
                   key={entry.id}
                   data-testid="flash-entry"
                   className="bg-paper flex flex-wrap items-center justify-between gap-2 p-3"
@@ -140,7 +141,7 @@ async function AccountContents() {
         className="mt-4 grid gap-6 md:grid-cols-[1fr_22rem] md:items-start"
       >
         <div className="flex flex-col gap-4">
-          <p className="font-semibold">{copy.streams.intro}</p>
+          <p className="field-backing w-fit font-semibold">{copy.streams.intro}</p>
           <StreamList streams={streams} left={left} confirmshaming={settings.confirmshaming} />
         </div>
         <div className="border-ink bg-paper border-4 p-4 shadow-[6px_6px_0_var(--color-ink)]">
@@ -161,7 +162,9 @@ async function AccountContents() {
               <li key={order.id} data-testid="order" className="flex flex-col gap-2">
                 <p className="font-display flex flex-wrap gap-3 text-sm">
                   <span className="bg-ink text-highlighter px-2 py-0.5">{order.number}</span>
-                  <span>{copy.account.placedOn(dateFormat.format(new Date(order.createdAt)))}</span>
+                  <span className="field-backing">
+                    {copy.account.placedOn(dateFormat.format(new Date(order.createdAt)))}
+                  </span>
                   <span className="bg-highlighter px-2">{describePayment(order.payment)}</span>
                 </p>
                 <OrderSummary

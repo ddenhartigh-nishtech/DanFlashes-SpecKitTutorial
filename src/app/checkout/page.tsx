@@ -21,7 +21,9 @@ export const metadata: Metadata = { title: copy.checkout.title };
 export default function CheckoutPage() {
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="font-display text-3xl leading-tight md:text-5xl">{copy.checkout.heading}</h1>
+      <h1 className="font-display field-backing w-fit text-3xl leading-tight md:text-5xl">
+        {copy.checkout.heading}
+      </h1>
       <Suspense
         fallback={<div className="loud-dots border-ink h-64 animate-pulse border-4 opacity-60" />}
       >
@@ -52,7 +54,7 @@ async function CheckoutContents() {
           </div>
         ) : null}
         {user ? (
-          <p className="font-semibold">
+          <p className="field-backing w-fit font-semibold">
             {copy.checkout.signedInAs(user.displayName ?? user.email)}
           </p>
         ) : null}

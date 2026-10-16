@@ -172,7 +172,7 @@ export function ZoomViewer({ src, alt, placeholderSrc, overlay }: ZoomViewerProp
           {scale.toFixed(1)}×
         </span>
       </div>
-      <p className="text-sm font-semibold">{copy.product.zoomHint}</p>
+      <p className="field-backing w-fit text-sm font-semibold">{copy.product.zoomHint}</p>
     </div>
   );
 }

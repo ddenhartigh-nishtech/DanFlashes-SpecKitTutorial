@@ -21,7 +21,7 @@ export function TopUpForm({ presetsUsd }: { presetsUsd: Usd[] }) {
         <legend className="font-display mb-2 text-sm uppercase">{copy.account.topUpHeading}</legend>
         <div className="flex flex-wrap gap-2">
           {presetsUsd.map((preset, i) => (
-            <label key={preset} className="cursor-pointer">
+            <label data-steady key={preset} className="cursor-pointer">
               <input
                 type="radio"
                 name="amountUsd"

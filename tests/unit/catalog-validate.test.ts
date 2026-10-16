@@ -109,6 +109,8 @@ describe("validateSettings", () => {
     socialProof: true,
     preCheckedAddOns: true,
     roachMotel: true,
+    flashMode: true,
+    pipesBackground: true,
   };
 
   it("accepts the defaults and an https base URL", () => {
@@ -144,6 +146,10 @@ describe("validateSettings", () => {
     ["preCheckedAddOns", { preCheckedAddOns: undefined }],
     ["roachMotel", { roachMotel: 1 }],
     ["roachMotel", { roachMotel: undefined }],
+    ["flashMode", { flashMode: "on" }],
+    ["flashMode", { flashMode: undefined }],
+    ["pipesBackground", { pipesBackground: 1 }],
+    ["pipesBackground", { pipesBackground: undefined }],
   ])("flags an invalid %s", (field, patch) => {
     expect(fields(validateSettings({ ...settings, ...patch } as StoreSettings))).toContain(field);
   });

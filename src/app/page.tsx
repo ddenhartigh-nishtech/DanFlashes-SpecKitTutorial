@@ -25,7 +25,7 @@ export default function HomePage() {
       </section>
 
       <section aria-labelledby="featured-heading" className="flex flex-col gap-4">
-        <h2 id="featured-heading" className="font-display text-2xl md:text-4xl">
+        <h2 id="featured-heading" className="font-display field-backing w-fit text-2xl md:text-4xl">
           {copy.home.featuredHeading}
         </h2>
         <Suspense fallback={<FeaturedFallback />}>

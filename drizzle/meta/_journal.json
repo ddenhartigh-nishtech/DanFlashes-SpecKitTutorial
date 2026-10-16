@@ -64,6 +64,13 @@
       "when": 1792156304270,
       "tag": "0008_checkout_squeeze",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1792165104162,
+      "tag": "0009_awesome_switches",
+      "breakpoints": true
     }
   ]
 }

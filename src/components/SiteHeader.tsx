@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { loadPopCandidates } from "@/app/_data/urgency";
 import { CartCount } from "@/components/CartCount";
+import { ExtremeAwesomeness } from "@/components/ExtremeAwesomeness";
 import { PurchasePops } from "@/components/PurchasePops";
 import { copy } from "@/lib/copy";
 
@@ -18,7 +19,7 @@ const linkClass =
 export function SiteHeader() {
   return (
     <header className="loud-stripes border-ink sticky top-0 z-40 border-b-4">
-      <div className="bg-ink mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-2 md:my-3 md:rounded-sm md:shadow-[6px_6px_0_var(--color-hot-pink)]">
+      <div className="bg-ink mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2 md:my-3 md:rounded-sm md:shadow-[6px_6px_0_var(--color-hot-pink)]">
         <Link
           href="/"
           className="font-display text-highlighter min-h-11 content-center text-2xl md:text-3xl"
@@ -39,6 +40,8 @@ export function SiteHeader() {
             </ul>
           </nav>
 
+          {/* Extreme Awesomeness (006): beside the cart where there's room, its own row below. */}
+          <ExtremeAwesomeness className="hidden lg:block" />
           <CartLink />
 
           {/* Phones: a no-JS disclosure menu with 44px tap targets. */}
@@ -48,7 +51,8 @@ export function SiteHeader() {
             </summary>
             <nav
               aria-label={copy.nav.mainLabel}
-              className="border-highlighter bg-ink absolute right-0 mt-2 w-48 rounded-sm border-4 p-2"
+              // z-50: it opens over the Extreme Awesomeness row below the bar (006), never under it.
+              className="border-highlighter bg-ink absolute right-0 z-50 mt-2 w-48 rounded-sm border-4 p-2"
             >
               <ul>
                 {links.map((link) => (
@@ -62,6 +66,7 @@ export function SiteHeader() {
             </nav>
           </details>
         </div>
+        <ExtremeAwesomeness className="w-full lg:hidden" />
       </div>
       <Suspense fallback={null}>
         <Pops />

@@ -32,7 +32,9 @@ export function AddToCart({ slug, shame = null, placeholderUrl = null }: AddToCa
     <form action={action} onSubmit={onSubmit} className="flex flex-col gap-4">
       <input type="hidden" name="slug" value={slug} />
       <fieldset>
-        <legend className="font-display mb-2 text-sm uppercase">{copy.product.size}</legend>
+        <legend className="font-display field-backing mb-2 text-sm uppercase">
+          {copy.product.size}
+        </legend>
         <div className="flex flex-wrap gap-2">
           {SIZES.map((size) => (
             <label key={size} className="cursor-pointer">
@@ -46,6 +48,7 @@ export function AddToCart({ slug, shame = null, placeholderUrl = null }: AddToCa
       </fieldset>
 
       <button
+        data-steady
         type="submit"
         disabled={pending}
         className="font-display bg-hot-pink text-paper min-h-12 px-6 text-lg uppercase shadow-[4px_4px_0_var(--color-ink)] disabled:opacity-60"

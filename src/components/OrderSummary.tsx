@@ -62,7 +62,10 @@ export function OrderSummary(props: OrderSummaryProps) {
           </li>
         ))}
       </ul>
-      <dl className="border-ink grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 border-t-4 p-3 font-semibold">
+      <dl
+        data-steady
+        className="border-ink grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 border-t-4 p-3 font-semibold"
+      >
         <dt>{copy.cart.subtotal}</dt>
         <dd data-testid="subtotal" className="text-right tabular-nums">
           {formatUsd(props.subtotalUsd)}

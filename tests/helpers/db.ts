@@ -51,6 +51,8 @@ export function setSwitches(
       | "socialProof"
       | "preCheckedAddOns"
       | "roachMotel"
+      | "flashMode"
+      | "pipesBackground"
     >
   >,
 ): void {

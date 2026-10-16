@@ -30,6 +30,8 @@ export function getSettings(db: Db): StoreSettings {
     socialProof: row.socialProof,
     preCheckedAddOns: row.preCheckedAddOns,
     roachMotel: row.roachMotel,
+    flashMode: row.flashMode,
+    pipesBackground: row.pipesBackground,
   };
 }
 
@@ -57,6 +59,8 @@ export function saveSettings(db: Db, settings: StoreSettings): void {
     socialProof: settings.socialProof,
     preCheckedAddOns: settings.preCheckedAddOns,
     roachMotel: settings.roachMotel,
+    flashMode: settings.flashMode,
+    pipesBackground: settings.pipesBackground,
   };
   db.insert(storeSettings)
     .values({ id: 1, ...values })

@@ -72,6 +72,8 @@ const settingsSchema = z.object({
   socialProof: z.boolean(),
   preCheckedAddOns: z.boolean(),
   roachMotel: z.boolean(),
+  flashMode: z.boolean(),
+  pipesBackground: z.boolean(),
 });
 
 function toIssues(error: z.ZodError): Issue[] {

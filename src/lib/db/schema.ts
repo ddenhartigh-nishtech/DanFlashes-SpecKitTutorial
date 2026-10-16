@@ -148,6 +148,9 @@ export const storeSettings = sqliteTable(
     /** The checkout squeeze (005): one switch per tactic (constitution IV). */
     preCheckedAddOns: integer("pre_checked_add_ons", { mode: "boolean" }).notNull().default(true),
     roachMotel: integer("roach_motel", { mode: "boolean" }).notNull().default(true),
+    /** Extreme Awesomeness (006): what the shopper's toggle can turn on (constitution V). */
+    flashMode: integer("flash_mode", { mode: "boolean" }).notNull().default(true),
+    pipesBackground: integer("pipes_background", { mode: "boolean" }).notNull().default(true),
   },
   (t) => [
     check("store_settings_singleton", sql`${t.id} = 1`),

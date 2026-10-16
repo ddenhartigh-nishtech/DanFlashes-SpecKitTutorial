@@ -73,3 +73,16 @@ describe("store_settings checkout squeeze switches (005, migration 0008)", () =>
     ).toEqual({ pre_checked_add_ons: 0, roach_motel: 0 });
   });
 });
+
+describe("store_settings Flash Mode and Pipes switches (006, migration 0009)", () => {
+  it("default both on, and round-trip them off", () => {
+    const { db, sqlite } = createTestDb();
+    sqlite.prepare("INSERT INTO store_settings (id) VALUES (1)").run();
+    expect(getSettings(db)).toMatchObject({ flashMode: true, pipesBackground: true });
+    saveSettings(db, { ...getSettings(db), flashMode: false, pipesBackground: false });
+    expect(getSettings(db)).toMatchObject({ flashMode: false, pipesBackground: false });
+    expect(sqlite.prepare("SELECT flash_mode, pipes_background FROM store_settings").get()).toEqual(
+      { flash_mode: 0, pipes_background: 0 },
+    );
+  });
+});

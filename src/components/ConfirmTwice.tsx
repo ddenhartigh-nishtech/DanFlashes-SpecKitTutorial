@@ -78,6 +78,7 @@ export function ConfirmTwice({
     <div className="contents" onSubmitCapture={onSubmitCapture}>
       {children}
       <dialog
+        data-steady
         ref={dialog}
         data-testid={step > 0 ? "roach-motel" : undefined}
         onCancel={(event) => {

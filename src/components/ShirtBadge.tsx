@@ -9,7 +9,7 @@ export function ShirtBadge({
   showTagline?: boolean;
 }) {
   return (
-    <span className="inline-flex flex-col items-start gap-1">
+    <span data-steady className="inline-flex flex-col items-start gap-1">
       <span
         data-testid="tier-badge"
         className="font-display border-ink inline-block border-2 px-2 py-0.5 text-xs tracking-wide uppercase shadow-[3px_3px_0_var(--color-ink)]"

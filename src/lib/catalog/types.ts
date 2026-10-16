@@ -38,6 +38,10 @@ export interface StoreSettings {
   preCheckedAddOns: boolean;
   /** Roach-motel cart (constitution IV): any decrease asks "Are you sure?", then "sure sure?". */
   roachMotel: boolean;
+  /** Flash Mode (constitution V): the strobe that Extreme Awesomeness turns on. */
+  flashMode: boolean;
+  /** The Pipes Background (006): the screensaver behind every page while Extreme Awesomeness is on. */
+  pipesBackground: boolean;
 }
 
 /** An owner-defined band of complexity scores. The tier with minScore 0 is the BLAND tier. */

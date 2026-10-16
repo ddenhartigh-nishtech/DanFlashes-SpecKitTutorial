@@ -51,6 +51,17 @@ test.describe("US1 — pre-checked add-ons", () => {
     await expect(
       visible(page.getByRole("checkbox", { name: /Complexity Insurance/ })),
     ).toBeChecked();
+    // Nor a trip to the cart and back: Next keeps the page he left mounted, just hidden.
+    await visible(page.getByRole("checkbox", { name: /Complexity Insurance/ })).uncheck();
+    await expect(visible(page.getByTestId("total"))).toHaveText("$444.58");
+    await visible(page.getByTestId("cart-link")).click();
+    await expect(page).toHaveURL(/\/cart$/);
+    await visible(page.getByRole("link", { name: copy.cart.checkout, exact: true })).click();
+    await expect(page).toHaveURL(/\/checkout$/);
+    await expect(visible(page.getByTestId("total"))).toHaveText("$534.57");
+    await expect(
+      visible(page.getByRole("checkbox", { name: /Complexity Insurance/ })),
+    ).toBeChecked();
 
     // 5 (US1 AC4): untick the protection plan and split the rest: credit plus card, add-ons included.
     await visible(page.getByRole("checkbox", { name: /Pattern Protection Plan/ })).uncheck();

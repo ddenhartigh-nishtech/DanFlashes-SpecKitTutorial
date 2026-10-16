@@ -20,7 +20,8 @@ Requires Node 22+.
 npm install
 npm run db:reset        # creates data/danflashes.db: demo catalog + demo@danflashes.local / password123
                         # ($10,000 of Flash Credit and a $75.00 daily per diem).
-                        # After pulling, use db:migrate instead: it keeps your data.
+                        # After pulling, use db:migrate instead: it keeps your data. Then db:seed adds
+                        # anything new in the demo catalog (like the add-ons), skipping what exists.
 npm run dev             # http://localhost:3000
 ```
 
@@ -53,6 +54,9 @@ npm run catalog:audit   # checks the catalog: errors exit 1, warnings exit 0
   Cash in. Payments that came due are credited whenever his money is shown, exactly once each.
 - **Checkout splits the bill.** "Apply my Flash Credit" covers what it can. He confirms putting the
   rest on a card, and Remove puts the whole total back on the card.
+- **Add-ons** (`add_ons`) are owner data: a name, a pitch, a decline line, a flat price per order,
+  `active`, and `position`. Edit them in Studio. Retire one with `active = 0`, and never delete one:
+  past orders keep their own copy of what was bought (`order_add_ons`), at the price paid.
 - **Manipulation switches** (constitution IV). Each tactic is its own `store_settings` column: set it
   to `1` for on and `0` for off, then reload the page.
 
@@ -66,6 +70,8 @@ npm run catalog:audit   # checks the catalog: errors exit 1, warnings exit 0
   | `fake_scarcity` | on | Every shirt card, shirt page and cart line says "Only 1 left!" (bland shirts: "Plenty left. Nobody wants these."). Every add and quantity raise adds "Oh wait, we found another one!", and once he's bought a shirt it says "Just kidding, we actually found another one! One more left!" It never limits what he can buy. |
   | `countdown_timers` | on | One 10-minute clock per browser, down to the millisecond: "This price won't last." beside the price, and "Your shirts are reserved for" on the cart and checkout. At zero it quietly starts over. Nothing ever expires or changes price. |
   | `social_proof` | on | Shirt pages say how many people are looking (3–40, drifting; 0 for bland shirts) and which fake coworker just bought it. Fake purchase pop-ups come every 20–40 seconds on every page, each with an (x): bottom-right on wider screens, under the header on phones. No real shopper or order ever appears. |
+  | `pre_checked_add_ons` | on | Checkout arrives with every offered add-on already ticked (Pattern Protection Plan™, Complexity Insurance, …), every time it opens. The total includes them; he has to untick each one, and while confirmshaming is on Dan has a line for every untick. Each add-on bought is its own line on the order. |
+  | `roach_motel` | on | Adding takes one click. Removing a line, or lowering its quantity, asks "Are you sure?" and then "Are you sure sure?". The yes buttons follow confirmshaming. Removals the store makes itself never ask. |
 
 ## Scripts
 

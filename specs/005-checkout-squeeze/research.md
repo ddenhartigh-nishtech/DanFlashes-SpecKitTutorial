@@ -61,7 +61,9 @@ Components, SQLite via Drizzle, Vitest and Playwright). There are no new package
     `declineLine`, `priceUsd`, when the switch is on), the shirts' subtotal, and the confirmshaming
     switch.
   - **The form** (client) keeps a `ticked` set that starts as every add-on (Q3: nothing is
-    remembered, because a fresh page mounts a fresh form).
+    remembered). A reload mounts a fresh form. A trip to the cart and back doesn't, because Next
+    keeps the page he left mounted but hidden. So the form forgets his unticks in an effect
+    cleanup, which runs when the page is hidden (T024).
   - **The live total** is `orderTotals(…)` from the ticked prices. The split box (003) uses that live
     total.
   - **Decline lines**: an unticked add-on shows its `declineLine` only while confirmshaming is on.
@@ -69,9 +71,15 @@ Components, SQLite via Drizzle, Vitest and Playwright). There are no new package
   - **Display**: `OrderSummary` at checkout shows the lines, the subtotal, shipping and tax. The
     add-on rows and the **Total** (`data-testid="total"`) belong to the form, because they change as
     he ticks.
-  - **After a refusal**: `placeOrderAction` already refreshes the page on any failure. The form is
-    keyed by the add-on list's ids *and* prices (e.g. `1:49.99,2:89.99`), so a retired, added or
-    repriced add-on remounts it with everything ticked again (analysis I1).
+  - **After a refusal**: `placeOrderAction` already refreshes the page on any failure, and the form
+    takes the new list as props. A retired add-on drops out, and a repriced one shows its new price
+    in the total. His unticks stay, so the total he sees is the one Dan's message quotes.
+  - **Revised in T024** (supersedes analysis I1's key): the form was keyed by the add-on ids and
+    prices. On a reprice or retire, that key remounted the form and threw away `useActionState`,
+    so Dan's refusal message vanished. The form is also submitted by hand (`onSubmit` +
+    `startTransition`), like `ConnectStreamForm` (003). After a `<form action>`, React resets the
+    form even on a refusal, and that reset turned the controlled checkboxes back to ticked while the
+    total still left those add-ons out.
 - **Rationale**: the total has to react to clicks, so it lives in the client. The server still decides
   what's charged (R3).
 - **Alternatives**: remembering unticks in a cookie was rejected (the owner said Q3 A).

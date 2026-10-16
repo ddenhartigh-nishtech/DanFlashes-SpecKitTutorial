@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import { startTransition, useActionState, useEffect, useState, type FormEvent } from "react";
 import { placeOrderAction } from "@/actions/checkout";
 import type { ActionState } from "@/lib/actions/state";
 import { PriceTag } from "@/components/PriceTag";
@@ -22,7 +22,7 @@ interface CheckoutFormProps {
   checkoutToken: string;
   /** The shirts. The total adds the add-ons he keeps ticked (005 R4). */
   subtotalUsd: Usd;
-  /** Every offered add-on (005 US1): all ticked whenever the form mounts. Empty while it's off. */
+  /** Every offered add-on (005 US1): all ticked on every visit. Empty while it's off. */
   addOns: CheckoutAddOn[];
   /** Decline lines show only while confirmshaming is on (002). */
   confirmshaming: boolean;
@@ -48,6 +48,10 @@ export function CheckoutForm({
   const [applied, setApplied] = useState(false);
   // Everything starts ticked, every time (005 Q3): only what he unticks in this visit is left out.
   const [unticked, setUnticked] = useState<ReadonlySet<number>>(new Set());
+  // Next keeps the checkout he left mounted, just hidden, so leaving forgets his unticks. A refusal
+  // re-renders without leaving: Dan's message stays, and so do his choices, so the total he sees is
+  // the one Dan quotes. A retired add-on drops out, a repriced one shows its new price (005 R4).
+  useEffect(() => () => setUnticked(new Set()), []);
   const ticked = addOns.filter((a) => !unticked.has(a.id));
   const toggle = (id: number) =>
     setUnticked((prev) => {
@@ -86,8 +90,16 @@ export function CheckoutForm({
   const cardUsd = split ? split.cardUsd : expectedTotalUsd;
   const hasCredit = balanceUsd !== null && cmp(balanceUsd, ZERO) > 0;
 
+  // Submitted by hand rather than as a form action, which React resets even when refused: the
+  // add-on boxes would go back to ticked while the total still left them out.
+  const submit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    startTransition(() => action(form));
+  };
+
   return (
-    <form action={action} className="flex flex-col gap-4">
+    <form onSubmit={submit} className="flex flex-col gap-4">
       <input type="hidden" name="checkoutToken" value={checkoutToken} />
       <input type="hidden" name="expectedTotalUsd" value={expectedTotalUsd} />
       {ticked.map((a) => (

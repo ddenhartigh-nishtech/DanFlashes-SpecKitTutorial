@@ -66,8 +66,8 @@ async function CheckoutContents() {
       </div>
       <div className="border-ink bg-paper border-4 p-4 shadow-[6px_6px_0_var(--color-ink)]">
         <CheckoutForm
-          // Any change to the add-ons (retired, added, repriced) starts the form over, all ticked.
-          key={addOns.map((a) => `${a.id}:${a.priceUsd}`).join(",")}
+          // No key: a refusal re-renders this with the new prices, and a remount would wipe Dan's
+          // message about them. The form forgets unticks when he leaves instead (005 R4).
           checkoutToken={randomUUID()}
           subtotalUsd={view.subtotalUsd}
           addOns={addOns.map(({ id, name, pitch, declineLine, priceUsd }) => ({

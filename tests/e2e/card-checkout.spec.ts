@@ -31,6 +31,11 @@ test.describe("US3 — checkout gate, account, faux card", () => {
     await visible(page.getByRole("button", { name: /Place order/ })).click();
     await expect(visible(page.getByTestId("checkout-error"))).toContainText("doesn't check out");
     await expect(page).toHaveURL(/\/checkout$/);
+    // A refusal leaves the form as he had it: the add-ons he unticked stay unticked (005).
+    for (const box of await visible(page.getByTestId("add-on")).getByRole("checkbox").all()) {
+      await expect(box).not.toBeChecked();
+    }
+    await expect(visible(page.getByTestId("total"))).toHaveText(subtotal);
 
     // The test card works.
     await visible(page.getByLabel("Card number")).fill("4242 4242 4242 4242");

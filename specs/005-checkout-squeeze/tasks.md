@@ -145,8 +145,10 @@ card, Flash Credit, or a split. The confirmation and history show them.
   - src/components/CheckoutForm.tsx gets ticked checkboxes (`data-testid="add-on"`), each add-on's
     decline line while confirmshaming is on and it's unticked, the live Total
     (`data-testid="total"`) from `orderTotals`, the split from that total, hidden `addOnId` fields,
-    and a key on the add-on list's ids and prices, so any change remounts with everything ticked
-    (analysis I1)
+    and ~~a key on the add-on list's ids and prices, so any change remounts with everything ticked
+    (analysis I1)~~. *Revised in T024:* no key, because a remount after a refusal wiped Dan's
+    message. The form is submitted by hand, so React's reset can't re-tick the boxes behind the
+    total's back, and it forgets unticks when he leaves the page (research R4).
   - src/components/OrderSummary.tsx renders add-on rows (`data-testid="add-on-line"`) and has an
     optional Total row (off at checkout)
   - the copy goes in src/lib/copy.ts
@@ -224,19 +226,56 @@ sure?". Only the second yes submits, and backing out changes nothing. Adding and
 
 ## Phase 5: Polish & Cross-Cutting Concerns
 
-- [ ] T021 [P] Add `pre_checked_add_ons` and `roach_motel` to the switches table in README.md. Note
+- [X] T021 [P] Add `pre_checked_add_ons` and `roach_motel` to the switches table in README.md. Note
   the add-ons in "Managing the store" (Studio, flat per order, retire rather than delete), and
   `npm run db:seed` after migrating.
-- [ ] T022 Check against `next dev` under React Strict Mode: ConfirmTwice (one dialog, closes cleanly,
+- [X] T022 Check against `next dev` under React Strict Mode: ConfirmTwice (one dialog, closes cleanly,
   no duplicate submit) and CheckoutForm (ticks, live total, decline lines). The console must be
   clean (002 R7, known gap).
-- [ ] T023 Constitution VII spot check: run Lighthouse (mobile) on `/checkout` (with a line) and
+  - *Result:* clean. One dialog, Keep closes it. Lowering a quantity sends exactly one
+    server-action POST. Checkout: $879.18 → $789.19 → $879.18 with two Geo Riots. Re-run after the
+    T024 fix: a refused card keeps his untick, and a trip to the cart and back re-ticks it. No
+    console errors or warnings.
+- [X] T023 Constitution VII spot check: run Lighthouse (mobile) on `/checkout` (with a line) and
   `/cart` against a production build. Each must have CLS ≤ 0.1 and LCP ≤ 2.5 s (applied
   throttling), with TBT noted.
-- [ ] T024 Run quickstart.md scenarios 1–15 and note the results. Scenario 14 covers the off-switch wiring (analysis C3), and scenario 15 covers store-made removals (C2).
-- [ ] T025 Run `npm run format`, then `npm run verify`. It must be fully green, with line coverage
+  - *Result* (two runs each, signed in with Geo Riot in the cart): all within budget.
+
+    | Page | LCP | CLS | TBT |
+    |---|---|---|---|
+    | `/checkout` | 2.0 s / 1.9 s | 0.026 / 0.013 | 210 / 130 ms |
+    | `/cart` | 1.7 s / 1.7 s | 0 / 0 | 140 / 290 ms |
+- [X] T024 Run quickstart.md scenarios 1–15 and note the results. Scenario 14 covers the off-switch wiring (analysis C3), and scenario 15 covers store-made removals (C2).
+  - *Result:* 15/15, scripted through the UI against a production build on a scratch database,
+    with "Studio" edits made directly in SQLite.
+    - 1–3: four ticked at $534.57, −$89.99 with its decline line, all ticked again after a reload.
+    - 4: $484.58 by card, three add-on lines on the order and in history.
+    - 5: split $100.00 + $434.57.
+    - 6: refused with "Your new total is $544.57", and no order placed.
+    - 7: a rename leaves the past order at "Complexity Insurance $89.99".
+    - 8–13: the roach motel, with the dialog 322 px wide at 360 px.
+    - 14: switches off gives $344.61, and Remove works at once.
+    - 15: a retired shirt is pulled with the notice.
+  - *Two bugs found, fixed test-first:*
+    - The first run of scenario 6 lost Dan's message. The I1 key remounted the form after the
+      refresh.
+    - A trip to the cart and back kept his unticks. Next keeps the hidden page mounted.
+  - *A third, surfaced while checking the fix:* any refusal re-ticked the boxes on screen while the
+    total still left them out. React resets a `<form action>`.
+  - *The fix:* no key, a hand-submitted form, and unticks forgotten when he leaves (research R4).
+    - New e2e steps in add-ons.spec.ts (the trip back) and card-checkout.spec.ts (unticks survive
+      a refused card).
+    - A retire mid-checkout with one add-on unticked: refused at $414.59, the form shows
+      $414.59, and the untick stays.
+- [X] T025 Run `npm run format`, then `npm run verify`. It must be fully green, with line coverage
   ≥ 90% on `src/lib`, including `src/lib/checkout/totals.ts`, `src/lib/data/add-ons.ts`, and
   `src/lib/cart/roach-motel.ts`.
+  - *Result:* green.
+    - Unit and integration: 57 files and 562 tests.
+    - Coverage on `src/lib`: 94.87% lines, 93.13% branches. The three named modules are at 100%.
+    - e2e: 80 passed in 2.9 min.
+    - One earlier run lost 003's drain-them-all on the desktop project only, at sign-up: bcrypt
+      was still "One moment…" at 15 s. The re-run was clean.
 
 ---
 

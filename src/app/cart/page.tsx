@@ -5,6 +5,7 @@ import { removeCartItem } from "@/actions/cart";
 import { currentCartId } from "@/app/_data/request";
 import { loadStorefront } from "@/app/_data/storefront";
 import { CartQuantityForm } from "@/components/CartQuantityForm";
+import { ConfirmTwice } from "@/components/ConfirmTwice";
 import { Countdown } from "@/components/Countdown";
 import { PriceTag } from "@/components/PriceTag";
 import { ShirtBadge } from "@/components/ShirtBadge";
@@ -94,6 +95,8 @@ async function CartContents() {
               placeholderUrl={placeholderUrl}
               removeLabel={removeLabel}
               stock={stockOf(line.shirt)}
+              roachMotel={settings.roachMotel}
+              confirmshaming={settings.confirmshaming}
             />
           ))}
         </ul>
@@ -157,11 +160,16 @@ function CartLineRow({
   placeholderUrl,
   removeLabel,
   stock,
+  roachMotel,
+  confirmshaming,
 }: {
   line: CartLine;
   placeholderUrl: string | null;
   removeLabel: string;
   stock: Line | null;
+  /** The roach motel (005 US2): Remove and any lower quantity ask twice first. */
+  roachMotel: boolean;
+  confirmshaming: boolean;
 }) {
   const image = line.shirt.images[0];
   return (
@@ -193,17 +201,25 @@ function CartLineRow({
         </div>
         <StockLine line={stock} />
         <div className="flex flex-wrap items-end gap-3">
-          <CartQuantityForm slug={line.shirt.slug} size={line.size} quantity={line.quantity} />
-          <form action={removeCartItem}>
-            <input type="hidden" name="slug" value={line.shirt.slug} />
-            <input type="hidden" name="size" value={line.size} />
-            <button
-              type="submit"
-              className="font-display min-h-11 px-3 text-sm uppercase underline decoration-4 underline-offset-4"
-            >
-              {removeLabel}
-            </button>
-          </form>
+          <CartQuantityForm
+            slug={line.shirt.slug}
+            size={line.size}
+            quantity={line.quantity}
+            roachMotel={roachMotel}
+            lowerYesLabel={labelFor("lowerYes", confirmshaming)}
+          />
+          <ConfirmTwice enabled={roachMotel} yesLabel={labelFor("removeYes", confirmshaming)}>
+            <form action={removeCartItem}>
+              <input type="hidden" name="slug" value={line.shirt.slug} />
+              <input type="hidden" name="size" value={line.size} />
+              <button
+                type="submit"
+                className="font-display min-h-11 px-3 text-sm uppercase underline decoration-4 underline-offset-4"
+              >
+                {removeLabel}
+              </button>
+            </form>
+          </ConfirmTwice>
           <span className="ml-auto">
             <PriceTag priceUsd={line.lineTotalUsd} />
           </span>

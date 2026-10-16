@@ -178,12 +178,12 @@ sure?". Only the second yes submits, and backing out changes nothing. Adding and
 
 ### Tests for User Story 2 (write first; they must fail)
 
-- [ ] T016 [P] [US2] Unit tests in tests/unit/roach-motel.test.ts for `needsConfirm(change, on)`:
+- [X] T016 [P] [US2] Unit tests in tests/unit/roach-motel.test.ts for `needsConfirm(change, on)`:
   - a remove → true
   - an update to a lower quantity → true
   - an equal or higher quantity → false
   - anything with the switch off → false
-- [ ] T017 [P] [US2] e2e journey in tests/e2e/roach-motel.spec.ts (desktop and phone):
+- [X] T017 [P] [US2] e2e journey in tests/e2e/roach-motel.spec.ts (desktop and phone):
   - **Remove**:
     - Keep at the first question leaves the line
     - yes, then Keep at the second, leaves it
@@ -197,12 +197,12 @@ sure?". Only the second yes submits, and backing out changes nothing. Adding and
 
 ### Implementation for User Story 2
 
-- [ ] T018 [US2] Implement `needsConfirm` in src/lib/cart/roach-motel.ts (pure). Add to src/lib/copy.ts:
+- [X] T018 [US2] Implement `needsConfirm` in src/lib/cart/roach-motel.ts (pure). Add to src/lib/copy.ts:
   - `copy.roachMotel`: `first` "Are you sure?", `second` "Are you sure sure?", `keep`
   - `copy.shame.labels`: `removeYes` and `lowerYes`, each shamed and neutral
 
   T016 passes.
-- [ ] T019 [US2] Create src/components/ConfirmTwice.tsx (client):
+- [X] T019 [US2] Create src/components/ConfirmTwice.tsx (client):
   - it wraps a form; when `when(form)` is true it cancels the submit and opens a native `<dialog>`
     for the first question, then the second
   - only the second yes calls `requestSubmit`, letting that one submit through
@@ -214,7 +214,7 @@ sure?". Only the second yes submits, and backing out changes nothing. Adding and
   src/components/CartQuantityForm.tsx (on a decrease), behind `settings.roachMotel`. The cart
   audit's removals (001, 002) stay server-side and never pass through it (FR-012, analysis C2).
   T017 passes.
-- [ ] T020 [US2] Add `confirmTwice(page)` to tests/e2e/helpers.ts. Use it in the journeys that remove
+- [X] T020 [US2] Add `confirmTwice(page)` to tests/e2e/helpers.ts. Use it in the journeys that remove
   a line or lower a quantity: zoom-and-cart, confirmshaming, fake-scarcity, and any others the
   suite shows. The full e2e suite passes.
 

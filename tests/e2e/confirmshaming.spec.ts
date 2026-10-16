@@ -1,6 +1,6 @@
 import { expect } from "@playwright/test";
 import { copy } from "../../src/lib/copy";
-import { addShirt, signUp, test, uniqueEmail, visible } from "./helpers";
+import { addShirt, confirmTwice, signUp, test, uniqueEmail, visible } from "./helpers";
 
 const { labels } = copy.shame;
 
@@ -14,6 +14,7 @@ test.describe("US2 — confirmshaming", () => {
     });
     await expect(remove).toBeVisible();
     await remove.click();
+    await confirmTwice(page); // the roach motel (005)
     await expect(visible(page.getByTestId("empty-cart"))).toBeVisible();
   });
 

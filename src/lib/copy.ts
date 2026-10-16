@@ -295,6 +295,13 @@ export const copy = {
     dismiss: (trophy: string) => `Put away "${trophy}". Dan will still know.`,
     dismissed: "Put away. It still happened.",
   },
+  /** The roach-motel cart (005 US2): shirts check in, but they don't check out. */
+  roachMotel: {
+    first: "Are you sure?",
+    second: "Are you sure sure?",
+    keep: "Keep it",
+  },
+
   /** The urgency engine (004): every sales trick, played straight. */
   urgency: {
     scarce: "Only 1 left!",
@@ -363,6 +370,9 @@ export const copy = {
       remove: { shamed: "Remove (and lose your edge)", neutral: "Remove" },
       signOut: { shamed: "Sign out (go back to being normal)", neutral: "Sign out" },
       disconnect: { shamed: "Disconnect (and settle for less)", neutral: "Disconnect" },
+      /** The roach motel's yes buttons (005 US2). */
+      removeYes: { shamed: "Yes, remove it (and lose your edge)", neutral: "Yes, remove it" },
+      lowerYes: { shamed: "Yes, take it down (and lose your edge)", neutral: "Yes, lower it" },
     },
   },
 

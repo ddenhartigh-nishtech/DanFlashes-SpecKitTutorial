@@ -111,3 +111,12 @@ export async function buyByCard(page: Page, slug: string, size: string) {
   // Placing an order is the step that queues behind a busy machine: give it room.
   await expect(page).toHaveURL(/\/orders\/\d+$/, { timeout: 30_000 });
 }
+
+/** Get past the roach motel (005): yes to "Are you sure?", then yes to "Are you sure sure?". */
+export async function confirmTwice(page: Page) {
+  const dialog = visible(page.getByTestId("roach-motel"));
+  await expect(dialog).toContainText(copy.roachMotel.first);
+  await dialog.getByRole("button", { name: /^Yes/ }).click();
+  await expect(dialog).toContainText(copy.roachMotel.second);
+  await dialog.getByRole("button", { name: /^Yes/ }).click();
+}

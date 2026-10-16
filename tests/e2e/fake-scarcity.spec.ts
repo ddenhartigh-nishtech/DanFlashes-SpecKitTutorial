@@ -1,6 +1,6 @@
 import { expect } from "@playwright/test";
 import { copy } from "../../src/lib/copy";
-import { signUp, test, uniqueEmail, visible } from "./helpers";
+import { confirmTwice, signUp, test, uniqueEmail, visible } from "./helpers";
 
 const u = copy.urgency;
 
@@ -43,6 +43,8 @@ test.describe("US1 — fake scarcity", () => {
     await expect(line.getByRole("status")).toHaveText(u.foundAnother);
     await line.getByLabel(copy.cart.quantity).fill("2");
     await line.getByRole("button", { name: copy.cart.update }).click();
+    await confirmTwice(page); // lowering goes through the roach motel (005)
+    await expect(line.getByTestId("price")).toHaveText("$689.22");
     await expect(line.getByLabel(copy.cart.quantity)).toHaveValue("2");
     await expect(line.getByText(u.foundAnother)).toHaveCount(0);
     const overflow = await page.evaluate(

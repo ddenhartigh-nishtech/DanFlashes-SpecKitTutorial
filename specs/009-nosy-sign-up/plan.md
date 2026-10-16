@@ -56,7 +56,7 @@ Checked against constitution v4.0.0.
 
 | # | Principle / Rule | How 009 complies | Pre | Post |
 |---|---|---|---|---|
-| I | Built for the Dan Flashes Guy | Every label, the "Required" marks, Dan's line and the legend live in `copy.nosy`, in voice. The joke is never explained. | ✅ | ✅ |
+| I | Built for the Dan Flashes Guy | Every label, the "Required" marks, Dan's line and the legend live in `copy.nosy`, in voice. The joke is never explained. "** Actually required." reads as deadpan fine print, as on any real form, not as an explanation (owner's addition; analysis K1). | ✅ | ✅ |
 | II | Complexity Is the Price | Untouched. | ✅ | ✅ |
 | III | Relentlessly Vibrant | Untouched. | ✅ | ✅ |
 | IV | Shamelessly Manipulative | A data-grab played straight, behind its own switch, on by default. | ✅ | ✅ |

@@ -81,8 +81,9 @@ already sets the one rule that matters: nosy fields are props.
 - **A refused sign-up** (email taken, password too short): the real fields' errors show as before.
   Nothing from the nosy fields was sent. Dan's "you skipped a few" line only shows once per visit to
   the page. After it, every press goes straight to signing up.
-- **The browser's own checks** (an empty email, a password that's too short) come first, as they do
-  today. Dan's line comes only once the real fields are acceptable.
+- **The browser's own checks** (an empty or malformed email, an empty password) come first, as
+  they do today. Dan's line comes only once they pass. The store's own checks (a password that's too
+  short, an email that's taken) answer the next press, as before (analysis I1).
 - **The checkout gate** (sign-up on the way to checkout): the same nosy fields, and he still lands on
   checkout after signing up.
 - **Sign-in**: unchanged. Dan already knows who you are.

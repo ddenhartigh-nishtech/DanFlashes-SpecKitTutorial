@@ -89,9 +89,17 @@ blank gets one line from Dan, and then he's in.
 
     The SSN and mother's maiden name inputs compute `-webkit-text-security: disc`, and the others
     don't.
-  - **Leaving** (US1-6, FR-007): type into the nosy fields, go to `/about`, go Back: they're empty.
+  - **Leaving** (US1-6, FR-007), both ways:
+    - type into the nosy fields, `goto("/about")`, go Back: they're empty
+    - type again, click the header's About link (an in-app navigation, which keeps the page mounted
+      but hidden), go Back: they're empty (analysis C2)
   - **The nudge** (US1-2, FR-008): with the real fields filled and the nosy fields blank, the first
-    press shows `data-testid="nosy-skipped"` and stays on `/sign-up`. The second lands on `/account`.
+    press shows `data-testid="nosy-skipped"` and stays on `/sign-up`.
+    - **Once per visit** (analysis C4): with an email that's already taken, the next press goes
+      straight to the store, whose "taken" error shows, with no second line.
+    - **Then**: fix the email, and the next press lands on `/account`.
+  - **Sign-in is unchanged** (FR-011, analysis C3): `/sign-in` has no nosy fields, no `**` and no
+    legend.
   - **Nothing leaves** (US1-3, SC-001), in a fresh context: fill every nosy field with its sentinel and
     sign up on the first press, recording every request's URL, headers and body and every console
     message. Then:
@@ -131,6 +139,8 @@ blank gets one line from Dan, and then he's in.
       `<button type="submit" form="sign-up-form">`
     - the form's `onSubmit` asks `shouldNudge`. On a nudge it calls `preventDefault()` and shows
       `copy.nosy.skipped` (`data-testid="nosy-skipped"`) once.
+    - the "said it" flag resets when he leaves, in the same effect cleanup and on `pagehide` as the
+      fields, so "once" means once per visit (analysis U1)
   - **While off**: the markup is as before.
   - **Last**: run the whole e2e suite. T008 passes, and every journey that signs up passes through
     T009's helper.
@@ -152,8 +162,12 @@ in two presses at most.
 - [ ] T015 Constitution VII spot check: run Lighthouse (mobile, applied throttling, production build,
   the installed Chrome) on `/sign-up` with the switch on, twice. It must have LCP ≤ 2.5 s and
   CLS ≤ 0.1, with TBT noted (SC-005).
-- [ ] T016 Run quickstart.md scenarios 1–12 and note the results. Scenario 6 (autofill and password
-  managers) is a hand check in a real browser profile.
+- [ ] T016 Run quickstart.md scenarios 1–12 and note the results.
+  - **Scripted**, against a production build on a scratch `db:reset` copy, with "Studio" edits made
+    straight in SQLite, as in 005 and 006.
+  - **Scenario 12** (analysis C1, FR-002, SC-004): flip `nosy_sign_up` to 0. `/sign-up` must show no
+    nosy fields, no `**` and no legend, and sign up on the first press. Then flip it back.
+  - **Scenario 6** (autofill and password managers) stays a hand check in a real browser profile.
 - [ ] T017 Run `npm run format`, then `npm run verify`. It must be fully green, with line coverage
   ≥ 90% on `src/lib`, including src/lib/nosy/.
 

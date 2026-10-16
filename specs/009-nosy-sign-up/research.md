@@ -72,7 +72,8 @@ packages.
     `preventDefault()`, which stops React's form action. It then shows the line and remembers that
     it did.
   - **The next press** goes through.
-  - **Once per visit**: the "said it" flag resets with the fields when he leaves (R5).
+  - **Once per visit**: the "said it" flag resets with the fields when he leaves, in the same effect
+    cleanup and on `pagehide` (R5, analysis U1).
   - **The browser's own checks come first**: the submit event only fires once the real fields are
     valid, so Dan's line never pre-empts them.
 - **Rationale**: FR-008, and FR-010's emptiness-only exception.

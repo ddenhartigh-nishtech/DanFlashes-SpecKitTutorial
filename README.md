@@ -72,6 +72,13 @@ npm run catalog:audit   # checks the catalog: errors exit 1, warnings exit 0
   | `social_proof` | on | Shirt pages say how many people are looking (3–40, drifting; 0 for bland shirts) and which fake coworker just bought it. Fake purchase pop-ups come every 20–40 seconds on every page, each with an (x): bottom-right on wider screens, under the header on phones. No real shopper or order ever appears. |
   | `pre_checked_add_ons` | on | Checkout arrives with every offered add-on already ticked (Pattern Protection Plan™, Complexity Insurance, …), every time it opens. The total includes them; he has to untick each one, and while confirmshaming is on Dan has a line for every untick. Each add-on bought is its own line on the order. |
   | `roach_motel` | on | Adding takes one click. Removing a line, or lowering its quantity, asks "Are you sure?" and then "Are you sure sure?". The yes buttons follow confirmshaming. Removals the store makes itself never ask. |
+  | `flash_mode` | on | Flash Mode (constitution V), the strobe that the shopper's **Extreme Awesomeness** button turns on. Backgrounds and borders step through the store's colors, at most 2.5 times a second. Prices, tier badges, Add to Cart and money rows never change, and no text color ever does. |
+  | `pipes_background` | on | Also turned on by Extreme Awesomeness: the old office "3D Pipes" screensaver grows behind every page on a black field, in its classic colors, and clears when the screen fills. It never covers or blocks anything. |
+
+  **Extreme Awesomeness** is the shopper's own toggle, in the header of every page. It starts off,
+  applies at once, and his browser remembers it (every tab, later visits). It's never sent to the
+  store or saved to his account, so other browsers keep their own choice. With both switches above
+  off, the button is hidden. After pulling 006, run `npm run db:migrate` for the two switches (0009).
 
 ## Scripts
 

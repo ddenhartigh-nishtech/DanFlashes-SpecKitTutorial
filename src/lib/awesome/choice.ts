@@ -3,6 +3,8 @@
  * every tab and kept for later visits, never sent to the store or saved to an account.
  */
 
+import { STROBE_ATTR } from "@/lib/awesome/strobe";
+
 export const AWESOME_KEY = "df-awesome";
 export const AWESOME_ATTR = "data-awesome";
 
@@ -47,5 +49,6 @@ export function applyChoice(root: Root, on: boolean): void {
 export function firstPaintScript(): string {
   const key = JSON.stringify(AWESOME_KEY);
   const attr = JSON.stringify(AWESOME_ATTR);
-  return `try{if(localStorage.getItem(${key})==="1")document.documentElement.setAttribute(${attr},"on")}catch(e){}`;
+  const step = JSON.stringify(STROBE_ATTR);
+  return `try{if(localStorage.getItem(${key})==="1"){var r=document.documentElement;r.setAttribute(${attr},"on");r.setAttribute(${step},"0")}}catch(e){}`;
 }

@@ -40,6 +40,7 @@ export function PipesBackground() {
     let shown = false;
     let running = false;
     let frame = 0;
+    let timer: ReturnType<typeof setTimeout> | undefined;
     let last = 0;
     let carry = 0;
     let resizeTimer: ReturnType<typeof setTimeout> | undefined;
@@ -149,8 +150,14 @@ export function PipesBackground() {
       last = performance.now();
     };
 
+    // Wake about as often as there's a step to draw, not 60 times a second: a timer, then one frame.
+    const schedule = () => {
+      timer = setTimeout(() => {
+        frame = requestAnimationFrame(tick);
+      }, 1000 / STEPS_PER_SECOND);
+    };
     const tick = (now: number) => {
-      frame = requestAnimationFrame(tick);
+      if (!running) return;
       const { steps, leftoverMs } = stepsDue(
         now - last + carry,
         STEPS_PER_SECOND,
@@ -159,6 +166,7 @@ export function PipesBackground() {
       last = now;
       carry = leftoverMs;
       for (let i = 0; i < steps; i++) draw(engine.step());
+      schedule();
     };
 
     const start = () => {
@@ -166,10 +174,11 @@ export function PipesBackground() {
       running = true;
       last = performance.now();
       carry = 0;
-      frame = requestAnimationFrame(tick);
+      schedule();
     };
     const stop = () => {
       running = false;
+      clearTimeout(timer);
       cancelAnimationFrame(frame);
     };
 

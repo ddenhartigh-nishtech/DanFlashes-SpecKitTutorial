@@ -96,6 +96,7 @@ the sale.
     - the `df-strobe` animation (its duration divided by its step count) holds each color for at
       least `STROBE_HOLD_MS`
     - its keyframes set only `--df-strobe-*` properties, never a `--color-*` theme token
+  - *Revised in T024* (research R7): the strobe is no longer a CSS animation, so these now check the step rules `strobeCss()` and `fieldStrobeCss()` write. Those rules change only `background-color` and `border-color`, skip `[data-steady]`, and run in palette order. The test also checks that globals.css has no strobe animation.
 - [X] T009 [P] [US1] Unit tests in a new tests/unit/awesome-switches.test.ts (research R4):
   `switchOffCss(settings)` returns:
   - `""` while both switches are on
@@ -168,6 +169,7 @@ the sale.
     - `.solid-backing` reads `--df-strobe-dark`
     - `.border-ink` reads `--df-strobe-edge`
   - *Also steady* (FR-012, every price): the checkout add-on rows, the order summary's money list, the stream rows, the top-up presets and the ledger rows, which hold money outside `PriceTag` (and the hot-pink spend amounts).
+  - *Revised in T024* (research R7): the keyframes and variables are gone. `StrobeClock` (mounted by the island while Flash Mode is on) moves `data-strobe-step` every 400 ms, and `strobeCss()` in the layout's `<head>` recolors the strobing classes directly. The animation restyled the page every frame: 1.7–2.8 s of style work on the home page under Lighthouse, now 0.35 s.
 
     Each falls back to its normal color. No text color changes.
   - **Steady**: `[data-steady]` resets the `--df-strobe-*` properties to `initial` for its subtree.
@@ -295,22 +297,48 @@ switch removes its own feature.
 
 ## Phase 5: Polish & Cross-Cutting Concerns
 
-- [ ] T022 [P] README.md:
+- [X] T022 [P] README.md:
   - add `flash_mode` and `pipes_background` to the switches table
   - note "Extreme Awesomeness" in what shoppers see, and that each browser remembers its own choice
   - note `npm run db:migrate` for 0009
-- [ ] T023 Check against `next dev` under React Strict Mode (002 R7, known gap):
+- [X] T023 Check against `next dev` under React Strict Mode (002 R7, known gap):
   - one animation loop and one observer, even after toggling it ten times
   - the attribute re-applied after the dev remount
   - no hydration warnings
   - a clean console
-- [ ] T024 Constitution VII spot check: run Lighthouse (mobile, applied throttling, production build)
+  - *Result:* clean, under `next dev`.
+    - **Loop and observers**: one pipes loop, with three observers on `<html>` (the two button instances and the canvas). Both stayed the same after ten toggles.
+    - **The attribute** came back after the dev remount, and held through a client navigation.
+    - **The console** had no errors or warnings.
+    - **One fix came out of it**: the pipes loop woke 60 times a second to draw 6 steps. It now waits on a timer, then takes one frame per step, about 5.5 wake-ups a second.
+- [X] T024 Constitution VII spot check: run Lighthouse (mobile, applied throttling, production build)
   with `df-awesome=1` set before load on `/`, `/shirts/geo-riot` and `/checkout` (with a line), and
   with it off on `/` for comparison. Each must have LCP ≤ 2.5 s and CLS ≤ 0.1, with TBT noted
   (SC-004).
-- [ ] T025 Run quickstart.md scenarios 1–15 and note the results.
-- [ ] T026 Run `npm run format`, then `npm run verify`. It must be fully green, with line coverage
+  - *Result* (mobile, applied throttling, the installed Chrome, two runs each; the machine's benchmark index was 1300–2500): all within budget.
+
+    | Page | LCP | CLS | TBT |
+    |---|---|---|---|
+    | `/`, on | 1.6 / 1.7 s | 0 | 300 / 330 ms |
+    | `/`, off | 1.6 / 1.7 s | 0 | 350 / 310 ms |
+    | `/shirts/geo-riot`, on | 1.5 / 1.6 s | 0 | 450 / 460 ms |
+    | `/checkout` (with a line), on | 1.0 / 0.8 s | 0.054 | 720 / 400 ms |
+
+  - The first runs found the strobe's cost: as a CSS animation, it restyled the page every frame (2.3 s of style work on `/`, LCP up to 3.5 s). It's now a 400 ms clock with direct step rules, and style work on `/` is down to 0.35 s (off: 0.23 s). See T014 and research R7.
+- [X] T025 Run quickstart.md scenarios 1–15 and note the results.
+  - *Result:* 1–15 pass on a production build, with Studio edits made in SQLite.
+    - The e2e journeys cover 1–5 and 7–12 on desktop and phone.
+    - Scripted here:
+      - **6**: the bland-shirt dialog sits above the pipes and the strobe, and holds still.
+      - **13**: Flash Mode off leaves the pipes only, the Pipes off leaves the strobe only, and both off means no button and the plain store.
+      - **14**: a 404 gets everything, and `/teapot` (418) is unchanged.
+      - **15**: print has no pipes and no strobe.
+- [X] T026 Run `npm run format`, then `npm run verify`. It must be fully green, with line coverage
   ≥ 90% on `src/lib`, including src/lib/pipes/ and src/lib/awesome/.
+  - *Result:* green.
+    - Unit and integration: 62 files and 609 tests.
+    - Coverage on `src/lib`: 94.79% lines, 93.03% branches. src/lib/awesome/ is at 100%, and src/lib/pipes/ at 91.1% (the free-cell scan's fallback is the uncovered part).
+    - e2e: 90 passed in 4.3 min. Main had 80 in 2.4 min; the 10 new journeys sample the strobe and grow the pipes.
 
 ---
 

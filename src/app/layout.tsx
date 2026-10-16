@@ -6,6 +6,7 @@ import { DrainCorner } from "@/components/DrainCorner";
 import { InlineScript } from "@/components/InlineScript";
 import { SiteHeader } from "@/components/SiteHeader";
 import { firstPaintScript } from "@/lib/awesome/choice";
+import { strobeCss } from "@/lib/awesome/strobe";
 import { copy } from "@/lib/copy";
 import "./globals.css";
 
@@ -43,6 +44,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <head>
         <InlineScript html={firstPaintScript()} />
+        {/* The strobe's colors, one rule per step (006 R7). Static: the layout stays prerenderable. */}
+        <style dangerouslySetInnerHTML={{ __html: strobeCss() }} />
       </head>
       <body className="flex min-h-full flex-col">
         <SiteHeader />

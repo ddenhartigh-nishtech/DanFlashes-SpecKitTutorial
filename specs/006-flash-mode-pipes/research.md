@@ -144,23 +144,24 @@ packages: the strobe is CSS, and the pipes are a 2D canvas.
     background.
   - SVG or DOM pipes were rejected: thousands of nodes, and layout work on every step.
 
-## R7. The strobe: strobe-only variables on backgrounds and borders
+## R7. The strobe: a stepped clock that recolors backgrounds and borders
 
-- **Decision** (revised by analysis I1). The strobe never touches the theme's color tokens. Text in
-  paper or any brand color keeps its color, so the strobe can't make it match its button.
-  - **The clock**: one stepped keyframe animation, `df-strobe`, on
-    `:root[data-awesome="on"]`. It cycles a few strobe-only custom properties:
-    - `--df-strobe-paper`
-    - `--df-strobe-dark`
-    - `--df-strobe-edge`
-  - **What reads them**: override rules, under the same selector, applied only to backgrounds and
-    borders:
-    - `.bg-paper` and the page field read `--df-strobe-paper`
-    - `.solid-backing` (heading and label backings) reads `--df-strobe-dark`
-    - `.border-ink` reads `--df-strobe-edge`
-
-    Each falls back to its normal color when the variable isn't set.
-  - **The palettes** are per backing (constants in src/lib/awesome/strobe.ts):
+- **Decision** (revised by analysis I1, and again in T024 for speed):
+  - **Never text.** The strobe never changes a text color, and never touches a theme color token.
+    Text in paper or any brand color keeps its color, so the strobe can't make it match its button.
+  - **The clock**: `StrobeClock`, a client component with no UI, moves `data-strobe-step` on
+    `<html>` every `STROBE_HOLD_MS` (400 ms) while Extreme Awesomeness is on and the page can be
+    seen. The inline `<head>` script starts it at step 0 before first paint. The island mounts the
+    clock only while the owner's Flash Mode switch is on.
+  - **The colors**: `strobeCss()` (src/lib/awesome/strobe.ts) writes one set of rules per step,
+    straight onto the classes that strobe. They're rendered into the layout's `<head>` as a static
+    `<style>`:
+    - `.bg-paper` and `.field-backing` backgrounds step through the paper palette
+    - `.solid-backing` (heading and label backings) steps through the dark palette
+    - `.border-ink` and `.field-backing` borders step through the edge palette
+    - the page field (`body`) strobes only while the pipes aren't covering it
+      (`fieldStrobeCss()`, from the switch-off CSS)
+  - **The palettes** are per backing:
 
     | Palette | Colors | Leaves out |
     |---|---|---|
@@ -169,21 +170,27 @@ packages: the strobe is CSS, and the pipes are a 2D canvas.
     | Edge | any brand color | (only borders read it) |
 
     Text stays readable at every step (FR-010).
-  - **Rate**: every color holds for at least `STROBE_HOLD_MS = 400`. That's at most 2.5 changes a
-    second on any element, under FR-011's limit of 3. A unit test checks the CSS against the
-    constant.
-  - **The sale stays steady**: prices (`PriceTag`), tier badges (`ShirtBadge`) and Add to Cart carry
-    `data-steady`. So do the dialogs, the per diem corner, the pop-ups, the countdowns and the
-    Extreme Awesomeness button.
-    - `[data-steady]` resets the strobe-only properties to `initial` for its subtree, so the
-      overrides fall back to the normal colors (FR-012).
-- **Rationale**: one animation on `:root` drives every color change. That's one style recalculation
-  per step, cheap enough for phones. Strobing backgrounds and borders only, never the tokens text
-  reads, is what keeps text readable.
+  - **Rate**: every color holds for 400 ms, so at most 2.5 changes a second on any element, under
+    FR-011's limit of 3.
+  - **The sale stays steady**: every step rule skips `[data-steady]` and its subtree.
+    - That covers prices (`PriceTag`), tier badges (`ShirtBadge`) and Add to Cart.
+    - It also covers the dialogs, the per diem corner, the pop-ups, the countdowns, the money rows
+      and the Extreme Awesomeness button (FR-012).
+  - **Flash Mode switched off**: the switch-off CSS holds those classes at their normal colors.
+- **Rationale**: changing one attribute on `<html>` only restyles the elements whose rules depend on
+  it, 2.5 times a second. The two earlier designs were measured in T024, with Lighthouse at mobile
+  throttling:
+
+  | Design | Style and layout work, home page | Why |
+  |---|---|---|
+  | A stepped CSS animation of inherited variables on `:root` | about 2.3 s | Chrome ticks CSS animations every frame, so the whole page restyled 60 times a second |
+  | Per-element animations of registered variables | 8–17 s | more work every frame, not less |
+  | **This design** | 0.35 s | (off: 0.23 s) |
+
 - **Alternatives**:
   - Animating the theme tokens was rejected (analysis I1). For example, `--color-paper` is also the
     text color of every hot-pink button, so that text would vanish.
-  - Per-element JavaScript was rejected: it's costly, and it fights React.
+  - CSS animations were rejected after measuring, as above.
 
 ## R8. Text never sits on a pipe
 
@@ -212,7 +219,7 @@ packages: the strobe is CSS, and the pipes are a 2D canvas.
 
 - **Unit**:
   - the pipes engine, with its exact constants, and `stepsDue` (R6)
-  - the strobe constants and palettes, checked against the CSS (R7)
+  - the strobe constants and palettes, and the step rules `strobeCss()` and `fieldStrobeCss()` write (R7)
   - the stored-value helpers and the inline script's source (R2, R3)
   - `switchOffCss` (R4)
 - **Integration**: migration `0009`, and the switches round-trip.

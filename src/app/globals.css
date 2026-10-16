@@ -24,8 +24,7 @@
 
 @layer base {
   body {
-    /* The plain field. It strobes with Extreme Awesomeness (006), unless the pipes cover it. */
-    background-color: var(--df-strobe-paper, var(--color-paper));
+    background-color: var(--color-paper);
     color: var(--color-ink);
     font-family: var(--font-sans);
   }
@@ -75,61 +74,15 @@
  * Extreme Awesomeness (006): everything keys off data-awesome="on" on <html>, which the inline
  * <head> script sets before first paint (research R3).
  *
- * Flash Mode, the strobe (research R7): one stepped clock on :root cycles strobe-only variables that
- * backgrounds and borders read. No text color ever changes, so no text can end up the color of its
- * own backing. Each color holds 400 ms (STROBE_HOLD_MS): at most 2.5 changes a second (FR-011).
- * Palettes and order: src/lib/awesome/strobe.ts, held to this CSS by a unit test.
+ * Flash Mode, the strobe (research R7): StrobeClock moves data-strobe-step on <html> every 400 ms
+ * (STROBE_HOLD_MS), and the step rules from strobeCss() (in the layout's <head>) recolor the
+ * backgrounds, backings and borders that strobe, everywhere outside [data-steady] (FR-012). No text
+ * color ever changes, so no text can end up the color of its own backing. At most 2.5 changes a
+ * second (FR-011).
+ *
+ * Not a CSS animation, and not inherited variables, on purpose: the first ticked every frame and the
+ * second restyled the whole page at every step, seconds of style work under Lighthouse (T024).
  */
-@keyframes df-strobe {
-  0% {
-    --df-strobe-paper: var(--color-highlighter);
-    --df-strobe-dark: var(--color-ink);
-    --df-strobe-edge: var(--color-hot-pink);
-  }
-  20% {
-    --df-strobe-paper: var(--color-acid);
-    --df-strobe-dark: var(--color-ultraviolet);
-    --df-strobe-edge: var(--color-electric-cyan);
-  }
-  40% {
-    --df-strobe-paper: var(--color-electric-cyan);
-    --df-strobe-dark: var(--color-ink);
-    --df-strobe-edge: var(--color-highlighter);
-  }
-  60% {
-    --df-strobe-paper: var(--color-safety-orange);
-    --df-strobe-dark: var(--color-ultraviolet);
-    --df-strobe-edge: var(--color-ultraviolet);
-  }
-  80% {
-    --df-strobe-paper: var(--color-paper);
-    --df-strobe-dark: var(--color-ink);
-    --df-strobe-edge: var(--color-acid);
-  }
-}
-
-:root[data-awesome="on"] {
-  animation: df-strobe 2000ms step-end infinite;
-}
-
-:root[data-awesome="on"] .bg-paper {
-  background-color: var(--df-strobe-paper, var(--color-paper));
-}
-
-:root[data-awesome="on"] .solid-backing {
-  background-color: var(--df-strobe-dark, var(--color-ink));
-}
-
-:root[data-awesome="on"] .border-ink {
-  border-color: var(--df-strobe-edge, var(--color-ink));
-}
-
-/* The sale, the dialogs, the corner, the pop-ups, the clocks: they never strobe (FR-012). */
-[data-steady] {
-  --df-strobe-paper: initial;
-  --df-strobe-dark: initial;
-  --df-strobe-edge: initial;
-}
 
 /*
  * The most exciting button on the site (FR-007): a rainbow frame that never stops chasing. It hops
@@ -190,12 +143,12 @@
  * field, a solid backing once the pipes run behind it.
  */
 @utility field-backing {
-  background-color: var(--df-strobe-paper, var(--color-paper));
+  background-color: var(--color-paper);
 }
 
 :root[data-awesome="on"] .field-backing {
   padding: 0.125rem 0.5rem;
-  border: 4px solid var(--df-strobe-edge, var(--color-ink));
+  border: 4px solid var(--color-ink);
 }
 
 /*

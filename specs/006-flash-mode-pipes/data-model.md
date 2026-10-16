@@ -33,6 +33,7 @@ about the shopper is stored by the store.
 |---|---|---|
 | `data-awesome="on"` on `<html>` | the inline script (first paint), the button | He has Extreme Awesomeness on. The strobe and the black field show under `:root[data-awesome="on"]`. |
 | the switch-off `<style>` | the layout island, from `switchOffCss(settings)` | Undoes whichever feature the owner has off (research R4). It's absent while both are on. |
+| `data-strobe-step="0"…"4"` on `<html>` | the inline script (step 0), `StrobeClock` | The strobe's current step: `strobeCss()` maps it to colors (research R7). |
 | `data-steady` on an element | markup | Its subtree never strobes (research R7). |
 
 ## The pipes engine (in memory only)

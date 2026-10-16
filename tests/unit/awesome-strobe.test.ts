@@ -4,28 +4,35 @@ import { describe, expect, it } from "vitest";
 import {
   DARK_PALETTE,
   EDGE_PALETTE,
+  fieldStrobeCss,
+  nextStep,
   PAPER_PALETTE,
+  STROBE_ATTR,
   STROBE_HOLD_MS,
-  STROBE_VARS,
+  STROBE_STEPS,
+  strobeCss,
 } from "@/lib/awesome/strobe";
 
-const css = readFileSync(join(process.cwd(), "src/app/globals.css"), "utf8");
+const globals = readFileSync(join(process.cwd(), "src/app/globals.css"), "utf8");
 
-/** The df-strobe keyframes: each stop's offset and the properties it sets. */
-function keyframes() {
-  const block = /@keyframes df-strobe\s*\{([\s\S]*?)\n\}/.exec(css)?.[1];
-  if (!block) throw new Error("no @keyframes df-strobe in globals.css");
-  return [...block.matchAll(/([\d.]+)%\s*\{([^}]*)\}/g)].map(([, offset, body]) => ({
-    offset: Number(offset),
-    props: Object.fromEntries(
-      body
-        .split(";")
-        .map((d) => d.trim())
-        .filter(Boolean)
-        .map((d) => d.split(/:\s*/) as [string, string]),
-    ),
-  }));
+type Rule = { step: number; selector: string; property: string; color: string };
+
+/** Every rule in a strobe stylesheet: which step, what it targets, and the color it sets. */
+function rules(css: string): Rule[] {
+  return [...css.matchAll(/([^{}]+)\{([^}]*)\}/g)].map(([, selector, body]) => {
+    const [property, value] = body.split(/:\s*/);
+    return {
+      step: Number(/\[data-strobe-step="(\d+)"\]/.exec(selector)?.[1]),
+      selector: selector.trim(),
+      property: property.trim(),
+      color: /var\(--color-([a-z-]+)\)/.exec(value)?.[1] ?? value,
+    };
+  });
 }
+const sequence = (all: Rule[], target: string) =>
+  all.filter((r) => r.selector.includes(target)).map((r) => r.color);
+const cycle = (palette: readonly string[]) =>
+  [...Array(STROBE_STEPS).keys()].map((i) => palette[i % palette.length]);
 
 describe("the strobe (006 R7)", () => {
   it("holds every color for at least 400 ms: never more than 3 changes a second (FR-011)", () => {
@@ -40,39 +47,44 @@ describe("the strobe (006 R7)", () => {
     expect(EDGE_PALETTE.length).toBeGreaterThanOrEqual(3);
   });
 
-  it("is one stepped animation whose stops each last at least STROBE_HOLD_MS", () => {
-    const decl = /animation:\s*df-strobe\s+(\d+)ms\s+step-end\s+infinite/.exec(css);
-    expect(decl, "animation: df-strobe <ms> step-end infinite").not.toBeNull();
-    const stops = keyframes().filter((k) => k.offset < 100);
-    const durationMs = Number(decl![1]);
-    for (let i = 0; i < stops.length; i++) {
-      const next = i + 1 < stops.length ? stops[i + 1].offset : 100;
-      expect(((next - stops[i].offset) / 100) * durationMs).toBeGreaterThanOrEqual(STROBE_HOLD_MS);
-    }
+  it("steps through STROBE_STEPS steps, in order, and wraps", () => {
+    expect(STROBE_ATTR).toBe("data-strobe-step");
+    expect(nextStep(0)).toBe(1);
+    expect(nextStep(STROBE_STEPS - 1)).toBe(0);
+    expect([...new Set(rules(strobeCss()).map((r) => r.step))]).toEqual([
+      ...Array(STROBE_STEPS).keys(),
+    ]);
   });
 
-  it("the button's rainbow hops no faster than the strobe, never per frame (FR-011)", () => {
-    const decl = /animation:\s*df-awesome-slide\s+(\d+)ms\s+steps\((\d+)\)\s+infinite/.exec(css);
-    expect(decl, "animation: df-awesome-slide <ms> steps(<n>) infinite").not.toBeNull();
-    expect(Number(decl![1]) / Number(decl![2])).toBeGreaterThanOrEqual(STROBE_HOLD_MS);
+  it("steps backgrounds, backings and borders through their palettes, in order", () => {
+    const all = rules(strobeCss());
+    expect(sequence(all, ".bg-paper")).toEqual(cycle(PAPER_PALETTE));
+    expect(sequence(all, ".solid-backing")).toEqual(cycle(DARK_PALETTE));
+    expect(sequence(all, ".border-ink")).toEqual(cycle(EDGE_PALETTE));
+    expect(sequence(rules(fieldStrobeCss()), "body")).toEqual(cycle(PAPER_PALETTE));
   });
 
-  it("only ever sets the strobe's own variables, never a theme color token", () => {
-    for (const { props } of keyframes()) {
-      for (const name of Object.keys(props)) {
-        expect(STROBE_VARS).toContain(name);
-        expect(name).not.toMatch(/^--color-/);
+  it("only changes backgrounds and borders, never a text color, and never the steady parts", () => {
+    for (const rule of [...rules(strobeCss()), ...rules(fieldStrobeCss())]) {
+      expect(["background-color", "border-color"]).toContain(rule.property);
+      expect(rule.selector).toContain(':root[data-awesome="on"][data-strobe-step=');
+      if (!rule.selector.endsWith("body")) {
+        expect(rule.selector).toContain(":not([data-steady],[data-steady] *)");
       }
     }
   });
 
-  it("steps each variable through its palette, in order", () => {
-    const stops = keyframes().filter((k) => k.offset < 100);
-    const sequence = (variable: string) =>
-      stops.map((s) => /var\(--color-([a-z-]+)\)/.exec(s.props[variable] ?? "")?.[1]);
-    const cycle = (palette: readonly string[]) => stops.map((_, i) => palette[i % palette.length]);
-    expect(sequence("--df-strobe-paper")).toEqual(cycle(PAPER_PALETTE));
-    expect(sequence("--df-strobe-dark")).toEqual(cycle(DARK_PALETTE));
-    expect(sequence("--df-strobe-edge")).toEqual(cycle(EDGE_PALETTE));
+  it("never runs as a CSS animation, and never through inherited variables: both restyled the whole page (T024)", () => {
+    expect(globals).not.toMatch(/@keyframes df-strobe/);
+    expect(globals).not.toMatch(/animation:\s*df-strobe/);
+    expect(strobeCss()).not.toMatch(/--df-strobe/);
+  });
+
+  it("the button's rainbow hops no faster than the strobe, never per frame (FR-011)", () => {
+    const decl = /animation:\s*df-awesome-slide\s+(\d+)ms\s+steps\((\d+)\)\s+infinite/.exec(
+      globals,
+    );
+    expect(decl, "animation: df-awesome-slide <ms> steps(<n>) infinite").not.toBeNull();
+    expect(Number(decl![1]) / Number(decl![2])).toBeGreaterThanOrEqual(STROBE_HOLD_MS);
   });
 });

@@ -1,3 +1,4 @@
+import { fieldStrobeCss } from "@/lib/awesome/strobe";
 import type { StoreSettings } from "@/lib/catalog/types";
 
 const ON = ':root[data-awesome="on"]';
@@ -11,10 +12,20 @@ export function switchOffCss(
   settings: Pick<StoreSettings, "flashMode" | "pipesBackground">,
 ): string {
   const rules: string[] = [];
-  if (!settings.flashMode) rules.push(`${ON}{animation:none!important}`);
-  if (!settings.pipesBackground) {
+  if (!settings.flashMode) {
+    // The <head> script still sets the first step: hold every strobing color at its normal value.
     rules.push(
-      `${ON} body{background-color:var(--df-strobe-paper, var(--color-paper))!important}`,
+      `${ON} :is(.bg-paper,.field-backing){background-color:var(--color-paper)!important}`,
+      `${ON} .solid-backing{background-color:var(--color-ink)!important}`,
+      `${ON} :is(.border-ink,.field-backing){border-color:var(--color-ink)!important}`,
+    );
+  }
+  if (!settings.pipesBackground) {
+    // The plain field comes back, and strobes too while Flash Mode is on.
+    rules.push(
+      settings.flashMode
+        ? fieldStrobeCss()
+        : `${ON} body{background-color:var(--color-paper)!important}`,
       `${ON} [data-testid="pipes"]{display:none!important}`,
       `${ON} .field-backing{padding:0!important;border:0!important}`,
     );

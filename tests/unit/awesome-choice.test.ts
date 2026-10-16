@@ -91,7 +91,10 @@ describe("the stored choice (006 R2)", () => {
 
 describe("the first-paint script (006 R3)", () => {
   it("turns it on before first paint only when the browser has it on", () => {
-    expect(runScript(fakeStorage({ [AWESOME_KEY]: "1" })).get("data-awesome")).toBe("on");
+    const on = runScript(fakeStorage({ [AWESOME_KEY]: "1" }));
+    expect(on.get("data-awesome")).toBe("on");
+    expect(on.get("data-strobe-step")).toBe("0"); // the strobe's first color, from the first frame
+    expect(runScript(fakeStorage({ [AWESOME_KEY]: "0" })).has("data-strobe-step")).toBe(false);
     expect(runScript(fakeStorage({ [AWESOME_KEY]: "0" })).has("data-awesome")).toBe(false);
     expect(runScript(fakeStorage({ other: "1" })).has("data-awesome")).toBe(false);
   });

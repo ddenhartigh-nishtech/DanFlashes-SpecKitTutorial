@@ -9,9 +9,10 @@
 One shopper toggle, **Extreme Awesomeness**, in the header of every page. It turns on two features,
 each behind its own owner switch in `store_settings` (migration 0009, both on by default).
 
-1. **Flash Mode (the strobe).** It's CSS only. A stepped animation on `:root` cycles strobe-only
-   variables that page backgrounds and borders read, holding each color for at least 400 ms (at most
-   2.5 changes a second).
+1. **Flash Mode (the strobe).** A small clock moves a step attribute on `<html>` every 400 ms, and
+   generated step rules recolor the backgrounds, backings and borders that strobe (at most 2.5
+   changes a second). It was first a CSS animation on `:root`; T024's Lighthouse run showed that
+   restyling the page every frame (research R7).
    - Text colors never change.
    - Prices, tier badges, Add to Cart, the dialogs, the corner, the pop-ups and the countdowns are
      marked `data-steady` and stay as they are.
@@ -69,7 +70,7 @@ Checked against constitution v4.0.0.
 | IV | Shamelessly Manipulative | Not a tactic. It follows the same pattern: each feature has its own switch, on by default. | ✅ | ✅ |
 | V | Maximum Visual Assault | This is the principle's own MUST. **Flash Mode** sits behind a toggle that starts off, and the toggle is the most exciting button on the site (R5). **The sale still closes**: prices, badges and Add to Cart are `data-steady` (R7). **Loud on every screen**: from 360px, with e2e checking for no sideways scroll. "It starts off" is read as off until he first turns it on (spec Assumptions, owner). That wording is a candidate for the next batch of constitution amendments (analysis K1); there's no change now. | ✅ | ✅ |
 | VI | Fully Tested | Not a money path, but pure logic is test-first: the pipes engine, the strobe constants and palettes, the stored-value helpers, and `switchOffCss`. There are no new Server Actions. Each story has an e2e journey, plus one everything-on smoke journey. `src/lib` stays ≥ 90%. | ✅ | ✅ |
-| VII | Fast | The strobe is one `:root` animation. The pipes are incremental canvas draws, capped per frame and paused when hidden. Lighthouse is re-checked with it on in polish (R10). | ✅ | ✅ |
+| VII | Fast | The strobe restyles only what strobes, 2.5 times a second (measured in T024, research R7). The pipes are incremental canvas draws, capped per frame and paused when hidden. Lighthouse is re-checked with it on in polish (R10). | ✅ | ✅ |
 | VIII | Simple Code | No packages, no actions, no new tables. One pure engine, one canvas component, one toggle, one island, and CSS. One deliberate inline script (Complexity Tracking). | ✅ | ✅ |
 | C | Commerce constraints | Untouched: no price, total, ledger or card path changes. His choice never leaves his browser. | ✅ | ✅ |
 | W | Workflow | Feature branch; spec → clarify → plan → tasks → analyze → implement → converge; merge by PR. Analyze ran and was remediated. | ✅ | ✅ |
@@ -101,12 +102,14 @@ src/
 │   └── (pages)                       # field-backing on loose text
 ├── components/
 │   ├── ExtremeAwesomeness.tsx        # new (client): the header toggle
+│   ├── StrobeClock.tsx               # new (client): moves the strobe's step every 400 ms
+│   ├── InlineScript.tsx              # new (client): the first-paint script, without a React warning
 │   ├── PipesBackground.tsx           # new (client): the canvas
 │   ├── SiteHeader.tsx                # mounts the toggle beside the cart
 │   └── PriceTag, ShirtBadge, AddToCart, dialogs, DrainCorner, PurchasePops, Countdown  # data-steady
 └── lib/
     ├── awesome/choice.ts             # new (pure): the storage key, parse/serialize, the inline script source
-    ├── awesome/strobe.ts             # new (pure): STROBE_HOLD_MS and the per-backing palettes
+    ├── awesome/strobe.ts             # new (pure): STROBE_HOLD_MS, the palettes, strobeCss/fieldStrobeCss
     ├── awesome/switches.ts           # new (pure): switchOffCss(settings)
     ├── pipes/engine.ts, pipes/loop.ts   # new (pure): the seeded growth engine, stepsDue
     ├── data/settings.ts, db/schema.ts, catalog/types.ts, catalog/validate.ts   # two switches

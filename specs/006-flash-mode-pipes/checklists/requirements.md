@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [ ] No [NEEDS CLARIFICATION] markers remain
+- [x] No [NEEDS CLARIFICATION] markers remain
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic (no implementation details)
@@ -31,11 +31,8 @@
 
 ## Notes
 
-- Three open questions remain, on purpose:
-  - FR-009: what flashes
-  - FR-012: how long Flash Mode stays on
-  - FR-013: when the pipes start
-- They go to the owner before `/speckit-clarify` or `/speckit-plan`.
+- The owner resolved Q1–Q3 on 2026-10-16 (spec, Clarifications): everything except the sale strobes;
+  Flash Mode lasts for the visit; the pipes always run. 16/16 items pass.
 - FR-010 caps flashing at 3 a second. That is a safety limit (the usual threshold for flashing
   content), not a style choice, so it isn't one of the questions.
 - Reduced-motion handling is deliberately out (Assumptions), per the owner's demo-site priorities.

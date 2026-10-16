@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-16
 
-**Status**: Draft (3 open questions)
+**Status**: Draft (Q1–Q3 resolved 2026-10-16)
 
 **Input**: User description: "Flash Mode & Pipes Background (ROADMAP 006). Two visual-assault features from constitution V, each its own named feature with its own owner on/off switch, on by default: (1) Flash Mode: the strobe/flash mode constitution V requires. It sits behind a shopper toggle that starts off, and the button that turns it on must be the most exciting button on the site. While it's on, the site strobes and flashes, but the price, the tier badge and Add to Cart stay readable (constitution V, "the sale still closes"). (2) Pipes Background: an animated Windows "3D Pipes" screensaver as the page background in place of the plain field, with pipes growing, turning at elbow joints and filling the screen, then starting over. Both work from a 360px phone up, never cover or block the header, prices, the cart, checkout, the per diem corner or the pop-ups, and must not break the Lighthouse budgets (constitution VII). Played completely straight, never explaining the joke. No money paths change."
 
@@ -15,6 +15,16 @@
 - 004-urgency-engine: the purchase pop-ups (bottom-right, or under the header on phones) and the
   countdowns
 - 005-checkout-squeeze: the roach-motel dialogs
+
+## Clarifications
+
+### Session 2026-10-16
+
+- Q1: What flashes? → A: **Everything except the sale.** Backgrounds, borders, headings and shirt
+  cards all cycle through the store's colors. Prices, tier badges and Add to Cart never flash.
+- Q2: How long does Flash Mode stay on? → A: **For the visit.** Once he turns it on, it stays on from
+  page to page until he turns it off or the visit ends. Every new visit starts off.
+- Q3: When do the pipes start? → A: **Always.** They start growing the moment a page opens.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -44,16 +54,17 @@ brand is literally called Dan _Flashes_. It's the only constitution MUST that's 
 2. **Given** any page, **When** he looks at the controls, **Then** the Flash Mode button is the most
    exciting one: it's the only control that animates on its own, cycling through at least three of the
    store's colors, even while Flash Mode is off.
-3. **Given** Flash Mode is off, **When** he presses the button, **Then** Flash Mode is on: [what
-   flashes, per FR-009]. The button shows that it's on. **When** he presses it again, **Then** it's
-   off, and the page looks exactly as it did before.
+3. **Given** Flash Mode is off, **When** he presses the button, **Then** Flash Mode is on:
+   backgrounds, borders, headings and shirt cards all cycle through the store's colors. The button
+   shows that it's on. **When** he presses it again, **Then** it's off, and the page looks exactly
+   as it did before.
 4. **Given** Flash Mode is on, **When** he views a shirt's page, the listing, the cart or checkout,
    **Then** every price, every tier badge and Add to Cart stay steady and readable. They never flash or
    change color, and nothing covers them.
 5. **Given** Flash Mode is on, **When** anything flashes, **Then** it flashes no more than 3 times in
    any second.
-6. **Given** Flash Mode is on, **When** he moves to another page or comes back later, **Then** [it
-   stays on or not, per FR-012].
+6. **Given** Flash Mode is on, **When** he moves to another page, **Then** it's still on. **When**
+   he comes back on a later visit, **Then** it's off again until he presses the button.
 7. **Given** the Flash Mode switch is off, **When** he browses, **Then** there's no Flash Mode button
    and nothing strobes. Everything else is exactly as before.
 
@@ -80,7 +91,7 @@ into patterns on top of patterns (constitution V). Flash Mode stands without it.
 **Acceptance Scenarios**:
 
 1. **Given** the Pipes switch is on, **When** any page opens, **Then** the background is pipes, in
-   place of the plain field. [When they start, per FR-013.]
+   place of the plain field, and they start growing right away.
 2. **Given** the pipes are growing, **When** he watches, **Then** each pipe runs in straight lines,
    turns only at right angles with a joint at every turn, and several pipes in the store's colors grow
    at once.
@@ -143,22 +154,21 @@ into patterns on top of patterns (constitution V). Flash Mode stands without it.
   on its own, cycling through at least three of the store's colors, whether Flash Mode is on or off.
 - **FR-008**: Flash Mode MUST start off. Pressing the button turns it on, and pressing it again turns
   it off. The button shows which it is.
-- **FR-009**: While Flash Mode is on, the store MUST strobe: [NEEDS CLARIFICATION: what flashes? Only
-  the background field, or everything that isn't a price, a tier badge or Add to Cart (backgrounds,
-  borders, headings, shirt cards)?]
+- **FR-009**: While Flash Mode is on, the store MUST strobe: backgrounds, borders, headings and shirt
+  cards all cycle through the store's colors, everywhere except the prices, the tier badges and Add to
+  Cart (FR-011). Text that changes color stays readable against its own backing at every step.
 - **FR-010**: Nothing MUST ever flash more than 3 times in any one second.
 - **FR-011**: While Flash Mode is on, every price, every tier badge and Add to Cart MUST stay readable.
   They never flash or change color, and they keep a steady, solid backing (constitution V, "the sale
   still closes").
-- **FR-012**: Flash Mode is his choice, kept in his own browser: [NEEDS CLARIFICATION: once he turns it
-  on, does it stay on across pages and later visits, only for this visit, or only for the page he's
-  on?]
+- **FR-012**: Flash Mode is his choice, kept in his own browser for the visit: once he turns it on,
+  it MUST stay on from page to page (and through a reload) until he turns it off or the visit ends.
+  Every new visit MUST start with it off.
 
 **Pipes Background**
 
 - **FR-013**: While its switch is on, the background of every page MUST be the pipes, in place of the
-  plain field. [NEEDS CLARIFICATION: do the pipes grow from the moment a page opens, or only after he's
-  been idle for a while, like a real screensaver?]
+  plain field, and they MUST start growing the moment a page opens.
 - **FR-014**: Pipes MUST grow in straight runs and turn only at right angles, with a joint at every
   turn. Several grow at once, in the store's colors. When the screen is full, it MUST clear and start
   over.
@@ -180,8 +190,8 @@ into patterns on top of patterns (constitution V). Flash Mode stands without it.
 ### Key Entities
 
 - **Store Settings** (from 001–005): gains two switches, Flash Mode and the Pipes Background.
-- **His Flash Mode choice**: on or off, kept in his own browser. It's never sent to the store or saved
-  to his account.
+- **His Flash Mode choice**: on or off, kept in his own browser for the visit. It's never sent to the
+  store or saved to his account.
 - **Brand Copy** gains the Flash Mode button's labels.
 
 ## Success Criteria *(mandatory)*

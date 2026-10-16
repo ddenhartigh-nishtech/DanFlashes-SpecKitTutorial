@@ -41,4 +41,11 @@
   - Q3 A: every checkout re-ticks every add-on
 
   FR-012 folded into FR-009, and the FRs are renumbered FR-001–FR-013. All items pass.
+- Iteration 3 (2026-10-16, after `/speckit-analyze`):
+  - U1: an add-on named twice is charged once
+  - C1: Flash Credit pays add-ons end to end
+  - I1: the checkout form remounts on any change of ids or prices
+  - C2 and C3: noted as true by construction, and covered by the quickstart
+
+  All items pass.
 - Items marked incomplete require spec updates before `/speckit-clarify` or `/speckit-plan`

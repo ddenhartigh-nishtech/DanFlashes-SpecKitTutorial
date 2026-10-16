@@ -125,6 +125,7 @@ touches no money, but it makes the cart a place shirts check into and don't chec
 - **The per diem drain**: an order counts against his streams by its whole total, add-ons included
   (003).
 - **A double submit**: it returns the same order, charged once, add-ons included.
+- **A tampered form that names an add-on twice**: it's charged once.
 - **Exact money**: an order's total always equals its shirts plus its add-ons, to the cent.
 - **Prices shown to him**: add-on prices are real and re-checked when he places the order. They never
   show a complexity score.

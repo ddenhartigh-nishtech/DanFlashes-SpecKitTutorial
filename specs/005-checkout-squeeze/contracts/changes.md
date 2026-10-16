@@ -15,7 +15,7 @@ These are deltas to [001 routes.md](../../001-core-storefront/contracts/routes.m
 
 | Action | Change | Spec |
 |---|---|---|
-| `placeOrder` | **New input**: `addOnId`, repeated, once per ticked add-on. `expectedTotalUsd` now includes them. **Inside the existing transaction**: while `pre_checked_add_ons` is on, it re-resolves the ticked add-ons from `add_ons`. If any isn't offered, or the recomputed total differs, it returns `PRICE_CHANGED` with the new total and nothing is charged. While off, it ignores add-ons. On success it inserts `order_add_ons` (the name and price snapshot) and charges the total (shirts plus add-ons) by card, Flash Credit, or a split. A replay returns the same order. | US1, FR-006–FR-008 |
+| `placeOrder` | **New input**: `addOnId`, repeated, once per ticked add-on, de-duplicated (a repeated id counts once). `expectedTotalUsd` now includes them. **Inside the existing transaction**: while `pre_checked_add_ons` is on, it re-resolves the ticked add-ons from `add_ons`. If any isn't offered, or the recomputed total differs, it returns `PRICE_CHANGED` with the new total and nothing is charged. While off, it ignores add-ons. On success it inserts `order_add_ons` (the name and price snapshot) and charges the total (shirts plus add-ons) by card, Flash Credit, or a split. A replay returns the same order. | US1, FR-006–FR-008 |
 | `removeCartItem`, `updateCartItem` | Unchanged on the server. The roach motel is a gate in front of them in the browser (research R5). | US2 |
 
 No new actions.

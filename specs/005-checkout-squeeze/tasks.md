@@ -109,7 +109,8 @@ card, Flash Credit, or a split. The confirmation and history show them.
   - **A replayed checkout token** returns the same order, charged once
   - **Snapshots**: renaming or repricing an add-on later leaves the order's rows and total unchanged
   - **The drain**: the per diem drain counts the full total, add-ons included (003)
-  - **Parsing**: `placeOrderCore` reads repeated `addOnId` fields
+  - **Parsing**: `placeOrderCore` reads repeated `addOnId` fields, and an add-on named twice is
+    charged once, with no error (analysis U1)
   - **The read model**: `getOrderForUser` and `listOrdersForUser` return `addOns`
 - [ ] T010 [P] [US1] e2e journey in tests/e2e/add-ons.spec.ts (desktop and phone):
   - **At checkout**: all four add-ons ticked with pitch and price, and Geo Riot's total is $534.57
@@ -130,7 +131,7 @@ card, Flash Credit, or a split. The confirmation and history show them.
   with `onConflictDoNothing` on `name`. Put the four starting add-ons (research R9) in
   scripts/seed-data.ts and the test fixture. T008 passes.
 - [ ] T013 [US1] Extend `placeOrder` in src/lib/checkout/place-order.ts per contracts/changes.md:
-  - take `addOnIds`
+  - take `addOnIds`, de-duplicated
   - while the switch is on, re-resolve them inside the transaction
   - total = `orderTotals`, and refuse with `PRICE_CHANGED` on any mismatch
   - insert `order_add_ons` with snapshots
@@ -142,7 +143,8 @@ card, Flash Credit, or a split. The confirmation and history show them.
   - src/components/CheckoutForm.tsx gets ticked checkboxes (`data-testid="add-on"`), each add-on's
     decline line while confirmshaming is on and it's unticked, the live Total
     (`data-testid="total"`) from `orderTotals`, the split from that total, hidden `addOnId` fields,
-    and a key on the add-on list so a change remounts with everything ticked
+    and a key on the add-on list's ids and prices, so any change remounts with everything ticked
+    (analysis I1)
   - src/components/OrderSummary.tsx renders add-on rows (`data-testid="add-on-line"`) and has an
     optional Total row (off at checkout)
   - the copy goes in src/lib/copy.ts
@@ -152,13 +154,14 @@ card, Flash Credit, or a split. The confirmation and history show them.
   first in journeys whose numbers assume no add-ons:
   - card-checkout
   - split-checkout
-  - flash-credit-checkout
   - per-diem-drain
   - drain-them-all
   - fake-scarcity
   - no-score
 
-  The full e2e suite passes.
+  flash-credit-checkout keeps every add-on ticked: it asserts the balance drops by exactly the total,
+  add-ons included, so Flash Credit pays add-ons end to end (analysis C1). The full e2e suite
+  passes.
 
 **Checkpoint**: US1 works on its own. Every checkout total equals the shirts plus the ticked add-ons.
 
@@ -206,7 +209,9 @@ sure?". Only the second yes submits, and backing out changes nothing. Adding and
   - the yes labels come from `labelFor`
 
   Wire it into the Remove form in src/app/cart/page.tsx (always) and into
-  src/components/CartQuantityForm.tsx (on a decrease), behind `settings.roachMotel`. T017 passes.
+  src/components/CartQuantityForm.tsx (on a decrease), behind `settings.roachMotel`. The cart
+  audit's removals (001, 002) stay server-side and never pass through it (FR-012, analysis C2).
+  T017 passes.
 - [ ] T020 [US2] Add `confirmTwice(page)` to tests/e2e/helpers.ts. Use it in the journeys that remove
   a line or lower a quantity: zoom-and-cart, confirmshaming, fake-scarcity, and any others the
   suite shows. The full e2e suite passes.
@@ -226,7 +231,7 @@ sure?". Only the second yes submits, and backing out changes nothing. Adding and
 - [ ] T023 Constitution VII spot check: run Lighthouse (mobile) on `/checkout` (with a line) and
   `/cart` against a production build. Each must have CLS ≤ 0.1 and LCP ≤ 2.5 s (applied
   throttling), with TBT noted.
-- [ ] T024 Run quickstart.md scenarios 1–14 and note the results
+- [ ] T024 Run quickstart.md scenarios 1–15 and note the results. Scenario 14 covers the off-switch wiring (analysis C3), and scenario 15 covers store-made removals (C2).
 - [ ] T025 Run `npm run format`, then `npm run verify`. It must be fully green, with line coverage
   ≥ 90% on `src/lib`, including `src/lib/checkout/totals.ts`, `src/lib/data/add-ons.ts`, and
   `src/lib/cart/roach-motel.ts`.

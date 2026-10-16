@@ -27,6 +27,11 @@ Migration `0008`. Money is exact two-decimal USD text, using 001's `money` CHECK
 
 PRIMARY KEY (`order_id`, `add_on_id`).
 
+**Add-ons are separate line items.** They never modify a shirt line (`order_items`). Each add-on
+bought is its own row here, with its own price, and the order's subtotal stays shirts-only. They
+have their own table because shirt lines carry shirt-only fields (size, tier, complexity, MSRP, the
+shirt FK).
+
 Invariant, enforced by `placeOrder` and tested: `orders.total_usd = subtotal_usd + Σ order_add_ons.price_usd + shipping_usd + tax_usd`.
 
 ## Changed: `store_settings`

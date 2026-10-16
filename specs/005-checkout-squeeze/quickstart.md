@@ -30,3 +30,4 @@ Or start fresh with `npm run db:reset`. "Studio" means Drizzle Studio (`npm run 
 | 12 | Add a shirt from its page | One click, with no question. (US2-6, SC-005) |
 | 13 | On a 360px phone, open the questions | They fit, and Keep is always reachable. (Edge Cases) |
 | 14 | In Studio set `pre_checked_add_ons = 0`, then `roach_motel = 0`, and repeat 1 and 8 | No add-ons, and the total is $344.61. Remove removes at once. Set both back to 1. (US1-7, US2-8, SC-006) |
+| 15 | With Geo Riot in the cart, set its `status` to `inactive` in Studio and reload the cart | The line is pulled with 001's notice, and no question is asked: that's Dan's doing (FR-012). Set it back to `active`. |

@@ -38,7 +38,9 @@ Components, SQLite via Drizzle, Vitest and Playwright). There are no new package
 
 - **Decision**:
   - **Input**: `placeOrder` takes `addOnIds` (the ticked boxes, parsed from repeated `addOnId` form
-    fields), alongside the existing `expectedTotalUsd`, which now includes the ticked add-ons.
+    fields), alongside the existing `expectedTotalUsd`, which now includes the ticked add-ons. The
+    ids are de-duplicated first, so a tampered form that names one twice is charged once, and the
+    (`order_id`, `add_on_id`) key never throws (analysis U1).
   - **Re-resolution**: inside the existing transaction, and only while `pre_checked_add_ons` is on,
     it loads those add-ons from `add_ons`.
   - **Refusal**: if any id isn't offered (unknown or inactive), or the recomputed total differs from
@@ -67,8 +69,9 @@ Components, SQLite via Drizzle, Vitest and Playwright). There are no new package
   - **Display**: `OrderSummary` at checkout shows the lines, the subtotal, shipping and tax. The
     add-on rows and the **Total** (`data-testid="total"`) belong to the form, because they change as
     he ticks.
-  - **After a refusal**: when the add-ons change under him (`PRICE_CHANGED`), the form is keyed by
-    the add-on list, so it remounts with everything ticked again.
+  - **After a refusal**: `placeOrderAction` already refreshes the page on any failure. The form is
+    keyed by the add-on list's ids *and* prices (e.g. `1:49.99,2:89.99`), so a retired, added or
+    repriced add-on remounts it with everything ticked again (analysis I1).
 - **Rationale**: the total has to react to clicks, so it lives in the client. The server still decides
   what's charged (R3).
 - **Alternatives**: remembering unticks in a cookie was rejected (the owner said Q3 A).
@@ -107,12 +110,21 @@ Components, SQLite via Drizzle, Vitest and Playwright). There are no new package
 - **Decision**: with `pre_checked_add_ons` off, the page passes no add-ons and `placeOrder` charges
   none. With `roach_motel` off, `ConfirmTwice` passes every submit through. "Off renders nothing" is
   proven in integration tests and the page loader's unit test. e2e keeps the defaults (002 R7).
+- **Accepted (analysis C3)**: the roach motel's page wiring (`settings.roachMotel` → `ConfirmTwice`)
+  has no automated off-test, only the pure `needsConfirm(…, off)`. Quickstart scenario 14 covers
+  it by hand.
+- **By construction (analysis C2)**: store-made removals (001's cart audit, 002's bland audit) run on
+  the server when the cart loads. They never go through `ConfirmTwice`, so they never ask (FR-012).
+  Quickstart scenario 15 shows it.
 
 ## R8. Existing journeys, and new defaults
 
 - **Decision**: with add-ons ticked by default, every checkout costs more. Journeys that aren't about
   add-ons untick them first, through a new e2e helper `untickAddOns(page)`, which `buyByCard` also
-  calls. That's a careful shopper, and it keeps 003's per diem and drain numbers. Journeys that
+  calls. That's a careful shopper, and it keeps 003's per diem and drain numbers. The exception
+  is flash-credit-checkout: it keeps every add-on ticked, since it only asserts that the balance
+  drops by exactly the total. So Flash Credit pays add-ons end to end, the card does in the split
+  journey, and card-checkout stays the plain baseline (analysis C1). Journeys that
   remove a line or lower a quantity click through both questions, through a helper `confirmTwice`.
   The add-ons journey is the one that pays for them.
 - **Rationale**: it changes no existing assertion's meaning, and the new journeys own the new

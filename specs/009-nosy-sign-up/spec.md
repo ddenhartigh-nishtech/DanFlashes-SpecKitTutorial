@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-16
 
-**Status**: Draft (3 open questions)
+**Status**: Draft (Q1–Q3 resolved 2026-10-16)
 
 **Input**: User description: "Nosy Sign-Up (ROADMAP 009). A comedy data-grab with its own owner on/off switch, on by default: the sign-up form demands an absurd amount of personal information on top of the real fields — Social Security Number, blood type, current medications, mother's maiden name, and more in the same spirit — every one marked "required" in the Dan Flashes voice. The fields are props (constitution, commerce constraints: "Nosy fields are props"): they MUST NEVER be submitted to the server, stored, or logged; they have no form field names and no autofill, because real people type real data into forms. Sign-up itself (display name, email, password) works exactly as before. Works from a 360px phone up, with Extreme Awesomeness on or off. Played completely straight, never explaining the joke. No money paths change."
 
@@ -12,6 +12,20 @@
 - 001-core-storefront: the sign-up page and its real fields (what Dan should call him, email, password), the checkout gate, the store settings
 - 002-brand-pages-and-shaming: the switch-per-tactic pattern
 - 006-flash-mode-pipes: text backings and steady parts under Extreme Awesomeness
+
+## Clarifications
+
+### Session 2026-10-16
+
+- Q1: How much nosiness? → A: **One long scroll.** Every nosy field, a dozen or so, comes after the
+  real ones, and Sign up waits at the very bottom.
+- Q2: Does "required" actually block sign-up? → A: **Once, in voice.**
+  - The first press with any nosy field blank shows one line instead of signing up: "Dan noticed
+    you skipped a few. He'll allow it."
+  - The next press signs him up.
+  - Owner addition: the fields that really are required (email, password) carry a double asterisk,
+    `**`, with a small legend by the button: "** Actually required."
+- Q3: Does it show up anywhere else? → A: **Sign-up only.**
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -38,11 +52,15 @@ already sets the one rule that matters: nosy fields are props.
 **Acceptance Scenarios**:
 
 1. **Given** the nosy sign-up switch is on, **When** he opens sign-up, **Then** the real fields come
-   first. Below them, before the Sign up button, come the nosy fields [how many and how laid out, per
-   FR-003], each marked required in the Dan Flashes voice.
-2. **Given** he fills in the real fields, **When** he presses Sign up, **Then** [with the nosy fields
-   blank or filled in, per FR-008] his account is created exactly as it would be with the switch off:
-   his name, his email, his password, and nothing else.
+   first, with email and password marked `**`. Below them comes one long scroll of nosy fields, each
+   marked required in the Dan Flashes voice. Then the "** Actually required." legend and Sign up, at
+   the very bottom.
+2. **Given** he fills in the real fields and leaves any nosy field blank, **When** he presses Sign
+   up, **Then** he isn't signed up yet: Dan says "Dan noticed you skipped a few. He'll allow it."
+   **When** he presses Sign up again, **Then** his account is created exactly as it would be with
+   the switch off: his name, his email, his password, and nothing else.
+   **Given** he filled in every nosy field, **When** he presses Sign up, **Then** he's signed up on
+   the first press.
 3. **Given** he typed something into every nosy field, **When** he signs up, **Then** none of it is in
    anything his browser sends to the store, and none of it appears in the store's data or its logs.
 4. **Given** the nosy fields, **When** he clicks into one, **Then** his browser offers no saved values,
@@ -61,7 +79,10 @@ already sets the one rule that matters: nosy fields are props.
 ### Edge Cases
 
 - **A refused sign-up** (email taken, password too short): the real fields' errors show as before.
-  Nothing from the nosy fields was sent.
+  Nothing from the nosy fields was sent. Dan's "you skipped a few" line only shows once per visit to
+  the page. After it, every press goes straight to signing up.
+- **The browser's own checks** (an empty email, a password that's too short) come first, as they do
+  today. Dan's line comes only once the real fields are acceptable.
 - **The checkout gate** (sign-up on the way to checkout): the same nosy fields, and he still lands on
   checkout after signing up.
 - **Sign-in**: unchanged. Dan already knows who you are.
@@ -72,7 +93,7 @@ already sets the one rule that matters: nosy fields are props.
   check would have to read it.
 - **The demo shopper** (seeded): unaffected; it never goes through sign-up.
 - **Extreme Awesomeness on**: the form sits on its own backing over the pipes, and the fields stay
-  readable through the strobe (006 FR-010, FR-016).
+  readable through the strobe (006 FR-011, FR-016).
 
 ## Requirements *(mandatory)*
 
@@ -81,9 +102,9 @@ already sets the one rule that matters: nosy fields are props.
 - **FR-001**: The nosy sign-up MUST be its own owner on/off setting, on by default (constitution IV).
 - **FR-002**: Turning it off MUST remove every trace of it from the sign-up page, and change nothing
   else.
-- **FR-003**: While it's on, the sign-up page MUST show the nosy fields after the real ones and before
-  the Sign up button. Each is marked "required" in voice. [NEEDS CLARIFICATION: how much nosiness? A
-  handful of fields, one long scroll of a dozen or more, or a multi-step "file" he pages through?]
+- **FR-003**: While it's on, the sign-up page MUST show every nosy field, a dozen or so, as one long
+  scroll after the real fields. Each is marked "required" in voice. The Sign up button comes last,
+  at the very bottom, so he scrolls past every one to join.
 - **FR-004**: Nothing typed into a nosy field MUST ever leave his browser. It's never part of what
   sign-up sends, never stored by the store, and never logged, on the server or in the browser's
   console (constitution, "Nosy fields are props").
@@ -95,23 +116,32 @@ already sets the one rule that matters: nosy fields are props.
 - **FR-007**: What he typed MUST be gone when he leaves the page or signs up. It's not restored by
   Back, and not kept in any browser storage.
 - **FR-008**: Signing up with valid real fields MUST create the same account as with the switch off.
-  The real fields' rules (email, password length) are unchanged. [NEEDS CLARIFICATION: the nosy
-  fields say "required". Do they actually stop him signing up while blank, or does Dan let him
-  through?]
-- **FR-009**: The store MUST never check, read or validate what's typed in a nosy field. Anything,
-  including nothing, is accepted as far as the fields themselves are concerned.
-- **FR-010**: [NEEDS CLARIFICATION: is the nosiness confined to the sign-up page, or does it come back
-  elsewhere, such as an account-page "complete your file" nag or an identity check at checkout?]
-  Sign-in is unchanged.
-- **FR-011**: It MUST work from a 360px phone up with no sideways scroll, and with Extreme Awesomeness
+  The real fields' rules (email, password length) are unchanged.
+  - **While any nosy field is blank**, the first press of Sign up MUST show "Dan noticed you skipped
+    a few. He'll allow it." instead of signing up, once per visit to the page.
+  - **The next press** signs him up.
+  - **With every nosy field filled**, the first press signs him up.
+  - **Never blocking**: he can always sign up without typing anything into a nosy field.
+- **FR-009**: The fields that really are required (email and password) MUST carry a double
+  asterisk, `**`. A legend by the button says "** Actually required." What Dan should call him
+  stays optional and unmarked.
+- **FR-010**: The store MUST never check, read or validate what's typed in a nosy field.
+  - The page itself may only tell, in his browser, whether a field is empty, to decide whether Dan
+    says his line (FR-008).
+  - Anything, including nothing, is accepted.
+- **FR-011**: The nosiness MUST be confined to the sign-up page. Sign-in, the account and checkout are
+  unchanged.
+- **FR-012**: It MUST work from a 360px phone up with no sideways scroll, and with Extreme Awesomeness
   on or off.
-- **FR-012**: All new copy MUST use the Dan Flashes voice from constitution I and never explain the
-  joke. That covers the fields' labels, their "required" marks, and any hints.
+- **FR-013**: All new copy MUST use the Dan Flashes voice from constitution I and never explain the
+  joke. That covers the fields' labels, their "required" marks, Dan's "you skipped a few" line, and
+  the "** Actually required." legend.
 
 ### Key Entities
 
 - **Store Settings** (from 001–006): gains one switch, the nosy sign-up.
-- **Brand Copy** gains the nosy fields' labels, their "required" marks and any hints.
+- **Brand Copy** gains the nosy fields' labels, their "required" marks, Dan's "you skipped a few"
+  line, and the "** Actually required." legend.
 - **No entity for what he types.** Nosy values exist only in the fields on his screen, and only until
   he leaves the page.
 
@@ -121,7 +151,8 @@ already sets the one rule that matters: nosy fields are props.
 
 - **SC-001**: Across test sign-ups with a distinctive value in every nosy field, 0 occurrences of those
   values reach anything the browser sends, the store's data, or any log.
-- **SC-002**: 100% of sign-ups with valid real fields create the same account as with the switch off.
+- **SC-002**: 100% of sign-ups with valid real fields create the same account as with the switch off,
+  in at most two presses of Sign up, whatever is or isn't typed in the nosy fields.
 - **SC-003**: 0 autofill offers or remembered entries for any nosy field, in a browser with saved
   form data.
 - **SC-004**: With the switch off, 0 nosy fields appear anywhere.
@@ -147,7 +178,7 @@ already sets the one rule that matters: nosy fields are props.
   The list and its order live in the brand copy, and are easy to change.
 - **They're copy, not store data.** Like every label on the site, they're edited in code, not in
   Studio. No admin screen is needed (008).
-- **No format checks**, no "invalid SSN" message. Checking would mean reading it (FR-009).
+- **No format checks**, no "invalid SSN" message. Checking would mean reading it (FR-010).
 - **Masking** applies to the two classic security answers (SSN, mother's maiden name). The rest show
   as typed.
 - **No accessibility work beyond today's** (owner: demo site). The fields are labelled like the real

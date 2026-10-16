@@ -206,3 +206,9 @@ in two presses at most.
 1. **MVP**: Setup, Foundational, then US1. It's the whole feature.
 2. **Polish**: the README, the Strict Mode check, Lighthouse, the quickstart, then verify. Then
    converge, and a PR.
+
+---
+
+## Phase 5: Convergence
+
+- [X] T018 Update research R5 and the plan's source-structure line to match the code: `AuthForm` owns clearing the nosy fields and resetting Dan's line, in one stable effect (and on `pagehide`), and `NosyFields` only renders them, per plan: structure, research R5 (contradicts)

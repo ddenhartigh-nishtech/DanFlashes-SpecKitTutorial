@@ -89,8 +89,8 @@ scripts/seed-data.ts                  # settings defaults gain the switch
 src/
 ├── app/_data/auth-page.tsx           # passes the switch to AuthForm (sign-up only)
 ├── components/
-│   ├── AuthForm.tsx                  # id'd real form; ** marks; the legend; Sign up after NosyFields (form="…")
-│   └── NosyFields.tsx                # new (client): the unnamed, unattached inputs; clears on leaving
+│   ├── AuthForm.tsx                  # id'd real form; ** marks; the legend; Sign up after NosyFields (form="…"); clears the fields and Dan's line on leaving
+│   └── NosyFields.tsx                # new: renders the unnamed, unattached inputs (plus the emptiness check and the clearing helper)
 └── lib/
     ├── nosy/nudge.ts                 # new (pure): shouldNudge
     ├── data/settings.ts, db/schema.ts, catalog/types.ts, catalog/validate.ts   # the switch

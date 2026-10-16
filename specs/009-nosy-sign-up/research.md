@@ -55,10 +55,16 @@ packages.
 
 ## R5. Gone when he leaves
 
-- **Decision**: `NosyFields` (client) clears every nosy input:
-  - in its effect cleanup, which runs when Next hides the page he left (005's lesson) and on unmount
+- **Decision**: `AuthForm` (client) clears every nosy input and resets Dan's line (R6), in one stable
+  effect. `NosyFields` only renders the fields. It clears them:
+  - in that effect's cleanup, which runs when Next hides the page he left (005's lesson) and on
+    unmount
   - on `pagehide`, so the back-forward cache never brings them back
   - after a successful sign-up the page redirects, which unmounts it
+
+  The clearing sits in `AuthForm`, not in `NosyFields`, on purpose (converge F1). An effect in
+  `NosyFields` that took a callback from the form would rerun on every re-render, and so wipe the
+  fields the moment Dan's line appeared.
 - **Rationale**: FR-007. React never holds the values: the inputs are uncontrolled, and a ref reads
   them only to know whether they're empty (R6).
 - **Alternatives**: controlled inputs in React state were rejected. They'd put every keystroke into

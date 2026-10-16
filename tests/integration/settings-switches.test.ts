@@ -86,3 +86,16 @@ describe("store_settings Flash Mode and Pipes switches (006, migration 0009)", (
     );
   });
 });
+
+describe("store_settings nosy sign-up switch (009, migration 0010)", () => {
+  it("defaults on, and round-trips off", () => {
+    const { db, sqlite } = createTestDb();
+    sqlite.prepare("INSERT INTO store_settings (id) VALUES (1)").run();
+    expect(getSettings(db)).toMatchObject({ nosySignUp: true });
+    saveSettings(db, { ...getSettings(db), nosySignUp: false });
+    expect(getSettings(db)).toMatchObject({ nosySignUp: false });
+    expect(sqlite.prepare("SELECT nosy_sign_up FROM store_settings").get()).toEqual({
+      nosy_sign_up: 0,
+    });
+  });
+});

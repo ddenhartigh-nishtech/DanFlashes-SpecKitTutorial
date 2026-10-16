@@ -74,6 +74,7 @@ const settingsSchema = z.object({
   roachMotel: z.boolean(),
   flashMode: z.boolean(),
   pipesBackground: z.boolean(),
+  nosySignUp: z.boolean(),
 });
 
 function toIssues(error: z.ZodError): Issue[] {

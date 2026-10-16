@@ -151,6 +151,8 @@ export const storeSettings = sqliteTable(
     /** Extreme Awesomeness (006): what the shopper's toggle can turn on (constitution V). */
     flashMode: integer("flash_mode", { mode: "boolean" }).notNull().default(true),
     pipesBackground: integer("pipes_background", { mode: "boolean" }).notNull().default(true),
+    /** The nosy sign-up (009): a data-grab played straight; the answers never leave the browser. */
+    nosySignUp: integer("nosy_sign_up", { mode: "boolean" }).notNull().default(true),
   },
   (t) => [
     check("store_settings_singleton", sql`${t.id} = 1`),

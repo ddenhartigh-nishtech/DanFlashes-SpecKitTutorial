@@ -42,6 +42,8 @@ export interface StoreSettings {
   flashMode: boolean;
   /** The Pipes Background (006): the screensaver behind every page while Extreme Awesomeness is on. */
   pipesBackground: boolean;
+  /** The nosy sign-up (009): sign-up asks for far too much. The answers are props, never sent. */
+  nosySignUp: boolean;
 }
 
 /** An owner-defined band of complexity scores. The tier with minScore 0 is the BLAND tier. */

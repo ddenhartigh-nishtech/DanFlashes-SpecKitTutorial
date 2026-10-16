@@ -1,5 +1,15 @@
 import { expect, type Page } from "@playwright/test";
-import { addShirt, awesomeButton, buyByCard, signUp, test, uniqueEmail, visible } from "./helpers";
+import { copy } from "../../src/lib/copy";
+import {
+  addShirt,
+  awesomeButton,
+  buyByCard,
+  connect,
+  signUp,
+  test,
+  uniqueEmail,
+  visible,
+} from "./helpers";
 
 const canvas = (page: Page) => page.locator('canvas[data-testid="pipes"]');
 
@@ -164,6 +174,18 @@ test.describe("US2 — the Pipes Background", () => {
     await audit();
     await audit("/checkout");
     await buyByCard(page, "geo-riot", "M");
+    await audit();
+    // The account once there's history: an order, and a per diem gauge (converge F1).
+    await page.goto("/account");
+    await connect(page, {
+      source: copy.streams.presets.per_diem,
+      amount: "100.00",
+      schedule: copy.streams.schedules.recurring,
+      every: ["1", "days"],
+      ongoing: true,
+    });
+    await expect(visible(page.getByTestId("account-per-diem"))).toBeVisible();
+    await expect(visible(page.getByTestId("order")).first()).toBeVisible();
     await audit();
     expect(bare).toEqual({});
   });

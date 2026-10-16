@@ -83,7 +83,7 @@ async function AccountContents() {
           {meter ? (
             <p
               data-testid="account-per-diem"
-              className="font-display flex flex-wrap items-center gap-3 uppercase"
+              className="font-display field-backing flex w-fit flex-wrap items-center gap-3 uppercase"
             >
               {copy.meter.label}
               {meter.drained ? (
@@ -162,7 +162,9 @@ async function AccountContents() {
               <li key={order.id} data-testid="order" className="flex flex-col gap-2">
                 <p className="font-display flex flex-wrap gap-3 text-sm">
                   <span className="bg-ink text-highlighter px-2 py-0.5">{order.number}</span>
-                  <span>{copy.account.placedOn(dateFormat.format(new Date(order.createdAt)))}</span>
+                  <span className="field-backing">
+                    {copy.account.placedOn(dateFormat.format(new Date(order.createdAt)))}
+                  </span>
                   <span className="bg-highlighter px-2">{describePayment(order.payment)}</span>
                 </p>
                 <OrderSummary

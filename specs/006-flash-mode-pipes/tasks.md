@@ -382,3 +382,10 @@ Task: "e2e journey in tests/e2e/extreme-awesomeness.spec.ts"
 2. **Increment 2**: US2 (the pipes), riding on the same toggle, plus the everything-on smoke journey.
 3. **Polish**: the README, the Strict Mode check, Lighthouse, the quickstart, then verify. Then
    converge, and a PR.
+
+---
+
+## Phase 6: Convergence
+
+- [X] T027 Give the account page's purchase-history date line ("Placed on…") and its per diem gauge label a solid backing, and extend the text-backing audit in tests/e2e/pipes.spec.ts to the account page with an order in its history and a per diem stream connected, per FR-016, US2/AC5 (partial)
+  - *Result:* the extended audit found exactly those two lines: "Per diem left" and "Placed Oct 16, 2026". Both now have `field-backing`, and the audit passes on desktop and phone.

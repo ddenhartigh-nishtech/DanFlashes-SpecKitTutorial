@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [ ] No [NEEDS CLARIFICATION] markers remain
+- [x] No [NEEDS CLARIFICATION] markers remain
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic (no implementation details)
@@ -35,4 +35,10 @@
   - Q1: how an add-on is priced (FR-003, Key Entities)
   - Q2: whether lowering a quantity also needs the two questions (US2 AC7, FR-012)
   - Q3: whether his unticks are remembered (US1 AC6)
+- Iteration 2 (2026-10-16): the owner answered:
+  - Q1 A: a flat price per order
+  - Q2 B: any decrease (removing a line or lowering a quantity) gets both questions
+  - Q3 A: every checkout re-ticks every add-on
+
+  FR-012 folded into FR-009, and the FRs are renumbered FR-001–FR-013. All items pass.
 - Items marked incomplete require spec updates before `/speckit-clarify` or `/speckit-plan`

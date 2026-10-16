@@ -70,7 +70,7 @@ re-run on `/` and `/shirts` in polish.
 - Everything works from 360px wide.
 
 **Scale/Scope**: one store, a handful of admins, tens of shirts, hundreds of orders. 13 console
-pages, about 25 actions.
+pages, 19 actions.
 
 All Technical Context items are resolved. See [research.md](./research.md) (R1–R16).
 

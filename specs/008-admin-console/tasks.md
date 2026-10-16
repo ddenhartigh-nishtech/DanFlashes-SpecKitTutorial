@@ -138,12 +138,15 @@ in a calm room no one else can enter.
       negative or fractional score, a price of 0.001 or "abc", a missing description, a BLAND
       price ≥ start (the message gives the limit and the resolved price), and an MSRP that can't
       be computed
+  - **Prices**: a whole-dollar entry like "1400" is stored as "1400.00" (FR-038, analysis U1)
   - **`updateShirt`**: a sent slug is ignored; the same refusals apply
   - **`setShirtStatus`**: activation needs an image; deactivation always works, and the shirt stays
     in order history (`getOrderForUser` still renders it)
   - **Images**: `attachImage`, `moveImage` (position 0 is main) and `detachImage` (refused for an
     active shirt's last image; positions close up)
   - **`checkCatalog`**: names every shirt a proposed state would break
+  - **`listAdminShirts`**: filters by status and tier, and sorts by score, price and name (FR-006,
+    analysis U2)
 - [ ] T015 [P] [US1] Write tests/integration/admin-door.test.ts. It's a table of every console
   action core, starting with US1's; each later story adds its own.
   - For a guest: `refused.signIn`. For a signed-in shopper: `refused.notFound`.
@@ -165,7 +168,8 @@ in a calm room no one else can enter.
     and saves inactive with Dan's encouragement
   - attaching a library image and activating puts it on `/shirts/<slug>` at the MSRP
   - a BLAND score with a $400.00 price is refused with the message
-  - deactivating asks once, calmly, and the shopper's `/shirts/<slug>` is then a 404
+  - deactivating asks once, calmly; the shirt then leaves `/shirts`, and its own page shows the
+    retired banner with no Add to Cart (analysis I1)
   - reactivating brings it back
 
 ### Implementation for User Story 1
@@ -221,7 +225,7 @@ and the media settings.
     - refused on shape rules
     - refused, naming the shirts, when a BLAND shirt would reach the new start price, or an MSRP
       can't be computed
-    - otherwise saves only the MSRP columns
+    - otherwise saves only the MSRP columns, and "400" is stored as "400.00" (FR-038)
   - **`savePresetsCore`**: normalizes "2500, 500.5" to `["2500.00","500.50"]`; refuses 0,
     negatives, "abc" and duplicates
   - **`saveMediaSettingsCore`**: refuses a non-http(s) base URL and a missing or unknown
@@ -229,7 +233,8 @@ and the media settings.
 
   Add these cores to the T015 sweep.
 - [ ] T028 [P] [US2] Write tests/e2e/admin/switchboard.spec.ts:
-  - all 13 switches show with descriptions
+  - all 13 switches show with descriptions, reached from `/admin` in two clicks: Settings, then the
+    switch (SC-005, analysis A1)
   - the owner turns off the roach motel; a shopper's cart line is then removed without "Are you
     sure?"; the owner turns it back on
   - previewing a start price of 400 lists each shirt's MSRP now and after, and the owner doesn't
@@ -281,9 +286,12 @@ and the media settings.
   passes.
 - [ ] T038 [US3] Create src/lib/admin/pricing.ts (`findInversions`, `overrideDistances`,
   `chartPoints`, per R12). T035 passes.
-- [ ] T039 [US3] Create src/components/admin/PriceChart.tsx (server SVG: log y-axis, the MSRP line,
+- [ ] T039 [US3] Give the catalog audit structured issues in src/lib/catalog/audit.ts: `{ kind:
+  shirt|tier|settings|media, ref, message }`, alongside the unchanged CLI strings (analysis U3).
+  Extend tests/integration/catalog-audit.test.ts to cover them. Then create
+  src/components/admin/PriceChart.tsx (server SVG: log y-axis, the MSRP line,
   tier bands, points linking to their shirts) and src/app/admin/pricing/page.tsx (chart, pairs,
-  overrides, `auditCatalog`). Show the problem count on src/app/admin/page.tsx. T036 passes.
+  overrides, and the audit issues, each linked to its shirt, the tiers, the settings or the media). Show the problem count on src/app/admin/page.tsx. T036 passes.
 
 ---
 
@@ -357,7 +365,8 @@ restored and reordered.
   - it's refused, naming shirts, when a shirt would land in BLAND at or above the start price
   - store badges follow (`listCatalogShirts`)
 - [ ] T050 [P] [US5] Write tests/integration/admin-add-ons.test.ts:
-  - create and update within bounds, and a duplicate name is refused
+  - create and update within bounds, a price of "25" is stored as "25.00" (FR-038), and a
+    duplicate name is refused
   - retire and restore (`listOfferedAddOns` follows)
   - `moveAddOn` swaps positions
   - an order placed before an edit keeps its name and price
@@ -448,7 +457,7 @@ only money change.
   Record the numbers in the PR.
 - [ ] T066 Script the quickstart on a scratch database (`DATABASE_PATH=data/qs008.db`). Run
   scenarios 1–28 that aren't already covered by e2e, including `npm run catalog:audit` = 0 errors
-  and `admin:revoke` mid-session.
+  and `admin:revoke` mid-session. Time scenario 7–8 by hand for SC-009 (analysis A2).
 - [ ] T067 Run `npm run verify` until it's green. Record the counts and the coverage.
 
 ---

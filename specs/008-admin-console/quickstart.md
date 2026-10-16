@@ -26,7 +26,7 @@ npm run dev             # http://localhost:3000
 | 7 | New shirt: score 30, no final price, no image | The live preview shows Very Complicated and the MSRP. It saves inactive. "Saved. That was a good decision, Dan." (FR-007, FR-008, FR-005b) |
 | 8 | Attach a library image, make it active, open `/shirts/<slug>` | Live in the store at the MSRP, with the right badge (FR-011) |
 | 9 | Set its score to 5 and the final price to 400 | Refused: BLAND must cost less than $300.00, and it would resolve to $400.00. Nothing changes (FR-009) |
-| 10 | Deactivate it | One calm confirmation. It's gone from `/shirts`, and its page 404s for shoppers (FR-010) |
+| 10 | Deactivate it | One calm confirmation. It's gone from `/shirts`. Its own page says "Retired from the floor", with no Add to Cart (FR-010) |
 | 11 | Score 999999 | Refused: too complicated to price (R7) |
 | 12 | `/admin/settings`: flip Roach motel off, then remove a cart line in the store | No "Are you sure?" Flip it back on (FR-012, FR-013, SC-005) |
 | 13 | Preview a start price of 500.00 | Each shirt's MSRP now and after. Saving is refused, naming every BLAND shirt at or above $500.00, if any (FR-014, FR-015) |

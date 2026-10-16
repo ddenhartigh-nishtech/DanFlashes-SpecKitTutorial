@@ -82,7 +82,8 @@ Each one is refused and changes nothing.
    refused (an active shirt needs at least one image).
 5. **Given** an active shirt that's in shoppers' carts and in past orders, **When** the owner
    deactivates it, **Then**:
-   - it's gone from the store's listings and pages
+   - it's gone from the store's listings, and its own page says it's retired, with no way to add
+     it to a cart
    - it's pulled from carts with the store's usual notice
    - it's still viewable from the order history of every order that has it
 
@@ -398,7 +399,8 @@ built test-first (constitution VI).
   - any value breaks its rule
 - **FR-010**: The owner MUST be able to deactivate and reactivate any shirt. The console MUST offer
   no way to delete a shirt. A deactivated shirt:
-  - leaves the store's listings and pages
+  - leaves the store's listings, and its own page shows it as retired, with no way to add it to a
+    cart (so order-history links keep working)
   - is pulled from carts with the store's existing notice
   - stays viewable from the order history of every order that has it
 - **FR-011**: Every console change MUST reach shoppers on their next page load, with no restart and

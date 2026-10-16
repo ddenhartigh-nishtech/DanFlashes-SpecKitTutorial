@@ -62,6 +62,10 @@ export async function signUp(page: Page, email: string) {
   await visible(page.getByLabel("Email")).fill(email);
   await visible(page.getByLabel("Password")).fill("complicated");
   await visible(page.getByRole("button", { name: "Sign up" })).click();
+  // The nosy sign-up (009) is on: blank nosy fields get one line from Dan, then the next press
+  // signs up.
+  await expect(visible(page.getByTestId("nosy-skipped"))).toBeVisible();
+  await visible(page.getByRole("button", { name: "Sign up" })).click();
 }
 
 /** Connect (or apply) a revenue stream from the account page's form. */

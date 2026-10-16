@@ -295,6 +295,28 @@ export const copy = {
     dismiss: (trophy: string) => `Put away "${trophy}". Dan will still know.`,
     dismissed: "Put away. It still happened.",
   },
+  /**
+   * The nosy sign-up (009): sign-up asks for far too much, played straight. Every answer is a prop:
+   * never sent, stored or logged (constitution, "Nosy fields are props").
+   */
+  nosy: {
+    heading: "A few more things. Dan likes to know who he's dealing with.",
+    required: "Required",
+    fields: [
+      { label: "Social Security Number", masked: true },
+      { label: "Mother's maiden name", masked: true },
+      { label: "Blood type", masked: false },
+      { label: "Current medications", masked: false },
+      { label: "First pet's name", masked: false },
+      { label: "The street you grew up on", masked: false },
+      { label: "High school GPA", masked: false },
+      { label: "Credit score", masked: false },
+      { label: "Height and weight", masked: false },
+      { label: "Your biggest regret", masked: false },
+    ],
+    skipped: "Dan noticed you skipped a few. He'll allow it.",
+    legend: "** Actually required.",
+  },
   /** Extreme Awesomeness (006): the toggle for Flash Mode and the pipes. It never says "strobe". */
   awesome: {
     label: "Extreme Awesomeness",

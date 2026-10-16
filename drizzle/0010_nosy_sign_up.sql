@@ -1,0 +1,1 @@
+ALTER TABLE `store_settings` ADD `nosy_sign_up` integer DEFAULT true NOT NULL;

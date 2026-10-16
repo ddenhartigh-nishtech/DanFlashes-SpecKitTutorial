@@ -111,6 +111,7 @@ describe("validateSettings", () => {
     roachMotel: true,
     flashMode: true,
     pipesBackground: true,
+    nosySignUp: true,
   };
 
   it("accepts the defaults and an https base URL", () => {
@@ -150,6 +151,8 @@ describe("validateSettings", () => {
     ["flashMode", { flashMode: undefined }],
     ["pipesBackground", { pipesBackground: 1 }],
     ["pipesBackground", { pipesBackground: undefined }],
+    ["nosySignUp", { nosySignUp: "on" }],
+    ["nosySignUp", { nosySignUp: undefined }],
   ])("flags an invalid %s", (field, patch) => {
     expect(fields(validateSettings({ ...settings, ...patch } as StoreSettings))).toContain(field);
   });

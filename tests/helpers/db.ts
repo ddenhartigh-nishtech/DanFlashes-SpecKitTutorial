@@ -53,6 +53,7 @@ export function setSwitches(
       | "roachMotel"
       | "flashMode"
       | "pipesBackground"
+      | "nosySignUp"
     >
   >,
 ): void {

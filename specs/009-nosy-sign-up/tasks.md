@@ -24,7 +24,7 @@
 
 ## Phase 1: Setup
 
-- [ ] T001 Record the baseline for the PR. Main is 006's merge (dc80dd6), last verified at 610 unit
+- [X] T001 Record the baseline for the PR. Main is 006's merge (dc80dd6), last verified at 610 unit
   and integration tests, 94.79% line coverage, and 90 e2e.
 
 ---
@@ -33,20 +33,20 @@
 
 **Purpose**: the switch (data-model.md, research R1).
 
-- [ ] T002 [P] Write failing unit tests in tests/unit/catalog-validate.test.ts: `validateSettings`
+- [X] T002 [P] Write failing unit tests in tests/unit/catalog-validate.test.ts: `validateSettings`
   accepts `nosySignUp` as a boolean, and reports it when it's missing or the wrong type
-- [ ] T003 [P] Write failing integration tests:
+- [X] T003 [P] Write failing integration tests:
   - in tests/integration/settings-switches.test.ts: the switch defaults on for a row written without
     it, and round-trips off
   - in a new tests/integration/migration-0010.test.ts (`databaseBefore("0010")`, `toMatchObject` for
     the settings row): an existing `store_settings` row gains `nosy_sign_up = 1`, and
     `foreign_key_check` is clean
-- [ ] T004 Add `nosySignUp` (boolean) to `StoreSettings` in src/lib/catalog/types.ts and to
+- [X] T004 Add `nosySignUp` (boolean) to `StoreSettings` in src/lib/catalog/types.ts and to
   `settingsSchema` in src/lib/catalog/validate.ts (T002 passes)
-- [ ] T005 Extend `store_settings` in src/lib/db/schema.ts with `nosy_sign_up`: "integer (boolean),
+- [X] T005 Extend `store_settings` in src/lib/db/schema.ts with `nosy_sign_up`: "integer (boolean),
   NOT NULL, default 1". Then run `npx drizzle-kit generate --name nosy_sign_up` to produce
   drizzle/0010_nosy_sign_up.sql. Check that it only adds the column and rebuilds no table.
-- [ ] T006 Carry the switch through src/lib/data/settings.ts, scripts/seed-data.ts,
+- [X] T006 Carry the switch through src/lib/data/settings.ts, scripts/seed-data.ts,
   tests/fixtures/catalog.ts, and `setSwitches` in tests/helpers/db.ts (T003 passes)
 
 **Checkpoint**: the switch exists and defaults on, and every existing test still passes.
@@ -65,7 +65,7 @@ blank gets one line from Dan, and then he's in.
 
 ### Tests for User Story 1 (write first, watch them fail)
 
-- [ ] T007 [P] [US1] Unit tests in a new tests/unit/nosy.test.ts (research R6, R8):
+- [X] T007 [P] [US1] Unit tests in a new tests/unit/nosy.test.ts (research R6, R8):
   - **The field list**: `copy.nosy.fields` has at least 10 fields.
     - It includes the Social Security Number, mother's maiden name, blood type and current
       medications.
@@ -75,7 +75,7 @@ blank gets one line from Dan, and then he's in.
     it.") and `legend` ("** Actually required.") are there.
   - **The nudge**: `shouldNudge({ anyBlank, nudged })` is true only when a field is blank and Dan
     hasn't said his line yet.
-- [ ] T008 [P] [US1] e2e journey in a new tests/e2e/nosy-sign-up.spec.ts (desktop and phone; the phone
+- [X] T008 [P] [US1] e2e journey in a new tests/e2e/nosy-sign-up.spec.ts (desktop and phone; the phone
   at 360×780). Every nosy field gets its own distinctive sentinel, e.g. `NOSY-<field>-7Q2X`.
   - **The page** (US1-1, FR-003, FR-009):
     - the real fields first, with `**` on email and password
@@ -86,6 +86,7 @@ blank gets one line from Dan, and then he's in.
     - no `name`, and `form === null`
     - `autocomplete="off"`, `spellcheck="false"`
     - the ignore hints (`data-1p-ignore`, `data-lpignore`, `data-bwignore`, `data-form-type="other"`)
+  - *Seen failing first*: the e2e build refused to type-check until `copy.nosy` existed. Once the fields existed, the nudge journey caught a test bug: a refused sign-up resets the real form (as it always has), so the test fills it in again.
 
     The SSN and mother's maiden name inputs compute `-webkit-text-security: disc`, and the others
     don't.
@@ -107,19 +108,19 @@ blank gets one line from Dan, and then he's in.
     - `localStorage`, `sessionStorage` and the cookies don't
     - the e2e database file and its WAL (`data/e2e.db`, `data/e2e.db-wal`) don't
     - `/account` shows the name he gave, and nothing else from the form
-- [ ] T009 [US1] Update `signUp` in tests/e2e/helpers.ts. With the switch on, a blank nosy form gets
+- [X] T009 [US1] Update `signUp` in tests/e2e/helpers.ts. With the switch on, a blank nosy form gets
   Dan's line first: press Sign up, wait for `nosy-skipped`, then press it again. Every journey that
   signs up keeps checking what it checks.
 
 ### Implementation for User Story 1
 
-- [ ] T010 [US1] Create src/lib/nosy/nudge.ts (`shouldNudge`), and add `copy.nosy` to src/lib/copy.ts:
+- [X] T010 [US1] Create src/lib/nosy/nudge.ts (`shouldNudge`), and add `copy.nosy` to src/lib/copy.ts:
   - the heading and the "Required" mark
   - the ten starting fields, in the spec's order, each with `label` and `masked`
   - `skipped` and `legend`
 
   T007 passes.
-- [ ] T011 [US1] Create src/components/NosyFields.tsx (client, research R2–R5):
+- [X] T011 [US1] Create src/components/NosyFields.tsx (client, research R2–R5):
   - **The fields**: one label per field (`data-testid="nosy-field"`) wrapping its "Required" mark and
     an **uncontrolled, unnamed** `<input type="text">`. Each input has `autoComplete="off"`,
     `spellCheck={false}`, `autoCorrect="off"`, `autoCapitalize="off"` and the four ignore hints.
@@ -129,7 +130,8 @@ blank gets one line from Dan, and then he's in.
     container), and only ever reads emptiness.
   - **Clearing**: every input empties in its effect cleanup (hide or unmount) and on `pagehide`.
   - **In src/app/globals.css**: `.nosy-masked { -webkit-text-security: disc; }`
-- [ ] T012 [US1] Wire it into sign-up:
+  - *Watch out*: the Tailwind Prettier plugin strips a leading space inside a class string, so `` `${input}${masked ? " nosy-masked" : ""}` `` would have glued the class on. The ternary picks between two whole strings instead.
+- [X] T012 [US1] Wire it into sign-up:
   - **src/app/_data/auth-page.tsx** reads `getSettings` and passes `nosy={settings.nosySignUp}` to
     `AuthForm` in sign-up mode.
   - **src/components/AuthForm.tsx**, while `nosy` is on:
@@ -144,6 +146,7 @@ blank gets one line from Dan, and then he's in.
   - **While off**: the markup is as before.
   - **Last**: run the whole e2e suite. T008 passes, and every journey that signs up passes through
     T009's helper.
+  - *Result:* the 8 new journeys pass, and the whole e2e suite passes: 98 tests in 3.5 min. AuthForm owns the clearing and the "said it" flag in one stable effect, so re-renders (Dan's line appearing) never wipe the fields.
 
 **Checkpoint**: US1 is complete. Nothing typed into a nosy field reaches the store, and sign-up works
 in two presses at most.

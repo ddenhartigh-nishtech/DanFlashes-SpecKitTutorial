@@ -32,6 +32,7 @@ export function getSettings(db: Db): StoreSettings {
     roachMotel: row.roachMotel,
     flashMode: row.flashMode,
     pipesBackground: row.pipesBackground,
+    nosySignUp: row.nosySignUp,
   };
 }
 
@@ -61,6 +62,7 @@ export function saveSettings(db: Db, settings: StoreSettings): void {
     roachMotel: settings.roachMotel,
     flashMode: settings.flashMode,
     pipesBackground: settings.pipesBackground,
+    nosySignUp: settings.nosySignUp,
   };
   db.insert(storeSettings)
     .values({ id: 1, ...values })

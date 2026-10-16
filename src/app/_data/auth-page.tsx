@@ -4,6 +4,8 @@ import { currentUser } from "@/app/_data/request";
 import { AuthForm } from "@/components/AuthForm";
 import { safeNext } from "@/lib/auth/safe-next";
 import { copy } from "@/lib/copy";
+import { getSettings } from "@/lib/data/settings";
+import { getDb } from "@/lib/db/client";
 
 /** Shared body of /sign-in and /sign-up. Request-time: render inside <Suspense>. */
 export async function AuthPageBody({
@@ -32,7 +34,11 @@ export async function AuthPageBody({
         </div>
       </div>
       <div className="border-ink bg-paper border-4 p-4 shadow-[6px_6px_0_var(--color-ink)]">
-        <AuthForm mode={mode} next={next} />
+        <AuthForm
+          mode={mode}
+          next={next}
+          nosy={mode === "sign-up" && getSettings(getDb()).nosySignUp}
+        />
       </div>
     </div>
   );

@@ -44,7 +44,10 @@ export function Countdown({ kind, label }: { kind: "deal" | "hold"; label: strin
   }, []);
 
   return (
-    <p className="border-ink bg-ink text-paper inline-flex max-w-full flex-wrap items-center gap-x-3 gap-y-1 border-4 px-3 py-2 shadow-[4px_4px_0_var(--color-hot-pink)]">
+    <p
+      data-steady
+      className="border-ink bg-ink text-paper inline-flex max-w-full flex-wrap items-center gap-x-3 gap-y-1 border-4 px-3 py-2 shadow-[4px_4px_0_var(--color-hot-pink)]"
+    >
       <span className="font-display text-sm uppercase">{label}</span>
       <span
         ref={time}

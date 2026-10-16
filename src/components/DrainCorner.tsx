@@ -18,6 +18,7 @@ export async function DrainCorner() {
   if (!gauge && pops.length === 0) return null;
   return (
     <div
+      data-steady
       data-testid="drain-corner"
       className="fixed bottom-3 left-3 z-30 flex max-w-[calc(100vw-1.5rem)] flex-col-reverse items-start gap-4"
     >

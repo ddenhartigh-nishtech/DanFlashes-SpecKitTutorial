@@ -24,7 +24,8 @@
 
 @layer base {
   body {
-    background-color: var(--color-paper);
+    /* The plain field. It strobes with Extreme Awesomeness (006), unless the pipes cover it. */
+    background-color: var(--df-strobe-paper, var(--color-paper));
     color: var(--color-ink);
     font-family: var(--font-sans);
   }
@@ -68,4 +69,122 @@
 @utility neon {
   filter: drop-shadow(0 0 1px currentColor) drop-shadow(0 0 6px currentColor)
     drop-shadow(0 0 12px currentColor);
+}
+
+/*
+ * Extreme Awesomeness (006): everything keys off data-awesome="on" on <html>, which the inline
+ * <head> script sets before first paint (research R3).
+ *
+ * Flash Mode, the strobe (research R7): one stepped clock on :root cycles strobe-only variables that
+ * backgrounds and borders read. No text color ever changes, so no text can end up the color of its
+ * own backing. Each color holds 400 ms (STROBE_HOLD_MS): at most 2.5 changes a second (FR-011).
+ * Palettes and order: src/lib/awesome/strobe.ts, held to this CSS by a unit test.
+ */
+@keyframes df-strobe {
+  0% {
+    --df-strobe-paper: var(--color-highlighter);
+    --df-strobe-dark: var(--color-ink);
+    --df-strobe-edge: var(--color-hot-pink);
+  }
+  20% {
+    --df-strobe-paper: var(--color-acid);
+    --df-strobe-dark: var(--color-ultraviolet);
+    --df-strobe-edge: var(--color-electric-cyan);
+  }
+  40% {
+    --df-strobe-paper: var(--color-electric-cyan);
+    --df-strobe-dark: var(--color-ink);
+    --df-strobe-edge: var(--color-highlighter);
+  }
+  60% {
+    --df-strobe-paper: var(--color-safety-orange);
+    --df-strobe-dark: var(--color-ultraviolet);
+    --df-strobe-edge: var(--color-ultraviolet);
+  }
+  80% {
+    --df-strobe-paper: var(--color-paper);
+    --df-strobe-dark: var(--color-ink);
+    --df-strobe-edge: var(--color-acid);
+  }
+}
+
+:root[data-awesome="on"] {
+  animation: df-strobe 2000ms step-end infinite;
+}
+
+:root[data-awesome="on"] .bg-paper {
+  background-color: var(--df-strobe-paper, var(--color-paper));
+}
+
+:root[data-awesome="on"] .solid-backing {
+  background-color: var(--df-strobe-dark, var(--color-ink));
+}
+
+:root[data-awesome="on"] .border-ink {
+  border-color: var(--df-strobe-edge, var(--color-ink));
+}
+
+/* The sale, the dialogs, the corner, the pop-ups, the clocks: they never strobe (FR-012). */
+[data-steady] {
+  --df-strobe-paper: initial;
+  --df-strobe-dark: initial;
+  --df-strobe-edge: initial;
+}
+
+/*
+ * The most exciting button on the site (FR-007): a rainbow frame that never stops sliding. It moves
+ * with transform only, so the compositor runs it without repainting the page every frame.
+ */
+@keyframes df-awesome-slide {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.df-awesome-button {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  box-shadow: 0 0 10px 1px var(--color-hot-pink);
+}
+
+.df-awesome-button::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  z-index: -1;
+  width: 200%;
+  background-image: linear-gradient(
+    90deg,
+    var(--color-hot-pink),
+    var(--color-highlighter),
+    var(--color-electric-cyan),
+    var(--color-ultraviolet),
+    var(--color-acid),
+    var(--color-hot-pink),
+    var(--color-highlighter),
+    var(--color-electric-cyan),
+    var(--color-ultraviolet),
+    var(--color-acid),
+    var(--color-hot-pink)
+  );
+  animation: df-awesome-slide 3s linear infinite;
+}
+
+.df-awesome-on {
+  display: none;
+}
+
+:root[data-awesome="on"] .df-awesome-on {
+  display: inline;
+}
+
+:root[data-awesome="on"] .df-awesome-off {
+  display: none;
+}
+
+@media print {
+  :root[data-awesome="on"] {
+    animation: none;
+  }
 }

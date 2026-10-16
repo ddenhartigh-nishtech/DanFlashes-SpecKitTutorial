@@ -61,6 +61,7 @@ export function ShameDialog({ ladder, insistLabel, placeholderUrl, onClose }: Sh
 
   return (
     <dialog
+      data-steady
       ref={ref}
       data-testid="shame-dialog"
       data-round={loop.round}

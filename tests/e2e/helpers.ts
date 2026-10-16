@@ -8,21 +8,26 @@ import { copy } from "../../src/lib/copy";
  */
 export const test = base.extend({
   page: async ({ page }, provide) => {
-    await page.addInitScript(() => {
-      try {
-        if (sessionStorage.getItem("df-pop-arm")) {
-          sessionStorage.removeItem("df-pop-arm");
-          sessionStorage.setItem("df-pop-next", String(Date.now() - 1));
-        } else if (sessionStorage.getItem("df-pop-next") === null) {
-          sessionStorage.setItem("df-pop-next", String(Date.now() + 3_600_000));
-        }
-      } catch {
-        // no storage: nothing to schedule
-      }
-    });
+    await pushPopsAway(page);
     await provide(page);
   },
 });
+
+/** The fixture's pop-up schedule, for pages a test opens itself (`context.newPage()`). */
+export async function pushPopsAway(page: Page) {
+  await page.addInitScript(() => {
+    try {
+      if (sessionStorage.getItem("df-pop-arm")) {
+        sessionStorage.removeItem("df-pop-arm");
+        sessionStorage.setItem("df-pop-next", String(Date.now() - 1));
+      } else if (sessionStorage.getItem("df-pop-next") === null) {
+        sessionStorage.setItem("df-pop-next", String(Date.now() + 3_600_000));
+      }
+    } catch {
+      // no storage: nothing to schedule
+    }
+  });
+}
 
 /**
  * Make a pop-up due on the next page load. Armed before the page's scripts run, so the current
@@ -120,3 +125,78 @@ export async function confirmTwice(page: Page) {
   await expect(dialog).toContainText(copy.roachMotel.second);
   await dialog.getByRole("button", { name: /^Yes/ }).click();
 }
+
+/** The Extreme Awesomeness toggle in the header (006). */
+export const awesomeButton = (page: Page) =>
+  visible(page.locator("header").getByTestId("extreme-awesomeness"));
+
+/**
+ * Every visible element with its own text, keyed by its place in the page, and its contrast with
+ * the nearest backing behind it (006 analysis I1). Text sitting straight on the page field is left
+ * out: that's the pipes' text-backing audit (FR-016).
+ */
+export async function textContrasts(page: Page): Promise<Record<string, number>> {
+  return page.evaluate(() => {
+    const rgba = (c: string) => (c.match(/[\d.]+/g) ?? []).map(Number);
+    const lum = ([r, g, b]: number[]) => {
+      const ch = (v: number) => {
+        const s = v / 255;
+        return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+      };
+      return 0.2126 * ch(r) + 0.7152 * ch(g) + 0.0722 * ch(b);
+    };
+    const out: Record<string, number> = {};
+    const seen = new Map<string, number>();
+    for (const el of document.body.querySelectorAll("*")) {
+      const own = [...el.childNodes]
+        .filter((n) => n.nodeType === Node.TEXT_NODE)
+        .map((n) => n.textContent ?? "")
+        .join("")
+        .trim();
+      if (!own || !(el as HTMLElement).checkVisibility?.({ opacityProperty: true })) continue;
+      // Keyed by what it says, so the same text matches across samples and page loads.
+      const base = `${el.tagName}|${own.slice(0, 40)}`;
+      const n = (seen.get(base) ?? 0) + 1;
+      seen.set(base, n);
+      let backing: Element | null = el;
+      while (backing && backing !== document.body) {
+        const bg = rgba(getComputedStyle(backing).backgroundColor);
+        if (bg.length >= 3 && (bg[3] ?? 1) > 0) break;
+        backing = backing.parentElement;
+      }
+      if (!backing || backing === document.body) continue;
+      const [a, b] = [
+        lum(rgba(getComputedStyle(el).color)),
+        lum(rgba(getComputedStyle(backing).backgroundColor)),
+      ];
+      out[`${base}#${n}`] = (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+    }
+    return out;
+  });
+}
+
+/** When an element's background color changed, sampled every `everyMs` for `forMs`. */
+export async function backgroundChanges(locator: Locator, forMs: number, everyMs = 50) {
+  return locator.evaluate(
+    (el, { forMs, everyMs }) =>
+      new Promise<number[]>((resolve) => {
+        const changes: number[] = [];
+        let last = getComputedStyle(el).backgroundColor;
+        const start = performance.now();
+        const tick = () => {
+          const now = performance.now();
+          const bg = getComputedStyle(el).backgroundColor;
+          if (bg !== last) changes.push(now - start);
+          last = bg;
+          if (now - start < forMs) setTimeout(tick, everyMs);
+          else resolve(changes);
+        };
+        setTimeout(tick, everyMs);
+      }),
+    { forMs, everyMs },
+  );
+}
+
+/** The most changes in any 1-second window. */
+export const mostChangesInASecond = (changes: number[]) =>
+  Math.max(0, ...changes.map((t) => changes.filter((u) => u >= t && u < t + 1000).length));

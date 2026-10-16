@@ -100,6 +100,7 @@ async function AccountContents() {
             <ul data-testid="flash-history" className="border-ink divide-ink divide-y-2 border-4">
               {entries.map((entry) => (
                 <li
+                  data-steady
                   key={entry.id}
                   data-testid="flash-entry"
                   className="bg-paper flex flex-wrap items-center justify-between gap-2 p-3"

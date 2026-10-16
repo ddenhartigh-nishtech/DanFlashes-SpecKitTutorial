@@ -29,6 +29,8 @@ export const SEED: CatalogFixture = {
     socialProof: true,
     preCheckedAddOns: true,
     roachMotel: true,
+    flashMode: true,
+    pipesBackground: true,
     flashCreditPresetsUsd: ["500.00", "1000.00", "5000.00"],
     mediaBaseUrl: "",
   },

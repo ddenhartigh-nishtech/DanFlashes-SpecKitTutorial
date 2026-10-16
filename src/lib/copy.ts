@@ -295,6 +295,12 @@ export const copy = {
     dismiss: (trophy: string) => `Put away "${trophy}". Dan will still know.`,
     dismissed: "Put away. It still happened.",
   },
+  /** Extreme Awesomeness (006): the toggle for Flash Mode and the pipes. It never says "strobe". */
+  awesome: {
+    label: "Extreme Awesomeness",
+    off: "Off",
+    on: "Maximum",
+  },
   /** The roach-motel cart (005 US2): shirts check in, but they don't check out. */
   roachMotel: {
     first: "Are you sure?",

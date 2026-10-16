@@ -114,6 +114,7 @@ export function CheckoutForm({
             return (
               <div
                 key={addOn.id}
+                data-steady
                 data-testid="add-on"
                 className="border-ink bg-paper flex flex-col gap-1 border-2 p-2"
               >

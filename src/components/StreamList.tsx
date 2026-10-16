@@ -26,6 +26,7 @@ export function StreamList({
     <ul className="flex flex-col gap-3">
       {streams.map((stream) => (
         <li
+          data-steady
           key={stream.id}
           data-testid="stream"
           className={`border-ink bg-paper flex flex-col gap-2 border-4 p-3 shadow-[4px_4px_0_var(--color-ink)] ${stream.connected && !stream.done ? "" : "opacity-60"}`}

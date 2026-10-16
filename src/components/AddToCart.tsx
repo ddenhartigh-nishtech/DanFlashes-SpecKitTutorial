@@ -46,6 +46,7 @@ export function AddToCart({ slug, shame = null, placeholderUrl = null }: AddToCa
       </fieldset>
 
       <button
+        data-steady
         type="submit"
         disabled={pending}
         className="font-display bg-hot-pink text-paper min-h-12 px-6 text-lg uppercase shadow-[4px_4px_0_var(--color-ink)] disabled:opacity-60"

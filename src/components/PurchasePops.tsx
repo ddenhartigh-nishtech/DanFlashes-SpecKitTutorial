@@ -94,6 +94,7 @@ export function PurchasePops({ candidates }: { candidates: PopShirt[] }) {
   };
   return (
     <div
+      data-steady
       data-testid="purchase-pop"
       role="status"
       className={`border-ink bg-highlighter text-ink absolute inset-x-0 top-full z-50 mt-1 flex items-start gap-3 border-b-4 px-4 py-3 font-bold shadow-[0_4px_0_var(--color-hot-pink)] transition duration-300 md:fixed md:inset-x-auto md:top-auto md:right-3 md:bottom-3 md:mt-0 md:w-80 md:border-4 md:shadow-[4px_4px_0_var(--color-hot-pink)] ${

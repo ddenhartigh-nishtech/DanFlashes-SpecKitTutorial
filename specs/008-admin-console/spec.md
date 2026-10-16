@@ -615,5 +615,6 @@ built test-first (constitution VI).
 - **Constitution note.** As written, principle I ("Every page… MUST target exactly one customer")
   and principle V ("The UI MUST be as loud as the shirts") cover every page. The tranquil console
   (FR-005) needs an amendment that scopes them to shopper pages and adds the console's own rule:
-  calm, and still working from 360px. It will be batched with the pending K1 clarification (V,
-  "It starts off"), and the owner ratifies it before the plan's Constitution Check.
+  calm, and still working from 360px. That amendment is drafted as constitution v4.1.0, batched
+  with the pending K1 clarification (V, "It starts off"). The owner ratifies it by merging this
+  feature's pull request.

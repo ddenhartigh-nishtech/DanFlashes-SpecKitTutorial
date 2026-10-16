@@ -1,3 +1,22 @@
+<!--
+Sync Impact Report
+- Version change: 4.0.0 → 4.1.0 (MINOR: a rule added for a new surface; no shopper-facing MUST is
+  removed or weakened)
+- Modified principles:
+  - I. Built for the Dan Flashes Guy: "Every page" → "Every shopper-facing page". The owner's
+    console didn't exist when this was written (008 FR-005).
+  - V. Maximum Visual Assault: "The UI" → "The shopper's UI". Added "The back office is calm": the
+    owner's console is tranquil, runs no tactic or Flash Mode, and still works from 360px.
+  - V. Flash Mode (006 analysis K1, PATCH-level wording): "It starts off" now reads "off for every
+    shopper until he first turns it on, and then his browser remembers his choice".
+- Why MINOR and not MAJOR: every MUST a shopper experiences is unchanged. A strict reading could call
+  narrowing "every page" a redefinition (5.0.0); the owner decides at ratification.
+- Added sections: none
+- Removed sections: none
+- Templates requiring updates: none (read at runtime) ✅
+- Follow-up TODOs: the owner ratifies v4.1.0 by merging the 008 pull request
+-->
+
 # Dan Flashes Constitution
 
 > Complicated shirts. Complicated prices. All sales final.
@@ -6,7 +25,7 @@
 
 ### I. Built for the Dan Flashes Guy
 
-Every page, line of copy, and design decision MUST target exactly one customer: a maladjusted,
+Every shopper-facing page, line of copy, and design decision MUST target exactly one customer: a maladjusted,
 socially awkward, middle-aged white guy who is certain the right shirt will finally make the room
 respect him. He has spent his whole per diem on shirts. He's exhausted. He is not stopping.
 
@@ -89,17 +108,23 @@ believable.
 
 ### V. Maximum Visual Assault
 
-Subtle is for other stores. The UI MUST be as loud as the shirts: clashing colors, bold type, motion
+Subtle is for other stores. The shopper's UI MUST be as loud as the shirts: clashing colors, bold type, motion
 everywhere, and patterns on top of patterns.
 
-- **Flash Mode.** The site MUST offer a strobe/flash mode behind a toggle. It starts off, and the
-  button that turns it on MUST be the most exciting button on the site.
+- **Flash Mode.** The site MUST offer a strobe/flash mode behind a toggle. It starts off for every
+  shopper until he first turns it on, and then his browser remembers his choice. The button that
+  turns it on MUST be the most exciting button on the site.
 - **The sale still closes.** The price, the tier badge, and Add to Cart MUST stay readable over
   any background. Go wild everywhere else. Nobody buys a shirt when he can't find the price.
 - **Loud on every screen.** Every page MUST work from a 360px-wide phone up to a desktop. He shops
   from the food court too.
+- **The back office is calm.** The owner's console is the one place exempt from Principle I's
+  voice and from this principle's loudness. It MUST be tranquil: nothing flashes, moves, or pops
+  up, and no manipulation tactic or Flash Mode runs there. It still MUST work from a 360px-wide
+  phone up.
 
-Rationale: the brand is literally called Dan _Flashes_.
+Rationale: the brand is literally called Dan _Flashes_. Dan is loud in public. In his own office,
+he can finally relax.
 
 ### VI. Fully Tested, Money Math First (NON-NEGOTIABLE)
 
@@ -198,4 +223,4 @@ Rationale: the complexity goes in the product, never in the architecture.
   and `/speckit-analyze`. A violation needs either a Complexity Tracking justification or an amendment.
 - Like every Dan Flashes sale, this constitution is final until amended.
 
-**Version**: 4.0.0 | **Ratified**: 2026-10-12 | **Last Amended**: 2026-10-13
+**Version**: 4.1.0 | **Ratified**: 2026-10-12 | **Last Amended**: 2026-10-16

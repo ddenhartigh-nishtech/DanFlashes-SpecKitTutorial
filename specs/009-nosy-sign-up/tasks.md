@@ -155,24 +155,37 @@ in two presses at most.
 
 ## Phase 4: Polish & Cross-Cutting Concerns
 
-- [ ] T013 [P] README.md: add `nosy_sign_up` to the switches table, and note `npm run db:migrate` for
+- [X] T013 [P] README.md: add `nosy_sign_up` to the switches table, and note `npm run db:migrate` for
   0010
-- [ ] T014 Check against `next dev` under React Strict Mode (002 R7, known gap):
+- [X] T014 Check against `next dev` under React Strict Mode (002 R7, known gap):
   - Dan's line shows once, and the second press signs up
   - the fields clear on leaving
   - no hydration warnings
   - a clean console
-- [ ] T015 Constitution VII spot check: run Lighthouse (mobile, applied throttling, production build,
+  - *Result:* clean, under `next dev`. The fields cleared on an in-app trip to About and back. Dan's line showed exactly once, and the second press signed up. There were no console errors or warnings.
+- [X] T015 Constitution VII spot check: run Lighthouse (mobile, applied throttling, production build,
   the installed Chrome) on `/sign-up` with the switch on, twice. It must have LCP ≤ 2.5 s and
   CLS ≤ 0.1, with TBT noted (SC-005).
-- [ ] T016 Run quickstart.md scenarios 1–12 and note the results.
+  - *Result* (`/sign-up`, as a guest, two runs, with the machine's benchmark index at 2126 and 2787): LCP 1.8 / 2.0 s, CLS 0 / 0, TBT 260 / 290 ms. Within budget.
+- [X] T016 Run quickstart.md scenarios 1–12 and note the results.
   - **Scripted**, against a production build on a scratch `db:reset` copy, with "Studio" edits made
     straight in SQLite, as in 005 and 006.
   - **Scenario 12** (analysis C1, FR-002, SC-004): flip `nosy_sign_up` to 0. `/sign-up` must show no
     nosy fields, no `**` and no legend, and sign up on the first press. Then flip it back.
   - **Scenario 6** (autofill and password managers) stays a hand check in a real browser profile.
-- [ ] T017 Run `npm run format`, then `npm run verify`. It must be fully green, with line coverage
+  - *Result:* all pass. The e2e journeys cover 1, 2, 4, 5, 7, 10 and 11, and the rest were scripted on a production build against a scratch database:
+    - **3**: every nosy field filled signs up on the first press.
+    - **8**: a short password, then a taken email, show the real errors as before, with Dan's line at most once.
+    - **9**: the checkout gate shows the same 10 nosy fields, then goes on to checkout.
+    - **12**: `nosy_sign_up = 0` means no nosy fields, no `**` and no legend, and the first press signs up.
+  - Scenario 6 (the browser's autofill and real password managers) is left for the owner to check by hand.
+- [X] T017 Run `npm run format`, then `npm run verify`. It must be fully green, with line coverage
   ≥ 90% on `src/lib`, including src/lib/nosy/.
+  - *Result:* green.
+    - Unit and integration: 64 files and 621 tests.
+    - Coverage on `src/lib`: 94.8% lines, 93.04% branches. src/lib/nosy/ is at 100%.
+    - e2e: 98 passed in 4.1 min.
+  - The run started right after `npm run format` failed to start Vitest at all ("Cannot read properties of undefined (reading 'config')" in every suite), as it did once during 006. The re-run was clean.
 
 ---
 

@@ -74,6 +74,7 @@ npm run catalog:audit   # checks the catalog: errors exit 1, warnings exit 0
   | `roach_motel` | on | Adding takes one click. Removing a line, or lowering its quantity, asks "Are you sure?" and then "Are you sure sure?". The yes buttons follow confirmshaming. Removals the store makes itself never ask. |
   | `flash_mode` | on | Flash Mode (constitution V), the strobe that the shopper's **Extreme Awesomeness** button turns on. Backgrounds and borders step through the store's colors, at most 2.5 times a second. Prices, tier badges, Add to Cart and money rows never change, and no text color ever does. |
   | `pipes_background` | on | Also turned on by Extreme Awesomeness: the old office "3D Pipes" screensaver grows behind every page on a black field, in its classic colors, and clears when the screen fills. It never covers or blocks anything. |
+  | `nosy_sign_up` | on | Sign-up asks for far too much after the real fields: Social Security Number, mother's maiden name, blood type, current medications and more, each marked "Required". They're props: unnamed, outside the form, no autofill. Nothing typed into them is ever sent, stored or logged. Blanks get one line from Dan ("He'll allow it."), and the next press signs up. Email and password carry `**`: "Actually required." After pulling 009, run `npm run db:migrate` (0010). |
 
   **Extreme Awesomeness** is the shopper's own toggle, in the header of every page. It starts off,
   applies at once, and his browser remembers it (every tab, later visits). It's never sent to the

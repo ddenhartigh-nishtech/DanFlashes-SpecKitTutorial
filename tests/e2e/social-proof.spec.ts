@@ -34,6 +34,8 @@ test.describe("US3 — fabricated social proof", () => {
     await expect(pop).toHaveCount(1);
     await expect(pop).toHaveText(someone);
     await expect(pop.getByRole("link")).toHaveAttribute("href", /^\/shirts\/[a-z0-9-]+$/);
+    // Measure it at rest: mid slide-in, it's a few pixels short of where it lands.
+    await pop.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
     const box = (await pop.boundingBox())!;
     const viewport = page.viewportSize()!;
     if (phone) {

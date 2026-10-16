@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { foundAnother, stockLine } from "@/lib/urgency/scarcity";
+import { cartStockLine, foundAnother, stockLine } from "@/lib/urgency/scarcity";
 
 describe("stockLine", () => {
   const shirt = (patch: Partial<{ isBland: boolean; active: boolean; boughtBefore: boolean }>) => ({
@@ -42,5 +42,19 @@ describe("foundAnother", () => {
     [{ previous: 0, next: 1, isBland: false }, false, false], // switch off
   ] as const)("%o (on: %s) → %s", (change, on, expected) => {
     expect(foundAnother(change, on)).toBe(expected);
+  });
+});
+
+describe("cartStockLine (owner, 2026-10-16)", () => {
+  it.each([
+    ["scarce", 1, "scarce"], // the last one, in his cart
+    ["again", 1, "again"],
+    ["scarce", 2, "few"], // more than one in the cart: Dan found a few more
+    ["again", 5, "few"],
+    ["scarce", 99, "few"],
+    ["plenty", 5, "plenty"], // nobody wants these, however many
+    [null, 5, null], // switch off, or retired
+  ] as const)("%s at quantity %i → %s", (line, quantity, expected) => {
+    expect(cartStockLine(line, quantity)).toBe(expected);
   });
 });

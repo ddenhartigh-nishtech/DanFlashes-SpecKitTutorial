@@ -81,10 +81,10 @@ describe("addToCart: 'Oh wait, we found another one!'", () => {
   });
 });
 
-describe("updateCartItem: found another one only on a raise", () => {
-  it("says it on a raise, and nothing on a cut, an unchanged quantity, or a remove", () => {
+describe("updateCartItem: the cart line says it instead (owner, 2026-10-16)", () => {
+  it("says nothing on a raise, a cut, an unchanged quantity, or a remove", () => {
     const { update } = guestWithGeoRiot();
-    expect(update(3)).toEqual({ ok: true, itemCount: 3, message: FOUND });
+    expect(update(3)).toEqual({ ok: true, itemCount: 3 });
     expect(update(2)).toEqual({ ok: true, itemCount: 2 });
     expect(update(2)).toEqual({ ok: true, itemCount: 2 });
     expect(update(0)).toEqual({ ok: true, itemCount: 0 });

@@ -20,7 +20,7 @@ import { getSettings } from "@/lib/data/settings";
 import { toShopperShirt } from "@/lib/data/shirts";
 import { getDb } from "@/lib/db/client";
 import { showCountdown } from "@/lib/urgency/countdown";
-import type { StockLine as Line } from "@/lib/urgency/scarcity";
+import { cartStockLine, type StockLine as Line } from "@/lib/urgency/scarcity";
 import { labelFor } from "@/lib/shaming/labels";
 
 export const metadata: Metadata = { title: copy.cart.title };
@@ -94,7 +94,7 @@ async function CartContents() {
               line={line}
               placeholderUrl={placeholderUrl}
               removeLabel={removeLabel}
-              stock={stockOf(line.shirt)}
+              stock={cartStockLine(stockOf(line.shirt), line.quantity)}
               roachMotel={settings.roachMotel}
               confirmshaming={settings.confirmshaming}
             />

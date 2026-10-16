@@ -306,6 +306,7 @@ export const copy = {
   urgency: {
     scarce: "Only 1 left!",
     again: "Just kidding, we actually found another one! One more left!",
+    fewMore: "You're lucky, we actually found a few more!",
     plenty: "Plenty left. Nobody wants these.",
     foundAnother: "Oh wait, we found another one!",
     deal: "This price won't last.",

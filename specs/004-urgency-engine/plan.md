@@ -11,8 +11,8 @@ by default). None of them touches a price, a total, or what can be bought.
 
 1. **Fake scarcity.** "Only 1 left!" appears on every shirt card, beside the price on the detail
    page, and on each cart line. Bland shirts get "Plenty left. Nobody wants these." instead.
-   - Every add, and every quantity raise in the cart, adds "Oh wait, we found another one!" to the
-     action's confirmation.
+   - Every add adds "Oh wait, we found another one!" to the action's confirmation. A cart line
+     holding more than one says "You're lucky, we actually found a few more!" (owner, 2026-10-16).
    - It's pure copy. There's no inventory (R2, R3).
 2. **Countdown timers.** One shared 10-minute clock per browser, in minutes, seconds and milliseconds.
    - It shows as a deal clock beside the price ("This price won't last.") and as a cart hold on the
@@ -106,13 +106,13 @@ src/
 │   ├── SocialProof.tsx               # new (server): "looking right now" + "just bought this pattern"
 │   ├── PurchasePops.tsx              # new (client): the 20–40 s pop-ups, (x), placement (R6)
 │   ├── SiteHeader.tsx                # mounts <PurchasePops/> in Suspense (rides under the sticky header on phones)
-│   └── CartQuantityForm.tsx          # shows a success message ("found another one")
+│   └── CartQuantityForm.tsx          # failures only (owner, 2026-10-16)
 └── lib/
     ├── urgency/scarcity.ts           # new (pure): stockLine
     ├── urgency/countdown.ts          # new (pure): COUNTDOWN_MS, remainingMs, formatCountdown, showCountdown
     ├── urgency/social-proof.ts       # new (pure): lookingNow, buyerFor, socialProofFor
     ├── urgency/pops.ts               # new (pure): nextDelay, popDue (the schedule)
-    ├── actions/cart.ts               # "found another one" on add and on a raise
+    ├── actions/cart.ts               # "found another one" on add
     ├── cart/cart.ts                  # updateItem reports the quantity it replaced
     ├── data/settings.ts, db/schema.ts, catalog/types.ts, catalog/validate.ts   # the three switches
     └── copy.ts                       # urgency: stock lines, found, deal/hold, looking, cast, purchases

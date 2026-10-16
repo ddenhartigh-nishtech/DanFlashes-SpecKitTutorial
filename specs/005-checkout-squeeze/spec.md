@@ -12,7 +12,8 @@
 - 001-core-storefront: the cart, checkout, orders and their history, and the store settings
 - 002-brand-pages-and-shaming: confirmshaming labels, and the switch-per-tactic pattern
 - 003-revenue-streams-per-diem: the Flash Credit split, and the per diem drain
-- 004-urgency-engine: the cart hold, and the cart's "found another one"
+- 004-urgency-engine: the cart hold, and the cart line's stock line (owner, 2026-10-16: "a few
+  more" past one, and no message on a raise; recorded in 004's spec)
 
 ## Clarifications
 

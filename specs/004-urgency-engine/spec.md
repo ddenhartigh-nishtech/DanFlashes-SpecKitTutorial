@@ -31,8 +31,8 @@
 
   The countdown stays as it is.
 - Owner addition: when he adds a shirt that's "Only 1 left!", the store adds **"Oh wait, we found
-  another one!"** It says it again whenever he raises the quantity in his cart. There's still only 1
-  left.
+  another one!"** ~~It says it again whenever he raises the quantity in his cart.~~ (Replaced
+  2026-10-16: the cart line says "a few more" instead, see below.) There's still only 1 left.
 - Q: On a phone, where should the fake-purchase pop-ups appear, given that the bottom-left corner
   already holds the per diem gauge and GONE pops? → A: **At the top on phones.**
   - On phones (the layout with the Menu button), each pop-up is a short, full-width banner that drops
@@ -42,13 +42,23 @@
   warning becomes "Just kidding, we actually found another one! One more left!" everywhere he sees
   it. A pop-up covering something briefly is fine, as long as it's easy to dismiss.
 
+### Session 2026-10-16
+
+- Owner feedback (during 005): **past one in the cart, Dan found a few more.**
+  - "One more left!" doesn't hold up once he's raised a line from 1 to 5. So a cart line holding 2 or
+    more reads "You're lucky, we actually found a few more!" in place of "Only 1 left!" or "Just kidding…". At 1 it's unchanged.
+  - The green "Oh wait, we found another one!" under the line after a raise is gone: the line's own
+    stock line already says it. A raise in the cart has no message.
+  - Adding from a shirt's page still says "Oh wait, we found another one!". Shirt pages and cards
+    are unchanged, so there's still only 1 left everywhere but his cart.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Fake Scarcity (Priority: P1)
 
 He's looking at Geo Riot. Right under the price, in letters you could read from the food court: "Only
 1 left!" He'd better move. He adds it to his cart. "Oh wait, we found another one!" He bumps the
-quantity to 2, and they found another one. The cart still says only 1 left. He buys them. Tomorrow he
+quantity to 2, and the cart line beams: "You're lucky, we actually found a few more!" He buys them. Tomorrow he
 comes back, and there's still only 1 left. There is always only 1 left.
 
 **Why this priority**: it's the cheapest tactic to build and the one he sees on every shirt. The other
@@ -57,7 +67,8 @@ two stand on their own, but this one makes the whole catalog feel like it's runn
 **Independent Test**: with the scarcity switch on, check that:
 - every active, non-bland shirt says "Only 1 left!" on its detail page, its listing card, and its cart
   line
-- adding it, or raising its quantity, adds "Oh wait, we found another one!"
+- adding it adds "Oh wait, we found another one!", and a cart line holding more than one says
+  "You're lucky, we actually found a few more!"
 - the number never changes, whatever anyone buys
 - bland shirts are the opposite: plenty left, and nobody looking
 - adding several, checking out, and paying all work exactly as before
@@ -69,11 +80,12 @@ two stand on their own, but this one makes the whole catalog feel like it's runn
    **Then** "Only 1 left!" shows beside the price and Add to Cart.
 2. **Given** the listing, **When** he browses, **Then** every active, non-bland shirt's card carries the
    same warning.
-3. **Given** the shirt is in his cart in any quantity, **When** he views the cart, **Then** its line still
-   says "Only 1 left!", and he can still set any quantity from 1 to 99.
+3. **Given** the shirt is in his cart, **When** he views the cart, **Then** a line holding 1 still says
+   "Only 1 left!", a line holding 2 or more says "You're lucky, we actually found a few more!", and he can
+   still set any quantity from 1 to 99.
 4. **Given** "Only 1 left!", **When** he adds the shirt to his cart, **Then** the confirmation also
-   says "Oh wait, we found another one!" **When** he raises its quantity in the cart, **Then** the
-   cart says it again.
+   says "Oh wait, we found another one!" **When** he raises its quantity in the cart, **Then** no
+   message appears; the line's stock line has its say (AC3).
 5. **Given** he has bought the shirt, **When** he views it again (its card, its page, or a cart line),
    **Then** it says "Just kidding, we actually found another one! One more left!" It never sells out,
    and no other shopper's purchase changes anything.
@@ -173,8 +185,8 @@ activity over time, which makes it the most to build.
 - **The countdown hits zero at checkout**: it restarts and checkout carries on as normal.
 - **An empty cart**: there's nothing to hold, so the cart and checkout show no hold countdown. Shirt
   pages still show the deal clock.
-- **Found another one, again and again**: every add and every raise says it. Lowering the quantity, or
-  removing the shirt, says nothing.
+- **Found another one, again and again**: every add says it. In the cart, the line itself says it:
+  past 1, it found a few more. A raise, a cut and a remove have no message of their own.
 - **A pop-up over a button**: a pop-up may briefly cover the page, a price or Add to Cart included,
   for about 6 seconds or until its (x). It never covers the header or the bottom-left corner.
   - On a wider screen it sits in the bottom-right corner.
@@ -222,13 +234,15 @@ activity over time, which makes it the most to build.
 - **FR-007**: While it's on, every active, non-bland shirt MUST say "Only 1 left!":
   - on its detail page, beside the price and Add to Cart
   - on its shirt card, wherever one appears (the listing, the home page, About's Exhibit A)
-  - on its cart line
+  - on its cart line, while the line holds 1. A cart line holding 2 or more MUST instead say
+    "You're lucky, we actually found a few more!", whether or not he's bought it before (owner, 2026-10-16).
 - **FR-008**: There MUST always be exactly 1 left. It never says sold out, and it never limits the
   quantity (1 to 99, as before). Once he has bought a shirt, its warning MUST read "Just kidding, we
   actually found another one! One more left!" wherever "Only 1 left!" would. Only his own orders
   count; nothing other shoppers buy changes anything.
-- **FR-009**: Adding a shirt that says "Only 1 left!", or raising its quantity in the cart, MUST add
-  "Oh wait, we found another one!" to the confirmation. The warning stays "Only 1 left!".
+- **FR-009**: Adding a shirt that says "Only 1 left!" MUST add "Oh wait, we found another one!" to
+  the confirmation. The warning on its page stays "Only 1 left!". Raising its quantity in the cart has
+  no message of its own (owner, 2026-10-16); the cart line's warning follows FR-007.
 - **FR-010**: A BLAND shirt MUST instead say "Plenty left. Nobody wants these." wherever the warning
   would be, and adding it never finds another one.
 

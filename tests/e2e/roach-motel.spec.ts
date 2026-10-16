@@ -56,7 +56,7 @@ test.describe("US2 — roach-motel cart", () => {
     const update = line.getByRole("button", { name: copy.cart.update });
     await qty.fill("3");
     await update.click();
-    await expect(line.getByText(copy.urgency.foundAnother)).toBeVisible();
+    await expect(line.getByTestId("stock-line")).toHaveText(copy.urgency.fewMore);
     await expect(dialog(page)).toHaveCount(0);
     await qty.fill("2");
     await update.click();

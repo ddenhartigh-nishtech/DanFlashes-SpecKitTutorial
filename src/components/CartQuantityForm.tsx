@@ -69,11 +69,6 @@ export function CartQuantityForm({
             {state.message}
           </p>
         ) : null}
-        {state?.ok && state.message ? (
-          <p role="status" className="bg-acid border-ink border-2 px-2 text-sm font-bold">
-            {state.message}
-          </p>
-        ) : null}
       </form>
     </ConfirmTwice>
   );

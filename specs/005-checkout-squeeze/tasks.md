@@ -279,6 +279,42 @@ sure?". Only the second yes submits, and backing out changes nothing. Adding and
 
 ---
 
+## Phase 6: Owner Feedback (2026-10-16): The Cart Line Found a Few More
+
+**Purpose**: the owner tried the roach motel and said the mechanics are good. But "One more left!"
+doesn't hold up once a line goes from 1 to 5, and the green "Oh wait, we found another one!" under
+the line repeats what the orange stock line already says. This changes 004's fake scarcity, recorded
+in specs/004-urgency-engine/spec.md (Session 2026-10-16; FR-007, FR-009, US1 AC3, AC4).
+
+- [X] T026 Tests first, and watch them fail:
+  - tests/unit/urgency-scarcity.test.ts: `cartStockLine(line, quantity)` turns "scarce" and "again"
+    into "few" at 2 or more. It leaves 1 alone, "plenty" alone, and null alone.
+  - tests/integration/cart-found-another.test.ts and tests/integration/actions-cart.test.ts: a
+    raise in `updateCartItemCore` has no message.
+  - tests/e2e/fake-scarcity.spec.ts and tests/e2e/roach-motel.spec.ts: the line reads "You're
+    lucky, we actually found a few more!" at 3 and at 2, with no "found another one" under it.
+- [X] T027 Make them pass:
+  - `cartStockLine` and the "few" `StockLine` in src/lib/urgency/scarcity.ts
+  - `copy.urgency.fewMore` ("You're lucky, we actually found a few more!") in src/lib/copy.ts
+  - src/components/StockLine.tsx renders it
+  - src/app/cart/page.tsx passes each line's quantity
+  - `updateCartItemCore` in src/lib/actions/cart.ts returns no message
+  - src/components/CartQuantityForm.tsx drops its success bar and keeps failures. Adding from a
+    shirt's page still says "Oh wait, we found another one!".
+- [X] T028 Update 004's spec (an owner note; FR-007, FR-009, US1 AC3, AC4, the edge case), and its
+  contracts, quickstart row 4, research R3, data model and plan, plus the README switches table.
+- [X] T029 Run `npm run format`, then `npm run verify`. It must be fully green.
+  - *Result:* green.
+    - Unit and integration: 57 files and 569 tests.
+    - Coverage on `src/lib`: 94.87% lines, 93.27% branches.
+    - e2e: 80 passed in 2.7 min.
+  - The first run failed four phone tests while a `next dev` server was also running. Three were
+    slow adds ("Adding…" past 15 s) and passed on a re-run.
+  - The fourth, 004's social-proof check, was a real race: it measured the phone pop-up mid
+    slide-in (2.77 px off). It now waits for the animation to finish, and passed 6/6.
+
+---
+
 ## Dependencies & Execution Order
 
 - **Setup (T001)** comes first.
@@ -293,6 +329,7 @@ sure?". Only the second yes submits, and backing out changes nothing. Adding and
 
   Do these sequentially.
 - **Polish (T021–T025)** comes after both stories.
+- **Owner feedback (T026–T029)** comes after Polish. T026 first, then T027 → T028 → T029.
 
 ### Parallel opportunities
 

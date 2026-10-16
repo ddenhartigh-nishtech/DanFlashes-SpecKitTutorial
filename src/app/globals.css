@@ -85,6 +85,14 @@
  */
 
 /*
+ * A picked option (a size, a top-up amount) never strobes: it holds its black with yellow text.
+ * A yellow frame makes it stand out on the black field and on every strobe color (owner).
+ */
+:root[data-awesome="on"] :checked ~ .border-ink {
+  border-color: var(--color-highlighter);
+}
+
+/*
  * The most exciting button on the site (FR-007): a rainbow frame that never stops chasing. It hops
  * 2.5 times a second, like mall signage, rather than sliding at 60 frames a second: a smooth slide
  * on every page doubled the e2e suite's time in software-rendered headless Chromium. It moves with

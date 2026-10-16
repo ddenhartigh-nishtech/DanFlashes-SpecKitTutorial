@@ -6,6 +6,11 @@ const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
+  experimental: {
+    // The e2e build (and so `npm run verify`) always compiles fresh: its cached build once served
+    // globals.css without a rule added minutes earlier (006). Other builds keep the cache.
+    turbopackFileSystemCacheForBuild: !process.env.NEXT_DIST_DIR,
+  },
   turbopack: {
     rules: {
       "*.css": {

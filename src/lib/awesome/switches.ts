@@ -1,4 +1,4 @@
-import { fieldStrobeCss } from "@/lib/awesome/strobe";
+import { fieldStrobeCss, STROBE_EXCLUDE } from "@/lib/awesome/strobe";
 import type { StoreSettings } from "@/lib/catalog/types";
 
 const ON = ':root[data-awesome="on"]';
@@ -13,11 +13,12 @@ export function switchOffCss(
 ): string {
   const rules: string[] = [];
   if (!settings.flashMode) {
-    // The <head> script still sets the first step: hold every strobing color at its normal value.
+    // The <head> script still sets the first step: hold what the strobe would recolor at its normal
+    // color. Only that: a picked size keeps its own black (STROBE_EXCLUDE).
     rules.push(
-      `${ON} :is(.bg-paper,.field-backing){background-color:var(--color-paper)!important}`,
-      `${ON} .solid-backing{background-color:var(--color-ink)!important}`,
-      `${ON} :is(.border-ink,.field-backing){border-color:var(--color-ink)!important}`,
+      `${ON} :is(.bg-paper,.field-backing)${STROBE_EXCLUDE}{background-color:var(--color-paper)!important}`,
+      `${ON} .solid-backing${STROBE_EXCLUDE}{background-color:var(--color-ink)!important}`,
+      `${ON} :is(.border-ink,.field-backing)${STROBE_EXCLUDE}{border-color:var(--color-ink)!important}`,
     );
   }
   if (!settings.pipesBackground) {

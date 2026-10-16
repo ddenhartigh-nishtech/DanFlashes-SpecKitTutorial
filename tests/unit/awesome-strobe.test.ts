@@ -8,6 +8,7 @@ import {
   nextStep,
   PAPER_PALETTE,
   STROBE_ATTR,
+  STROBE_EXCLUDE,
   STROBE_HOLD_MS,
   STROBE_STEPS,
   strobeCss,
@@ -69,9 +70,13 @@ describe("the strobe (006 R7)", () => {
       expect(["background-color", "border-color"]).toContain(rule.property);
       expect(rule.selector).toContain(':root[data-awesome="on"][data-strobe-step=');
       if (!rule.selector.endsWith("body")) {
-        expect(rule.selector).toContain(":not([data-steady],[data-steady] *)");
+        expect(rule.selector).toContain(STROBE_EXCLUDE);
       }
     }
+  });
+
+  it("leaves the steady parts, and a picked option (a size, a top-up), as they are (owner)", () => {
+    expect(STROBE_EXCLUDE).toBe(":not([data-steady],[data-steady] *,:checked ~ *)");
   });
 
   it("never runs as a CSS animation, and never through inherited variables: both restyled the whole page (T024)", () => {

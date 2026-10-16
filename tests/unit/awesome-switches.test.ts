@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fieldStrobeCss } from "@/lib/awesome/strobe";
+import { fieldStrobeCss, STROBE_EXCLUDE } from "@/lib/awesome/strobe";
 import { switchOffCss } from "@/lib/awesome/switches";
 
 const on = { flashMode: true, pipesBackground: true };
@@ -15,6 +15,8 @@ describe("switchOffCss (006 R4)", () => {
     expect(css).toMatch(/\.bg-paper[^{]*\{background-color:var\(--color-paper\)!important\}/);
     expect(css).toMatch(/\.solid-backing[^{]*\{background-color:var\(--color-ink\)!important\}/);
     expect(css).toMatch(/\.border-ink[^{]*\{border-color:var\(--color-ink\)!important\}/);
+    // A picked size keeps its own black: these hold only what the strobe would have changed.
+    for (const rule of css.split("\n")) expect(rule).toContain(STROBE_EXCLUDE);
     expect(css).not.toContain('[data-testid="pipes"]');
     expect(css).not.toContain('[data-testid="extreme-awesomeness"]');
   });

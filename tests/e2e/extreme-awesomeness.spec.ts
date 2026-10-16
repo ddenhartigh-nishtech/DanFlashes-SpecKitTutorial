@@ -68,6 +68,8 @@ test.describe("US1 — Extreme Awesomeness (Flash Mode)", () => {
     const cartBaseline = await textContrasts(page);
     await page.goto("/shirts/geo-riot");
     await expect(visible(page.getByRole("button", { name: "Add to cart" }))).toBeVisible();
+    // A picked size has to stay readable too: yellow on black, never yellow on a yellow step (owner).
+    await page.locator("label").filter({ hasText: /^M$/ }).click();
     const before = await saleColors(page);
     expect(before.join("\n")).not.toContain("missing");
     const geoBaseline = await textContrasts(page);

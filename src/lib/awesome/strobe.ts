@@ -36,7 +36,12 @@ export const STROBE_STEPS = 5;
 
 export const nextStep = (step: number) => (step + 1) % STROBE_STEPS;
 
-const NOT_STEADY = ":not([data-steady],[data-steady] *)";
+/**
+ * What the strobe never touches: [data-steady] and everything in it (FR-012), and a picked option.
+ * A checked size or top-up shows its own black behind yellow text (\`peer-checked:\`), and a strobe
+ * color there turned it yellow on yellow (owner).
+ */
+export const STROBE_EXCLUDE = ":not([data-steady],[data-steady] *,:checked ~ *)";
 const at = (i: number) => `:root[data-awesome="on"][${STROBE_ATTR}="${i}"]`;
 const color = (palette: readonly string[], i: number) =>
   `var(--color-${palette[i % palette.length]})`;
@@ -45,15 +50,15 @@ const color = (palette: readonly string[], i: number) =>
  * The strobe's colors: one set of rules per step, straight onto the classes that strobe. Moving the
  * step restyles just those elements, 2.5 times a second. A CSS animation ticked every frame, and
  * inherited variables restyled the whole page at every step (T024). Only backgrounds and borders
- * change, never a text color, and never inside [data-steady].
+ * change, never a text color, and never inside [data-steady] or on a picked option.
  */
 export function strobeCss(): string {
   const rules: string[] = [];
   for (let i = 0; i < STROBE_STEPS; i++) {
     rules.push(
-      `${at(i)} :is(.bg-paper,.field-backing)${NOT_STEADY}{background-color:${color(PAPER_PALETTE, i)}}`,
-      `${at(i)} .solid-backing${NOT_STEADY}{background-color:${color(DARK_PALETTE, i)}}`,
-      `${at(i)} :is(.border-ink,.field-backing)${NOT_STEADY}{border-color:${color(EDGE_PALETTE, i)}}`,
+      `${at(i)} :is(.bg-paper,.field-backing)${STROBE_EXCLUDE}{background-color:${color(PAPER_PALETTE, i)}}`,
+      `${at(i)} .solid-backing${STROBE_EXCLUDE}{background-color:${color(DARK_PALETTE, i)}}`,
+      `${at(i)} :is(.border-ink,.field-backing)${STROBE_EXCLUDE}{border-color:${color(EDGE_PALETTE, i)}}`,
     );
   }
   return rules.join("\n");

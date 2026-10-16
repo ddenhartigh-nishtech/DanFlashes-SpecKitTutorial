@@ -389,3 +389,15 @@ Task: "e2e journey in tests/e2e/extreme-awesomeness.spec.ts"
 
 - [X] T027 Give the account page's purchase-history date line ("Placed on…") and its per diem gauge label a solid backing, and extend the text-backing audit in tests/e2e/pipes.spec.ts to the account page with an order in its history and a per diem stream connected, per FR-016, US2/AC5 (partial)
   - *Result:* the extended audit found exactly those two lines: "Per diem left" and "Placed Oct 16, 2026". Both now have `field-backing`, and the audit passes on desktop and phone.
+
+---
+
+## Phase 7: Owner Feedback (2026-10-16): A Picked Size Stays Readable
+
+**Purpose**: the owner noticed that a picked size (yellow text on black) went yellow on yellow during the strobe. The size buttons carry `bg-paper`, so the strobe's step rules recolored a checked one too.
+
+- [X] T028 Never strobe a picked option, and frame it:
+  - **Tests first**: the US1 journey (tests/e2e/extreme-awesomeness.spec.ts) picks a size before taking its readability baseline. It failed at the first step, with `SPAN|M` losing its contrast.
+  - **The fix**: `STROBE_EXCLUDE` in src/lib/awesome/strobe.ts now also skips `:checked ~ *`. That covers a checked size and a checked top-up amount. The Flash-Mode-off rules in src/lib/awesome/switches.ts use the same exclusion, so they no longer paint a picked size paper-colored. Unit tests cover both.
+  - **The frame**: while Extreme Awesomeness is on, a picked option gets a yellow frame (src/app/globals.css), so it stands out on the black field and on every strobe color.
+  - **Found on the way**: Turbopack's build cache served globals.css without the new rule. next.config.ts now turns that cache off for the e2e build (\`NEXT_DIST_DIR\`), so \`npm run verify\` always tests fresh CSS.

@@ -176,7 +176,11 @@ packages: the strobe is CSS, and the pipes are a 2D canvas.
     - That covers prices (`PriceTag`), tier badges (`ShirtBadge`) and Add to Cart.
     - It also covers the dialogs, the per diem corner, the pop-ups, the countdowns, the money rows
       and the Extreme Awesomeness button (FR-012).
-  - **Flash Mode switched off**: the switch-off CSS holds those classes at their normal colors.
+  - **A picked option holds still** (owner, T028): every step rule also skips `:checked ~ *`.
+    - A checked size or top-up amount keeps its black with yellow text, and gets a yellow frame
+      while Extreme Awesomeness is on.
+    - The step rules had recolored it yellow on yellow.
+  - **Flash Mode switched off**: the switch-off CSS holds those classes at their normal colors. It skips the same things.
 - **Rationale**: changing one attribute on `<html>` only restyles the elements whose rules depend on
   it, 2.5 times a second. The two earlier designs were measured in T024, with Lighthouse at mobile
   throttling:

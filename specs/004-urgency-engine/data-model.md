@@ -6,7 +6,7 @@ There are no new tables. Everything urgent is copy, or computed from the shirt a
 
 | Column | Type | Rules |
 |---|---|---|
-| `fake_scarcity` | integer (boolean), NOT NULL, default 1 | "Only 1 left!" on shirt cards, the detail page, cart lines; "found another one" on adds and raises (US1) |
+| `fake_scarcity` | integer (boolean), NOT NULL, default 1 | "Only 1 left!" on shirt cards, the detail page, cart lines; "found another one" on adds; "a few more" on cart lines past one (US1) |
 | `countdown_timers` | integer (boolean), NOT NULL, default 1 | the shared deal and hold countdown (US2) |
 | `social_proof` | integer (boolean), NOT NULL, default 1 | "looking right now", "just bought this pattern", and the purchase pop-ups (US3) |
 
@@ -41,7 +41,7 @@ for the page.
 ## Brand copy additions (`src/lib/copy.ts`, not data)
 
 `copy.urgency`:
-- `scarce`, `again`, `plenty`
+- `scarce`, `again`, `fewMore` (owner, 2026-10-16), `plenty`
 - `foundAnother`
 - `deal`, `hold`
 - `looking(n)`, `nobodyLooking`

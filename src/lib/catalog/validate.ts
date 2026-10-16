@@ -70,6 +70,8 @@ const settingsSchema = z.object({
   fakeScarcity: z.boolean(),
   countdownTimers: z.boolean(),
   socialProof: z.boolean(),
+  preCheckedAddOns: z.boolean(),
+  roachMotel: z.boolean(),
 });
 
 function toIssues(error: z.ZodError): Issue[] {

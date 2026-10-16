@@ -72,11 +72,7 @@ describe("updateCartItem / removeCartItem actions", () => {
     addToCartCore(db, jar, form({ slug: "geo-riot", size: "M" }));
     expect(
       updateCartItemCore(db, jar, form({ slug: "geo-riot", size: "M", quantity: "4" })),
-    ).toEqual({
-      ok: true,
-      itemCount: 4,
-      message: copy.urgency.foundAnother, // a raise finds another one (004)
-    });
+    ).toEqual({ ok: true, itemCount: 4 }); // the line's stock line has its say instead (004, owner)
     expect(
       updateCartItemCore(db, jar, form({ slug: "geo-riot", size: "M", quantity: "lots" })),
     ).toMatchObject({

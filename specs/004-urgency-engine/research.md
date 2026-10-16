@@ -52,6 +52,10 @@ Components, SQLite via Drizzle, Vitest and Playwright). There are no new package
   comparison. It needs no client state, and it's covered by the cart action integration tests.
 - **Alternatives**: a client-side toast was rejected: it would say it even when the server refused
   the add.
+- **Revised (owner, 2026-10-16)**: `updateCartItemCore` no longer has a message, and
+  `CartQuantityForm` shows failures only. The cart line says it instead: the pure
+  `cartStockLine(line, quantity)` turns "scarce" or "again" into "few" ("You're lucky, we actually found a few more!") once the line
+  holds more than one.
 
 ## R4. One shared countdown, computed rather than stored
 
@@ -180,11 +184,11 @@ Components, SQLite via Drizzle, Vitest and Playwright). There are no new package
 - **Integration**:
   - the three switches default on and round-trip
   - migration 0007
-  - `addToCartCore` and `updateCartItemCore`: "found another one" on an add and on a raise; not on
-    a cut, a remove, a bland shirt, or with the switch off
+  - `addToCartCore`: "found another one" on an add; not on a bland shirt, or with the switch off.
+    `updateCartItemCore` never says it (owner, 2026-10-16).
 - **e2e** (desktop and phone, production build):
-  - **scarcity**: the card, the detail page, the cart line, and "found another one" on an add and a
-    raise
+  - **scarcity**: the card, the detail page, the cart line ("a few more" past one), and "found
+    another one" on an add
   - **the countdown**: the format, a deal and hold that match, continuity across navigation, and a
     quiet reset (the anchor is set about 10 minutes back with `addInitScript`)
   - **social proof**: the page lines; a pop-up that's bottom-right on desktop and under the header

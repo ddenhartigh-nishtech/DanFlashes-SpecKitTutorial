@@ -1,6 +1,6 @@
 import { expect } from "@playwright/test";
 import { copy } from "../../src/lib/copy";
-import { signUp, test, uniqueEmail, visible } from "./helpers";
+import { confirmTwice, signUp, test, uniqueEmail, visible } from "./helpers";
 
 const u = copy.urgency;
 
@@ -34,17 +34,21 @@ test.describe("US1 — fake scarcity", () => {
     ).toContainText(copy.product.added);
     await expect(stock).toHaveText(u.scarce);
 
-    // 4: the cart line, a raise that finds another one, and a cut that doesn't.
+    // 4: the cart line. One is the last one; any more, and Dan found a few more. The raise itself
+    // says nothing (owner, 2026-10-16).
     await page.goto("/cart");
     const line = visible(page.getByTestId("cart-line")).filter({ hasText: "Geo Riot" });
     await expect(line.getByTestId("stock-line")).toHaveText(u.scarce);
     await line.getByLabel(copy.cart.quantity).fill("3");
     await line.getByRole("button", { name: copy.cart.update }).click();
-    await expect(line.getByRole("status")).toHaveText(u.foundAnother);
+    await expect(line.getByTestId("stock-line")).toHaveText(u.fewMore);
+    await expect(line.getByText(u.foundAnother)).toHaveCount(0);
     await line.getByLabel(copy.cart.quantity).fill("2");
     await line.getByRole("button", { name: copy.cart.update }).click();
+    await confirmTwice(page); // lowering goes through the roach motel (005)
+    await expect(line.getByTestId("price")).toHaveText("$689.22");
     await expect(line.getByLabel(copy.cart.quantity)).toHaveValue("2");
-    await expect(line.getByText(u.foundAnother)).toHaveCount(0);
+    await expect(line.getByTestId("stock-line")).toHaveText(u.fewMore);
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );

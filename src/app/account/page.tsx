@@ -170,6 +170,7 @@ async function AccountContents() {
                   shippingUsd={order.shippingUsd}
                   taxUsd={order.taxUsd}
                   totalUsd={order.totalUsd}
+                  addOns={order.addOns}
                   placeholderUrl={placeholderUrl}
                 />
               </li>

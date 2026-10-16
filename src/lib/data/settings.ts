@@ -28,6 +28,8 @@ export function getSettings(db: Db): StoreSettings {
     fakeScarcity: row.fakeScarcity,
     countdownTimers: row.countdownTimers,
     socialProof: row.socialProof,
+    preCheckedAddOns: row.preCheckedAddOns,
+    roachMotel: row.roachMotel,
   };
 }
 
@@ -53,6 +55,8 @@ export function saveSettings(db: Db, settings: StoreSettings): void {
     fakeScarcity: settings.fakeScarcity,
     countdownTimers: settings.countdownTimers,
     socialProof: settings.socialProof,
+    preCheckedAddOns: settings.preCheckedAddOns,
+    roachMotel: settings.roachMotel,
   };
   db.insert(storeSettings)
     .values({ id: 1, ...values })

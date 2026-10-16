@@ -9,7 +9,7 @@ import { validateShirt } from "@/lib/catalog/validate";
 import { getSettings, saveSettings } from "@/lib/data/settings";
 import { listTiers } from "@/lib/data/tiers";
 import type { Db } from "@/lib/db/client";
-import { complexityTiers, media, shirtImages, shirts, storeSettings } from "@/lib/db/schema";
+import { addOns, complexityTiers, media, shirtImages, shirts, storeSettings } from "@/lib/db/schema";
 import { isValidMediaKey } from "@/lib/media";
 
 export interface SeedImage {
@@ -29,17 +29,28 @@ export interface SeedShirt {
   image: SeedImage;
 }
 
+/** An add-on the store starts with (005): owner data, editable in Studio afterwards. */
+export interface SeedAddOn {
+  name: string;
+  pitch: string;
+  declineLine: string;
+  priceUsd: string;
+  position: number;
+}
+
 export interface CatalogFixture {
   settings: Omit<StoreSettings, "placeholderMediaId">;
   placeholder: SeedImage;
   tiers: Omit<Tier, "id">[];
   shirts: SeedShirt[];
+  addOns: SeedAddOn[];
 }
 
 export interface SeedCounts {
   tiers: number;
   media: number;
   shirts: number;
+  addOns: number;
 }
 
 function ensureMedia(
@@ -54,7 +65,7 @@ function ensureMedia(
 }
 
 export function seedCatalog(db: Db, fixture: CatalogFixture): SeedCounts {
-  const counts: SeedCounts = { tiers: 0, media: 0, shirts: 0 };
+  const counts: SeedCounts = { tiers: 0, media: 0, shirts: 0, addOns: 0 };
 
   db.transaction(() => {
     for (const tier of fixture.tiers) {
@@ -99,6 +110,11 @@ export function seedCatalog(db: Db, fixture: CatalogFixture): SeedCounts {
         .get();
       db.insert(shirtImages).values({ shirtId: id, mediaId: image.id, position: 0 }).run();
       counts.shirts++;
+    }
+
+    // Add-ons are skipped by name, so a second seed never overwrites the owner's edits.
+    for (const addOn of fixture.addOns) {
+      counts.addOns += db.insert(addOns).values(addOn).onConflictDoNothing().run().changes;
     }
   });
 

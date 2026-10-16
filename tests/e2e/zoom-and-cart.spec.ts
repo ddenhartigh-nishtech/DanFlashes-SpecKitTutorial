@@ -1,5 +1,5 @@
 import { expect } from "@playwright/test";
-import { addShirt, test, visible } from "./helpers";
+import { addShirt, confirmTwice, test, visible } from "./helpers";
 
 test.describe("US2 — zoom, enhance, add to cart", () => {
   test("empty cart pitches the most expensive shirt", async ({ page }) => {
@@ -62,6 +62,7 @@ test.describe("US2 — zoom, enhance, add to cart", () => {
 
     // Remove empties the cart and brings back the pitch.
     await line.getByRole("button", { name: "Remove (and lose your edge)" }).click();
+    await confirmTwice(page); // the roach motel (005)
     await expect(visible(page.getByTestId("empty-cart"))).toBeVisible();
   });
 

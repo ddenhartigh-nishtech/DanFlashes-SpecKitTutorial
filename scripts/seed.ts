@@ -7,7 +7,7 @@ const { sqlite, db } = openDatabase();
 try {
   const counts = seedCatalog(db, SEED);
   console.log(
-    `Seeded: ${counts.tiers} tiers, ${counts.media} media, ${counts.shirts} shirts (existing rows skipped).`,
+    `Seeded: ${counts.tiers} tiers, ${counts.media} media, ${counts.shirts} shirts, ${counts.addOns} add-ons (existing rows skipped).`,
   );
 } catch (error) {
   console.error(error);

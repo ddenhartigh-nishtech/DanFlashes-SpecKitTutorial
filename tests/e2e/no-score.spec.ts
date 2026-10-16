@@ -1,5 +1,9 @@
 import { expect, type Page } from "@playwright/test";
+import { SEED } from "../../scripts/seed-data";
 import { addShirt, signUp, test, uniqueEmail, visible } from "./helpers";
+
+/** The add-ons' own copy (005): "Complexity Insurance" names a product, not a score. */
+const ADD_ON_COPY = SEED.addOns.flatMap((a) => [a.name, a.pitch, a.declineLine]);
 
 /**
  * SC-003: shoppers never see a complexity score — not in the visible text, and not in the
@@ -11,7 +15,10 @@ async function expectNoScore(page: Page, where: string) {
   const html = await page.content();
   expect(html, `${where}: payload carries a complexity field`).not.toContain('"complexity"');
   expect(html, `${where}: payload carries an MSRP`).not.toContain('"msrpUsd"');
-  const text = await page.locator("body").innerText();
+  const text = ADD_ON_COPY.reduce(
+    (rest, line) => rest.split(line).join(""),
+    await page.locator("body").innerText(),
+  );
   expect(text, `${where}: visible text mentions a score`).not.toMatch(/\bcomplexity\b|\bscore\b/i);
 }
 

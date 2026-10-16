@@ -1,5 +1,5 @@
 import { expect } from "@playwright/test";
-import { addShirt, signUp, test, uniqueEmail, visible } from "./helpers";
+import { addShirt, signUp, test, uniqueEmail, untickAddOns, visible } from "./helpers";
 
 test.describe("US3 — checkout gate, account, faux card", () => {
   test("guest cart → gate → sign up → card checkout → history", async ({ page }, info) => {
@@ -15,6 +15,7 @@ test.describe("US3 — checkout gate, account, faux card", () => {
     await visible(page.getByRole("link", { name: "New here? Create an account" })).click();
     await signUp(page, uniqueEmail(info.project.name));
     await expect(page).toHaveURL(/\/checkout$/);
+    await untickAddOns(page); // the plain baseline: shirts alone (005 analysis C1)
     const summary = visible(page.getByTestId("order-summary"));
     await expect(summary.getByRole("link", { name: "Geo Riot" })).toBeVisible();
     await expect(summary.getByRole("link", { name: "Paisley Panic" })).toBeVisible();
@@ -30,6 +31,11 @@ test.describe("US3 — checkout gate, account, faux card", () => {
     await visible(page.getByRole("button", { name: /Place order/ })).click();
     await expect(visible(page.getByTestId("checkout-error"))).toContainText("doesn't check out");
     await expect(page).toHaveURL(/\/checkout$/);
+    // A refusal leaves the form as he had it: the add-ons he unticked stay unticked (005).
+    for (const box of await visible(page.getByTestId("add-on")).getByRole("checkbox").all()) {
+      await expect(box).not.toBeChecked();
+    }
+    await expect(visible(page.getByTestId("total"))).toHaveText(subtotal);
 
     // The test card works.
     await visible(page.getByLabel("Card number")).fill("4242 4242 4242 4242");

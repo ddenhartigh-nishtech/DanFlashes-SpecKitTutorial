@@ -112,6 +112,9 @@ export const copy = {
     useCard: "or pay by card",
     // Split payment (003 US3)
     applyCredit: (available: string) => `Apply my Flash Credit (${available} available)`,
+    /** Pre-checked add-ons (005 US1). */
+    addOnsHeading: "Already added. You're welcome.",
+    addOnPrice: (price: string) => `+${price}`,
     removeCredit: "Remove Flash Credit",
     creditLine: (amount: string) => `Flash Credit: −${amount}`,
     cardLine: (amount: string) => `On your card: ${amount}`,
@@ -292,10 +295,18 @@ export const copy = {
     dismiss: (trophy: string) => `Put away "${trophy}". Dan will still know.`,
     dismissed: "Put away. It still happened.",
   },
+  /** The roach-motel cart (005 US2): shirts check in, but they don't check out. */
+  roachMotel: {
+    first: "Are you sure?",
+    second: "Are you sure sure?",
+    keep: "Keep it",
+  },
+
   /** The urgency engine (004): every sales trick, played straight. */
   urgency: {
     scarce: "Only 1 left!",
     again: "Just kidding, we actually found another one! One more left!",
+    fewMore: "You're lucky, we actually found a few more!",
     plenty: "Plenty left. Nobody wants these.",
     foundAnother: "Oh wait, we found another one!",
     deal: "This price won't last.",
@@ -360,6 +371,9 @@ export const copy = {
       remove: { shamed: "Remove (and lose your edge)", neutral: "Remove" },
       signOut: { shamed: "Sign out (go back to being normal)", neutral: "Sign out" },
       disconnect: { shamed: "Disconnect (and settle for less)", neutral: "Disconnect" },
+      /** The roach motel's yes buttons (005 US2). */
+      removeYes: { shamed: "Yes, remove it (and lose your edge)", neutral: "Yes, remove it" },
+      lowerYes: { shamed: "Yes, take it down (and lose your edge)", neutral: "Yes, lower it" },
     },
   },
 

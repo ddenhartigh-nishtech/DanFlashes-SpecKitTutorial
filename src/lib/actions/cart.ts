@@ -26,7 +26,7 @@ function toState(result: CartResult, message?: string): ActionState {
     : { ok: true, itemCount: result.itemCount };
 }
 
-/** Fake scarcity (004 FR-009): did this add or raise just "find another one"? */
+/** Fake scarcity (004 FR-009): did this add just "find another one"? */
 function found(db: Db, result: Extract<CartChange, { ok: true }>, next: number): boolean {
   const isBland = isBlandShirt(db, result.shirtId);
   return foundAnother(
@@ -64,10 +64,8 @@ export function updateCartItemCore(db: Db, jar: CookieJar, form: FormData): Acti
     size: field(form, "size"),
     quantity,
   });
-  if (!result.ok) return failure(result.code);
-  return found(db, result, quantity)
-    ? { ok: true, itemCount: result.itemCount, message: copy.urgency.foundAnother }
-    : { ok: true, itemCount: result.itemCount };
+  // A raise says nothing: the line's own stock line has its say (004, owner 2026-10-16).
+  return toState(result);
 }
 
 export function removeCartItemCore(db: Db, jar: CookieJar, form: FormData): ActionState {

@@ -13,6 +13,7 @@ import { getDb } from "@/lib/db/client";
 import { getBalanceUsd } from "@/lib/flash-credit/ledger";
 import { cartSummaryLines } from "@/lib/orders/orders";
 import { showCountdown } from "@/lib/urgency/countdown";
+import { listOfferedAddOns } from "@/lib/data/add-ons";
 import { settleStreams } from "@/lib/streams/streams";
 
 export const metadata: Metadata = { title: copy.checkout.title };
@@ -40,7 +41,8 @@ async function CheckoutContents() {
   if (view.lines.length === 0) redirect("/cart");
   if (user) settleStreams(db, user.id); // the balance below includes every payday that came due
 
-  const totalUsd = view.subtotalUsd; // shipping and tax are $0.00 (FR-029)
+  // Shipping and tax are $0.00 (FR-029). The total is live in the form: shirts plus add-ons (005 R4).
+  const addOns = listOfferedAddOns(db, settings);
   return (
     <div className="grid gap-6 md:grid-cols-[1fr_22rem] md:items-start">
       <div className="flex flex-col gap-3">
@@ -59,14 +61,23 @@ async function CheckoutContents() {
           subtotalUsd={view.subtotalUsd}
           shippingUsd="0.00"
           taxUsd="0.00"
-          totalUsd={totalUsd}
           placeholderUrl={getPlaceholderUrl(db, settings)}
         />
       </div>
       <div className="border-ink bg-paper border-4 p-4 shadow-[6px_6px_0_var(--color-ink)]">
         <CheckoutForm
+          // No key: a refusal re-renders this with the new prices, and a remount would wipe Dan's
+          // message about them. The form forgets unticks when he leaves instead (005 R4).
           checkoutToken={randomUUID()}
-          expectedTotalUsd={totalUsd}
+          subtotalUsd={view.subtotalUsd}
+          addOns={addOns.map(({ id, name, pitch, declineLine, priceUsd }) => ({
+            id,
+            name,
+            pitch,
+            declineLine,
+            priceUsd,
+          }))}
+          confirmshaming={settings.confirmshaming}
           balanceUsd={user ? getBalanceUsd(db, user.id) : null}
         />
       </div>

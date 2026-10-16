@@ -107,6 +107,8 @@ describe("validateSettings", () => {
     fakeScarcity: true,
     countdownTimers: true,
     socialProof: true,
+    preCheckedAddOns: true,
+    roachMotel: true,
   };
 
   it("accepts the defaults and an https base URL", () => {
@@ -138,6 +140,10 @@ describe("validateSettings", () => {
     ["countdownTimers", { countdownTimers: undefined }],
     ["socialProof", { socialProof: "yes" }],
     ["socialProof", { socialProof: undefined }],
+    ["preCheckedAddOns", { preCheckedAddOns: "on" }],
+    ["preCheckedAddOns", { preCheckedAddOns: undefined }],
+    ["roachMotel", { roachMotel: 1 }],
+    ["roachMotel", { roachMotel: undefined }],
   ])("flags an invalid %s", (field, patch) => {
     expect(fields(validateSettings({ ...settings, ...patch } as StoreSettings))).toContain(field);
   });

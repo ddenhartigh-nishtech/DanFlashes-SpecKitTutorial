@@ -60,3 +60,16 @@ describe("store_settings urgency switches (004, migration 0007)", () => {
     ).toEqual({ fake_scarcity: 0, countdown_timers: 0, social_proof: 0 });
   });
 });
+
+describe("store_settings checkout squeeze switches (005, migration 0008)", () => {
+  it("default both on, and round-trip them off", () => {
+    const { db, sqlite } = createTestDb();
+    sqlite.prepare("INSERT INTO store_settings (id) VALUES (1)").run();
+    expect(getSettings(db)).toMatchObject({ preCheckedAddOns: true, roachMotel: true });
+    saveSettings(db, { ...getSettings(db), preCheckedAddOns: false, roachMotel: false });
+    expect(getSettings(db)).toMatchObject({ preCheckedAddOns: false, roachMotel: false });
+    expect(
+      sqlite.prepare("SELECT pre_checked_add_ons, roach_motel FROM store_settings").get(),
+    ).toEqual({ pre_checked_add_ons: 0, roach_motel: 0 });
+  });
+});

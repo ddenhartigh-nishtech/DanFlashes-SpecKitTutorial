@@ -145,6 +145,9 @@ export const storeSettings = sqliteTable(
     fakeScarcity: integer("fake_scarcity", { mode: "boolean" }).notNull().default(true),
     countdownTimers: integer("countdown_timers", { mode: "boolean" }).notNull().default(true),
     socialProof: integer("social_proof", { mode: "boolean" }).notNull().default(true),
+    /** The checkout squeeze (005): one switch per tactic (constitution IV). */
+    preCheckedAddOns: integer("pre_checked_add_ons", { mode: "boolean" }).notNull().default(true),
+    roachMotel: integer("roach_motel", { mode: "boolean" }).notNull().default(true),
   },
   (t) => [
     check("store_settings_singleton", sql`${t.id} = 1`),
@@ -371,4 +374,59 @@ export const orderDrains = sqliteTable(
       .references(() => revenueStreams.id, { onDelete: "restrict" }),
   },
   (t) => [primaryKey({ columns: [t.orderId, t.streamId] })],
+);
+
+/**
+ * Add-ons (005 US1): owner-managed extras, every one pre-ticked at checkout. A flat price per order.
+ * Retired (active = 0), never deleted: orders keep their snapshots (order_add_ons).
+ */
+export const addOns = sqliteTable(
+  "add_ons",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    name: text("name").notNull().unique(),
+    pitch: text("pitch").notNull(),
+    declineLine: text("decline_line").notNull(),
+    priceUsd: text("price_usd").notNull(),
+    active: integer("active", { mode: "boolean" }).notNull().default(true),
+    position: integer("position").notNull().default(0),
+    ...timestamps,
+  },
+  (t) => [
+    check("add_ons_name", sql`length(trim(${t.name})) BETWEEN 1 AND 60`),
+    check("add_ons_pitch", sql`length(trim(${t.pitch})) BETWEEN 1 AND 160`),
+    check("add_ons_decline_line", sql`length(trim(${t.declineLine})) BETWEEN 1 AND 160`),
+    check("add_ons_price", money(t.priceUsd)),
+    check(
+      "add_ons_price_positive",
+      sql`${t.priceUsd} NOT GLOB '-*' AND ${t.priceUsd} NOT IN ('0.00')`,
+    ),
+  ],
+);
+
+/**
+ * One add-on bought on an order (005 FR-007): its own line, separate from the shirts, with the name
+ * and price he paid, kept as they were whatever the owner changes later.
+ */
+export const orderAddOns = sqliteTable(
+  "order_add_ons",
+  {
+    orderId: integer("order_id")
+      .notNull()
+      .references(() => orders.id, { onDelete: "restrict" }),
+    addOnId: integer("add_on_id")
+      .notNull()
+      .references(() => addOns.id, { onDelete: "restrict" }),
+    name: text("name").notNull(),
+    priceUsd: text("price_usd").notNull(),
+    position: integer("position").notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.orderId, t.addOnId] }),
+    check("order_add_ons_price", money(t.priceUsd)),
+    check(
+      "order_add_ons_price_positive",
+      sql`${t.priceUsd} NOT GLOB '-*' AND ${t.priceUsd} NOT IN ('0.00')`,
+    ),
+  ],
 );

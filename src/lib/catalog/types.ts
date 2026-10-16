@@ -34,6 +34,10 @@ export interface StoreSettings {
   countdownTimers: boolean;
   /** Fabricated social proof (constitution IV): "looking right now", the buyer, the pop-ups. */
   socialProof: boolean;
+  /** Pre-checked add-ons (constitution IV): checkout arrives with every extra already ticked. */
+  preCheckedAddOns: boolean;
+  /** Roach-motel cart (constitution IV): any decrease asks "Are you sure?", then "sure sure?". */
+  roachMotel: boolean;
 }
 
 /** An owner-defined band of complexity scores. The tier with minScore 0 is the BLAND tier. */

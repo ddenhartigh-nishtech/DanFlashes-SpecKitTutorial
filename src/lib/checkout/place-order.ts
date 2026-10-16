@@ -7,12 +7,21 @@ import { eq } from "drizzle-orm";
 import { auditCart, findCartId, loadCheckoutLines, type RemovedLine } from "@/lib/cart/cart";
 import { getSettings } from "@/lib/data/settings";
 import type { Db } from "@/lib/db/client";
-import { cartItems, flashCreditEntries, orderDrains, orderItems, orders } from "@/lib/db/schema";
+import {
+  cartItems,
+  flashCreditEntries,
+  orderAddOns,
+  orderDrains,
+  orderItems,
+  orders,
+} from "@/lib/db/schema";
 import { getBalanceUsd } from "@/lib/flash-credit/ledger";
-import { add, cmp, isUsdString, sub, sum, ZERO, type Usd } from "@/lib/money";
+import { cmp, isUsdString, sub, sum, ZERO, type Usd } from "@/lib/money";
 import { validateFauxCard, type CardErrorCode, type FauxCardInput } from "@/lib/payments/faux-card";
 import type { Err, Ok } from "@/lib/result";
 import { splitPayment, type Split } from "@/lib/checkout/split";
+import { orderTotals } from "@/lib/checkout/totals";
+import { resolveAddOns, type AddOnView } from "@/lib/data/add-ons";
 import { settleStreams, streamsDrainedBy } from "@/lib/streams/streams";
 
 export interface PlaceOrderInput {
@@ -26,6 +35,8 @@ export interface PlaceOrderInput {
   useFlashCredit: boolean;
   /** The credit checkout showed him. Compared with the live split, never trusted (FR-021). */
   expectedCreditUsd?: string;
+  /** The add-ons he kept ticked (005 FR-006): re-resolved here, never priced by the browser. */
+  addOnIds?: readonly number[];
   /** He confirmed putting the rest on a card (FR-019). */
   confirmSplit?: boolean;
   /** Required whenever a card portion remains. */
@@ -74,8 +85,27 @@ export function placeOrder(db: Db, input: PlaceOrderInput): PlaceOrderResult {
       const subtotalUsd = sum(lines.map((l) => l.lineTotalUsd));
       const shippingUsd = ZERO;
       const taxUsd = ZERO;
-      const totalUsd = add(add(subtotalUsd, shippingUsd), taxUsd);
-      if (!isUsdString(input.expectedTotalUsd) || cmp(input.expectedTotalUsd, totalUsd) !== 0) {
+
+      // Pre-checked add-ons (005 R3): what he kept ticked, priced from the store's own data. Any
+      // add-on no longer offered, or any total he didn't see, refuses before anything is charged.
+      let addOns: AddOnView[] = [];
+      let addOnsMissing = false;
+      if (settings.preCheckedAddOns && input.addOnIds?.length) {
+        const { found, missing } = resolveAddOns(db, input.addOnIds);
+        addOns = found;
+        addOnsMissing = missing.length > 0;
+      }
+      const { totalUsd } = orderTotals({
+        subtotalUsd,
+        addOnPrices: addOns.map((a) => a.priceUsd),
+        shippingUsd,
+        taxUsd,
+      });
+      if (
+        addOnsMissing ||
+        !isUsdString(input.expectedTotalUsd) ||
+        cmp(input.expectedTotalUsd, totalUsd) !== 0
+      ) {
         return { ok: false, code: "PRICE_CHANGED", totalUsd };
       }
 
@@ -157,6 +187,18 @@ export function placeOrder(db: Db, input: PlaceOrderInput): PlaceOrderResult {
             amountUsd: sub(ZERO, split.creditUsd),
             kind: "spend",
             orderId,
+          })
+          .run();
+      }
+
+      for (const addOn of addOns) {
+        db.insert(orderAddOns)
+          .values({
+            orderId,
+            addOnId: addOn.id,
+            name: addOn.name,
+            priceUsd: addOn.priceUsd,
+            position: addOn.position,
           })
           .run();
       }

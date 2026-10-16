@@ -20,6 +20,10 @@ export function placeOrderCore(db: Db, jar: CookieJar, form: FormData, now?: Dat
     useFlashCredit: field(form, "useFlashCredit") === "on",
     expectedCreditUsd: field(form, "expectedCreditUsd"),
     confirmSplit: field(form, "confirmSplit") === "on",
+    addOnIds: form
+      .getAll("addOnId")
+      .map(Number)
+      .filter((id) => Number.isInteger(id) && id > 0),
     card: {
       number: field(form, "cardNumber"),
       expiry: field(form, "expiry"),

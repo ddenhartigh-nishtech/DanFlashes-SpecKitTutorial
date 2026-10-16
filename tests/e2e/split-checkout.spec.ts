@@ -1,6 +1,6 @@
 import { expect } from "@playwright/test";
 import { copy } from "../../src/lib/copy";
-import { addShirt, signUp, test, uniqueEmail, visible } from "./helpers";
+import { addShirt, signUp, test, uniqueEmail, untickAddOns, visible } from "./helpers";
 
 const c = copy.checkout;
 
@@ -23,6 +23,7 @@ test.describe("US3 — split the bill", () => {
 
     await addShirt(page, "geo-riot", "M");
     await page.goto("/checkout");
+    await untickAddOns(page); // this journey's numbers are the shirt alone
     await visible(page.getByRole("button", { name: c.applyCredit("$100.00") })).click();
     const split = visible(page.getByTestId("split"));
     await expect(split.getByTestId("credit-line")).toHaveText(c.creditLine("$100.00"));

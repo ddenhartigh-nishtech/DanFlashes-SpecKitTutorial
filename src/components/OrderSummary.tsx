@@ -11,11 +11,17 @@ interface OrderSummaryProps {
   subtotalUsd: Usd;
   shippingUsd: Usd;
   taxUsd: Usd;
-  totalUsd: Usd;
+  /** Omitted at checkout, where the live total lives in the form (005 R4). */
+  totalUsd?: Usd;
+  /** The add-ons on the order (005 FR-007): their own lines, at the price paid. */
+  addOns?: { name: string; priceUsd: Usd }[];
   placeholderUrl: string | null;
 }
 
-/** Lines, then Subtotal / Shipping $0.00 / Tax $0.00 / Total — used by checkout, receipts, history. */
+/**
+ * Lines, then Subtotal / add-ons / Shipping $0.00 / Tax $0.00 / Total — used by checkout, receipts,
+ * history.
+ */
 export function OrderSummary(props: OrderSummaryProps) {
   return (
     <div
@@ -61,6 +67,16 @@ export function OrderSummary(props: OrderSummaryProps) {
         <dd data-testid="subtotal" className="text-right tabular-nums">
           {formatUsd(props.subtotalUsd)}
         </dd>
+        {props.addOns?.map((addOn) => (
+          <div
+            key={addOn.name}
+            data-testid="add-on-line"
+            className="col-span-2 flex flex-wrap justify-between gap-x-4"
+          >
+            <dt className="[overflow-wrap:anywhere]">{addOn.name}</dt>
+            <dd className="text-right tabular-nums">{formatUsd(addOn.priceUsd)}</dd>
+          </div>
+        ))}
         <dt>{copy.checkout.shipping}</dt>
         <dd data-testid="shipping" className="text-right tabular-nums">
           {formatUsd(props.shippingUsd)}
@@ -69,12 +85,16 @@ export function OrderSummary(props: OrderSummaryProps) {
         <dd data-testid="tax" className="text-right tabular-nums">
           {formatUsd(props.taxUsd)}
         </dd>
-        <dt className="font-display mt-2 uppercase">{copy.checkout.total}</dt>
-        <dd className="mt-2 text-right">
-          <span data-testid="total">
-            <PriceTag priceUsd={props.totalUsd} />
-          </span>
-        </dd>
+        {props.totalUsd === undefined ? null : (
+          <>
+            <dt className="font-display mt-2 uppercase">{copy.checkout.total}</dt>
+            <dd className="mt-2 text-right">
+              <span data-testid="total">
+                <PriceTag priceUsd={props.totalUsd} />
+              </span>
+            </dd>
+          </>
+        )}
       </dl>
     </div>
   );

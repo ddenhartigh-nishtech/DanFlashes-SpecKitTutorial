@@ -57,6 +57,13 @@
       "when": 1792086128843,
       "tag": "0007_urgency_switches",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1792156304270,
+      "tag": "0008_checkout_squeeze",
+      "breakpoints": true
     }
   ]
 }

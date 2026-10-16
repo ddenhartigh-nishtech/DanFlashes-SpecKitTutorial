@@ -50,6 +50,7 @@ async function OrderContents({ params }: Pick<PageProps<"/orders/[id]">, "params
         shippingUsd={order.shippingUsd}
         taxUsd={order.taxUsd}
         totalUsd={order.totalUsd}
+        addOns={order.addOns}
         placeholderUrl={getPlaceholderUrl(db, getSettings(db))}
       />
       <div className="flex flex-wrap gap-3">

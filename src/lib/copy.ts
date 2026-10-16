@@ -112,6 +112,9 @@ export const copy = {
     useCard: "or pay by card",
     // Split payment (003 US3)
     applyCredit: (available: string) => `Apply my Flash Credit (${available} available)`,
+    /** Pre-checked add-ons (005 US1). */
+    addOnsHeading: "Already added. You're welcome.",
+    addOnPrice: (price: string) => `+${price}`,
     removeCredit: "Remove Flash Credit",
     creditLine: (amount: string) => `Flash Credit: −${amount}`,
     cardLine: (amount: string) => `On your card: ${amount}`,

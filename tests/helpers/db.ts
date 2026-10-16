@@ -49,6 +49,8 @@ export function setSwitches(
       | "fakeScarcity"
       | "countdownTimers"
       | "socialProof"
+      | "preCheckedAddOns"
+      | "roachMotel"
     >
   >,
 ): void {

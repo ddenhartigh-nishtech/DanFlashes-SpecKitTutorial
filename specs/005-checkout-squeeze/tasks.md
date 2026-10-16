@@ -28,8 +28,10 @@ may do money math with JS numbers. Every total comes from `orderTotals` (researc
 
 ## Phase 1: Setup
 
-- [ ] T001 Run `npm run verify` on the branch before changing anything, and record the baseline for
+- [X] T001 Run `npm run verify` on the branch before changing anything, and record the baseline for
   the PR
+  - **Result (2026-10-16).** Main's code is the 004 head, which was verified before the merge: 533
+    unit and integration tests, 95.0% line coverage, 76 e2e.
 
 ---
 
@@ -37,10 +39,10 @@ may do money math with JS numbers. Every total comes from `orderTotals` (researc
 
 **Purpose**: the two switches and the two tables (data-model.md, research R1).
 
-- [ ] T002 [P] Write failing unit tests in tests/unit/catalog-validate.test.ts: `validateSettings`
+- [X] T002 [P] Write failing unit tests in tests/unit/catalog-validate.test.ts: `validateSettings`
   accepts `preCheckedAddOns` and `roachMotel` as booleans, and reports each one when it's missing or
   the wrong type
-- [ ] T003 [P] Write failing integration tests:
+- [X] T003 [P] Write failing integration tests:
   - in tests/integration/settings-switches.test.ts: both switches default on for a row written
     without them, and round-trip off
   - in a new tests/integration/migration-0008.test.ts:
@@ -51,9 +53,9 @@ may do money math with JS numbers. Every total comes from `orderTotals` (researc
     - `order_add_ons` has PRIMARY KEY (`order_id`, `add_on_id`), with FKs ON DELETE RESTRICT to
       `orders` and `add_ons`, and a snapshot `price_usd` with the same money CHECK
     - `foreign_key_check` is clean
-- [ ] T004 Add `preCheckedAddOns` and `roachMotel` (booleans) to `StoreSettings` in
+- [X] T004 Add `preCheckedAddOns` and `roachMotel` (booleans) to `StoreSettings` in
   src/lib/catalog/types.ts and to `settingsSchema` in src/lib/catalog/validate.ts (T002 passes)
-- [ ] T005 Extend src/lib/db/schema.ts per data-model.md:
+- [X] T005 Extend src/lib/db/schema.ts per data-model.md:
   - **`store_settings`** gains `pre_checked_add_ons` and `roach_motel` (integer boolean, NOT NULL,
     default 1)
   - **New `add_ons`**:
@@ -66,7 +68,7 @@ may do money math with JS numbers. Every total comes from `orderTotals` (researc
 
   Then run `npx drizzle-kit generate --name checkout_squeeze` to produce drizzle/0008_checkout_squeeze.sql.
   Check that it adds the columns and creates the tables, and rebuilds nothing.
-- [ ] T006 Carry the switches through src/lib/data/settings.ts, scripts/seed-data.ts,
+- [X] T006 Carry the switches through src/lib/data/settings.ts, scripts/seed-data.ts,
   tests/fixtures/catalog.ts, and `setSwitches` in tests/helpers/db.ts (T003 passes)
 
 **Checkpoint**: the switches and tables exist, both switches default on, and every existing test
@@ -85,19 +87,19 @@ card, Flash Credit, or a split. The confirmation and history show them.
 
 ### Tests for User Story 1 (write first; they must fail)
 
-- [ ] T007 [P] [US1] Unit tests in tests/unit/checkout-totals.test.ts for `orderTotals({ subtotalUsd,
+- [X] T007 [P] [US1] Unit tests in tests/unit/checkout-totals.test.ts for `orderTotals({ subtotalUsd,
   addOnPrices, shippingUsd, taxUsd })`:
   - no add-ons → total = subtotal
   - Geo Riot plus the four starting add-ons → `addOnsUsd` "189.96" and total "534.57"
   - exact cents: "0.10" + "0.20" → "0.30"
   - shipping and tax still add
   - the result is always two-decimal strings
-- [ ] T008 [P] [US1] Integration tests in tests/integration/add-ons.test.ts:
+- [X] T008 [P] [US1] Integration tests in tests/integration/add-ons.test.ts:
   - `listOfferedAddOns(db, settings)` returns active add-ons only, by `position` then `id`, with
     `id`, `name`, `pitch`, `declineLine` and `priceUsd`, and is empty with `preCheckedAddOns` off
   - `resolveAddOns(db, ids)` returns the offered ones and names the missing or inactive ids
   - `seedCatalog` inserts the fixture's four add-ons and, run again, changes nothing (idempotent)
-- [ ] T009 [P] [US1] Integration tests in tests/integration/place-order-add-ons.test.ts:
+- [X] T009 [P] [US1] Integration tests in tests/integration/place-order-add-ons.test.ts:
   - **By card, some ticked**: the total is the shirts plus the ticked add-ons, exactly, and
     `order_add_ons` holds each add-on's name, price and position
   - **Flash Credit covering it all**: the one spend entry equals the full total
@@ -112,7 +114,7 @@ card, Flash Credit, or a split. The confirmation and history show them.
   - **Parsing**: `placeOrderCore` reads repeated `addOnId` fields, and an add-on named twice is
     charged once, with no error (analysis U1)
   - **The read model**: `getOrderForUser` and `listOrdersForUser` return `addOns`
-- [ ] T010 [P] [US1] e2e journey in tests/e2e/add-ons.spec.ts (desktop and phone):
+- [X] T010 [P] [US1] e2e journey in tests/e2e/add-ons.spec.ts (desktop and phone):
   - **At checkout**: all four add-ons ticked with pitch and price, and Geo Riot's total is $534.57
   - **Untick and re-tick**: unticking Complexity Insurance drops the total by $89.99 and shows "No
     thanks, I'll take my chances with complexity.", and re-ticking restores it
@@ -125,12 +127,12 @@ card, Flash Credit, or a split. The confirmation and history show them.
 
 ### Implementation for User Story 1
 
-- [ ] T011 [US1] Implement `orderTotals` in src/lib/checkout/totals.ts (pure, `money.ts`). T007 passes.
-- [ ] T012 [US1] Create src/lib/data/add-ons.ts (`listOfferedAddOns`, `resolveAddOns`; the only reader
+- [X] T011 [US1] Implement `orderTotals` in src/lib/checkout/totals.ts (pure, `money.ts`). T007 passes.
+- [X] T012 [US1] Create src/lib/data/add-ons.ts (`listOfferedAddOns`, `resolveAddOns`; the only reader
   of `add_ons`). Add `addOns` to `CatalogFixture` and `seedCatalog` in src/lib/data/seed.ts, inserting
   with `onConflictDoNothing` on `name`. Put the four starting add-ons (research R9) in
   scripts/seed-data.ts and the test fixture. T008 passes.
-- [ ] T013 [US1] Extend `placeOrder` in src/lib/checkout/place-order.ts per contracts/changes.md:
+- [X] T013 [US1] Extend `placeOrder` in src/lib/checkout/place-order.ts per contracts/changes.md:
   - take `addOnIds`, de-duplicated
   - while the switch is on, re-resolve them inside the transaction
   - total = `orderTotals`, and refuse with `PRICE_CHANGED` on any mismatch
@@ -138,7 +140,7 @@ card, Flash Credit, or a split. The confirmation and history show them.
 
   Then parse `addOnId` in src/lib/actions/checkout.ts, and add `addOns` to `OrderView` in
   src/lib/orders/orders.ts. T009 passes.
-- [ ] T014 [US1] Show the add-ons:
+- [X] T014 [US1] Show the add-ons:
   - src/app/checkout/page.tsx passes `listOfferedAddOns`, the subtotal and `confirmshaming`
   - src/components/CheckoutForm.tsx gets ticked checkboxes (`data-testid="add-on"`), each add-on's
     decline line while confirmshaming is on and it's unticked, the live Total
@@ -150,7 +152,7 @@ card, Flash Credit, or a split. The confirmation and history show them.
   - the copy goes in src/lib/copy.ts
 
   T010 passes.
-- [ ] T015 [US1] Add `untickAddOns(page)` to tests/e2e/helpers.ts and call it from `buyByCard`. Untick
+- [X] T015 [US1] Add `untickAddOns(page)` to tests/e2e/helpers.ts and call it from `buyByCard`. Untick
   first in journeys whose numbers assume no add-ons:
   - card-checkout
   - split-checkout

@@ -22,7 +22,7 @@ async function main() {
     const counts = seedCatalog(db, SEED);
     await ensureDemoShopper(db, DEMO_SHOPPER);
     console.log(
-      `Reset ${file}: ${counts.tiers} tiers, ${counts.media} media, ${counts.shirts} shirts, ` +
+      `Reset ${file}: ${counts.tiers} tiers, ${counts.media} media, ${counts.shirts} shirts, ${counts.addOns} add-ons, ` +
         `and ${DEMO_SHOPPER.email} / ${DEMO_SHOPPER.password}.`,
     );
   } finally {

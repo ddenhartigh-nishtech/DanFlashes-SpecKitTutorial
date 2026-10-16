@@ -121,8 +121,8 @@ describe("seedCatalog", () => {
   it("is idempotent: a second run inserts nothing", () => {
     const first = seedCatalog(db, SMALL_FIXTURE);
     const second = seedCatalog(db, SMALL_FIXTURE);
-    expect(first).toEqual({ tiers: 3, media: 5, shirts: 4 });
-    expect(second).toEqual({ tiers: 0, media: 0, shirts: 0 });
+    expect(first).toEqual({ tiers: 3, media: 5, shirts: 4, addOns: 4 });
+    expect(second).toEqual({ tiers: 0, media: 0, shirts: 0, addOns: 0 });
   });
 
   it("refuses a BLAND shirt priced at the start price, naming the shirt", () => {

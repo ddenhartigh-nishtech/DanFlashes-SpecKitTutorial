@@ -10,7 +10,7 @@ import { copy } from "@/lib/copy";
 import { getCatalogShirtsByIds, type ShirtImageView, type TierBadge } from "@/lib/data/shirts";
 import { listTiers } from "@/lib/data/tiers";
 import type { Db } from "@/lib/db/client";
-import { orderDrains, orderItems, orders, revenueStreams } from "@/lib/db/schema";
+import { orderAddOns, orderDrains, orderItems, orders, revenueStreams } from "@/lib/db/schema";
 import { formatUsd, mul, sub, type Usd } from "@/lib/money";
 import { streamName } from "@/lib/streams/streams";
 import type { StreamPreset } from "@/lib/streams/types";
@@ -50,6 +50,8 @@ export interface OrderView {
   perDiemDrained: boolean;
   /** Every other stream this order emptied (003 US4): one achievement each. */
   drainedStreams: DrainedStream[];
+  /** The add-ons he bought (005 FR-007): separate lines, at the price he paid. */
+  addOns: { name: string; priceUsd: Usd }[];
   lines: SummaryLine[];
 }
 
@@ -134,6 +136,22 @@ function hydrateOrders(db: Db, rows: (typeof orders.$inferSelect)[]): OrderView[
     .orderBy(orderDrains.streamId)
     .all();
 
+  const extras = db
+    .select({
+      orderId: orderAddOns.orderId,
+      name: orderAddOns.name,
+      priceUsd: orderAddOns.priceUsd,
+    })
+    .from(orderAddOns)
+    .where(
+      inArray(
+        orderAddOns.orderId,
+        rows.map((r) => r.id),
+      ),
+    )
+    .orderBy(orderAddOns.position, orderAddOns.addOnId)
+    .all();
+
   const catalog = getCatalogShirtsByIds(db, [...new Set(items.map((i) => i.shirtId))]);
   const tiers = sortTiers(listTiers(db));
   const badge = (name: string): TierBadge => {
@@ -163,6 +181,9 @@ function hydrateOrders(db: Db, rows: (typeof orders.$inferSelect)[]): OrderView[
     drainedStreams: drains
       .filter((d) => d.orderId === order.id)
       .map((d) => ({ streamId: d.streamId, name: streamName(d), preset: d.preset })),
+    addOns: extras
+      .filter((extra) => extra.orderId === order.id)
+      .map(({ name, priceUsd }) => ({ name, priceUsd })),
     lines: items
       .filter((item) => item.orderId === order.id)
       .map((item) => ({

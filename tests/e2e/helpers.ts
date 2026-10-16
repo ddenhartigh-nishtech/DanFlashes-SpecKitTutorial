@@ -88,10 +88,22 @@ export async function connect(
   await section.getByRole("button", { name: submit }).click();
 }
 
-/** Buy one shirt by card and land on its confirmation. */
+/**
+ * A careful shopper (005): untick every pre-checked add-on, so the order is the shirts alone. Run
+ * it on the checkout page; it waits for the form first.
+ */
+export async function untickAddOns(page: Page) {
+  await visible(page.getByTestId("total")).waitFor();
+  for (const box of await visible(page.getByTestId("add-on")).getByRole("checkbox").all()) {
+    await box.uncheck();
+  }
+}
+
+/** Buy one shirt by card, without the add-ons, and land on its confirmation. */
 export async function buyByCard(page: Page, slug: string, size: string) {
   await addShirt(page, slug, size);
   await page.goto("/checkout");
+  await untickAddOns(page);
   await visible(page.getByLabel("Card number")).fill("4242 4242 4242 4242");
   await visible(page.getByLabel("Expiry (MM/YY)")).fill("12/29");
   await visible(page.getByLabel("CVC")).fill("123");

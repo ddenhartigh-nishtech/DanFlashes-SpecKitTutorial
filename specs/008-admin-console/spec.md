@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-16
 
-**Status**: Draft
+**Status**: Draft (Q1–Q3 resolved 2026-10-16)
 
 **Input**: User description: "Admin Console (ROADMAP 008). Non-technical owner pages that replace Drizzle Studio as the owner's tool: shirts (create, edit, see each one's complexity score, tier, MSRP and final price, deactivate and reactivate, never delete), media uploads (high-resolution, zoomable shirt imagery with alt text, attached to shirts), complexity tiers (names, taglines, score bands, badge colors; the lowest is BLAND), add-ons (005), every store setting and tactic switch from 001–009 (including the MSRP tuning parameters and Flash Credit presets), customers, and orders. Plus a pricing-vs-complexity analysis that spots shirts priced against the complexity order. Only the store owner can open the console or make a change, and every change is checked by the store when it's made, not just hidden. Changes take effect immediately. The constitution's rules hold: shoppers never see complexity scores, shirts are deactivated rather than deleted and stay viewable from order history, bland shirts are priced below a real shirt's starting price, the MSRP algorithm stays one deterministic exponential function whose tuning is owner-adjustable, money is exact. Every page works from a 360px phone up. Card details never show beyond brand and last four."
 
@@ -14,12 +14,35 @@
 - 003-revenue-streams-per-diem: revenue streams, the per diem drain and its achievements
 - 004, 005, 006, 009: their tactic switches; 005's add-ons
 
+## Clarifications
+
+### Session 2026-10-16
+
+- Q1: Who is the owner? → A: **An account marked as an admin.**
+  - Each account gets an admin flag (owner: "likely bool: isAdmin"), off by default.
+  - It's set and cleared from the command line only, never from the store or the console.
+  - An admin signs in on the normal sign-in page, and can still shop like anyone else.
+  - The demo seed adds one admin account.
+- Q2: Can the owner change customers and orders? → A: **Look, plus grant Flash Credit.**
+  - The owner can grant a customer Flash Credit. Each grant is its own entry in the customer's
+    Flash Credit ledger.
+  - Nothing else about customers or orders can be changed. There are no refunds: all sales final.
+- Q3: How does the console look and sound? → A: **Perfectly tranquil.**
+  - Owner: "Dan's a phoney." Dan is insecure, and the store's loudness is an act.
+  - In his own office, everything is calm, and corporate motivational-poster wisdom gently
+    encourages him.
+  - None of the shopper tactics or the strobe ever run there.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Dan's Shirts (Priority: P1)
 
-Dan signs in and opens the console. Every shirt he's ever stocked is there, active or not, each with
-the number only Dan gets to see: its complexity score. Beside it are the tier that score earns, the
+Dan signs in and opens the console, and it's quiet in here. Nothing flashes, nothing counts down,
+and nobody is looking at this shirt right now. A framed poster says **CONFIDENCE**, and under it:
+"You set the prices. That makes you the expert."
+
+Every shirt he's ever stocked is there, active or not, each with the number only Dan gets to see:
+its complexity score. Beside it are the tier that score earns, the
 MSRP the math suggests, and the final price he actually charges.
 
 He bumps Fractal Fury from 42 to 48 and watches the MSRP climb before he saves. He sets a final price
@@ -37,8 +60,9 @@ only the owner gets in.
 - change a score and a final price
 - deactivate a shirt, then reactivate it
 
-Each change shows in the store on the next page load. Then, as a guest and as a signed-in shopper,
-open every console address and try every console action. Each one is refused and changes nothing.
+Each change shows in the store on the next page load, and the console itself stays calm throughout.
+Then, as a guest and as a signed-in shopper, open every console address and try every console action.
+Each one is refused and changes nothing.
 
 **Acceptance Scenarios**:
 
@@ -67,6 +91,12 @@ open every console address and try every console action. Each one is refused and
    see the store's ordinary not-found page. **When** they send any console change directly (not
    through a page), **Then** it's refused and nothing changes.
 7. **Given** any shirt, **When** the owner looks for a way to delete it, **Then** there is none.
+8. **Given** every tactic switch is on and the owner's browser has Extreme Awesomeness on, **When**
+   the owner opens any console page, **Then**:
+   - nothing flashes, moves or pops up
+   - no shopper tactic appears
+   - one motivational poster is on the page
+   - a successful save is confirmed with a word of encouragement
 
 ---
 
@@ -198,12 +228,19 @@ diem left, three streams drained. Dan opens Greg's latest order and sees the shi
 had that day, the add-ons Greg didn't untick, and a Visa ending 4242. Nothing more about the card. The
 store never had any more than that.
 
-**Why this priority**: it's useful, and it's where the store's drain achievements finally get a
-reader. But nothing else depends on it.
+Greg is out of money. Dan grants him $500.00 of Flash Credit, and the poster says **GENEROSITY**.
+Greg's balance goes up by exactly $500.00. His Flash Credit history shows it as a gift from Dan,
+right next to his top-ups. He spends it on a shirt the same afternoon.
 
-**Independent Test**: with seeded shoppers and orders, confirm that the customers and orders pages
-show the right totals, balances and lines. Confirm that no page shows more of a card than its brand
-and last four.
+**Why this priority**: it's useful, and it's where the store's drain achievements finally get a
+reader. But nothing else depends on it. The grant is the console's only money change, so it's
+built test-first (constitution VI).
+
+**Independent Test**: with seeded shoppers and orders:
+- confirm that the customers and orders pages show the right totals, balances and lines
+- confirm that no page shows more of a card than its brand and last four
+- grant a customer Flash Credit, and confirm that their balance rises by exactly that amount and
+  still equals the sum of their entries, and that they can spend it at checkout
 
 **Acceptance Scenarios**:
 
@@ -228,8 +265,16 @@ and last four.
    - the Flash Credit applied
    - the card's brand and last four, and nothing more of the card
    - any drain achievements it earned
-4. **Given** any customer or order, **When** the owner looks for what the owner may change, **Then**
-   it matches FR-036.
+4. **Given** a customer, **When** the owner grants them an amount of Flash Credit, **Then**:
+   - one grant entry for exactly that amount is added to their ledger
+   - their balance rises by exactly that amount
+   - their own Flash Credit history shows the grant
+   - checkout lets them spend it like any other Flash Credit
+5. **Given** a grant that's zero, negative, or not a dollar amount, **When** the owner submits it,
+   **Then** it's refused and nothing is recorded. **When** the owner presses Grant twice for one
+   grant, **Then** it's recorded once.
+6. **Given** any customer or order, **When** the owner looks for anything else to change (an order,
+   a past entry, an account's details), **Then** there's no way to change it.
 
 ---
 
@@ -259,6 +304,14 @@ and last four.
   names match.
 - **Guest orders.** With the checkout gate off, a guest can place an order. It's listed under
   "Guest".
+- **Spending a grant.** Granted credit is spent exactly like topped-up credit, including how the per
+  diem drain counts it.
+- **A gift to himself.** An admin's own account is a customer like any other, so the owner can grant
+  it Flash Credit. It's fake money.
+- **An admin no longer.** When an account's admin flag is cleared from the command line, that
+  account loses the console at its next page load or save, even mid-session.
+- **The quiet office.** Console pages stay calm whatever the tactic switches say, and whatever the
+  owner's own Extreme Awesomeness toggle says.
 - **Deactivated, still bought.** An inactive shirt still shows in the console. Its past orders still
   open, and the shopper's order history still shows it.
 - **Nothing to analyze.** The pricing page with one active shirt, or none, says so.
@@ -272,10 +325,15 @@ and last four.
 
 **The door**
 
-- **FR-001**: The console MUST be open only to the store owner. Who the owner is, and how they sign
-  in: [NEEDS CLARIFICATION: Is the owner a regular store account marked as the owner (set from the
-  command line, signing in on the normal sign-in page), a separate owner password from the store's
-  environment configuration, or any account whose email is on an owner list in that configuration?]
+- **FR-001**: The console MUST be open only to the store owner: a signed-in account marked as an
+  admin.
+  - Every account MUST carry an admin flag, off by default. Accounts that exist today start with it
+    off.
+  - The flag MUST be set and cleared only from the command line, by email. The store and the
+    console MUST offer no way to change it.
+  - An admin signs in on the store's normal sign-in page, and can still shop.
+  - The demo seed MUST add one admin account. Its sign-in lives in the seed data, like the demo
+    shopper's.
 - **FR-002**: Anyone who isn't the signed-in owner, guest or shopper, who opens any console address
   MUST see the store's ordinary not-found page. Shoppers MUST see no link to the console and no hint
   that it exists.
@@ -287,9 +345,26 @@ and last four.
   MUST NEVER be the only protection.
 - **FR-004**: The owner MUST be able to reach the console from a link in the store header, which
   only the owner sees, and get back to the store from every console page.
-- **FR-005**: The console's look and voice: [NEEDS CLARIFICATION: Should the console wear the
-  store's loud look and Dan's voice, with none of the shopper tactics running inside it? Or should
-  it be a plain, neutral admin tool, or fully loud, tactics and Extreme Awesomeness included?]
+- **FR-005**: The console MUST be perfectly tranquil. Dan's a phoney, and in his own office he can
+  drop the act:
+  - soft, muted colors, plain type and generous space
+  - nothing that flashes, strobes, animates or pops up
+  - no Extreme Awesomeness button, and no strobe or pipes, even when the owner's browser has it on
+  - none of the shopper tactics: no scarcity lines, countdowns, social proof, pop-ups, add-ons,
+    confirmshaming or "Are you sure sure?"
+
+  A confirmation the console needs, such as deactivating a shirt, MUST be asked once, calmly.
+- **FR-005a**: Every console page MUST show one motivational poster, in the corporate style:
+  - one word in capitals, such as INTEGRITY, SYNERGY or CONFIDENCE
+  - one serene line of encouragement under it, aimed at an insecure man who sets the prices (for
+    example "You set the prices. That makes you the expert.")
+
+  The posters MUST come from a set of at least 12 and change from page load to page load. Like
+  the rest of the store's copy, they're played straight and never explain the joke.
+- **FR-005b**: The console's messages MUST be calm and encouraging:
+  - a successful save says so, with a word of encouragement (for example "Saved. That was a good
+    decision, Dan.")
+  - a refusal is gentle, and still says plainly what to fix
 
 **Shirts (US1)**
 
@@ -423,7 +498,8 @@ and last four.
 **Customers and orders (US6)**
 
 - **FR-032**: The customers page MUST list every account with its display name, email, join date,
-  order count, lifetime spend and Flash Credit balance. It MUST be searchable by name or email.
+  order count, lifetime spend and Flash Credit balance, and mark the admins. It MUST be searchable
+  by name or email.
 - **FR-033**: A customer's page MUST show:
   - their orders
   - every Flash Credit entry, with the balance equal to the sum of the entries
@@ -441,9 +517,17 @@ and last four.
 - **FR-035**: No console page may show more of a card than its brand and last four. No console page
   may show a password or anything derived from one, or a sign-in session. The nosy sign-up's answers
   are never stored, so there is nothing of them to show.
-- **FR-036**: What the owner may change about customers and orders: [NEEDS CLARIFICATION: Is it look
-  only (all sales final), or may the owner also grant Flash Credit as a ledger entry, or also refund
-  an order to Flash Credit?]
+- **FR-036**: The owner MUST be able to grant a customer Flash Credit:
+  - The amount is in dollars and cents, at least $0.01, with no ceiling (the same as a top-up).
+  - Each grant MUST be recorded as its own entry in the customer's Flash Credit ledger, marked as a
+    grant (constitution: Flash Credit is a ledger).
+  - The balance stays the sum of the entries, and it never goes below zero.
+  - A grant MUST be recorded exactly once, even when it's submitted twice.
+  - The customer's own Flash Credit history MUST show the grant as a gift from Dan, in the store's
+    voice. It's spent at checkout like any other Flash Credit.
+- **FR-036a**: Apart from grants, the console MUST NOT change customers or orders. There's no
+  refund, no order edit, no change to a past ledger entry, and no change to an account's details or
+  sign-in. All sales final.
 
 **Everywhere**
 
@@ -461,7 +545,8 @@ and last four.
 
 ### Key Entities *(include if feature involves data)*
 
-- **Owner**: the one person who runs the store and the only one who can open the console (FR-001).
+- **Admin (the owner)**: an account with the admin flag on (FR-001). Only an admin can open the
+  console. Every account has the flag, off by default.
 - **Shirt**: name, URL name, style, complexity score, optional final price, description, status
   (active or inactive), featured, ordered images. It's never deleted.
 - **Media**: an image with a storage key and alt text, attachable to any number of shirts. One image
@@ -472,6 +557,10 @@ and last four.
   image, and every tactic switch.
 - **Add-on**: name, pitch, decline line, price, position and active. It's retired, never deleted.
 - **Customer**: a shopper account, with its orders, Flash Credit entries and revenue streams.
+- **Flash Credit grant**: a new kind of Flash Credit entry. It's a positive amount the owner gave a
+  customer, and it's never edited or removed.
+- **Motivational poster**: a word in capitals and one line of encouragement. It's console copy,
+  with at least 12 in the set.
 - **Order**: its shirt lines and add-on lines as they were bought, its payment (Flash Credit and the
   card's brand and last four), and its drain achievements.
 - **Pricing finding** (derived, never stored): an inverted pair, an override's distance from the
@@ -498,11 +587,16 @@ and last four.
   journeys on both a phone and a desktop.
 - **SC-009**: An owner new to the console can create a shirt, attach an uploaded image and make it
   active in under 5 minutes, without help.
+- **SC-010**: After every grant, the customer's balance rises by exactly the amount granted and
+  equals the sum of their ledger entries, every time. A grant submitted twice is recorded once.
+- **SC-011**: With every tactic switch on and Extreme Awesomeness on, console pages show zero
+  flashing, motion, pop-ups or shopper tactics. Every console page shows exactly one motivational
+  poster.
 
 ## Assumptions
 
-- There's one store and one owner. No staff roles, no permissions beyond "owner or not", and no
-  change history of who changed what.
+- There's one store. Any admin is the owner. There are no staff roles, no permissions beyond "admin
+  or not", and no change history of who changed what.
 - No bulk import or export, and no scheduled changes (such as a price that changes next week).
 - Nothing is deleted from the console except images that nothing uses. Shirts and add-ons retire,
   and customers and orders are never removed.
@@ -514,5 +608,12 @@ and last four.
 - The console needs no performance work beyond the store's existing budgets. It's an owner tool on a
   demo store.
 - Drizzle Studio stays available to developers. The owner just no longer needs it.
-- No money path changes for shoppers. Prices still come from the catalog at checkout, and the
-  console changes the catalog only.
+- Shoppers' money paths don't change. Prices still come from the catalog at checkout. The only
+  new money is the grant, a new kind of Flash Credit entry that's spent like a top-up.
+- Because grants touch Flash Credit, this feature is built test-first and runs `/speckit-analyze`
+  before implementation (constitution VI and the "Analyze the money" gate).
+- **Constitution note.** As written, principle I ("Every page… MUST target exactly one customer")
+  and principle V ("The UI MUST be as loud as the shirts") cover every page. The tranquil console
+  (FR-005) needs an amendment that scopes them to shopper pages and adds the console's own rule:
+  calm, and still working from 360px. It will be batched with the pending K1 clarification (V,
+  "It starts off"), and the owner ratifies it before the plan's Constitution Check.

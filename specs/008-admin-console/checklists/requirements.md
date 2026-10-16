@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [ ] No [NEEDS CLARIFICATION] markers remain
+- [x] No [NEEDS CLARIFICATION] markers remain
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic (no implementation details)
@@ -31,9 +31,13 @@
 
 ## Notes
 
-- Three [NEEDS CLARIFICATION] markers are open for the owner: FR-001 (who the owner is and how
-  they sign in), FR-005 (the console's look and voice) and FR-036 (whether customers and orders
-  are look-only).
+- Q1–Q3 resolved 2026-10-16 (see the spec's Clarifications):
+  - FR-001: the owner is an admin-flagged account.
+  - FR-005, FR-005a, FR-005b: a tranquil console with motivational posters.
+  - FR-036, FR-036a: look only, plus Flash Credit grants.
+- The tranquil console needs a constitution amendment scoping principles I and V to shopper pages.
+  It's recorded in the spec's Assumptions, and the owner ratifies it before the plan's
+  Constitution Check.
 - Drizzle Studio, the command-line catalog audit, image formats and #RRGGBB colors are named
   because they're the owner's existing tools and product rules, not implementation choices.
 - Items marked incomplete require spec updates before `/speckit-clarify` or `/speckit-plan`.

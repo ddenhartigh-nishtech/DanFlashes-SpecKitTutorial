@@ -25,6 +25,9 @@
   don't check out.
 - Q3: Are his unticks remembered? → A: **No. Every add-on is ticked again, every time** checkout
   opens.
+- Q: When he unticks an add-on, does each add-on have its own decline line, or does every untick show
+  the same one? → A: **Each add-on has its own decline line**, kept with the add-on and edited
+  alongside its pitch. With confirmshaming off, no decline line shows at all.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -53,9 +56,10 @@ feature and the bigger laugh at checkout. The roach-motel cart works without the
    is listed with its name, its pitch and its price, already ticked, and the total includes all of them.
 2. **Given** a ticked add-on, **When** he unticks it, **Then** the total drops by exactly its price.
    **When** he ticks it again, **Then** the total goes back up.
-3. **Given** confirmshaming is on, **When** he unticks an add-on, **Then** a shamed line appears under
-   it, in voice ("No thanks, I'd rather my patterns go unprotected."). With confirmshaming off, the
-   line is neutral or absent. The behavior is the same either way.
+3. **Given** confirmshaming is on, **When** he unticks an add-on, **Then** that add-on's own decline line
+   appears under it, in voice (Pattern Protection Plan™: "No thanks, I'd rather my patterns go
+   unprotected."). With confirmshaming off, no decline line appears. The total behaves the same
+   either way.
 4. **Given** some add-ons ticked, **When** he places the order by any payment method (card, Flash
    Credit, or a split), **Then** he's charged exactly the shirts plus the ticked add-ons. The
    confirmation and his order history list each add-on he bought, with the price he paid.
@@ -145,14 +149,15 @@ touches no money, but it makes the cart a place shirts check into and don't chec
 **Pre-checked add-ons**
 
 - **FR-003**: The add-ons MUST be owner-managed store data, editable without code changes. Each has a
-  name, a one-line pitch in voice, a flat price per order in exact dollars and cents (greater than
-  $0.00), whether it's offered, and its place in the list. The store starts with at least four, including
+  name, a one-line pitch in voice, a decline line in voice, a flat price per order in exact dollars
+  and cents (greater than $0.00), whether it's offered, and its place in the list. The store starts with at least four, including
   Pattern Protection Plan™ and Complexity Insurance.
 - **FR-004**: While it's on, checkout MUST list every offered add-on with its name, pitch and price,
   already ticked, and the total MUST include every ticked add-on. Every time checkout opens, every
   offered add-on starts ticked again. Nothing remembers what he unticked.
 - **FR-005**: Unticking an add-on MUST take exactly its price out of the total, and re-ticking puts it
-  back. Unticking shows a decline line that follows 002's confirmshaming switch.
+  back. While 002's confirmshaming switch is on, an unticked add-on shows its own decline line. While
+  it's off, no decline line shows.
 - **FR-006**: When the order is placed, the store MUST work out each ticked add-on's price again from
   its own data, never from the browser. If an add-on he ticked is no longer offered, or its price or
   the total differs from what he saw, nothing is charged and he's shown the new total.
@@ -176,18 +181,19 @@ touches no money, but it makes the cart a place shirts check into and don't chec
 **Voice**
 
 - **FR-013**: All new copy MUST use the Dan Flashes voice from constitution I and never explain the
-  joke. That covers the add-on names and pitches, the decline lines, and both questions with their
-  buttons.
+  joke. That covers the starting add-ons' names, pitches and decline lines, and both questions with
+  their buttons.
 
 ### Key Entities
 
-- **Add-on** (owner data): a name, a pitch, a flat price per order, whether it's offered, and its
-  position.
+- **Add-on** (owner data): a name, a pitch, a decline line, a flat price per order, whether it's
+  offered, and its position.
 - **Order Add-on**: one add-on bought on an order, with its name and the price paid, kept as it was even
   if the owner changes the add-on later.
 - **Order** (from 001): its total now covers its shirts plus its add-ons.
 - **Store Settings** (from 001–004): gains two switches, pre-checked add-ons and the roach-motel cart.
-- **Brand Copy** gains the decline lines and the two questions with their buttons.
+- **Brand Copy** gains the two questions with their buttons. The add-ons' names, pitches and decline
+  lines are owner data.
 
 ## Success Criteria *(mandatory)*
 

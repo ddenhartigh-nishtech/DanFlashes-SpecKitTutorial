@@ -47,7 +47,7 @@ test.describe("US1 — Dan's shirts (FR-006–FR-011)", () => {
     await expect(visible(page.getByTestId("shirt-image"))).toHaveCount(1);
     await visible(page.getByRole("button", { name: "Put it on the floor" })).click();
     await expect(visible(page.getByTestId("shirt-status"))).toHaveText(/on the floor/i);
-    const editUrl = page.url();
+    const editUrl = page.url().replace(/\?.*$/, "");
 
     await storePage(page, slug);
     await expect(visible(page.getByRole("heading", { level: 1 }))).toHaveText(name);

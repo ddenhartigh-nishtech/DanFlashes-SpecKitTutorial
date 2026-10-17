@@ -673,6 +673,36 @@ export const copy = {
         placeholderMissing: "Choose a placeholder picture.",
       },
     },
+    pricing: {
+      title: "Pricing",
+      intro:
+        "How the prices line up with the shapes. Complexity is the price; this is where to check.",
+      chartTitle: "Price against complexity",
+      chartHelp: "Each dot is a shirt on the floor. The line is the MSRP. Higher means pricier.",
+      chartLabel: "Final price against complexity score, with the MSRP line and the tier bands",
+      score: "Complexity score",
+      inversionsTitle: "Priced against the grain",
+      inversionsHelp: "A simpler shirt shouldn't cost more than a more complicated one.",
+      noInversions: "Every shirt on the floor is priced in order. Lovely.",
+      costsMore: (simpler: string, complex: string, gap: string) =>
+        `${simpler} costs ${gap} more than ${complex}, which is more complicated.`,
+      overridesTitle: "Your own prices",
+      overridesHelp: "Shirts you priced yourself, and how far that is from the MSRP.",
+      noOverrides: "Every shirt is at its MSRP.",
+      above: "above",
+      below: "below",
+      at: "at",
+      distance: (diff: string, percent: string, direction: string) =>
+        direction === "at" ? "Right at the MSRP." : `${diff} (${percent}%) ${direction} the MSRP`,
+      scoreAndPrice: (score: number, price: string) => `score ${score}, ${price}`,
+      auditTitle: "Catalog check",
+      auditHelp: "The same check as `npm run catalog:audit`.",
+      auditClean: "Nothing needs a look. The catalog is in good shape.",
+      error: "Needs fixing",
+      warning: "Worth a look",
+      fix: "Take a look",
+      nothing: "There's nothing to compare yet. Put a couple of shirts on the floor first.",
+    },
   },
 
   /** One message per error code in contracts/actions.md. */

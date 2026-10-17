@@ -266,27 +266,27 @@ and the media settings.
 
 ### Tests for User Story 3 ⚠️
 
-- [ ] T034 [P] [US3] Extend tests/unit/money.test.ts: `percentDiff(final, msrp)` is exact to one
+- [X] T034 [P] [US3] Extend tests/unit/money.test.ts: `percentDiff(final, msrp)` is exact to one
   decimal (for example 450.00 against 300.00 → "50.0", 299.99 against 300.00 → "-0.0", and a
   value that rounds half-up), and refuses a zero base.
-- [ ] T035 [P] [US3] Write tests/unit/admin-pricing.test.ts:
+- [X] T035 [P] [US3] Write tests/unit/admin-pricing.test.ts:
   - `findInversions` flags exactly the pairs where a higher score costs less, with the gap; ties
     aren't flagged; inactive shirts are excluded by the caller
   - `overrideDistances` gives the dollars, percent and direction
   - `chartPoints` is monotonic in score and in log price, and every point stays inside the plot
   - fewer than two shirts → nothing to compare
-- [ ] T036 [P] [US3] Write tests/e2e/admin/pricing.spec.ts:
+- [X] T036 [P] [US3] Write tests/e2e/admin/pricing.spec.ts:
   - with the e2e shirt priced below a simpler shirt, the pair is listed with edit links
   - fixing the price clears the pair
   - the override list and the audit section show
 
 ### Implementation for User Story 3
 
-- [ ] T037 [US3] Add `percentDiff` to src/lib/money.ts (big.js; one decimal, half-up). T034
+- [X] T037 [US3] Add `percentDiff` to src/lib/money.ts (big.js; one decimal, half-up). T034
   passes.
-- [ ] T038 [US3] Create src/lib/admin/pricing.ts (`findInversions`, `overrideDistances`,
+- [X] T038 [US3] Create src/lib/admin/pricing.ts (`findInversions`, `overrideDistances`,
   `chartPoints`, per R12). T035 passes.
-- [ ] T039 [US3] Give the catalog audit structured issues in src/lib/catalog/audit.ts: `{ kind:
+- [X] T039 [US3] Give the catalog audit structured issues in src/lib/catalog/audit.ts: `{ kind:
   shirt|tier|settings|media, ref, message }`, alongside the unchanged CLI strings (analysis U3).
   Extend tests/integration/catalog-audit.test.ts to cover them. Then create
   src/components/admin/PriceChart.tsx (server SVG: log y-axis, the MSRP line,

@@ -564,6 +564,115 @@ export const copy = {
       featured: "Featured",
       viewInStore: "See it in the store",
     },
+    settings: {
+      title: "Settings",
+      intro: "Every switch is one click. Nothing here is permanent; you can always change it back.",
+      switchesTitle: "The tactics",
+      on: "On",
+      off: "Off",
+      turnOn: "Turn on",
+      turnOff: "Turn off",
+      switched: (label: string, on: boolean) => `${label} is ${on ? "on" : "off"}. Nicely handled.`,
+      unknownSwitch: "That isn't a switch we have.",
+      /** One plain line each (FR-012), from the store guide's switch table. */
+      switches: {
+        checkoutGate: {
+          label: "Checkout gate",
+          description: "Guests can build a cart, but they have to sign in to check out.",
+        },
+        blandShaming: {
+          label: "Bland-shirt shaming",
+          description:
+            'BLAND shirts can\'t stay in a cart: Add to Cart opens the endless "You sure about that?" loop.',
+        },
+        confirmshaming: {
+          label: "Confirmshaming",
+          description: 'Decline buttons make him feel it, like "Yes, I\'d rather blend in."',
+        },
+        perDiemDrain: {
+          label: "Per diem drain",
+          description:
+            "A gauge counts his per diem down with every order, and throws a party when it hits $0.",
+        },
+        drainJokes: {
+          label: "Drain jokes",
+          description:
+            "Each GONE trophy also says what he did. It only matters while the per diem drain is on.",
+        },
+        fakeScarcity: {
+          label: "Fake scarcity",
+          description: '"Only 1 left!" on every shirt, and another one found on every add.',
+        },
+        countdownTimers: {
+          label: "Countdown timers",
+          description: "A ten-minute clock that quietly starts over at zero. Nothing ever expires.",
+        },
+        socialProof: {
+          label: "Fabricated social proof",
+          description:
+            "How many people are looking, who just bought it, and fake purchase pop-ups on every page.",
+        },
+        preCheckedAddOns: {
+          label: "Pre-checked add-ons",
+          description:
+            "Checkout arrives with every add-on already ticked. He has to untick each one.",
+        },
+        roachMotel: {
+          label: "Roach-motel cart",
+          description:
+            'Removing or lowering a cart line asks "Are you sure?" and then "Are you sure sure?"',
+        },
+        flashMode: {
+          label: "Flash Mode",
+          description:
+            "The strobe the shopper's Extreme Awesomeness button turns on. Prices and Add to Cart never flash.",
+        },
+        pipesBackground: {
+          label: "Pipes background",
+          description:
+            "The old 3D Pipes screensaver grows behind every page while Extreme Awesomeness is on.",
+        },
+        nosySignUp: {
+          label: "Nosy sign-up",
+          description:
+            "Sign-up asks for far too much, all marked Required. The answers never leave his browser.",
+        },
+      },
+      tuning: {
+        title: "MSRP dials",
+        help: "MSRP = start price × 2 ^ ((score − anchor) ÷ doubling interval). Only the dials change, never the formula.",
+        start: "Start price",
+        anchor: "Anchor score",
+        interval: "Doubling interval",
+        now: "MSRP now",
+        after: "MSRP after",
+        shirt: "Shirt",
+        save: "Save the dials",
+        startFormat: "A dollar amount of at least $0.01, like 300.00.",
+        anchorFormat: "A whole number, 0 or more.",
+        intervalFormat: "A whole number, 1 or more.",
+        breaks: "These shirts wouldn't follow the rules with those dials:",
+      },
+      presets: {
+        title: "Top-up amounts",
+        label: "Amounts offered on the account page",
+        help: "One amount per line, or separated by commas.",
+        save: "Save the amounts",
+        format: (value: string) => `"${value}" isn't a dollar amount of at least $0.01.`,
+        duplicate: (value: string) => `${value} is in the list twice.`,
+        none: "Keep at least one amount.",
+      },
+      media: {
+        title: "Pictures",
+        baseUrl: "Media base URL",
+        baseUrlHelp:
+          "Leave it blank to serve pictures from this store. Or a CDN, starting http(s)://.",
+        placeholder: "Placeholder picture",
+        save: "Save",
+        baseUrlFormat: "Leave it blank, or start it with http:// or https://.",
+        placeholderMissing: "Choose a placeholder picture.",
+      },
+    },
   },
 
   /** One message per error code in contracts/actions.md. */

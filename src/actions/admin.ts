@@ -11,6 +11,12 @@ import {
   setShirtStatusCore,
   updateShirtCore,
 } from "@/lib/actions/admin/shirts";
+import {
+  saveMediaSettingsCore,
+  savePresetsCore,
+  saveTuningCore,
+  setSwitchCore,
+} from "@/lib/actions/admin/settings";
 import type { ConsoleState } from "@/lib/admin/state";
 import { getDb } from "@/lib/db/client";
 import type { CookieJar } from "@/lib/http/cookies";
@@ -47,4 +53,20 @@ export async function moveImage(_prev: ConsoleState | null, form: FormData) {
 }
 export async function detachImage(_prev: ConsoleState | null, form: FormData) {
   return run(detachImageCore, form);
+}
+
+export async function setSwitch(_prev: ConsoleState | null, form: FormData) {
+  return run(setSwitchCore, form);
+}
+
+export async function saveTuning(_prev: ConsoleState | null, form: FormData) {
+  return run(saveTuningCore, form);
+}
+
+export async function savePresets(_prev: ConsoleState | null, form: FormData) {
+  return run(savePresetsCore, form);
+}
+
+export async function saveMediaSettings(_prev: ConsoleState | null, form: FormData) {
+  return run(saveMediaSettingsCore, form);
 }

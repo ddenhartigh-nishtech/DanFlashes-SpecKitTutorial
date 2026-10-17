@@ -11,6 +11,12 @@ import {
   setShirtStatusCore,
   updateShirtCore,
 } from "@/lib/actions/admin/shirts";
+import {
+  saveMediaSettingsCore,
+  savePresetsCore,
+  saveTuningCore,
+  setSwitchCore,
+} from "@/lib/actions/admin/settings";
 import type { ConsoleState } from "@/lib/admin/state";
 import { copy } from "@/lib/copy";
 import type { Db, Sqlite } from "@/lib/db/client";
@@ -51,6 +57,19 @@ const CORES: [string, Core, Record<string, string>][] = [
   ["attachImage", attachImageCore, { shirtId: "2", mediaId: "1" }],
   ["moveImage", moveImageCore, { shirtId: "2", mediaId: "3", direction: "down" }],
   ["detachImage", detachImageCore, { shirtId: "4", mediaId: "5" }],
+  // US2
+  ["setSwitch", setSwitchCore, { key: "roachMotel", on: "0" }],
+  [
+    "saveTuning",
+    saveTuningCore,
+    { startPriceUsd: "1.00", anchorScore: "0", doublingInterval: "1" },
+  ],
+  ["savePresets", savePresetsCore, { presetsUsd: "1" }],
+  [
+    "saveMediaSettings",
+    saveMediaSettingsCore,
+    { mediaBaseUrl: "https://evil.example", placeholderMediaId: "2" },
+  ],
 ];
 
 /** Every row of every table, so "changes nothing" means nothing. */

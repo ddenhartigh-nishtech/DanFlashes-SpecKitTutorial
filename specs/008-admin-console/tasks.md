@@ -215,10 +215,10 @@ and the media settings.
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T026 [P] [US2] Write tests/unit/admin-switches.test.ts: `SWITCHES` lists exactly the 13 boolean
+- [X] T026 [P] [US2] Write tests/unit/admin-switches.test.ts: `SWITCHES` lists exactly the 13 boolean
   tactic keys of `StoreSettings` (`checkoutGate` included), each with a non-empty label and
   description, and no duplicates.
-- [ ] T027 [P] [US2] Write tests/integration/admin-settings.test.ts:
+- [X] T027 [P] [US2] Write tests/integration/admin-settings.test.ts:
   - **`setSwitchCore`**: changes only its column (every other column is unchanged); refuses an
     unknown key
   - **`saveTuningCore`**:
@@ -232,7 +232,7 @@ and the media settings.
     placeholder
 
   Add these cores to the T015 sweep.
-- [ ] T028 [P] [US2] Write tests/e2e/admin/switchboard.spec.ts:
+- [X] T028 [P] [US2] Write tests/e2e/admin/switchboard.spec.ts:
   - all 13 switches show with descriptions, reached from `/admin` in two clicks: Settings, then the
     switch (SC-005, analysis A1)
   - the owner turns off the roach motel; a shopper's cart line is then removed without "Are you
@@ -243,16 +243,16 @@ and the media settings.
 
 ### Implementation for User Story 2
 
-- [ ] T029 [US2] Create src/lib/admin/switches.ts (`SWITCHES`: key, column, label, description,
+- [X] T029 [US2] Create src/lib/admin/switches.ts (`SWITCHES`: key, column, label, description,
   per R11). Add the copy to `copy.console.settings`. T026 passes.
-- [ ] T030 [US2] Add targeted saves to src/lib/data/settings.ts: `saveSwitch`, `saveTuning`,
+- [X] T030 [US2] Add targeted saves to src/lib/data/settings.ts: `saveSwitch`, `saveTuning`,
   `savePresets` and `saveMediaSettings`. Each updates only its own columns.
-- [ ] T031 [US2] Create src/lib/actions/admin/settings.ts with the four cores, and add their
+- [X] T031 [US2] Create src/lib/actions/admin/settings.ts with the four cores, and add their
   wrappers to src/actions/admin.ts. T027 passes.
-- [ ] T032 [P] [US2] Create in src/components/admin/: `SwitchRow.tsx` (a one-click form),
+- [X] T032 [P] [US2] Create in src/components/admin/: `SwitchRow.tsx` (a one-click form),
   `TuningForm.tsx` (client; the now/after preview uses `msrpUsd`), `PresetsForm.tsx` and
   `MediaSettingsForm.tsx`.
-- [ ] T033 [US2] Create src/app/admin/settings/page.tsx. T028 passes.
+- [X] T033 [US2] Create src/app/admin/settings/page.tsx. T028 passes.
 
 **Checkpoint**: switches and tuning work without the database tools.
 

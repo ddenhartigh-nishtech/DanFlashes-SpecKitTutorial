@@ -304,16 +304,16 @@ zoomable.
 
 ### Tests for User Story 4 ⚠️
 
-- [ ] T040 [P] [US4] Create tests/helpers/images.ts: a real PNG builder (zlib, CRCs) at any size,
+- [X] T040 [P] [US4] Create tests/helpers/images.ts: a real PNG builder (zlib, CRCs) at any size,
   minimal JPEG (SOF0) and WebP (VP8, VP8L and VP8X) headers at any size, and SVG strings.
-- [ ] T041 [P] [US4] Write tests/unit/media-files.test.ts for `inspectUpload(bytes)`:
+- [X] T041 [P] [US4] Write tests/unit/media-files.test.ts for `inspectUpload(bytes)`:
   - it sniffs PNG, JPEG and WebP sizes, and SVG
   - it refuses: a renamed text file, more than 15 MB, a photo under 2,000 px on its longest side,
     and an SVG with `<script>`, `onload=`, `javascript:`, `<foreignObject>`, `<!DOCTYPE>`, an
     external `href` or `xlink:href`, an external `url(`, or `@import`
   - it accepts an SVG using `#id` references
   - an alt of 0 or 201 characters is refused
-- [ ] T042 [P] [US4] Write tests/integration/admin-media.test.ts (`MEDIA_UPLOADS_DIR` pointed at a
+- [X] T042 [P] [US4] Write tests/integration/admin-media.test.ts (`MEDIA_UPLOADS_DIR` pointed at a
   temp dir):
   - an accepted upload writes `uploads/<uuid>.<ext>` and a row
   - a refused one writes neither
@@ -324,24 +324,24 @@ zoomable.
     or malformed names, including `..`
 
   Add the cores to the T015 sweep.
-- [ ] T043 [P] [US4] Write tests/e2e/admin/media.spec.ts:
+- [X] T043 [P] [US4] Write tests/e2e/admin/media.spec.ts:
   - uploading an SVG with alt text, attaching it as the e2e shirt's main image, and opening the
     shopper's shirt page shows it in the zoom viewer
   - a 600×600 PNG is refused with its reason
 
 ### Implementation for User Story 4
 
-- [ ] T044 [US4] Create src/lib/admin/media-files.ts (`inspectUpload`, per R8). T041 passes.
-- [ ] T045 [US4] Create src/lib/admin/uploads.ts (the uploads dir from `MEDIA_UPLOADS_DIR` or
+- [X] T044 [US4] Create src/lib/admin/media-files.ts (`inspectUpload`, per R8). T041 passes.
+- [X] T045 [US4] Create src/lib/admin/uploads.ts (the uploads dir from `MEDIA_UPLOADS_DIR` or
   beside the database; `writeUpload`; `removeUpload`; safe file names) and src/lib/data/admin-media.ts
   (the library with its users and the placeholder flag).
-- [ ] T046 [US4] Create src/lib/actions/admin/media.ts (`uploadMediaCore`, `updateMediaAltCore`,
+- [X] T046 [US4] Create src/lib/actions/admin/media.ts (`uploadMediaCore`, `updateMediaAltCore`,
   `removeMediaCore`) and src/app/media/uploads/[file]/route.ts.
   - Add the wrappers.
   - Set `experimental.serverActions.bodySizeLimit: "16mb"` in next.config.ts.
   - Document `MEDIA_UPLOADS_DIR` in .env.example.
   - T042 passes.
-- [ ] T047 [US4] Create `UploadForm.tsx` and `MediaCard.tsx` in src/components/admin/ and
+- [X] T047 [US4] Create `UploadForm.tsx` and `MediaCard.tsx` in src/components/admin/ and
   src/app/admin/media/page.tsx. T043 passes.
 
 ---

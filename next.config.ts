@@ -7,6 +7,8 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   experimental: {
+    // Uploads (008 R8): a 15 MB picture plus the form's own overhead.
+    serverActions: { bodySizeLimit: "16mb" },
     // The e2e build (and so `npm run verify`) always compiles fresh: its cached build once served
     // globals.css without a rule added minutes earlier (006). Other builds keep the cache.
     turbopackFileSystemCacheForBuild: !process.env.NEXT_DIST_DIR,

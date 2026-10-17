@@ -17,6 +17,7 @@ import {
   saveTuningCore,
   setSwitchCore,
 } from "@/lib/actions/admin/settings";
+import { removeMediaCore, updateMediaAltCore, uploadMediaCore } from "@/lib/actions/admin/media";
 import type { ConsoleState } from "@/lib/admin/state";
 import { copy } from "@/lib/copy";
 import type { Db, Sqlite } from "@/lib/db/client";
@@ -57,6 +58,10 @@ const CORES: [string, Core, Record<string, string>][] = [
   ["attachImage", attachImageCore, { shirtId: "2", mediaId: "1" }],
   ["moveImage", moveImageCore, { shirtId: "2", mediaId: "3", direction: "down" }],
   ["detachImage", detachImageCore, { shirtId: "4", mediaId: "5" }],
+  // US4
+  ["uploadMedia", uploadMediaCore, { alt: "Sneaky upload" }],
+  ["updateMediaAlt", updateMediaAltCore, { mediaId: "1", alt: "Hacked" }],
+  ["removeMedia", removeMediaCore, { mediaId: "1" }],
   // US2
   ["setSwitch", setSwitchCore, { key: "roachMotel", on: "0" }],
   [

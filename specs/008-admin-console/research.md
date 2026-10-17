@@ -41,6 +41,11 @@ plan.md, data-model.md, contracts/console.md and tasks.md.
     - no session → "Your session ended. Sign in again." (nothing changes)
     - a signed-in non-admin → a generic refusal (nothing changes)
   - The store header shows a "Back office" link only to admins, inside `<Suspense>`.
+  - Every console page also calls `requireAdmin()` before it reads anything. Next renders a page
+    apart from its layout, and an in-console navigation fetches only the page, so a gate in the
+    layout alone could let a crafted page request (or a revoked admin's next click) read data.
+    The layout's gate keeps the shell out of non-admin responses; the page check protects the
+    data. Found during implementation.
 - **Rationale**: Cache Components requires request data inside `<Suspense>`. A `null` fallback means
   the static shell holds nothing of the console, so a non-admin's response never contains console
   markup. Re-checking in every action makes hiding a page never the only protection (FR-003).

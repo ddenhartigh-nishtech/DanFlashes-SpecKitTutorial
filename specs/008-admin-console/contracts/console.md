@@ -7,6 +7,8 @@ spec's FR, or the research R that decided it.
 
 - Every route under `/admin` renders through `app/admin/layout.tsx`. Its gate runs before any
   console markup.
+- Every console page also calls `requireAdmin()` before reading anything (R2), because Next
+  renders pages apart from layouts.
 - An admin gets the calm console.
 - Anyone else gets the store's ordinary 404 (`app/not-found.tsx` in `StoreChrome`). The response
   contains no console markup.

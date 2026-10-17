@@ -13,6 +13,8 @@ export interface SessionUser {
   id: number;
   email: string;
   displayName: string | null;
+  /** The owner (008 FR-001): read with every session, so a cleared flag counts at once. */
+  isAdmin: boolean;
 }
 
 const hashToken = (token: string) => createHash("sha256").update(token).digest("hex");
@@ -38,7 +40,12 @@ export function findSessionUser(
   if (!token) return null;
   return (
     db
-      .select({ id: users.id, email: users.email, displayName: users.displayName })
+      .select({
+        id: users.id,
+        email: users.email,
+        displayName: users.displayName,
+        isAdmin: users.isAdmin,
+      })
       .from(sessions)
       .innerJoin(users, eq(sessions.userId, users.id))
       .where(

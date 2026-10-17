@@ -1,6 +1,8 @@
 /**
  * Every shopper-facing string, in the Dan Flashes voice (constitution I): loud, confident,
- * dead serious on the surface. The store never explains the joke.
+ * dead serious on the surface. The store never explains the joke. The one exception is
+ * `console`: the owner's back office, where Dan can finally relax (constitution V, "The back
+ * office is calm").
  */
 export const copy = {
   brand: {
@@ -15,6 +17,8 @@ export const copy = {
     signIn: "Sign in",
     menu: "Menu",
     mainLabel: "Main",
+    /** Admins only (008 FR-004): the way into the console. */
+    backOffice: "Back office",
   },
   home: {
     headline: "These shirts are complicated.",
@@ -402,6 +406,163 @@ export const copy = {
       /** The roach motel's yes buttons (005 US2). */
       removeYes: { shamed: "Yes, remove it (and lose your edge)", neutral: "Yes, remove it" },
       lowerYes: { shamed: "Yes, take it down (and lose your edge)", neutral: "Yes, lower it" },
+    },
+  },
+
+  /**
+   * The owner's console (008): perfectly tranquil. Dan is loud in public; in here, nobody's
+   * watching. Every message is calm, and the posters gently encourage him.
+   */
+  console: {
+    brand: "Dan's Office",
+    backToStore: "Back to the store",
+    navLabel: "Office",
+    nav: {
+      home: "Welcome",
+      shirts: "Shirts",
+      pricing: "Pricing",
+      media: "Media",
+      tiers: "Tiers",
+      addOns: "Add-ons",
+      settings: "Settings",
+      customers: "Customers",
+      orders: "Orders",
+    },
+    /** One poster per page (FR-005a): a word in capitals and one serene line. Never the joke. */
+    posters: [
+      { word: "CONFIDENCE", line: "You set the prices. That makes you the expert." },
+      { word: "INTEGRITY", line: "A shirt is worth exactly what you say it is." },
+      {
+        word: "LEADERSHIP",
+        line: "Somebody has to decide what a shape costs. It might as well be you.",
+      },
+      { word: "COURAGE", line: "It takes courage to charge this much. You have that courage." },
+      { word: "VISION", line: "Others see a shirt. You see a fourteen-hundred-dollar shirt." },
+      { word: "TEAMWORK", line: "There is no I in team. There is a Dan in Dan Flashes." },
+      { word: "PERSEVERANCE", line: "Every sale is final. So is your commitment to excellence." },
+      {
+        word: "PATIENCE",
+        line: "The right customer is out there, and he still has some per diem left.",
+      },
+      { word: "GROWTH", line: "Prices double every ten points of complexity. So can you." },
+      {
+        word: "BALANCE",
+        line: "Breathe in. Breathe out. Nobody is looking at the numbers but you.",
+      },
+      {
+        word: "ACCEPTANCE",
+        line: "Some men will always choose beige. You can't save all of them.",
+      },
+      {
+        word: "EXCELLENCE",
+        line: "Excellence is not an act. It is a habit, like restocking the polos.",
+      },
+      { word: "CALM", line: "It's quiet in here. You can let your shoulders down." },
+      {
+        word: "VALUE",
+        line: "Your worth isn't measured in shirts sold. Although it is a good start.",
+      },
+    ],
+    poster: "Today's thought",
+    welcome: {
+      title: "Welcome back, Dan.",
+      body: "Everything is right where you left it. Take your time.",
+      problems: (n: number) =>
+        n === 0
+          ? "The catalog is in good shape. Nothing needs you right now."
+          : `${n} catalog ${n === 1 ? "thing needs" : "things need"} a look when you're ready.`,
+      areas: "Where would you like to start?",
+    },
+    saved: "Saved. That was a good decision, Dan.",
+    refused: {
+      signIn: "Your session ended. Sign in again, whenever you're ready.",
+      notFound: "That isn't available.",
+      problems: "That didn't save, and that's okay. Here's what needs a look:",
+    },
+    notFoundHere: "We couldn't find that one. That's okay.",
+    working: "One moment…",
+    yes: "Yes",
+    cancel: "Never mind",
+    shirts: {
+      title: "Shirts",
+      intro: "Every shirt you've ever stocked, with the number only you get to see.",
+      newShirt: "New shirt",
+      newTitle: "A new shirt",
+      fields: {
+        name: "Name",
+        slug: "URL name",
+        slugHelp: "Lowercase letters, numbers and hyphens. It can't change later.",
+        style: "Style",
+        complexity: "Complexity score",
+        description: "Description",
+        finalPrice: "Final price",
+        finalPriceHelp: "Leave it blank to use the MSRP.",
+        featured: "Feature it on the home page",
+        mainImage: "Main picture",
+        noImage: "No picture yet",
+        live: "Put it on the floor right away",
+      },
+      save: "Save",
+      preview: {
+        label: "What the store will show",
+        tier: "Tier",
+        msrp: "MSRP",
+        final: "Final price",
+        dans: "set by you",
+        isMsrp: "the MSRP",
+        cantPrice: "That's too complicated to price, even for Dan.",
+      },
+      status: { active: "On the floor", inactive: "Resting (not in the store)" },
+      activate: "Put it on the floor",
+      deactivate: "Deactivate",
+      confirmDeactivate: (name: string) => `Deactivate ${name}? You can bring it back any time.`,
+      yesDeactivate: "Yes, deactivate",
+      keep: "Keep it",
+      onTheFloor: "It's on the floor. Well done.",
+      resting: "Done. It's resting now, and you can bring it back any time.",
+      images: {
+        title: "Pictures",
+        help: "The first one is the main picture.",
+        add: "Add a picture",
+        choose: "Choose a picture",
+        attach: "Attach",
+        up: "Move up",
+        down: "Move down",
+        detach: "Detach",
+        none: "No pictures yet.",
+      },
+      slugTaken: "That URL name is already taken. Try another.",
+      scoreFormat: "A whole number, 0 or more.",
+      priceFormat: "Dollars and cents, like 299.99, or leave it blank for the MSRP.",
+      unknownImage: "We couldn't find that picture.",
+      alreadyAttached: "That picture is already on this shirt.",
+      lastImage:
+        "A shirt on the floor keeps at least one picture. Attach another first, or let it rest.",
+      notFound: "We couldn't find that shirt.",
+      badStatus: "That isn't a status we know.",
+      table: {
+        name: "Shirt",
+        score: "Score",
+        tier: "Tier",
+        msrp: "MSRP",
+        final: "Final price",
+        status: "Status",
+      },
+      filters: {
+        status: "Showing",
+        all: "Every shirt",
+        active: "On the floor",
+        inactive: "Resting",
+        tier: "Tier",
+        allTiers: "Every tier",
+        sort: "Sort by",
+        score: "Score",
+        price: "Price",
+        name: "Name",
+        apply: "Show",
+      },
+      featured: "Featured",
+      viewInStore: "See it in the store",
     },
   },
 

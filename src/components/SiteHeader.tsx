@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import { currentUser } from "@/app/_data/request";
 import { loadPopCandidates } from "@/app/_data/urgency";
 import { CartCount } from "@/components/CartCount";
 import { ExtremeAwesomeness } from "@/components/ExtremeAwesomeness";
@@ -37,6 +38,9 @@ export function SiteHeader() {
                   </Link>
                 </li>
               ))}
+              <Suspense fallback={null}>
+                <BackOfficeLink />
+              </Suspense>
             </ul>
           </nav>
 
@@ -62,6 +66,9 @@ export function SiteHeader() {
                     </Link>
                   </li>
                 ))}
+                <Suspense fallback={null}>
+                  <BackOfficeLink />
+                </Suspense>
               </ul>
             </nav>
           </details>
@@ -115,5 +122,21 @@ function CartIcon() {
       <circle cx="9.5" cy="20.5" r="1.5" />
       <circle cx="17.5" cy="20.5" r="1.5" />
     </svg>
+  );
+}
+
+/**
+ * The way into the owner's console (008 FR-004): admins only, and a plain <a> so crossing into the
+ * calm back office is a full page load that leaves the strobe and pipes behind (R1).
+ */
+async function BackOfficeLink() {
+  const user = await currentUser();
+  if (!user?.isAdmin) return null;
+  return (
+    <li>
+      <a href="/admin" data-testid="back-office-link" className={linkClass}>
+        {copy.nav.backOffice}
+      </a>
+    </li>
   );
 }

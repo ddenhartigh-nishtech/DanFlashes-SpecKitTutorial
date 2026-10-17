@@ -23,7 +23,7 @@
 
 ## Phase 1: Setup
 
-- [ ] T001 Record the baseline for the PR. Main is 009's merge (ade02fb), last verified at 621 unit
+- [X] T001 Record the baseline for the PR. Main is 009's merge (ade02fb), last verified at 621 unit
   and integration tests, 94.8% line coverage, and 98 e2e.
 
 ---
@@ -33,21 +33,21 @@
 **Purpose**: the admin flag and the grant column (0011), the door, the calm shell, and the store
 chrome split. Every story needs these.
 
-- [ ] T002 [P] Write a failing tests/integration/migration-0011.test.ts (`databaseBefore("0011")`):
+- [X] T002 [P] Write a failing tests/integration/migration-0011.test.ts (`databaseBefore("0011")`):
   - existing users gain `is_admin = 0`
   - existing `flash_credit_entries` rows survive the rebuild unchanged
   - a `grant` row needs a positive amount and a `grant_token`, with no order, card or stream
   - `grant_token` is UNIQUE
   - every other kind refuses a `grant_token`
   - `foreign_key_check` is clean
-- [ ] T003 [P] Write a failing tests/integration/admin-auth.test.ts:
+- [X] T003 [P] Write a failing tests/integration/admin-auth.test.ts:
   - `setAdmin(db, email, on)` sets and clears the flag, case-insensitively, and reports an unknown
     email
   - `findSessionUser` returns `isAdmin`
   - `adminUser(db, jar)` is null for a guest or a shopper and the user for an admin
   - clearing the flag takes effect on the next lookup in the same session (edge case "An admin no
     longer")
-- [ ] T004 Extend src/lib/db/schema.ts per data-model.md:
+- [X] T004 Extend src/lib/db/schema.ts per data-model.md:
   - `users.is_admin` ("integer (boolean), NOT NULL, default false")
   - `flash_credit_entries.kind` gains `grant`
   - `grant_token` text, UNIQUE
@@ -57,27 +57,27 @@ chrome split. Every story needs these.
   Then run `npx drizzle-kit generate --name admin_console` to produce drizzle/0011_admin_console.sql.
   Check that it adds `is_admin` and rebuilds only `flash_credit_entries`, copying every row (T002
   passes).
-- [ ] T005 Add `isAdmin` to `SessionUser` and its select in src/lib/auth/session.ts. Create
+- [X] T005 Add `isAdmin` to `SessionUser` and its select in src/lib/auth/session.ts. Create
   src/lib/auth/admin.ts with `setAdmin` and `adminUser` (T003 passes).
-- [ ] T006 [P] Add `DEMO_OWNER` (display name, email and password, in seed data only) to
+- [X] T006 [P] Add `DEMO_OWNER` (display name, email and password, in seed data only) to
   scripts/seed-data.ts, and `ensureDemoOwner` (real sign-up, then `setAdmin`; idempotent) to
   src/lib/data/demo-shopper.ts.
   - Call it from scripts/db-reset.ts and scripts/seed-demo.ts.
   - Create scripts/admin.ts and the package.json scripts `admin:grant` and `admin:revoke`.
     Each prints whether anything changed, and exits 1 for an unknown email.
   - Extend tests/integration/demo-shopper.test.ts: the owner is created once, as an admin.
-- [ ] T007 [P] Write failing tests/unit/admin-posters.test.ts:
+- [X] T007 [P] Write failing tests/unit/admin-posters.test.ts:
   - `copy.console.posters` has ≥ 12 entries, each a one-word capitalized title with a non-empty
     line
   - `pickPoster(count, last, random)` never returns `last`, and stays in range for every random
     value in [0, 1)
-- [ ] T008 Create src/lib/admin/posters.ts (`pickPoster`) and src/lib/admin/state.ts (the
+- [X] T008 Create src/lib/admin/posters.ts (`pickPoster`) and src/lib/admin/state.ts (the
   `ConsoleState` type, `refused`, `saved`, `issuesOf`).
   - Add a `copy.console` skeleton to src/lib/copy.ts: the posters, `saved` encouragements,
     `refused.signIn`, `refused.notFound`, `notFoundHere`, and the nav labels.
   - Add `copy.nav.backOffice`.
   - T007 passes.
-- [ ] T009 Split the store chrome (R1, R16):
+- [X] T009 Split the store chrome (R1, R16):
   - Create src/components/StoreChrome.tsx (the first-paint `InlineScript`, the strobe `<style>`,
     `SiteHeader`, `<main>`, `DrainCorner`, `AwesomeIsland`, the footer).
   - Make src/app/layout.tsx bare (html, fonts, globals.css, metadata, viewport).
@@ -87,10 +87,10 @@ chrome split. Every story needs these.
   - Wrap src/app/not-found.tsx in `<StoreChrome>`.
   - Run the shopper e2e (browse, extreme-awesomeness, pipes, everything-on, social-proof). They
     pass unchanged.
-- [ ] T010 Add the admin-only "Back office" link to src/components/SiteHeader.tsx, in the desktop
+- [X] T010 Add the admin-only "Back office" link to src/components/SiteHeader.tsx, in the desktop
   nav and the phone menu: a plain `<a href="/admin">` inside `<Suspense fallback={null}>`, shown
   when `currentUser()?.isAdmin`.
-- [ ] T011 Build the calm shell (R2, R4, R5):
+- [X] T011 Build the calm shell (R2, R4, R5):
   - **The theme**: office tokens and `.office` rules in src/app/globals.css (Geist only, no
     animation or transition, a thin sage focus ring).
   - **The gate**: src/app/_data/admin.ts `currentAdmin()`. src/app/admin/layout.tsx renders
@@ -102,7 +102,7 @@ chrome split. Every story needs these.
   - **Shared pieces**: src/components/admin/ConsolePage.tsx (title, poster, children) and
     `ConsoleMessage` (calm `ConsoleState` output).
   - **Pages**: src/app/admin/error.tsx, and src/app/admin/page.tsx (a welcome and the areas).
-- [ ] T012 [P] Add the admin Playwright projects to playwright.config.ts (R15):
+- [X] T012 [P] Add the admin Playwright projects to playwright.config.ts (R15):
   - `desktop` and `phone` get `testIgnore: "admin/**"`
   - `admin-desktop` (Desktop Chrome) and `admin-phone` (Pixel 7) get `testMatch: "admin/**"` and
     `workers: 1`
@@ -125,11 +125,11 @@ in a calm room no one else can enter.
 
 ### Tests for User Story 1 (write first, see them fail) ⚠️
 
-- [ ] T013 [P] [US1] Extend tests/unit/catalog-validate.test.ts: `validateShirt` refuses a score
+- [X] T013 [P] [US1] Extend tests/unit/catalog-validate.test.ts: `validateShirt` refuses a score
   whose MSRP can't be computed (for example 999999 at the default tuning) with
   `copy.console`'s "too complicated to price" message, and still accepts large computable scores
   (R7).
-- [ ] T014 [P] [US1] Write tests/integration/admin-shirts.test.ts against the cores in
+- [X] T014 [P] [US1] Write tests/integration/admin-shirts.test.ts against the cores in
   src/lib/actions/admin/shirts.ts:
   - **`createShirt`**:
     - no image → saved inactive
@@ -147,22 +147,22 @@ in a calm room no one else can enter.
   - **`checkCatalog`**: names every shirt a proposed state would break
   - **`listAdminShirts`**: filters by status and tier, and sorts by score, price and name (FR-006,
     analysis U2)
-- [ ] T015 [P] [US1] Write tests/integration/admin-door.test.ts. It's a table of every console
+- [X] T015 [P] [US1] Write tests/integration/admin-door.test.ts. It's a table of every console
   action core, starting with US1's; each later story adds its own.
   - For a guest: `refused.signIn`. For a signed-in shopper: `refused.notFound`.
   - For both, a snapshot of every table is byte-identical before and after.
-- [ ] T016 [P] [US1] Write tests/e2e/admin/door.spec.ts:
+- [X] T016 [P] [US1] Write tests/e2e/admin/door.spec.ts:
   - every `CONSOLE_PAGES` route shows the store's 404 text to a guest and to a newly signed-up
     shopper, with no console markup and no "Back office" link
   - the owner sees the link, and it opens `/admin`
-- [ ] T017 [P] [US1] Write tests/e2e/admin/calm.spec.ts. With Extreme Awesomeness turned on in the
+- [X] T017 [P] [US1] Write tests/e2e/admin/calm.spec.ts. With Extreme Awesomeness turned on in the
   store, then the console opened, on every console page:
   - `<html>` has no `data-awesome`, and there's no pipes canvas, pop-up, countdown or stock line
   - `document.getAnimations()` is empty
   - there's exactly one poster
   - reloading gives a different poster
   - at 360px, `scrollWidth ≤ clientWidth`
-- [ ] T018 [P] [US1] Write tests/e2e/admin/shirts.spec.ts:
+- [X] T018 [P] [US1] Write tests/e2e/admin/shirts.spec.ts:
   - the list shows scores and tiers
   - a new shirt (unique slug per project) with score 30 previews Very Complicated and its MSRP,
     and saves inactive with Dan's encouragement
@@ -174,31 +174,31 @@ in a calm room no one else can enter.
 
 ### Implementation for User Story 1
 
-- [ ] T019 [US1] In src/lib/catalog/validate.ts, make `validateShirt` refuse an MSRP that can't be
+- [X] T019 [US1] In src/lib/catalog/validate.ts, make `validateShirt` refuse an MSRP that can't be
   computed (catch the `msrpUsd` RangeError or MoneyError). Add the message to src/lib/copy.ts.
   T013 passes.
-- [ ] T020 [US1] Create src/lib/admin/catalog-check.ts: `checkCatalog(db, { shirt?, tiers?,
+- [X] T020 [US1] Create src/lib/admin/catalog-check.ts: `checkCatalog(db, { shirt?, tiers?,
   msrp?, imageCounts? })` returns each shirt that would fail `validateShirt` under the proposed
   state, plus any tier problems (R10).
-- [ ] T021 [US1] Create src/lib/data/admin-shirts.ts (server-only):
+- [X] T021 [US1] Create src/lib/data/admin-shirts.ts (server-only):
   - `listAdminShirts(db, { status, tierId, sort })`, with score, tier, MSRP, final price and
     whether it's Dan's
   - `getAdminShirt(db, id)`, with images in order
   - `listLibrary(db)`, every media item with a resolved URL
-- [ ] T022 [US1] Create src/lib/actions/admin/shirts.ts: `createShirtCore`, `updateShirtCore`,
+- [X] T022 [US1] Create src/lib/actions/admin/shirts.ts: `createShirtCore`, `updateShirtCore`,
   `setShirtStatusCore`, `attachImageCore`, `moveImageCore` and `detachImageCore`.
   - Each starts with `adminUser`, runs in one transaction, and uses `checkCatalog`.
   - Add their `copy.console.shirts` messages.
   - T014 and T015 pass.
-- [ ] T023 [US1] Create src/actions/admin.ts ("use server") with wrappers for the shirt cores
+- [X] T023 [US1] Create src/actions/admin.ts ("use server") with wrappers for the shirt cores
   (`refresh()` on success).
-- [ ] T024 [P] [US1] Create the shirt UI in src/components/admin/:
+- [X] T024 [P] [US1] Create the shirt UI in src/components/admin/:
   - `ShirtForm.tsx` (client), with `PricePreview` using the shared `tierOf` and `resolvePrice`
     (FR-008)
   - `ImageManager.tsx` (attach from the library, up, down, detach)
   - `StatusControl.tsx`, with a single calm inline confirmation to deactivate
   - `ShirtTable.tsx`, which becomes stacked cards under 640px
-- [ ] T025 [US1] Create src/app/admin/shirts/page.tsx (sort and filter by search params),
+- [X] T025 [US1] Create src/app/admin/shirts/page.tsx (sort and filter by search params),
   src/app/admin/shirts/new/page.tsx and src/app/admin/shirts/[id]/page.tsx. An unknown id gets
   `copy.console.notFoundHere`. T016–T018 pass.
 

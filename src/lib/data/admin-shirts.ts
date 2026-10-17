@@ -1,0 +1,148 @@
+/**
+ * The console's view of the catalog (008 FR-006). Server-only and owner-only: it carries the
+ * complexity score, which no shopper page may ever show (constitution II).
+ */
+import { asc, eq } from "drizzle-orm";
+import { isBlandTier, tierOf } from "@/lib/catalog/tiers";
+import type { ShirtStatus, ShirtStyle } from "@/lib/catalog/types";
+import { getSettings } from "@/lib/data/settings";
+import type { ShirtImageView, TierBadge } from "@/lib/data/shirts";
+import { listTiers } from "@/lib/data/tiers";
+import type { Db } from "@/lib/db/client";
+import { media, shirtImages, shirts } from "@/lib/db/schema";
+import { resolveMediaUrl } from "@/lib/media";
+import { cmp, type Usd } from "@/lib/money";
+import { resolvePrice } from "@/lib/pricing/resolve";
+
+export type AdminShirtSort = "score" | "price" | "name";
+
+export interface AdminShirtRow {
+  id: number;
+  slug: string;
+  name: string;
+  style: ShirtStyle;
+  status: ShirtStatus;
+  featured: boolean;
+  description: string;
+  complexity: number;
+  tier: TierBadge;
+  msrpUsd: Usd;
+  finalPriceUsd: Usd;
+  /** Dan set this price himself; otherwise it's the MSRP. */
+  priceIsDans: boolean;
+  /** The raw owner price, for the edit form ("" when it's the MSRP). */
+  ownerPriceUsd: Usd | null;
+  image: ShirtImageView | null;
+}
+
+export interface AdminShirtImage extends ShirtImageView {
+  mediaId: number;
+  position: number;
+}
+
+export interface AdminShirt extends AdminShirtRow {
+  images: AdminShirtImage[];
+}
+
+export interface LibraryItem {
+  id: number;
+  key: string;
+  alt: string;
+  kind: "shirt" | "placeholder";
+  url: string;
+}
+
+function rows(db: Db): { rows: AdminShirtRow[]; images: Map<number, AdminShirtImage[]> } {
+  const settings = getSettings(db);
+  const tiers = listTiers(db);
+  const images = new Map<number, AdminShirtImage[]>();
+  for (const image of db
+    .select({
+      shirtId: shirtImages.shirtId,
+      mediaId: shirtImages.mediaId,
+      position: shirtImages.position,
+      key: media.key,
+      alt: media.alt,
+    })
+    .from(shirtImages)
+    .innerJoin(media, eq(shirtImages.mediaId, media.id))
+    .orderBy(asc(shirtImages.shirtId), asc(shirtImages.position))
+    .all()) {
+    const list = images.get(image.shirtId) ?? [];
+    list.push({
+      mediaId: image.mediaId,
+      position: image.position,
+      alt: image.alt,
+      url: resolveMediaUrl(image.key, settings.mediaBaseUrl),
+    });
+    images.set(image.shirtId, list);
+  }
+
+  const list = db
+    .select()
+    .from(shirts)
+    .all()
+    .map((row): AdminShirtRow => {
+      const price = resolvePrice(row, settings.msrp);
+      const tier = tierOf(row.complexity, tiers);
+      const first = images.get(row.id)?.[0];
+      return {
+        id: row.id,
+        slug: row.slug,
+        name: row.name,
+        style: row.style,
+        status: row.status,
+        featured: row.featured,
+        description: row.description,
+        complexity: row.complexity,
+        tier: { ...tier, isBland: isBlandTier(tier) },
+        msrpUsd: price.msrpUsd,
+        finalPriceUsd: price.finalPriceUsd,
+        priceIsDans: row.finalPriceUsd !== null,
+        ownerPriceUsd: row.finalPriceUsd,
+        image: first ? { url: first.url, alt: first.alt } : null,
+      };
+    });
+  return { rows: list, images };
+}
+
+const sorters: Record<AdminShirtSort, (a: AdminShirtRow, b: AdminShirtRow) => number> = {
+  score: (a, b) => a.complexity - b.complexity || a.name.localeCompare(b.name),
+  price: (a, b) => cmp(a.finalPriceUsd, b.finalPriceUsd) || a.name.localeCompare(b.name),
+  name: (a, b) => a.name.localeCompare(b.name),
+};
+
+/** Every shirt, active and inactive, filtered and sorted (by score unless asked otherwise). */
+export function listAdminShirts(
+  db: Db,
+  options: { status?: ShirtStatus | null; tierId?: number | null; sort?: AdminShirtSort | null },
+): AdminShirtRow[] {
+  return rows(db)
+    .rows.filter((r) => !options.status || r.status === options.status)
+    .filter((r) => !options.tierId || r.tier.id === options.tierId)
+    .sort(sorters[options.sort ?? "score"]);
+}
+
+/** One shirt for the editor, with its images in order; null when there's no such shirt. */
+export function getAdminShirt(db: Db, id: number): AdminShirt | null {
+  const { rows: list, images } = rows(db);
+  const row = list.find((r) => r.id === id);
+  return row ? { ...row, images: images.get(id) ?? [] } : null;
+}
+
+/** Every image in the media library, newest last, with its URL. */
+export function listLibrary(db: Db): LibraryItem[] {
+  const { mediaBaseUrl } = getSettings(db);
+  return db
+    .select()
+    .from(media)
+    .orderBy(asc(media.id))
+    .all()
+    .map((m) => ({
+      id: m.id,
+      key: m.key,
+      alt: m.alt,
+      kind: m.kind,
+      url: resolveMediaUrl(m.key, mediaBaseUrl),
+    }));
+}

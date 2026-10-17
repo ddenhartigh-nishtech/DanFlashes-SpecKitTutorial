@@ -41,7 +41,7 @@ export function topUp(
 
 export interface LedgerEntry {
   id: number;
-  kind: "top_up" | "spend" | "stream";
+  kind: "top_up" | "spend" | "stream" | "grant";
   amountUsd: Usd;
   orderId: number | null;
   cardBrand: string | null;

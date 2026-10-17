@@ -133,9 +133,11 @@ test.describe("US1 — Extreme Awesomeness (Flash Mode)", () => {
   }, info) => {
     test.slow(); // a sign-up, a sign-out and a sign-in (real bcrypt) on a busy machine
     await page.addInitScript(() => {
-      // When <body> starts, has the inline <head> script already turned it on?
+      // When the store's first content (the header) parses, has the first-paint script already
+      // turned it on? It's the first thing in the store's <body> (008 R16), ahead of everything
+      // that paints.
       new MutationObserver((_, observer) => {
-        if (!document.body) return;
+        if (!document.querySelector("header")) return;
         (window as unknown as { awesomeAtBody: string | null }).awesomeAtBody =
           document.documentElement.getAttribute("data-awesome");
         observer.disconnect();

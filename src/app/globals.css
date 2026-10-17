@@ -18,6 +18,15 @@
   --color-acid: #b6ff00;
   --color-safety-orange: #ff5a00;
 
+  /* The owner's back office (008 R4): calm, muted, and BLAND's own beige. */
+  --color-office: #f4f1ea;
+  --color-office-card: #fbfaf6;
+  --color-office-ink: #3b3b3b;
+  --color-office-muted: #6f6b62;
+  --color-office-line: #ddd6c8;
+  --color-office-sage: #6f8a7f;
+  --color-beige: #c8b89a;
+
   --font-display: var(--font-bungee), Impact, "Arial Black", sans-serif;
   --font-sans: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
@@ -192,4 +201,27 @@
   :root[data-awesome="on"] body {
     background-color: var(--color-paper);
   }
+}
+
+/*
+ * The back office is calm (constitution V, 008 FR-005, R4): nothing in it moves, and its focus
+ * ring is a quiet line instead of the store's ultraviolet.
+ */
+.office {
+  background-color: var(--color-office);
+  color: var(--color-office-ink);
+  font-family: var(--font-sans);
+}
+
+.office *,
+.office *::before,
+.office *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+
+.office :focus-visible {
+  outline: 2px solid var(--color-office-sage);
+  outline-offset: 2px;
 }

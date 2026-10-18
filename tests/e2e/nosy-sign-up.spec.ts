@@ -19,6 +19,8 @@ const typed = (page: Page) =>
   nosyInputs(page).evaluateAll((els) => els.map((e) => (e as HTMLInputElement).value));
 
 async function typeEverywhere(page: Page, text: (i: number) => string) {
+  // The fields stream in with the form; .all() doesn't wait, so wait for the first one.
+  await nosyInputs(page).first().waitFor();
   const inputs = await nosyInputs(page).all();
   for (const [i, input] of inputs.entries()) await input.fill(text(i));
   return inputs.length;

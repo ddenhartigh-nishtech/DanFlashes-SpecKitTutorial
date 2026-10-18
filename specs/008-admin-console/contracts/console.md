@@ -16,7 +16,7 @@ spec's FR, or the research R that decided it.
 
 | Caller | Result | Changes |
 |---|---|---|
-| no session, or an expired one | `{ ok: false, message: copy.console.refused.signIn }` ("Your session ended. Sign in again.") | none |
+| no session, or an expired one | `{ ok: false, message: copy.console.refused.signIn }` ("Your session ended. Sign in again, whenever you're ready.") | none |
 | a signed-in non-admin | `{ ok: false, message: copy.console.refused.notFound }` | none |
 | an admin | the action runs | as below |
 
@@ -93,7 +93,8 @@ Success calls `refresh()`. Each one runs in a single transaction. "Refused" mean
   - Saves only the MSRP columns.
 - **`savePresets`**:
   - **Fields**: `presetsUsd`, one amount per line or comma-separated.
-  - **Refused when**: an amount isn't a positive dollar amount, or is a duplicate.
+  - **Refused when**: an amount isn't a positive dollar amount, is a duplicate, or the list is
+    empty (the account page's top-up needs at least one amount to offer).
   - The amounts are normalized to two decimals and saved in the order given.
 - **`saveMediaSettings`**:
   - **Fields**: `mediaBaseUrl` (blank or `http(s)://…`) and `placeholderMediaId` (an existing

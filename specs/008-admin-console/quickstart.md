@@ -51,3 +51,25 @@ npm run dev             # http://localhost:3000
 ```bash
 npm run verify   # format, lint, types, unit + integration (≥ 90% src/lib), e2e (shopper, then console)
 ```
+
+## Results (2026-10-17)
+
+Scripted on a scratch database (`DATABASE_PATH=data/qs008.db`), beside the e2e suite.
+
+- **Strict Mode (T064)**: `next dev` with every console client component exercised (the shirt
+  preview, the deactivate confirmation, the MSRP dials, the tier editor, a grant). There were no
+  browser console errors or warnings.
+- **Scenario 5**: eight reloads of `/admin` showed posters 4, 0, 10, 7, 11, 10, 9, 6. None
+  repeated.
+- **Scenario 26 (SC-004)**: `npm run catalog:audit` after the run reported 0 errors and 0 warnings.
+- **Scenario 28**: `admin:revoke` mid-session, and the next console load was the store's 404 (no
+  office). As in research R2, the status is 200 once streaming has started.
+- **SC-009**: the media journey (create a shirt, upload a picture, attach it, put it on the floor,
+  open it in the store) takes about 20 s in e2e. A person new to the console has five minutes.
+- **Lighthouse (T065)**, mobile, applied throttling, the installed Chrome, on a production build
+  after the chrome split:
+
+  | Page | Runs | LCP | CLS |
+  |---|---|---|---|
+  | `/` | 2 | 2.0 s, 2.2 s | 0, 0 |
+  | `/shirts` | 5 | 2.0–2.3 s (one 2.6 s run at benchmark index 1794, under load) | 0–0.035 |

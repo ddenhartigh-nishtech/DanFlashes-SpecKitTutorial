@@ -41,7 +41,7 @@ export function PricePreview({
     <dl
       data-testid="price-preview"
       aria-label={p.label}
-      className="border-office-line bg-office grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 rounded-md border p-3 text-sm"
+      className="border-office-line bg-office grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1 rounded-md border p-3 text-sm [overflow-wrap:anywhere]"
     >
       <dt className="text-office-muted">{p.tier}</dt>
       <dd>{tier ?? "—"}</dd>

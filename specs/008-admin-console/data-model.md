@@ -43,7 +43,7 @@ The other checks still apply:
 | `shirt_images` | `position` 0 is the main image. Reordering rewrites the positions in one transaction. An active shirt keeps ≥ 1 image. |
 | `media` | Uploads get `kind = 'shirt'` and the key `uploads/<uuid>.<ext>` (R8). Alt is 1–200 characters. Removable only when no `shirt_images` row uses it and it isn't `store_settings.placeholder_media_id` (the FKs already RESTRICT). Removing an `uploads/` row also removes its file. |
 | `complexity_tiers` | Saved as a set (R9). Exactly one tier starts at 0. That tier is named `BLAND`, and its name and start never change. Unique starts and names (case-insensitive). Name 1–40 characters, tagline ≤ 120, colors `#RRGGBB`. |
-| `store_settings` | Each form saves only its own columns (R11): one switch, the MSRP tuning (start ≥ $0.01, anchor ≥ 0, interval ≥ 1), the presets (positive amounts, no duplicates), the media base URL (blank or `http(s)://`) and the placeholder (never null). |
+| `store_settings` | Each form saves only its own columns (R11): one switch, the MSRP tuning (start ≥ $0.01, anchor ≥ 0, interval ≥ 1), the presets (positive amounts, no duplicates, at least one, so the account page's top-up always has something to offer), the media base URL (blank or `http(s)://`) and the placeholder (never null). |
 | `add_ons` | Create, edit, retire (`active = 0`), restore and reorder (`position`). Name 1–60 characters and unique, pitch 1–160, decline line 1–160, price ≥ $0.01 (existing CHECKs). No delete. |
 | `orders`, `order_items`, `order_add_ons`, `order_drains`, `revenue_streams` | Read-only in the console (FR-036a). The console never settles stream payments (R14). |
 

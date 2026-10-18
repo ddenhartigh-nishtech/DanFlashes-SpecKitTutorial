@@ -3,7 +3,9 @@
  * page looks like the same calm room.
  */
 export const ui = {
-  card: "rounded-lg border border-office-line bg-office-card p-4 md:p-5",
+  // [overflow-wrap:anywhere]: a price with no ceiling (hundreds of digits) wraps instead of
+  // pushing a 360px page sideways (008 FR-037, converge T068).
+  card: "rounded-lg border border-office-line bg-office-card p-4 [overflow-wrap:anywhere] md:p-5",
   h1: "text-2xl font-semibold tracking-tight md:text-3xl",
   h2: "text-lg font-semibold",
   muted: "text-sm text-office-muted",

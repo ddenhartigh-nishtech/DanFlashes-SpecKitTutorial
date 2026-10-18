@@ -184,9 +184,11 @@ plan.md, data-model.md, contracts/console.md and tasks.md.
     that can't be computed
   - every tier problem
 
-  Shirt saves, image detaches, tier saves and tuning saves all call it inside their transaction,
-  and refuse with the names of the shirts that would break. Inactive shirts count too, because the
-  audit checks them.
+  Tier saves and tuning saves call it inside their transaction, and refuse with the names of the
+  shirts that would break. Inactive shirts count too, because the audit checks them. A shirt save
+  can only change that one shirt, so it runs `validateShirt` on it against the live tiers and
+  tuning, the same rule `checkCatalog` applies to each shirt. Detaching refuses an active shirt's
+  last picture directly. (Converge T070: the code checks the one shirt a save can change.)
 - **Rationale**: SC-004 (the audit stays at zero errors after any console save). The audit and the
   console share `validateShirt`, so they can't disagree.
 

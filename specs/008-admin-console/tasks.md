@@ -445,17 +445,17 @@ only money change.
 
 ## Phase 9: Polish & Cross-Cutting Concerns
 
-- [ ] T063 [P] Rewrite the README's "Managing the store" around the console (FR-040):
+- [X] T063 [P] Rewrite the README's "Managing the store" around the console (FR-040):
   - the admin scripts
   - the demo owner (pointing to seed data)
   - uploads and `MEDIA_UPLOADS_DIR`
   - the switch table kept as reference
   - Drizzle Studio as a developer tool
-- [ ] T064 [P] Hand-check the client components in `next dev` under React Strict Mode: `ShirtForm`,
+- [X] T064 [P] Hand-check the client components in `next dev` under React Strict Mode: `ShirtForm`,
   `TuningForm`, `TierEditor`, `GrantForm`, `StatusControl` and `RememberPoster` (002 R7 known gap).
-- [ ] T065 [P] Lighthouse `/` and `/shirts` after the chrome split (R16; LCP ≤ 2.5 s, CLS ≤ 0.1).
+- [X] T065 [P] Lighthouse `/` and `/shirts` after the chrome split (R16; LCP ≤ 2.5 s, CLS ≤ 0.1).
   Record the numbers in the PR.
-- [ ] T066 Script the quickstart on a scratch database (`DATABASE_PATH=data/qs008.db`). Run
+- [X] T066 Script the quickstart on a scratch database (`DATABASE_PATH=data/qs008.db`). Run
   scenarios 1–28 that aren't already covered by e2e, including `npm run catalog:audit` = 0 errors
   and `admin:revoke` mid-session. Time scenario 7–8 by hand for SC-009 (analysis A2).
 - [ ] T067 Run `npm run verify` until it's green. Record the counts and the coverage.
@@ -492,3 +492,11 @@ only money change.
    add-ons), US6 (customers, orders, grants; money, so Red first).
 3. **Polish**: the README, Strict Mode, Lighthouse, the quickstart, then verify. Then converge, and
    a PR that also ratifies constitution v4.1.0.
+
+---
+
+## Phase 10: Convergence
+
+- [X] T068 Let long money text wrap in the console's cells (`ShirtTable`, `PricePreview`, the pricing page's pairs and overrides, the order page's lines and totals), so a huge MSRP never scrolls a 360px page sideways. Extend the 360px test in tests/e2e/admin/calm.spec.ts with an inactive score-9000 shirt, checked on `/admin/shirts` and its edit page, per FR-037 and the spec edge case "A score with no ceiling" (partial)
+- [X] T069 Record the top-up amounts' "at least one" rule (the account page's top-up needs something to offer) in data-model.md (store_settings) and contracts/console.md (`savePresets`), per FR-016, data-model (unrequested)
+- [X] T070 Bring research R10 and contracts/console.md in line with the code. Shirt saves check the one shirt they change with `validateShirt`; detaching refuses an active shirt's last picture directly; tier and tuning saves run `checkCatalog` over every shirt. The guest refusal reads "Your session ended. Sign in again, whenever you're ready." Per plan: R10 and contracts/console.md (contradicts)

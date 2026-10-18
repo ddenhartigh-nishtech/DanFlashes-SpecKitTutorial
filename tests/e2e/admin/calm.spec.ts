@@ -1,6 +1,6 @@
 import { expect } from "@playwright/test";
-import { awesomeButton, test } from "../helpers";
-import { CONSOLE_PAGES, poster, signInAsOwner } from "./helpers";
+import { awesomeButton, test, visible } from "../helpers";
+import { CONSOLE_PAGES, field, poster, signInAsOwner, unique } from "./helpers";
 
 const LOUD = [
   "pipes",
@@ -38,11 +38,26 @@ test.describe("US1 — the back office is calm (FR-005, FR-005a, FR-037, SC-011)
     }
   });
 
-  test("every console page fits a 360px phone with no sideways scrolling", async ({ page }) => {
+  test("every console page fits a 360px phone with no sideways scrolling", async ({
+    page,
+  }, info) => {
     test.slow();
     await page.setViewportSize({ width: 360, height: 780 });
     await signInAsOwner(page);
-    for (const path of CONSOLE_PAGES) {
+
+    // A score with no ceiling (converge T068): score 9000 prices at ~274 digits. Resting, so the
+    // store never shows it, but the console lists it and its editor previews it.
+    const id = unique(info.project.name);
+    await page.goto("/admin/shirts/new");
+    await field(page, "Name").fill(`Endless ${id}`);
+    await field(page, "URL name").fill(`endless-${id}`);
+    await field(page, "Complexity score").fill("9000");
+    await field(page, "Description").fill("It just keeps going.");
+    await visible(page.getByRole("button", { name: "Save" })).click();
+    await expect(page).toHaveURL(/\/admin\/shirts\/\d+/);
+    const huge = new URL(page.url()).pathname;
+
+    for (const path of [...CONSOLE_PAGES, huge]) {
       await page.goto(path);
       await expect(page.locator(".office"), path).toBeVisible();
       const overflow = await page.evaluate(

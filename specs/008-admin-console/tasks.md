@@ -458,7 +458,7 @@ only money change.
 - [X] T066 Script the quickstart on a scratch database (`DATABASE_PATH=data/qs008.db`). Run
   scenarios 1–28 that aren't already covered by e2e, including `npm run catalog:audit` = 0 errors
   and `admin:revoke` mid-session. Time scenario 7–8 by hand for SC-009 (analysis A2).
-- [ ] T067 Run `npm run verify` until it's green. Record the counts and the coverage.
+- [X] T067 Run `npm run verify` until it's green. Record the counts and the coverage.
 
 ---
 

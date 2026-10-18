@@ -355,16 +355,16 @@ restored and reordered.
 
 ### Tests for User Story 5 ⚠️
 
-- [ ] T048 [P] [US5] Write tests/unit/admin-tiers.test.ts:
+- [X] T048 [P] [US5] Write tests/unit/admin-tiers.test.ts:
   - `validateTierEdit(current, proposed)` refuses renaming, moving or removing BLAND; names
     outside 1–40 characters; taglines over 120 characters; bad colors; duplicate starts and
     names. It accepts tagline and color edits on BLAND.
   - `tierChanges(shirts, current, proposed)` lists exactly the shirts whose tier changes.
-- [ ] T049 [P] [US5] Write tests/integration/admin-tiers.test.ts:
+- [X] T049 [P] [US5] Write tests/integration/admin-tiers.test.ts:
   - `saveTiersCore` updates, inserts and deletes in one transaction
   - it's refused, naming shirts, when a shirt would land in BLAND at or above the start price
   - store badges follow (`listCatalogShirts`)
-- [ ] T050 [P] [US5] Write tests/integration/admin-add-ons.test.ts:
+- [X] T050 [P] [US5] Write tests/integration/admin-add-ons.test.ts:
   - create and update within bounds, a price of "25" is stored as "25.00" (FR-038), and a
     duplicate name is refused
   - retire and restore (`listOfferedAddOns` follows)
@@ -372,7 +372,7 @@ restored and reordered.
   - an order placed before an edit keeps its name and price
 
   Add the US5 cores to the T015 sweep.
-- [ ] T051 [P] [US5] Write tests/e2e/admin/tiers-add-ons.spec.ts:
+- [X] T051 [P] [US5] Write tests/e2e/admin/tiers-add-ons.spec.ts:
   - add a tier starting at 5000 (no shirt is affected) and remove it
   - edit Complicated's tagline, check the store shows it, then restore it
   - renaming BLAND is refused
@@ -381,12 +381,12 @@ restored and reordered.
 
 ### Implementation for User Story 5
 
-- [ ] T052 [US5] Create src/lib/admin/tiers.ts (`validateTierEdit`, `tierChanges`). T048 passes.
-- [ ] T053 [US5] Create src/lib/actions/admin/tiers.ts (`saveTiersCore`) and
+- [X] T052 [US5] Create src/lib/admin/tiers.ts (`validateTierEdit`, `tierChanges`). T048 passes.
+- [X] T053 [US5] Create src/lib/actions/admin/tiers.ts (`saveTiersCore`) and
   src/lib/actions/admin/add-ons.ts (`createAddOnCore`, `updateAddOnCore`, `setAddOnActiveCore`,
   `moveAddOnCore`). Add `listAllAddOns` to src/lib/data/add-ons.ts. Add the wrappers. T049 and
   T050 pass.
-- [ ] T054 [P] [US5] Create `TierEditor.tsx` (client, with a live preview) and `AddOnRow.tsx` /
+- [X] T054 [P] [US5] Create `TierEditor.tsx` (client, with a live preview) and `AddOnRow.tsx` /
   `AddOnForm.tsx` in src/components/admin/, and src/app/admin/tiers/page.tsx and
   src/app/admin/add-ons/page.tsx. T051 passes.
 

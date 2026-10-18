@@ -18,6 +18,13 @@ import {
   setSwitchCore,
 } from "@/lib/actions/admin/settings";
 import { removeMediaCore, updateMediaAltCore, uploadMediaCore } from "@/lib/actions/admin/media";
+import {
+  createAddOnCore,
+  moveAddOnCore,
+  setAddOnActiveCore,
+  updateAddOnCore,
+} from "@/lib/actions/admin/add-ons";
+import { saveTiersCore } from "@/lib/actions/admin/tiers";
 import type { ConsoleState } from "@/lib/admin/state";
 import { copy } from "@/lib/copy";
 import type { Db, Sqlite } from "@/lib/db/client";
@@ -62,6 +69,16 @@ const CORES: [string, Core, Record<string, string>][] = [
   ["uploadMedia", uploadMediaCore, { alt: "Sneaky upload" }],
   ["updateMediaAlt", updateMediaAltCore, { mediaId: "1", alt: "Hacked" }],
   ["removeMedia", removeMediaCore, { mediaId: "1" }],
+  // US5
+  ["saveTiers", saveTiersCore, { tiers: "[]" }],
+  ["createAddOn", createAddOnCore, { name: "Sneaky", pitch: "x", declineLine: "x", priceUsd: "1" }],
+  [
+    "updateAddOn",
+    updateAddOnCore,
+    { id: "1", name: "Hacked", pitch: "x", declineLine: "x", priceUsd: "1" },
+  ],
+  ["setAddOnActive", setAddOnActiveCore, { id: "1", active: "0" }],
+  ["moveAddOn", moveAddOnCore, { id: "1", direction: "down" }],
   // US2
   ["setSwitch", setSwitchCore, { key: "roachMotel", on: "0" }],
   [

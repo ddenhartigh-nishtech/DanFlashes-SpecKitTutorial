@@ -18,6 +18,13 @@ import {
   setSwitchCore,
 } from "@/lib/actions/admin/settings";
 import { removeMediaCore, updateMediaAltCore, uploadMediaCore } from "@/lib/actions/admin/media";
+import {
+  createAddOnCore,
+  moveAddOnCore,
+  setAddOnActiveCore,
+  updateAddOnCore,
+} from "@/lib/actions/admin/add-ons";
+import { saveTiersCore } from "@/lib/actions/admin/tiers";
 import type { ConsoleState } from "@/lib/admin/state";
 import { getDb } from "@/lib/db/client";
 import type { CookieJar } from "@/lib/http/cookies";
@@ -86,4 +93,28 @@ export async function updateMediaAlt(_prev: ConsoleState | null, form: FormData)
 
 export async function removeMedia(_prev: ConsoleState | null, form: FormData) {
   return run(removeMediaCore, form);
+}
+
+export async function saveTiers(_prev: ConsoleState | null, form: FormData) {
+  return run(saveTiersCore, form);
+}
+
+export async function createAddOn(_prev: ConsoleState | null, form: FormData) {
+  return run(createAddOnCore, form);
+}
+
+/** One action for an add-on's row (edit, retire, restore, move), so its message is the latest. */
+export async function manageAddOn(_prev: ConsoleState | null, form: FormData) {
+  switch (form.get("op")) {
+    case "retire":
+    case "restore":
+      form.set("active", form.get("op") === "restore" ? "1" : "0");
+      return run(setAddOnActiveCore, form);
+    case "up":
+    case "down":
+      form.set("direction", String(form.get("op")));
+      return run(moveAddOnCore, form);
+    default:
+      return run(updateAddOnCore, form);
+  }
 }

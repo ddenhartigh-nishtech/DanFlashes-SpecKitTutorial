@@ -401,7 +401,7 @@ only money change.
 
 ### Tests for User Story 6 (money: Red first) ⚠️
 
-- [ ] T055 [P] [US6] Write a failing tests/integration/grants.test.ts against
+- [X] T055 [P] [US6] Write a failing tests/integration/grants.test.ts against
   `grantCredit(db, userId, { amountInput, token })` in src/lib/flash-credit/ledger.ts:
   - **The balance**:
     - it rises by exactly the amount ($500.00, $0.01, a 15-digit amount)
@@ -412,16 +412,16 @@ only money change.
     granted credit
   - **The drain**: the per diem meter and stream balances treat a grant as other money, unchanged
     by it
-- [ ] T056 [P] [US6] Write tests/integration/admin-read-models.test.ts:
+- [X] T056 [P] [US6] Write tests/integration/admin-read-models.test.ts:
   - **Customers**: the list's order count, exact lifetime spend, balance and admin flag; search by
     name or email is case-insensitive
   - **A customer's page**: orders, ledger (with grants), streams with what's left, drains
   - **Orders**: newest first, a guest order shows "Guest"
   - **An order's page**: the score and MSRP at purchase, add-ons, Flash Credit applied, and the
     card's brand and last four only (no other card field exists in the view)
-- [ ] T057 [P] [US6] Write tests/integration/admin-grants-action.test.ts for `grantFlashCreditCore`:
+- [X] T057 [P] [US6] Write tests/integration/admin-grants-action.test.ts for `grantFlashCreditCore`:
   success, a refused amount, an unknown customer, and a repeated token. Add it to the T015 sweep.
-- [ ] T058 [P] [US6] Write tests/e2e/admin/customers.spec.ts:
+- [X] T058 [P] [US6] Write tests/e2e/admin/customers.spec.ts:
   - a shopper signs up in their own context
   - the owner finds them by search and grants $500.00
   - the shopper's account shows "A gift from Dan. He believes in you." and a balance of $500.00
@@ -430,14 +430,14 @@ only money change.
 
 ### Implementation for User Story 6
 
-- [ ] T059 [US6] Implement `grantCredit` in src/lib/flash-credit/ledger.ts (`tryParseUsd`, ≥ 0.01,
+- [X] T059 [US6] Implement `grantCredit` in src/lib/flash-credit/ledger.ts (`tryParseUsd`, ≥ 0.01,
   `ON CONFLICT(grant_token) DO NOTHING`). Add `"grant"` to `LedgerEntry.kind`. Add
   `copy.account.entryGrant` and render it in src/app/(store)/account/page.tsx. T055 passes.
-- [ ] T060 [US6] Export `hydrateOrders` from src/lib/orders/orders.ts. Create
+- [X] T060 [US6] Export `hydrateOrders` from src/lib/orders/orders.ts. Create
   src/lib/data/admin-customers.ts and src/lib/data/admin-orders.ts (per R14). T056 passes.
-- [ ] T061 [US6] Create src/lib/actions/admin/grants.ts (`grantFlashCreditCore`) and its wrapper.
+- [X] T061 [US6] Create src/lib/actions/admin/grants.ts (`grantFlashCreditCore`) and its wrapper.
   T057 passes.
-- [ ] T062 [P] [US6] Create `GrantForm.tsx` (a fresh token each render, calm messages) and
+- [X] T062 [P] [US6] Create `GrantForm.tsx` (a fresh token each render, calm messages) and
   `LedgerTable.tsx` in src/components/admin/. Create src/app/admin/customers/page.tsx,
   customers/[id]/page.tsx, orders/page.tsx and orders/[id]/page.tsx. T058 passes.
 

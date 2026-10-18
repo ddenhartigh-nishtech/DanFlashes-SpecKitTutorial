@@ -1,11 +1,11 @@
 /**
- * Flash Credit is a ledger (constitution): every top-up, spend, and revenue-stream payment is an entry, the balance is
+ * Flash Credit is a ledger (constitution): every top-up, spend, revenue-stream payment and owner grant is an entry, the balance is
  * their exact decimal sum (computed here, never with SQL SUM, which would use floats), and it can
  * never go negative.
  */
 import { desc, eq } from "drizzle-orm";
 import type { Db } from "@/lib/db/client";
-import { flashCreditEntries, revenueStreams } from "@/lib/db/schema";
+import { flashCreditEntries, revenueStreams, users } from "@/lib/db/schema";
 import { cmp, sum, tryParseUsd, type Usd } from "@/lib/money";
 import { validateFauxCard, type CardErrorCode, type FauxCardInput } from "@/lib/payments/faux-card";
 import type { Err, Ok } from "@/lib/result";
@@ -35,6 +35,34 @@ export function topUp(
   if (!card.ok) return card;
   db.insert(flashCreditEntries)
     .values({ userId, amountUsd, kind: "top_up", cardBrand: card.brand, cardLast4: card.last4 })
+    .run();
+  return { ok: true, balanceUsd: getBalanceUsd(db, userId) };
+}
+
+export type GrantResult =
+  Ok<{ balanceUsd: Usd }> | Err<"INVALID_AMOUNT" | "UNKNOWN_CUSTOMER" | "INVALID_TOKEN">;
+
+/**
+ * Flash Credit the owner gives a customer (008 FR-036, R13): any amount ≥ $0.01, dollars and
+ * cents, no ceiling. Each grant form carries its own token, so a second submit of the same form
+ * records nothing and still answers with the balance. A grant is other money, like a top-up.
+ */
+export function grantCredit(
+  db: Db,
+  userId: number,
+  input: { amountInput: string; token: string },
+): GrantResult {
+  const amountUsd = tryParseUsd(input.amountInput);
+  if (amountUsd === null || cmp(amountUsd, "0.01") < 0)
+    return { ok: false, code: "INVALID_AMOUNT" };
+  const token = input.token.trim();
+  if (!token) return { ok: false, code: "INVALID_TOKEN" };
+  if (!db.select({ id: users.id }).from(users).where(eq(users.id, userId)).get()) {
+    return { ok: false, code: "UNKNOWN_CUSTOMER" };
+  }
+  db.insert(flashCreditEntries)
+    .values({ userId, amountUsd, kind: "grant", grantToken: token })
+    .onConflictDoNothing({ target: flashCreditEntries.grantToken })
     .run();
   return { ok: true, balanceUsd: getBalanceUsd(db, userId) };
 }

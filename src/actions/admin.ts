@@ -25,6 +25,7 @@ import {
   updateAddOnCore,
 } from "@/lib/actions/admin/add-ons";
 import { saveTiersCore } from "@/lib/actions/admin/tiers";
+import { grantFlashCreditCore } from "@/lib/actions/admin/grants";
 import type { ConsoleState } from "@/lib/admin/state";
 import { getDb } from "@/lib/db/client";
 import type { CookieJar } from "@/lib/http/cookies";
@@ -117,4 +118,8 @@ export async function manageAddOn(_prev: ConsoleState | null, form: FormData) {
     default:
       return run(updateAddOnCore, form);
   }
+}
+
+export async function grantFlashCredit(_prev: ConsoleState | null, form: FormData) {
+  return run(grantFlashCreditCore, form);
 }

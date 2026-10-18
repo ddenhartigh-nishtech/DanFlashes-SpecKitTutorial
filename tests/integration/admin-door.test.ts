@@ -25,6 +25,7 @@ import {
   updateAddOnCore,
 } from "@/lib/actions/admin/add-ons";
 import { saveTiersCore } from "@/lib/actions/admin/tiers";
+import { grantFlashCreditCore } from "@/lib/actions/admin/grants";
 import type { ConsoleState } from "@/lib/admin/state";
 import { copy } from "@/lib/copy";
 import type { Db, Sqlite } from "@/lib/db/client";
@@ -79,6 +80,8 @@ const CORES: [string, Core, Record<string, string>][] = [
   ],
   ["setAddOnActive", setAddOnActiveCore, { id: "1", active: "0" }],
   ["moveAddOn", moveAddOnCore, { id: "1", direction: "down" }],
+  // US6
+  ["grantFlashCredit", grantFlashCreditCore, { userId: "1", amountUsd: "1000000", token: "x" }],
   // US2
   ["setSwitch", setSwitchCore, { key: "roachMotel", on: "0" }],
   [

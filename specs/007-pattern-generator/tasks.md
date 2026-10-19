@@ -442,3 +442,12 @@ analyzes the money before polish.
     - Unit and integration: 92 files, 1,009 tests.
     - E2E: 148 tests in 6.2 min, at 4 workers.
     - Coverage: statements 94.22%, branches 92.13%, functions 88.58%, lines 95.04%.
+
+### Owner review, part 2 (spec Q10, 2026-10-19)
+
+- [X] T047 FR-028: console confirmations are short-lived. The e2e comes first, in
+  tests/e2e/admin/shirts.spec.ts: a save shows "Saved…", it goes within 10 s, and the next save
+  shows it again; a refusal is still there after 6 s. Then `ConsoleMessage` hides a confirmation
+  after `CONFIRMATION_MS` (4 s), in place, and every new answer shows again. The console e2e passed
+  17/17 on each of admin-desktop and admin-phone, run one after the other. (Run together with
+  `--no-deps`, the two projects share the switches and race, as the config warns.)

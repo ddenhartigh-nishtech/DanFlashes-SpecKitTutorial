@@ -40,7 +40,8 @@ npm run catalog:audit                     # the catalog check, also on the conso
 
 Sign in as an admin and a **Back office** link appears in the store header. Anyone else gets the
 store's ordinary 404 at every `/admin` address, and every console change is checked again on the
-server. Only the command line can make or unmake an admin. After pulling 008, run
+server. A confirmation ("Saved. That was a good decision, Dan.") goes away by itself after a few
+seconds, so the next save shows it again; a refusal stays until it's fixed. Only the command line can make or unmake an admin. After pulling 008, run
 `npm run db:migrate` (0011), then `npm run admin:grant -- <your email>`. The console is deliberately calm: none
 of the tactics run there, nothing flashes, and every page has a motivational poster.
 

@@ -67,6 +67,9 @@ Uniquity Surcharge is a new charge.
   - The console's generator gets a slider beside the score box, spaced like the dial.
 - Pricing curve (noted, not in this feature): the owner wants a gentler, near-linear MSRP. That's
   ROADMAP 010, with its own constitution II amendment.
+- Q10: How long does a console confirmation stay? → A: **A few seconds.** "Saved. That was a good
+  decision, Dan." and its kin go away by themselves, so the next save shows one again. A refusal
+  stays until it's fixed (FR-028).
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -368,6 +371,12 @@ show which shirts came from the generator.
   - The server works it out at checkout. A total the shopper didn't see (the amount changed, or the
     switch flipped) is refused like any price change.
   - Mass-produced and ordinary shirts never pay it. While the switch is off, nothing does.
+
+**Dan's Office, everywhere (owner review)**
+
+- **FR-028**: A console confirmation MUST go away by itself after a few seconds (4), in place, with
+  no fade or slide (constitution V, the back office is calm). The next action shows it again, even
+  with the same words. A refusal stays: it says what to fix.
 
 **Everywhere**
 

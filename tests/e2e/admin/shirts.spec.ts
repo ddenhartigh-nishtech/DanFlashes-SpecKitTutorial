@@ -83,4 +83,26 @@ test.describe("US1 — Dan's shirts (FR-006–FR-011)", () => {
     await storePage(page, slug);
     await expect(visible(page.getByRole("button", { name: "Add to cart" }))).toBeVisible();
   });
+
+  test("a confirmation shows, goes away by itself, and shows again on the next save (owner, 2026-10-19)", async ({
+    page,
+  }) => {
+    test.slow(); // two waits for a confirmation to go
+    await signInAsOwner(page);
+    await page.goto("/admin/shirts/1");
+    const save = visible(page.getByRole("button", { name: "Save" }));
+    for (let i = 0; i < 2; i++) {
+      await save.click();
+      await expect(consoleMessage(page)).toHaveText(saved);
+      // Quietly, in place: no fade and no slide (constitution V, the back office is calm).
+      await expect(page.getByTestId("console-message")).toHaveCount(0, { timeout: 10_000 });
+    }
+
+    // A refusal stays until he fixes it: it says what's wrong.
+    await field(page, "Complexity score").fill("lots");
+    await save.click();
+    await expect(consoleMessage(page)).toHaveAttribute("data-ok", "false");
+    await page.waitForTimeout(6_000);
+    await expect(consoleMessage(page)).toHaveAttribute("data-ok", "false");
+  });
 });

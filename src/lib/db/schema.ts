@@ -77,6 +77,10 @@ export const shirts = sqliteTable(
     recipe: text("recipe").unique(),
     /** In the listing, the home page, the pop-ups and the suggestions (007 FR-018). */
     listed: integer("listed", { mode: "boolean" }).notNull().default(true),
+    /** Who made a dial shirt: while it's one of a kind, the only account that can buy it (007 R14). */
+    makerUserId: integer("maker_user_id").references((): AnySQLiteColumn => users.id, {
+      onDelete: "restrict",
+    }),
     ...timestamps,
     updatedAt: text("updated_at").notNull().default(nowIso),
   },
@@ -84,6 +88,7 @@ export const shirts = sqliteTable(
     check("shirts_origin", sql`${t.origin} IN ('catalog', 'owner', 'dial')`),
     check("shirts_recipe", sql`(${t.origin} = 'catalog') = (${t.recipe} IS NULL)`),
     check("shirts_listed", sql`${t.origin} = 'dial' OR ${t.listed} = 1`),
+    check("shirts_maker", sql`${t.origin} = 'dial' OR ${t.makerUserId} IS NULL`),
     check("shirts_slug", sql`${t.slug} <> '' AND ${t.slug} NOT GLOB '*[^a-z0-9-]*'`),
     check("shirts_name_length", sql`length(${t.name}) BETWEEN 1 AND 80`),
     check("shirts_style", sql`${t.style} IN ('polo', 'button-down')`),
@@ -166,6 +171,9 @@ export const storeSettings = sqliteTable(
     nosySignUp: integer("nosy_sign_up", { mode: "boolean" }).notNull().default(true),
     /** The pattern generator's dial in the store (007). Dan's generator works either way. */
     patternGenerator: integer("pattern_generator", { mode: "boolean" }).notNull().default(true),
+    /** The Uniquity Surcharge™ (007 R15): a flat fee on every one-of-a-kind shirt, and its switch. */
+    uniquitySurcharge: integer("uniquity_surcharge", { mode: "boolean" }).notNull().default(true),
+    uniquitySurchargeUsd: text("uniquity_surcharge_usd").notNull().default("499.99"),
   },
   (t) => [
     check("store_settings_singleton", sql`${t.id} = 1`),
@@ -173,6 +181,10 @@ export const storeSettings = sqliteTable(
     check("store_settings_anchor", sql`${t.msrpAnchorScore} >= 0`),
     check("store_settings_interval", sql`${t.msrpDoublingInterval} >= 1`),
     check("store_settings_presets_json", sql`json_valid(${t.flashCreditPresetsUsd})`),
+    check(
+      "store_settings_surcharge",
+      sql`${money(t.uniquitySurchargeUsd)} AND ${t.uniquitySurchargeUsd} NOT GLOB '-*'`,
+    ),
   ],
 );
 
@@ -248,6 +260,8 @@ export const orders = sqliteTable(
     flashCreditUsd: text("flash_credit_usd").notNull().default("0.00"),
     /** This order took the per diem meter from above $0 to $0 while the drain was on (003 R5). */
     perDiemDrained: integer("per_diem_drained", { mode: "boolean" }).notNull().default(false),
+    /** Every Uniquity Surcharge on the order, in all (007 R15). */
+    surchargeUsd: text("surcharge_usd").notNull().default("0.00"),
     ...timestamps,
   },
   (t) => [
@@ -257,6 +271,7 @@ export const orders = sqliteTable(
     check("orders_total", money(t.totalUsd)),
     check("orders_method", sql`${t.paymentMethod} IN ('card', 'flash_credit', 'split')`),
     check("orders_flash_credit", money(t.flashCreditUsd)),
+    check("orders_surcharge", money(t.surchargeUsd)),
     check(
       "orders_payment",
       sql`(${t.paymentMethod} = 'card' AND ${t.flashCreditUsd} = '0.00' AND ${t.cardBrand} IS NOT NULL AND length(${t.cardLast4}) = 4 AND ${t.cardLast4} NOT GLOB '*[^0-9]*')
@@ -284,11 +299,14 @@ export const orderItems = sqliteTable(
     quantity: integer("quantity").notNull(),
     finalPriceUsd: text("final_price_usd").notNull(),
     msrpUsd: text("msrp_usd").notNull(),
+    /** The Uniquity Surcharge per shirt on this line, as charged (007 R15). */
+    surchargeUsd: text("surcharge_usd").notNull().default("0.00"),
   },
   (t) => [
     check("order_items_quantity", sql`${t.quantity} BETWEEN 1 AND 99`),
     check("order_items_final_price", money(t.finalPriceUsd)),
     check("order_items_msrp", money(t.msrpUsd)),
+    check("order_items_surcharge", money(t.surchargeUsd)),
     index("order_items_order_idx").on(t.orderId),
   ],
 );

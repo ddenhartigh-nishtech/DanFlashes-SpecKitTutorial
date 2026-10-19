@@ -34,7 +34,13 @@ describe("migration 0012 (generated shirts and the pattern generator switch)", (
     const before = sqlite.prepare("SELECT * FROM shirts ORDER BY id").all() as object[];
     runMigrations(db);
     expect(sqlite.prepare("SELECT * FROM shirts ORDER BY id").all()).toEqual(
-      before.map((row) => ({ ...row, origin: "catalog", recipe: null, listed: 1 })),
+      before.map((row) => ({
+        ...row,
+        origin: "catalog",
+        recipe: null,
+        listed: 1,
+        maker_user_id: null,
+      })),
     );
     expect(sqlite.prepare("SELECT * FROM store_settings").get()).toMatchObject({
       nosy_sign_up: 0,

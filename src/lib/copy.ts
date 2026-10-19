@@ -683,6 +683,11 @@ export const copy = {
           description:
             'The store\'s "How complicated can it get?" dial: shoppers crank it up and make their own one-of-a-kind shirt.',
         },
+        uniquitySurcharge: {
+          label: "Uniquity Surcharge",
+          description:
+            "A flat fee on every one-of-a-kind shirt, per shirt, on its own line. Being unique costs extra.",
+        },
       },
       tuning: {
         title: "MSRP dials",

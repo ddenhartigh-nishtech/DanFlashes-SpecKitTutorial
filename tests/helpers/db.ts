@@ -55,6 +55,8 @@ export function setSwitches(
       | "pipesBackground"
       | "nosySignUp"
       | "patternGenerator"
+      | "uniquitySurcharge"
+      | "uniquitySurchargeUsd"
     >
   >,
 ): void {

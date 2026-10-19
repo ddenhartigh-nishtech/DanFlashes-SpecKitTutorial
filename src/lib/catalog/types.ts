@@ -46,6 +46,10 @@ export interface StoreSettings {
   nosySignUp: boolean;
   /** The pattern generator (007): the store's "How complicated can it get?" dial. */
   patternGenerator: boolean;
+  /** The Uniquity Surcharge™ (007 R15): a flat fee on every one-of-a-kind shirt, per shirt. */
+  uniquitySurcharge: boolean;
+  /** What it charges per shirt: dollars and cents, $0.00 or more. */
+  uniquitySurchargeUsd: string;
 }
 
 /** An owner-defined band of complexity scores. The tier with minScore 0 is the BLAND tier. */

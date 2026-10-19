@@ -112,3 +112,22 @@ describe("store_settings pattern generator switch (007, migration 0012)", () => 
     });
   });
 });
+
+describe("store_settings Uniquity Surcharge (007 owner review, migration 0013)", () => {
+  it("defaults on at $499.99, and round-trips off at another amount", () => {
+    const { db, sqlite } = createTestDb();
+    sqlite.prepare("INSERT INTO store_settings (id) VALUES (1)").run();
+    expect(getSettings(db)).toMatchObject({
+      uniquitySurcharge: true,
+      uniquitySurchargeUsd: "499.99",
+    });
+    saveSettings(db, {
+      ...getSettings(db),
+      uniquitySurcharge: false,
+      uniquitySurchargeUsd: "0.00",
+    });
+    expect(
+      sqlite.prepare("SELECT uniquity_surcharge, uniquity_surcharge_usd FROM store_settings").get(),
+    ).toEqual({ uniquity_surcharge: 0, uniquity_surcharge_usd: "0.00" });
+  });
+});

@@ -312,7 +312,7 @@ analyzes the money before polish.
 
 ### Foundation
 
-- [ ] T031 Migration `0013_made_to_order` and src/lib/db/schema.ts, test-first in
+- [X] T031 Migration `0013_made_to_order` and src/lib/db/schema.ts, test-first in
   tests/integration/migration-0013.test.ts:
   - `shirts.maker_user_id` (FK users, CHECK `origin = 'dial' OR maker_user_id IS NULL`; the
     rebuild copies every row), backfilled from each dial shirt's earliest order

@@ -35,6 +35,8 @@ export function getSettings(db: Db): StoreSettings {
     pipesBackground: row.pipesBackground,
     nosySignUp: row.nosySignUp,
     patternGenerator: row.patternGenerator,
+    uniquitySurcharge: row.uniquitySurcharge,
+    uniquitySurchargeUsd: row.uniquitySurchargeUsd,
   };
 }
 
@@ -66,6 +68,8 @@ export function saveSettings(db: Db, settings: StoreSettings): void {
     pipesBackground: settings.pipesBackground,
     nosySignUp: settings.nosySignUp,
     patternGenerator: settings.patternGenerator,
+    uniquitySurcharge: settings.uniquitySurcharge,
+    uniquitySurchargeUsd: settings.uniquitySurchargeUsd,
   };
   db.insert(storeSettings)
     .values({ id: 1, ...values })

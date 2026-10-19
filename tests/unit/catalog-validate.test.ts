@@ -122,6 +122,8 @@ describe("validateSettings", () => {
     pipesBackground: true,
     nosySignUp: true,
     patternGenerator: true,
+    uniquitySurcharge: true,
+    uniquitySurchargeUsd: "499.99",
   };
 
   it("accepts the defaults and an https base URL", () => {
@@ -165,6 +167,9 @@ describe("validateSettings", () => {
     ["nosySignUp", { nosySignUp: undefined }],
     ["patternGenerator", { patternGenerator: "on" }],
     ["patternGenerator", { patternGenerator: undefined }],
+    ["uniquitySurcharge", { uniquitySurcharge: "on" }],
+    ["uniquitySurchargeUsd", { uniquitySurchargeUsd: "lots" }],
+    ["uniquitySurchargeUsd", { uniquitySurchargeUsd: "-1.00" }],
   ])("flags an invalid %s", (field, patch) => {
     expect(fields(validateSettings({ ...settings, ...patch } as StoreSettings))).toContain(field);
   });

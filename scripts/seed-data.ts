@@ -40,6 +40,8 @@ export const SEED: CatalogFixture = {
     pipesBackground: true,
     nosySignUp: true,
     patternGenerator: true,
+    uniquitySurcharge: true,
+    uniquitySurchargeUsd: "499.99",
     flashCreditPresetsUsd: ["500.00", "1000.00", "5000.00"],
     mediaBaseUrl: "",
   },

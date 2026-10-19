@@ -20,7 +20,7 @@ test.describe("US2 — the switchboard (FR-012–FR-016, SC-005)", () => {
     await visible(page.getByRole("link", { name: copy.console.nav.settings }))
       .first()
       .click();
-    await expect(visible(page.getByTestId("switch"))).toHaveCount(14); // 007 added one
+    await expect(visible(page.getByTestId("switch"))).toHaveCount(15); // 007 added two: the pattern generator and the Uniquity Surcharge
     for (const [key, { label, description }] of Object.entries(c.switches)) {
       await expect(sw(page, key)).toContainText(label);
       await expect(sw(page, key)).toContainText(description);

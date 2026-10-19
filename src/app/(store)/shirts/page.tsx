@@ -17,9 +17,6 @@ export default function ShirtsPage({ searchParams }: PageProps<"/shirts">) {
       <h1 className="font-display field-backing w-fit text-3xl leading-tight md:text-5xl">
         {copy.listing.heading}
       </h1>
-      <Suspense fallback={null}>
-        <DialCta />
-      </Suspense>
       <Suspense fallback={<ListingFallback />}>
         <Listing searchParams={searchParams} />
       </Suspense>
@@ -34,9 +31,14 @@ async function Listing({ searchParams }: Pick<PageProps<"/shirts">, "searchParam
 
   return (
     <div className="grid gap-6 md:grid-cols-[16rem_1fr] md:items-start">
-      <FilterDrawer label={copy.listing.filters}>
-        <ListingFilters tiers={tiers} query={query} />
-      </FilterDrawer>
+      {/* The dial sits under the filters: the sidebar on wider screens, under the toggle on a phone
+          (007 FR-009, owner review Q9). */}
+      <div className="flex min-w-0 flex-col gap-6">
+        <FilterDrawer label={copy.listing.filters}>
+          <ListingFilters tiers={tiers} query={query} />
+        </FilterDrawer>
+        <DialCta />
+      </div>
 
       <section aria-label={copy.nav.shirts}>
         <p className="font-display bg-highlighter mb-4 inline-block px-2 text-sm uppercase">

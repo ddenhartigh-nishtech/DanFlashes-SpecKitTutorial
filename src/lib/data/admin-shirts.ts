@@ -9,7 +9,7 @@ import { getSettings } from "@/lib/data/settings";
 import type { ShirtImageView, TierBadge } from "@/lib/data/shirts";
 import { listTiers } from "@/lib/data/tiers";
 import type { Db } from "@/lib/db/client";
-import { media, shirtImages, shirts } from "@/lib/db/schema";
+import { media, shirtImages, shirts, users } from "@/lib/db/schema";
 import { resolveMediaUrl } from "@/lib/media";
 import { cmp, type Usd } from "@/lib/money";
 import { resolvePrice } from "@/lib/pricing/resolve";
@@ -49,6 +49,8 @@ export interface AdminShirtImage extends ShirtImageView {
 
 export interface AdminShirt extends AdminShirtRow {
   images: AdminShirtImage[];
+  /** Who made a shopper's shirt (007 R18): his name, or his email if he gave none. */
+  maker: { id: number; label: string } | null;
 }
 
 export interface LibraryItem {
@@ -141,11 +143,28 @@ export function listAdminShirts(
     .sort(sorters[options.sort ?? "score"]);
 }
 
-/** One shirt for the editor, with its images in order; null when there's no such shirt. */
+/** One shirt for the editor, with its images in order and its maker; null when there's none. */
 export function getAdminShirt(db: Db, id: number): AdminShirt | null {
   const { rows: list, images } = rows(db);
   const row = list.find((r) => r.id === id);
-  return row ? { ...row, images: images.get(id) ?? [] } : null;
+  if (!row) return null;
+  const makerId = db
+    .select({ makerUserId: shirts.makerUserId })
+    .from(shirts)
+    .where(eq(shirts.id, id))
+    .get()?.makerUserId;
+  const maker = makerId
+    ? db
+        .select({ id: users.id, email: users.email, displayName: users.displayName })
+        .from(users)
+        .where(eq(users.id, makerId))
+        .get()
+    : undefined;
+  return {
+    ...row,
+    images: images.get(id) ?? [],
+    maker: maker ? { id: maker.id, label: maker.displayName ?? maker.email } : null,
+  };
 }
 
 /** Every image in the media library, newest last, with its URL. */

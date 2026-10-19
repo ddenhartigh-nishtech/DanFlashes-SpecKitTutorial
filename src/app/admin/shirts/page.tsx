@@ -91,6 +91,9 @@ async function Shirts({ searchParams }: Pick<PageProps<"/admin/shirts">, "search
           </button>
         </Form>
         <div className="flex flex-wrap gap-2">
+          <Link href="/admin/shirts?origin=dial" className={ui.button}>
+            {g.review}
+          </Link>
           <Link href="/admin/shirts/generate" className={ui.button}>
             {g.generateOne}
           </Link>

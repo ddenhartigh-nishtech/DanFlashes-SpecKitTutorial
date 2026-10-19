@@ -388,7 +388,7 @@ analyzes the money before polish.
 
 ### Console and store
 
-- [ ] T040 Mass production and the slider, test-first where it's logic:
+- [X] T040 Mass production and the slider, test-first where it's logic:
   - `ListedControl` becomes "Put it into mass production" or "Make it one of a kind again"
   - the editor shows the maker, linked to the customer
   - the list marks a mass-produced shirt, and has a "Review shopper creations" link
@@ -396,7 +396,7 @@ analyzes the money before polish.
     /admin/shirts/generate
 
   Update tests/integration/admin-generator.test.ts.
-- [ ] T041 Move `DialCta` under the filters on /shirts (the sidebar, and under the toggle on a
+- [X] T041 Move `DialCta` under the filters on /shirts (the sidebar, and under the toggle on a
   phone).
 
 ### E2E and polish

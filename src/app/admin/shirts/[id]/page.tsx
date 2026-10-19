@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Suspense } from "react";
 import { requireAdmin } from "@/app/_data/admin";
 import { ConsoleLoading, ConsolePage } from "@/components/admin/ConsolePage";
@@ -45,6 +46,14 @@ async function EditShirt({
       intro={
         <span className="flex flex-wrap gap-x-3">
           <span data-testid="shirt-origin">{copy.console.generator.origins[shirt.origin]}</span>
+          {shirt.maker ? (
+            <span data-testid="shirt-maker">
+              {copy.console.generator.maker}{" "}
+              <Link href={`/admin/customers/${shirt.maker.id}`} className={ui.link}>
+                {shirt.maker.label}
+              </Link>
+            </span>
+          ) : null}
           {/* A full load into the loud store, on purpose (008 R1). */}
           <a href={`/shirts/${shirt.slug}`} className={ui.link}>
             {s.viewInStore}

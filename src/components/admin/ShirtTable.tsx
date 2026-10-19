@@ -44,6 +44,9 @@ export function ShirtTable({ shirts }: { shirts: AdminShirtRow[] }) {
                 {shirt.origin !== "catalog"
                   ? ` · ${copy.console.generator.origins[shirt.origin]}`
                   : ""}
+                {shirt.origin === "dial" && shirt.listed
+                  ? ` · ${copy.console.generator.massProduced}`
+                  : ""}
               </span>
             </span>
             <span>

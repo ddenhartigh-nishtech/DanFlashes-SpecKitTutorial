@@ -9,7 +9,7 @@ import {
 } from "@/lib/actions/admin/generator";
 import { makeItMineCore } from "@/lib/actions/dial";
 import { copy } from "@/lib/copy";
-import { listAdminShirts } from "@/lib/data/admin-shirts";
+import { getAdminShirt, listAdminShirts } from "@/lib/data/admin-shirts";
 import { getShirtBySlug, listCatalogShirts } from "@/lib/data/shirts";
 import type { Db } from "@/lib/db/client";
 import { SESSION_COOKIE } from "@/lib/http/cookies";
@@ -239,5 +239,17 @@ describe("GET /admin/generator/art/[code] (007 contracts: the console)", () => {
     expect(generatorArt(db, request(), encodeRecipe(recipe))).toBeNull();
     expect(generatorArt(db, request("not-a-session"), encodeRecipe(recipe))).toBeNull();
     expect(generatorArt(db, request(admin), "nonsense")).toBeNull();
+  });
+});
+
+describe("the editor knows who made a shopper's shirt (007 FR-021, R18)", () => {
+  it("names its maker for Dan, and nobody for his own or the catalog's", () => {
+    const { db } = createSeededTestDb();
+    const shopper = person(db, { email: "maker@danflashes.test", displayName: "Craig" });
+    const made = makeItMineCore(db, form({ code: buildDial(db, {})!.steps[40].code! }), shopper.id);
+    if (!made.ok || !("slug" in made)) throw new Error("not made");
+    const shirt = listAdminShirts(db, { origin: "dial" })[0];
+    expect(getAdminShirt(db, shirt.id)?.maker).toEqual({ id: shopper.id, label: "Craig" });
+    expect(getAdminShirt(db, 1)?.maker).toBeNull();
   });
 });

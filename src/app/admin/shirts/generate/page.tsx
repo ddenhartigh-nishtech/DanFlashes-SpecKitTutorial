@@ -3,10 +3,12 @@ import { Suspense } from "react";
 import { requireAdmin } from "@/app/_data/admin";
 import { ConsoleLoading, ConsolePage } from "@/components/admin/ConsolePage";
 import { GeneratorForm } from "@/components/admin/GeneratorForm";
+import { ScoreField } from "@/components/admin/ScoreField";
 import { ui } from "@/components/admin/ui";
 import { copy } from "@/lib/copy";
 import { getDb } from "@/lib/db/client";
 import { formatUsd } from "@/lib/money";
+import { BEYOND, scoreAtStep } from "@/lib/pattern/dial";
 import { generatorPreview } from "@/lib/pattern/generator-view";
 
 const g = copy.console.generator;
@@ -33,21 +35,11 @@ async function Generate({
   return (
     <ConsolePage title={g.title} intro={g.intro}>
       <Form action="/admin/shirts/generate" className={`${ui.card} flex flex-wrap items-end gap-3`}>
-        <div className="flex flex-col gap-1">
-          <label className={ui.label}>
-            {g.score}
-            <input
-              name="score"
-              inputMode="numeric"
-              defaultValue={input.score}
-              aria-describedby="score-help"
-              className={ui.input}
-            />
-          </label>
-          <span id="score-help" className="text-office-muted text-xs">
-            {g.scoreRange(view.maxScore)}
-          </span>
-        </div>
+        <ScoreField
+          defaultScore={input.score}
+          maxScore={view.maxScore}
+          scores={Array.from({ length: BEYOND }, (_, step) => scoreAtStep(step, view.maxScore)!)}
+        />
         <label className={`${ui.label} self-start`}>
           {g.style}
           <select

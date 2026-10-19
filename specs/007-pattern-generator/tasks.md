@@ -401,7 +401,7 @@ analyzes the money before polish.
 
 ### E2E and polish
 
-- [ ] T042 Amend the e2e:
+- [X] T042 Amend the e2e:
   - **tests/e2e/dial.spec.ts**:
     - the guest's Make it mine goes to sign-in, then back to the setting
     - signed in, a made shirt shows the made-to-order line, no crowd and the surcharge note

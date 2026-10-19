@@ -91,3 +91,36 @@ Scripted on a scratch database (`DATABASE_PATH=data/qs007.db`), beside the e2e s
 - **Found while scripting**: the dial page's title came from static metadata, so the 404 showed
   "How complicated can it get?" in the tab. The title now renders inside the dial, behind the
   switch.
+
+### Owner review round (T045, 2026-10-19)
+
+Scripted on a scratch database (`DATABASE_PATH=data/qs007b.db`).
+
+- **Strict Mode**: `next dev`, across the dial, the made shirt's page, the cart, checkout, the
+  receipt, the review queue, the editor, `ListedControl`, `ScoreField` and `SurchargeForm`.
+  There were no browser console errors or warnings over two runs.
+- **21**: a guest's Make it mine went to `/sign-in?next=/how-complicated?r=…`.
+- **22**:
+  - the stock line said "Made to order, just for you. Nobody else can have one."
+  - there was no social proof
+  - the note said "+ $499.99 Uniquity Surcharge™ per shirt. Being unique costs extra."
+- **23**:
+  - the second add said "We'll make another one, just for you."
+  - the cart showed "Uniquity Surcharge™ × 2: $999.98" and the made-to-order-many line
+- **28**: with the amount changed to $1.00 mid-checkout, Place order stayed on checkout (refused).
+- **24**: back at $499.99, the order placed by card, and the receipt showed the surcharge line.
+- **25**: another account saw "One of a kind, and it's somebody else's.", with no Add to Cart.
+- **26**:
+  - the review queue's editor showed "Made by Craig"
+  - mass production gave the other account an Add to Cart and no surcharge note
+- **27**: one of a kind again, the other account's cart took it out with "These are one of a
+  kind, and they're somebody else's:".
+- **29**: slider step 60 set the score box to 150.
+- **Audit M1**: the console's order page showed "Uniquity Surcharge™ × 2: $999.98".
+- **20 (SC-006)**: `npm run catalog:audit` reported 0 errors and 0 warnings.
+- **Lighthouse**: production, mobile, applied throttling, on `/how-complicated` (its default
+  step's art is busier now).
+
+  | Runs | LCP | CLS | TBT |
+  |---|---|---|---|
+  | 3 | 2.4 s, 2.1 s, 2.4 s | 0, 0.032, 0 | 240–480 ms |

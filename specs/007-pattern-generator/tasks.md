@@ -431,7 +431,7 @@ analyzes the money before polish.
       text drops prices, the surcharge note and the countdowns before it looks.
     - **Coverage**: the spec's Q4–Q9 and FR-026, FR-027, SC-009 and SC-010 each map to T031–T042.
       No constitution conflicts (the plan's re-check).
-- [ ] T045 On a scratch database in `next dev`:
+- [X] T045 On a scratch database in `next dev`:
   - a Strict Mode pass over the new and changed client components
   - the scripted quickstart 21–30
   - Lighthouse on `/how-complicated`, whose art is heavier now

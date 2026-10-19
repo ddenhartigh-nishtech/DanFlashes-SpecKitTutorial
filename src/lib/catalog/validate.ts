@@ -14,6 +14,7 @@ import {
   type Tier,
 } from "@/lib/catalog/types";
 import { cmp, formatUsd, isUsdString } from "@/lib/money";
+import { msrpUsd } from "@/lib/pricing/msrp";
 import { resolvePrice } from "@/lib/pricing/resolve";
 
 export interface Issue {
@@ -93,6 +94,13 @@ export function validateShirt(
 
   const issues: Issue[] = [];
   const shirt = parsed.data;
+
+  // No ceiling, but the exponential has to be countable (008 R7): past ~2^1023 it's Infinity.
+  try {
+    msrpUsd(shirt.complexity, ctx.msrp);
+  } catch {
+    return [{ field: "complexity", message: "That's too complicated to price, even for Dan." }];
+  }
 
   if (isBlandTier(tierOf(shirt.complexity, ctx.tiers))) {
     const { finalPriceUsd } = resolvePrice(shirt, ctx.msrp);

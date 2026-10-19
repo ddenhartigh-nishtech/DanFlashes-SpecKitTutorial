@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
-import { auditCatalog } from "@/lib/catalog/audit";
+import { auditCatalog, auditIssues } from "@/lib/catalog/audit";
 import { seedCatalog } from "@/lib/data/seed";
 import { SEED } from "../../scripts/seed-data";
 import { createTestDb } from "../helpers/db";
@@ -72,6 +72,40 @@ describe("auditCatalog", () => {
   it("errors when store settings are missing entirely", () => {
     const { db } = createTestDb();
     expect(auditCatalog(db).errors.join("\n")).toMatch(/settings/i);
+  });
+});
+
+describe("auditIssues (008 analysis U3: each problem says what it's about)", () => {
+  it("is empty for the demo catalog", () => {
+    const { db } = createTestDb();
+    seedCatalog(db, SEED);
+    expect(auditIssues(db)).toEqual([]);
+  });
+
+  it("names the shirt, the setting or the tier each problem belongs to", () => {
+    const { db, sqlite } = createTestDb();
+    seedCatalog(db, SEED);
+    sqlite
+      .prepare("UPDATE shirts SET final_price_usd = '300.00' WHERE slug = 'beige-regret'")
+      .run();
+    sqlite.prepare("UPDATE store_settings SET placeholder_media_id = NULL").run();
+    const issues = auditIssues(db);
+    expect(issues).toContainEqual(
+      expect.objectContaining({ level: "error", kind: "shirt", ref: "beige-regret" }),
+    );
+    expect(issues).toContainEqual(expect.objectContaining({ level: "warning", kind: "settings" }));
+    // The CLI's strings are the same problems, word for word.
+    const { errors, warnings } = auditCatalog(db);
+    expect(issues.map((i) => i.text).sort()).toEqual([...errors, ...warnings].sort());
+  });
+
+  it("files broken tiers under tiers", () => {
+    const { db, sqlite } = createTestDb();
+    seedCatalog(db, SEED);
+    sqlite.prepare("UPDATE complexity_tiers SET min_score = 1 WHERE min_score = 0").run();
+    expect(auditIssues(db)).toContainEqual(
+      expect.objectContaining({ level: "error", kind: "tier" }),
+    );
   });
 });
 

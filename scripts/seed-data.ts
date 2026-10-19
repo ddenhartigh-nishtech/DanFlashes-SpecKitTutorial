@@ -1,9 +1,9 @@
 /**
  * Demo catalog fixture and demo shopper — development/demo data only, loaded by `npm run db:reset`
  * (or `db:seed` / `db:seed-demo`). The database is the runtime source of truth; edit live data in
- * Drizzle Studio, not here.
+ * the owner's console (/admin, 008), not here.
  */
-import type { DemoShopper } from "@/lib/data/demo-shopper";
+import type { DemoOwner, DemoShopper } from "@/lib/data/demo-shopper";
 import type { CatalogFixture } from "@/lib/data/seed";
 
 /** The demo shopper that `db:reset` (and `db:seed-demo`) create for local development. */
@@ -14,6 +14,13 @@ export const DEMO_SHOPPER: DemoShopper = {
   creditUsd: "10000.00",
   pastOrder: { slug: "fractal-fury", size: "XL" },
   perDiem: { amountUsd: "75.00" },
+};
+
+/** The demo owner (008 R3): an admin account, so the console works right after `db:reset`. */
+export const DEMO_OWNER: DemoOwner = {
+  email: "dan@danflashes.local",
+  password: "the-office-2026",
+  displayName: "Dan",
 };
 
 export const SEED: CatalogFixture = {

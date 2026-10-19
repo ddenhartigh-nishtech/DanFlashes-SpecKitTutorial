@@ -6,6 +6,7 @@ import {
   isUsdString,
   mul,
   parseUsd,
+  percentDiff,
   roundHalfUp2,
   sub,
   sum,
@@ -128,5 +129,23 @@ describe("formatUsd", () => {
 
   it("rejects malformed input", () => {
     expect(() => formatUsd("12.3")).toThrow();
+  });
+});
+
+describe("percentDiff (008 R12)", () => {
+  it.each([
+    ["450.00", "300.00", "50.0"],
+    ["200.00", "300.00", "-33.3"],
+    ["1.00", "3.00", "-66.7"], // half-up, away from zero
+    ["300.15", "300.00", "0.1"], // exactly 0.05%: rounds up
+    ["299.99", "300.00", "0.0"], // a hair under shows as 0.0, never -0.0
+    ["300.00", "300.00", "0.0"],
+  ])("%s against %s is %s%", (value, base, expected) => {
+    expect(percentDiff(value, base)).toBe(expected);
+  });
+
+  it("refuses a zero base and anything that isn't money", () => {
+    expect(() => percentDiff("1.00", "0.00")).toThrow();
+    expect(() => percentDiff("1", "3.00")).toThrow();
   });
 });

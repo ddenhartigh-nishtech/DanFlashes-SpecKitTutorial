@@ -59,3 +59,16 @@ export function resolveAddOns(
   const offered = new Set(found.map((a) => a.id));
   return { found, missing: unique.filter((id) => !offered.has(id)) };
 }
+
+export interface AdminAddOn extends AddOnView {
+  active: boolean;
+}
+
+/** Every add-on, retired ones included, in checkout order: the console's list (008 FR-031). */
+export function listAllAddOns(db: Db): AdminAddOn[] {
+  return db
+    .select({ ...columns, active: addOns.active })
+    .from(addOns)
+    .orderBy(asc(addOns.position), asc(addOns.id))
+    .all();
+}

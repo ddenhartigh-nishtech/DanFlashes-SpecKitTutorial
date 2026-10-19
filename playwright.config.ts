@@ -16,8 +16,24 @@ export default defineConfig({
     trace: "retain-on-failure",
   },
   projects: [
-    { name: "desktop", use: { ...devices["Desktop Chrome"] } },
-    { name: "phone", use: { ...devices["Pixel 7"] } },
+    { name: "desktop", use: { ...devices["Desktop Chrome"] }, testIgnore: "admin/**" },
+    { name: "phone", use: { ...devices["Pixel 7"] }, testIgnore: "admin/**" },
+    // The owner's console (008 R15) changes shared state (switches, tiers, prices), so it runs
+    // after every shopper journey, one spec at a time, desktop then phone.
+    {
+      name: "admin-desktop",
+      use: { ...devices["Desktop Chrome"] },
+      testMatch: "admin/**/*.spec.ts",
+      dependencies: ["desktop", "phone"],
+      workers: 1,
+    },
+    {
+      name: "admin-phone",
+      use: { ...devices["Pixel 7"] },
+      testMatch: "admin/**/*.spec.ts",
+      dependencies: ["admin-desktop"],
+      workers: 1,
+    },
   ],
   // A production build: no on-demand compilation (deterministic timing), and `verify` gets a
   // real `next build` — which is where Cache Components reports prerendering mistakes.

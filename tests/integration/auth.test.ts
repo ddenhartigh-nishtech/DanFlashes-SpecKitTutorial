@@ -91,6 +91,7 @@ describe("sessions", () => {
       id: userId,
       email: "s@x.io",
       displayName: "Sal",
+      isAdmin: false, // 008: a new account is never the owner
     });
   });
 

@@ -1,5 +1,6 @@
 import { eq } from "drizzle-orm";
-import type { StoreSettings } from "@/lib/catalog/types";
+import type { SwitchKey } from "@/lib/admin/switches";
+import type { MsrpSettings, StoreSettings } from "@/lib/catalog/types";
 import { validateSettings } from "@/lib/catalog/validate";
 import type { Db } from "@/lib/db/client";
 import { getMediaById } from "@/lib/data/media";
@@ -75,4 +76,39 @@ export function getPlaceholderUrl(db: Db, settings: StoreSettings): string | nul
   if (settings.placeholderMediaId === null) return null;
   const row = getMediaById(db, settings.placeholderMediaId);
   return row ? resolveMediaUrl(row.key, settings.mediaBaseUrl) : null;
+}
+
+// ── Column-scoped saves for the console (008 R11): each touches only its own columns, so a switch
+// flip and a tuning edit in two tabs never overwrite each other. The console validates first.
+
+export function saveSwitch(db: Db, key: SwitchKey, on: boolean): void {
+  db.update(storeSettings)
+    .set({ [key]: on })
+    .where(eq(storeSettings.id, 1))
+    .run();
+}
+
+export function saveTuning(db: Db, msrp: MsrpSettings): void {
+  db.update(storeSettings)
+    .set({
+      msrpStartPriceUsd: msrp.startPriceUsd,
+      msrpAnchorScore: msrp.anchorScore,
+      msrpDoublingInterval: msrp.doublingInterval,
+    })
+    .where(eq(storeSettings.id, 1))
+    .run();
+}
+
+export function savePresets(db: Db, presetsUsd: string[]): void {
+  db.update(storeSettings)
+    .set({ flashCreditPresetsUsd: presetsUsd })
+    .where(eq(storeSettings.id, 1))
+    .run();
+}
+
+export function saveMediaSettings(
+  db: Db,
+  media: { mediaBaseUrl: string; placeholderMediaId: number },
+): void {
+  db.update(storeSettings).set(media).where(eq(storeSettings.id, 1)).run();
 }

@@ -5,6 +5,7 @@
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { signUp } from "@/lib/auth/accounts";
+import { setAdmin } from "@/lib/auth/admin";
 import { addItem, getCartView, getOrCreateCart } from "@/lib/cart/cart";
 import { placeOrder } from "@/lib/checkout/place-order";
 import type { Db } from "@/lib/db/client";
@@ -72,4 +73,29 @@ export async function ensureDemoShopper(
   }
 
   return { created: true, userId };
+}
+
+/** The demo owner (008 R3): a real account with the admin flag on. */
+export interface DemoOwner {
+  email: string;
+  password: string;
+  displayName: string;
+}
+
+/** Idempotent: an existing account with the same email keeps its password, and is made an admin. */
+export async function ensureDemoOwner(
+  db: Db,
+  owner: DemoOwner,
+): Promise<{ created: boolean; userId: number }> {
+  const existing = db.select({ id: users.id }).from(users).where(eq(users.email, owner.email)).get();
+  let created = false;
+  let userId = existing?.id;
+  if (!userId) {
+    const account = await signUp(db, owner);
+    if (!account.ok) throw new Error(`Demo owner ${owner.email}: ${account.code}`);
+    userId = account.userId;
+    created = true;
+  }
+  setAdmin(db, owner.email, true);
+  return { created, userId };
 }

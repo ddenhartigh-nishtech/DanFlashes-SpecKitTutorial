@@ -104,7 +104,7 @@ export function cartSummaryLines(view: CartView): SummaryLine[] {
   }));
 }
 
-function hydrateOrders(db: Db, rows: (typeof orders.$inferSelect)[]): OrderView[] {
+export function hydrateOrders(db: Db, rows: (typeof orders.$inferSelect)[]): OrderView[] {
   if (rows.length === 0) return [];
   const items = db
     .select()

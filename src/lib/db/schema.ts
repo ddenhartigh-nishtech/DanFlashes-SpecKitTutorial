@@ -170,6 +170,8 @@ export const users = sqliteTable("users", {
   email: text("email").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
   displayName: text("display_name"),
+  /** The owner (008 FR-001): opens the console. Set and cleared from the command line only. */
+  isAdmin: integer("is_admin", { mode: "boolean" }).notNull().default(false),
   ...timestamps,
 });
 
@@ -339,13 +341,15 @@ export const flashCreditEntries = sqliteTable(
       .notNull()
       .references(() => users.id, { onDelete: "restrict" }),
     amountUsd: text("amount_usd").notNull(),
-    kind: text("kind", { enum: ["top_up", "spend", "stream"] }).notNull(),
+    kind: text("kind", { enum: ["top_up", "spend", "stream", "grant"] }).notNull(),
     orderId: integer("order_id").references(() => orders.id, { onDelete: "restrict" }),
     cardBrand: text("card_brand"),
     cardLast4: text("card_last4"),
     streamId: integer("stream_id").references(() => revenueStreams.id, { onDelete: "restrict" }),
     /** The stream's 1-based payment number: (stream_id, stream_payment_no) is paid at most once. */
     streamPaymentNo: integer("stream_payment_no"),
+    /** A grant's form token (008 R13): the same grant submitted twice is recorded once. */
+    grantToken: text("grant_token").unique(),
     ...timestamps,
   },
   (t) => [
@@ -353,11 +357,15 @@ export const flashCreditEntries = sqliteTable(
     check("flash_credit_nonzero", sql`${t.amountUsd} NOT IN ('0.00', '-0.00')`),
     check(
       "flash_credit_kind",
-      sql`(${t.kind} = 'top_up' AND ${t.amountUsd} NOT GLOB '-*' AND ${t.cardBrand} IS NOT NULL AND length(${t.cardLast4}) = 4)
-        OR (${t.kind} = 'spend' AND ${t.amountUsd} GLOB '-*' AND ${t.orderId} IS NOT NULL)
+      sql`(${t.kind} = 'top_up' AND ${t.amountUsd} NOT GLOB '-*' AND ${t.cardBrand} IS NOT NULL AND length(${t.cardLast4}) = 4
+            AND ${t.grantToken} IS NULL)
+        OR (${t.kind} = 'spend' AND ${t.amountUsd} GLOB '-*' AND ${t.orderId} IS NOT NULL AND ${t.grantToken} IS NULL)
         OR (${t.kind} = 'stream' AND ${t.amountUsd} NOT GLOB '-*' AND ${t.streamId} IS NOT NULL
             AND ${t.streamPaymentNo} IS NOT NULL AND ${t.streamPaymentNo} >= 1
-            AND ${t.orderId} IS NULL AND ${t.cardBrand} IS NULL AND ${t.cardLast4} IS NULL)`,
+            AND ${t.orderId} IS NULL AND ${t.cardBrand} IS NULL AND ${t.cardLast4} IS NULL AND ${t.grantToken} IS NULL)
+        OR (${t.kind} = 'grant' AND ${t.amountUsd} NOT GLOB '-*' AND ${t.grantToken} IS NOT NULL
+            AND ${t.orderId} IS NULL AND ${t.cardBrand} IS NULL AND ${t.cardLast4} IS NULL
+            AND ${t.streamId} IS NULL AND ${t.streamPaymentNo} IS NULL)`,
     ),
     uniqueIndex("flash_credit_stream_payment_unique").on(t.streamId, t.streamPaymentNo),
     index("flash_credit_user_idx").on(t.userId, t.createdAt),

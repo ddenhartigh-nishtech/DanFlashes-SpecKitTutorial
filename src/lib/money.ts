@@ -117,3 +117,14 @@ export function formatUsd(value: Usd): string {
   const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   return `${negative ? "-" : ""}$${grouped}.${cents}`;
 }
+
+/**
+ * How far `value` is from `base`, in percent of `base`, exact and rounded half-up to one decimal
+ * ("50.0", "-16.7"). A hair either side of zero reads "0.0", never "-0.0" (008 R12).
+ */
+export function percentDiff(value: Usd, base: Usd): string {
+  const b = toBig(base);
+  if (b.eq(0)) throw new MoneyError("A percentage of $0.00 isn't a number.");
+  const pct = toBig(value).minus(b).div(b).times(100).round(1, Big.roundHalfUp).toFixed(1);
+  return pct === "-0.0" ? "0.0" : pct;
+}

@@ -39,7 +39,7 @@ describe("migration 0003 (each recurring top-off gets its own interval)", () => 
       { id: 2, schedule: "whenever", interval_minutes: null, payments_made: 0, next_due_at: null },
       { id: 3, schedule: "one_time", interval_minutes: null, payments_made: 1, next_due_at: null },
     ]);
-    expect(entries()).toEqual(before);
+    expect(entries()).toMatchObject(before); // later migrations add columns (008: grant_token)
     const columns = (
       sqlite.prepare("PRAGMA table_info(store_settings)").all() as { name: string }[]
     ).map((c) => c.name);

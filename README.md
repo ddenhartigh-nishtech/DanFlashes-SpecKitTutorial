@@ -29,13 +29,37 @@ Test card: **4242 4242 4242 4242**, any future expiry (e.g. 12/29), any 3-digit 
 
 ## Managing the store
 
-All product data lives in SQLite, not in code. Until the Admin Console (ROADMAP 008) exists, edit it
-with Drizzle Studio:
+All product data lives in SQLite, not in code. The owner manages it in **Dan's Office**, the
+console at `/admin` (008):
 
 ```bash
-npm run db:studio       # browser-based editor for shirts, tiers, settings, media
-npm run catalog:audit   # checks the catalog: errors exit 1, warnings exit 0
+npm run db:reset                          # also creates the demo owner (DEMO_OWNER in scripts/seed-data.ts)
+npm run admin:grant -- you@example.com    # make an existing account an admin; admin:revoke undoes it
+npm run catalog:audit                     # the catalog check, also on the console's Pricing page
 ```
+
+Sign in as an admin and a **Back office** link appears in the store header. Anyone else gets the
+store's ordinary 404 at every `/admin` address, and every console change is checked again on the
+server. Only the command line can make or unmake an admin. After pulling 008, run
+`npm run db:migrate` (0011), then `npm run admin:grant -- <your email>`. The console is deliberately calm: none
+of the tactics run there, nothing flashes, and every page has a motivational poster.
+
+- **Shirts**: each one's score, tier, MSRP and final price. Create one, edit it with a live preview,
+  rest it (deactivate) and bring it back. There's no delete, and the URL name is fixed once created.
+- **Pricing**: price against score, every pair priced against the complexity order, how far your
+  own prices sit from the MSRP, and the catalog audit's problems with links to fix them.
+- **Media**: upload a PNG, JPEG or WebP at least 2,000 px on its longest side, or an SVG with no
+  scripts or outside references, up to 15 MB. Uploads are kept in `MEDIA_UPLOADS_DIR` (default:
+  `uploads/` beside the database file) and served from `/media/uploads/…`. Attach pictures to a
+  shirt and order them (the first is the main one). Only a picture nothing uses can be removed.
+- **Tiers**: saved as one set, with a preview of the shirts that change tier.
+- **Add-ons**: create, edit, retire, restore and reorder.
+- **Settings**: every tactic switch in one click, the MSRP dials with a before-and-after preview,
+  the Flash Credit top-up amounts, the media base URL and the placeholder picture.
+- **Customers and orders**: look only, except one thing: **grant** a customer Flash Credit. It's a
+  ledger entry, recorded once per form, spent like a top-up; the shopper sees "A gift from Dan".
+
+`npm run db:studio` (Drizzle Studio) is still there for developers. The owner no longer needs it.
 
 - **Complexity score** (`shirts.complexity`) is owner-only and never shown to shoppers. It sets
   the shirt's tier badge and its MSRP.
@@ -44,10 +68,10 @@ npm run catalog:audit   # checks the catalog: errors exit 1, warnings exit 0
 - **Final price** is `shirts.final_price_usd` if you set one, otherwise the MSRP.
 - **Tiers** (`complexity_tiers`) can be renamed, restyled, and re-ranged. The tier starting at 0 is
   BLAND.
-- **Never delete a shirt.** Set `status` to `inactive`. Shirts that have been ordered can't be
-  deleted.
+- **Never delete a shirt.** Rest it in the console (`status` = `inactive`). Shirts that have been
+  ordered can't be deleted, and a rested shirt's page stays up (marked retired) for order history.
 - **Images** live in `public/media/` and are referenced by relative key. To move them to a CDN,
-  change `store_settings.media_base_url`.
+  change the media base URL in Settings (`store_settings.media_base_url`).
 - **Revenue streams** are connected by shoppers on their account page and feed Flash Credit. A
   "Recurring top-off" pays on its own interval (for a demo, connect one that tops off every 1
   minute). "Just once" is applied immediately and is final. "Whenever I want" pays each time he hits
@@ -55,10 +79,10 @@ npm run catalog:audit   # checks the catalog: errors exit 1, warnings exit 0
 - **Checkout splits the bill.** "Apply my Flash Credit" covers what it can. He confirms putting the
   rest on a card, and Remove puts the whole total back on the card.
 - **Add-ons** (`add_ons`) are owner data: a name, a pitch, a decline line, a flat price per order,
-  `active`, and `position`. Edit them in Studio. Retire one with `active = 0`, and never delete one:
+  `active`, and `position`. Edit them in the console. Retire one there, and never delete one:
   past orders keep their own copy of what was bought (`order_add_ons`), at the price paid.
-- **Manipulation switches** (constitution IV). Each tactic is its own `store_settings` column: set it
-  to `1` for on and `0` for off, then reload the page.
+- **Manipulation switches** (constitution IV). Each tactic is its own `store_settings` column. Flip it
+  in the console's Settings, one click each; the store follows on the next page load.
 
   | Column | Default | When on |
   |---|---|---|
@@ -93,7 +117,9 @@ npm run catalog:audit   # checks the catalog: errors exit 1, warnings exit 0
 | `npm run db:migrate` | Back up, then apply migrations |
 | `npm run db:backup` / `db:restore -- <file>` | Timestamped backups in `backups/`; restoring makes a safety backup first |
 | `npm run db:reset` | Back up, then rebuild and reseed the database (catalog and demo shopper) |
-| `npm run db:seed` / `db:seed-demo` | Demo catalog / demo shopper (both idempotent) |
+| `npm run db:seed` / `db:seed-demo` | Demo catalog / demo shopper and owner (both idempotent) |
+| `npm run admin:grant -- <email>` / `admin:revoke -- <email>` | Make an account the owner, or stop it being one (the only way) |
+| `npm run catalog:audit` | The catalog check: errors exit 1, warnings exit 0 |
 | `npm run art:generate` | Regenerate the placeholder shirt art |
 
 The e2e suite builds into `.next-e2e/` and uses `data/e2e.db`, so it can run while your own

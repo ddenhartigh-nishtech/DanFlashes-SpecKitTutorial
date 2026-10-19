@@ -113,6 +113,8 @@ async function AccountContents() {
                       copy.account.entryTopUp(entry.cardBrand ?? "Card", entry.cardLast4 ?? "????")
                     ) : entry.kind === "stream" ? (
                       copy.streams.historyEntry(entry.streamName ?? "")
+                    ) : entry.kind === "grant" ? (
+                      copy.account.entryGrant
                     ) : (
                       <Link href={`/orders/${entry.orderId}`} className="underline">
                         {copy.account.entrySpend(orderNumber(entry.orderId!))}

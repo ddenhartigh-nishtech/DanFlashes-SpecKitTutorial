@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { signIn } from "@/lib/auth/accounts";
-import { ensureDemoShopper, type DemoShopper } from "@/lib/data/demo-shopper";
+import { adminUser } from "@/lib/auth/admin";
+import { createSession } from "@/lib/auth/session";
+import { ensureDemoOwner, ensureDemoShopper, type DemoShopper } from "@/lib/data/demo-shopper";
+import { SESSION_COOKIE } from "@/lib/http/cookies";
+import { FakeCookieJar } from "../helpers/cookies";
 import { getBalanceUsd, listEntries } from "@/lib/flash-credit/ledger";
 import { listOrdersForUser } from "@/lib/orders/orders";
 import { listStreams } from "@/lib/streams/streams";
@@ -61,5 +65,23 @@ describe("ensureDemoShopper", () => {
     await expect(
       ensureDemoShopper(db, { ...DEMO, pastOrder: { slug: "no-such-shirt", size: "M" } }),
     ).rejects.toThrow(/no-such-shirt/);
+  });
+});
+
+describe("ensureDemoOwner (008 R3)", () => {
+  const OWNER = { email: "owner@danflashes.test", password: "the-office-test", displayName: "Dan" };
+
+  it("creates the owner once, through real sign-up, with the admin flag on", async () => {
+    const { db, sqlite } = createSeededTestDb();
+    const first = await ensureDemoOwner(db, OWNER);
+    const second = await ensureDemoOwner(db, OWNER);
+    expect(first.created).toBe(true);
+    expect(second).toEqual({ created: false, userId: first.userId });
+    expect(await signIn(db, OWNER)).toEqual({ ok: true, userId: first.userId });
+    const { token } = createSession(db, first.userId);
+    expect(adminUser(db, new FakeCookieJar({ [SESSION_COOKIE]: token }))).not.toBeNull();
+    expect(sqlite.prepare("SELECT COUNT(*) AS n FROM users WHERE is_admin = 1").get()).toEqual({
+      n: 1,
+    });
   });
 });

@@ -91,6 +91,15 @@ describe("validateShirt", () => {
     expect(fields(validateShirt(valid, { ...ctx, imageCount: 0 }))).toContain("images");
     expect(validateShirt({ ...valid, status: "inactive" }, { ...ctx, imageCount: 0 })).toEqual([]);
   });
+
+  it("refuses a score whose MSRP can't be computed, and nothing below that (008 R7)", () => {
+    const issues = validateShirt({ ...valid, complexity: 999_999 }, ctx);
+    expect(issues).toEqual([
+      { field: "complexity", message: "That's too complicated to price, even for Dan." },
+    ]);
+    // No ceiling below the limit: score 10,000 at the default tuning is ~2^999 × $300, in full.
+    expect(validateShirt({ ...valid, complexity: 10_000 }, ctx)).toEqual([]);
+  });
 });
 
 describe("validateSettings", () => {

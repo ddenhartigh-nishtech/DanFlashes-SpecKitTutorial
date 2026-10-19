@@ -296,3 +296,131 @@ them, and lists or unlists the shopper-made ones.
 1. **MVP**: Setup, Foundational, US1. Shoppers can turn the dial and see how complicated it gets.
 2. **Then**: US2 (buy it), then US3 (Dan's generator).
 3. **Polish**: then verify, converge, and a PR that also ratifies constitution v4.2.0.
+
+---
+
+## Phase 7: Owner Review Round (spec Q4–Q9, 2026-10-19)
+
+**Goal**: shopper-made shirts are made to order for their maker, the Uniquity Surcharge™ is
+charged on each, Dan mass-produces shopper creations, generated art is as busy as the seed shirts,
+the dial's link sits under the filters, and the console generator has a slider.
+
+**Independent Test**: quickstart 21–30, and the amended e2e journeys.
+
+⚠️ T038–T039 touch money (cart totals, checkout, orders): tests first (constitution VI), and T044
+analyzes the money before polish.
+
+### Foundation
+
+- [ ] T031 Migration `0013_made_to_order` and src/lib/db/schema.ts, test-first in
+  tests/integration/migration-0013.test.ts:
+  - `shirts.maker_user_id` (FK users, CHECK `origin = 'dial' OR maker_user_id IS NULL`; the
+    rebuild copies every row), backfilled from each dial shirt's earliest order
+  - `store_settings.uniquity_surcharge` (default true) and `uniquity_surcharge_usd` (default
+    `'499.99'`)
+  - `orders.surcharge_usd` and `order_items.surcharge_usd` (NOT NULL, default `'0.00'`)
+
+  Plumb the `uniquitySurcharge` switch and amount through the settings types, validation, the
+  settings reader, seed data, the fixtures, `setSwitches`, the 15-key switchboard and its copy.
+  Update the switch-count tests to 15.
+
+### The art (R1, R13)
+
+- [ ] T032 [P] Amend tests/unit/pattern-generate.test.ts and tests/unit/pattern-dial.test.ts first:
+  - the count is `⌊points ÷ 10⌋ + 5 × extra colors + 10 × extra layers`, exact over 1,000 recipes
+    and up to `ART_MAX_SCORE` (24,000)
+  - at score 130 there are at least 200 shapes, and the shape count never falls as the score climbs
+    (sampled)
+  - under 1 MB at the default top, under 2 MB at the art limit
+  - the bland and loud palettes, determinism and no metadata, as before
+- [ ] T033 Recalibrate src/lib/pattern/count.ts, generate.ts and dial.ts (`ART_MAX_SCORE = 24_000`)
+  to the scratch prototype (R1). T032 passes, and so do the dial, route and materialize tests.
+
+### Made to order (R14, R16)
+
+- [ ] T034 [P] Write failing tests/integration/made-to-order.test.ts:
+  - **`makeItMineCore`**: a guest gets the sign-in redirect and nothing is made. A signed-in
+    shopper becomes the maker. An unmade-by-anyone shirt is claimed. Someone else's stays theirs.
+  - **`canBuy` everywhere**: the maker adds any quantity. Anyone else, or a guest cart, is refused
+    `NOT_YOURS` on an add and on a raise. The audit takes out such lines with reason `unique`
+    (after a sign-in merge, or after Dan makes it one of a kind again). `placeOrder` refuses with
+    `CART_AUDITED`.
+  - **Mass production**: anyone can buy it. Owner-generated and catalog shirts are unaffected.
+  - **The dial**: a made setting says whether it's his.
+- [ ] T035 Build it: `materialize` takes a maker. `makeItMineCore` takes the user, and the wrapper
+  redirects a guest to sign in with the dial setting as `next`. Add `canBuy` and the guards in
+  src/lib/cart/cart.ts (`NOT_YOURS`, removal reason `unique`, with copy). Give the shopper shirt a
+  `oneOfAKind` flag and keep the maker server-side. `buildDial` marks `made.mine`. T034 passes.
+- [ ] T036 [P] Write failing unit tests:
+  - scarcity's `made` and `madeMany` lines
+  - `socialProofFor` is null for a one-of-a-kind shirt
+  - the add message on a one-of-a-kind shirt says "make another"
+- [ ] T037 Build the urgency changes and the shirt page's two states:
+  - **For the maker**: the made-to-order stock line, the surcharge note, the size picker and Add to
+    Cart.
+  - **For anyone else**: "One of a kind, and it's someone else's.", plus a sign-in link for a guest.
+  - The cart page's stock lines and removal notices.
+
+  T036 passes.
+
+### The Uniquity Surcharge™ (R15, money)
+
+- [ ] T038 [P] Write failing tests first:
+  - tests/unit/checkout-totals.test.ts: `orderTotals` with a surcharge
+  - tests/integration/uniquity-surcharge.test.ts:
+    - the cart view's surcharge is the amount × quantity on one-of-a-kind lines only, with nothing
+      while the switch is off or after mass production
+    - `placeOrder` by card, by Flash Credit and split: total = shirts + surcharges + add-ons, to the
+      cent
+    - a changed amount or a flipped switch is `PRICE_CHANGED`
+    - the order keeps the surcharge per line and in all, and the order view shows its line
+    - `saveSurchargeCore` validates the amount, and joins tests/integration/admin-door.test.ts
+- [ ] T039 Build it:
+  - src/lib/cart/cart.ts: the surcharge per line, and in all, on the cart view and checkout lines
+  - src/lib/checkout/totals.ts and place-order.ts: the total, the check and the snapshot
+  - src/lib/orders/orders.ts and `OrderSummary`: the "Uniquity Surcharge™ × N" line on the cart,
+    checkout, receipt and history
+  - `CheckoutForm`'s expected total
+  - the console Settings surcharge form, `saveSurcharge` and its wrapper, and the switchboard's 15th
+    row
+
+  T038 passes.
+
+### Console and store
+
+- [ ] T040 Mass production and the slider, test-first where it's logic:
+  - `ListedControl` becomes "Put it into mass production" or "Make it one of a kind again"
+  - the editor shows the maker, linked to the customer
+  - the list marks a mass-produced shirt, and has a "Review shopper creations" link
+  - `ScoreField`: a number box plus a slider spaced through `scoreAtStep`, on
+    /admin/shirts/generate
+
+  Update tests/integration/admin-generator.test.ts.
+- [ ] T041 Move `DialCta` under the filters on /shirts (the sidebar, and under the toggle on a
+  phone).
+
+### E2E and polish
+
+- [ ] T042 Amend the e2e:
+  - **tests/e2e/dial.spec.ts**:
+    - the guest's Make it mine goes to sign-in, then back to the setting
+    - signed in, a made shirt shows the made-to-order line, no crowd and the surcharge note
+    - the cart, checkout and order show the surcharge line, and the total includes it
+    - quantity 2 pays it twice
+    - another account sees "someone else's" and no Add to Cart
+    - the BLAND journey signs in first
+  - **tests/e2e/admin/generator.spec.ts**: the shopper creation comes from a signed-up context;
+    mass-produce, then one of a kind again; the maker link; the slider moves the score box
+  - **tests/e2e/browse.spec.ts**: the dial's link sits under the filters
+  - **switchboard**: 15 switches, and the surcharge amount saves
+- [ ] T043 Update the README and quickstart.md (scenarios 21–30): made to order, the surcharge row
+  in the switch table, mass production, the art's density and budgets, and the slider.
+- [ ] T044 Analyze the money: run `/speckit-analyze` on the amended artifacts, and audit the
+  surcharge's path from cart to receipt by hand. Record the findings and how they were fixed.
+- [ ] T045 On a scratch database in `next dev`:
+  - a Strict Mode pass over the new and changed client components
+  - the scripted quickstart 21–30
+  - Lighthouse on `/how-complicated`, whose art is heavier now
+
+  Record the results.
+- [ ] T046 Run `npm run verify` until it's green. Record the counts and the coverage.

@@ -29,6 +29,25 @@ Migration 0012 adds `shirts.origin`, `shirts.recipe` (unique) and `shirts.listed
 The listing, the home page, the pop-ups and the shaming loop's picks read listed shirts only.
 Constitution v4.2.0 (draft, ratified by merging) says how generated shirts get their score.
 
+### Owner review round (2026-10-19, spec Q4–Q9)
+
+- **Made to order** (R14): `shirts.maker_user_id`. Make it mine needs an account. `canBuy` decides
+  who may add or buy a one-of-a-kind shirt, enforced in `addItem`, `updateItem`, the cart audit and
+  so `placeOrder`.
+- **Uniquity Surcharge™** (R15): a flat fee per one-of-a-kind shirt, with a switch and an amount in
+  `store_settings`. It's live in the cart view and the checkout lines, and part of `orderTotals`.
+  Each order keeps what it charged, per line and in all.
+- **Urgency** (R16): no fake crowd and no "just bought" on a one-of-a-kind shirt, and made-to-order
+  stock lines.
+- **Mass production** (R18): `listed`, renamed in the console, with the maker shown and a review
+  link.
+- **Art** (R1, R13): one point of score per 10 drawn, seed-shirt density, loud tangles at the top.
+  The art budgets move.
+- **Placement and slider** (R17): the dial's link sits under the shirts page's filters, and the
+  console's score box gets a slider.
+- **Migration 0013**: the maker (backfilled from orders), the surcharge settings, and the
+  surcharge on orders and order lines.
+
 ## Technical Context
 
 **Language/Version**: unchanged (TypeScript on Node 22, Next.js 16.4 with Cache Components, React
@@ -98,6 +117,19 @@ owner assigns each shirt's complexity score") wouldn't cover a dial shirt that a
 
 **Result**: PASS on v4.2.0, pre-research and post-design. The PR description must say that merging
 ratifies v4.2.0 (analysis C1).
+
+**Re-check for the owner review round** (spec Q4–Q9). Still PASS on v4.2.0, and no further
+amendment is needed:
+
+| # | Principle / Rule | How the review round complies |
+|---|---|---|
+| II | Complexity Is the Price | The Uniquity Surcharge is a fee on its own line, like add-ons. A shirt's price is still its owner price or its MSRP, from the one algorithm. The new count rule changes how a generated shirt's score is counted from its pattern, which v4.2.0 already covers. |
+| IV | Shamelessly Manipulative | The surcharge is a named tactic with its own switch. Made-to-order lines replace scarcity and social proof only on one-of-a-kind shirts, under the same switches. |
+| VI | Money Math First | The surcharge touches cart totals, checkout and orders: its tests come first (totals, `placeOrder` by card, Flash Credit and split, the expected-total refusal, the snapshot), and the money gets its own analysis pass. |
+| C | Commerce constraints | `canBuy` and the surcharge are decided on the server, inside `placeOrder`'s transaction. The browser never sends either. |
+
+The gentler pricing curve the owner also asked for needs II changed ("exponential"), so it's its
+own feature (ROADMAP 010), not part of 007.
 
 ## Project Structure
 

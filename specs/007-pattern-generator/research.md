@@ -34,6 +34,20 @@ plan.md, data-model.md, contracts/generator.md and tasks.md.
   - One unit per shape: about 10,000 shapes at the top, and extreme tunings can't fit the budget.
   - Measuring the SVG's size or entropy: not something the owner can reason about.
 
+- **Amended after the owner's review (Q8)**: the count is `⌊points ÷ 10⌋ + 5(C−1) + 10(L−1)`,
+  and the builder spends exactly `10 × (rem − 5(C−1))` points.
+  - **Why**: the hand-drawn seed shirts carry about 600 shapes at score 130, and the old rule could
+    afford about 40. So a generated shirt looked emptier than a hand-drawn one at the same score.
+    Ten drawn points per score point matches the seed shirts from 12 to 130. The scratch
+    comparison, 2026-10-19, set the seed shirts' art beside the generator's at the same scores.
+  - **Shapes**: seed-shirt shapes and sizes at the low end (dots, ellipses, triangles, waves,
+    rectangles, short zigzags), and layers shrink gently (`1/(1 + 0.12·layer)`) at nearly full
+    opacity.
+  - **Top end**: zigzags take over and get long. They wander (a turning random walk with a stride
+    that grows with the score), drawn as medium-width strokes, and some short ones are filled.
+    Big filled tangles and faint layers were tried and rejected: they washed the shirt into one
+    color or grey.
+
 ## R2 — How far the dial goes, and its steps
 
 - **Decision**:
@@ -195,7 +209,98 @@ plan.md, data-model.md, contracts/generator.md and tasks.md.
 
 - **Decision**:
   - A unit test checks that the SVG at `ART_MAX_SCORE` is under 2 MB, and at the default
-    `maxPriceableScore` under 300 KB.
+    `maxPriceableScore` under 1 MB.
+  - **Owner review (R1 amended)**: ten drawn points per score point makes the art about 10 times
+    heavier per score. At the default top (10,249) it's about 785 KB, so that budget rises from
+    300 KB to 1 MB. `ART_MAX_SCORE` drops from 120,000 to 24,000 (about 1.9 MB), which is still
+    above the default top. SC-005's 2 MB and 2 s are unchanged.
   - The e2e times the top step's preview, from the request to a decoded `<img>`, at under 2 s.
   - Polish runs Lighthouse on `/how-complicated`.
 - **Rationale**: SC-005, and constitution VII.
+
+## R14 — Made to order: the maker (owner review, Q4)
+
+- **Decision**: `shirts.maker_user_id`, set for dial shirts only (a CHECK).
+  - **Make it mine** needs a signed-in shopper. A guest gets
+    `/sign-in?next=/how-complicated?r=<code>`, so he comes back to the same setting. Nothing is made
+    for a guest.
+  - **Making a recipe that's already a shirt**:
+    - with no maker: the shopper claims it
+    - his own: it lands on it
+    - someone else's: it lands on that shirt's page, which says it's someone else's
+  - **May this account buy it?** `canBuy(shirt, userId)`: true for anything but a one-of-a-kind
+    shirt (dial, unlisted). For a one-of-a-kind shirt, true only for its maker.
+  - **Where it's enforced, on the server**:
+    - `addItem`: the cart's own `user_id` (a guest cart is nobody's maker)
+    - `updateItem`, on a raise
+    - `auditCart`: a new removal reason, `unique`, takes out lines the cart's owner can't buy. That
+      covers a sign-in merge, and a shirt Dan made one of a kind again.
+    - `placeOrder`: it runs the audit first, so `CART_AUDITED` refuses the checkout
+  - **Backfill** (migration 0013): a dial shirt's maker is the account on its earliest order. With
+    no orders, it stays NULL and the next signed-in maker claims it.
+- **Rationale**: one rule, `canBuy`, in one place, checked wherever a line can enter or leave. The
+  page hides the controls, but the server decides.
+- **Alternatives**: tying a shirt to the guest's cart (lost on a new browser, and the checkout gate
+  needs an account anyway); selling it once (rejected by the owner, Q4).
+
+## R15 — The Uniquity Surcharge's money (owner review, Q5)
+
+- **Decision**:
+  - **Settings**: `store_settings.uniquity_surcharge` (switch, on) and
+    `store_settings.uniquity_surcharge_usd` (a USD string, `499.99`).
+  - **Per line**: the surcharge is the amount × quantity, for each line whose shirt is one of a
+    kind while the switch is on. It's worked out live in `getCartView` and `loadCheckoutLines`, like
+    prices (carts never store money).
+  - **Totals**: `orderTotals` takes a `surchargeUsd`: total = shirts + surcharges + add-ons +
+    shipping + tax.
+  - **Checkout**: the form's expected total includes it. `placeOrder` recomputes it inside its
+    transaction, and a mismatch is `PRICE_CHANGED` (FR-027).
+  - **The order keeps it**: `order_items.surcharge_usd` (per shirt, `0.00` when none) and
+    `orders.surcharge_usd` (in all). The receipt and history show one line, "Uniquity Surcharge™
+    × N".
+  - **Money math**: big.js through `src/lib/money.ts` (`mul`, `sum`, `add`), test-first
+    (constitution VI). Property: total = subtotal + surcharge + add-ons, to the cent, for every
+    payment method.
+  - **Console**: the amount is edited on Settings (`saveSurchargeCore`, in the door sweep). The
+    switch is the 15th row on the switchboard.
+- **Rationale**: it's a fee, not part of a shirt's price (constitution II's MSRP and final price
+  are untouched), shown and charged like add-ons, which already set the pattern for extra lines.
+- **Alternatives**:
+  - Folding it into the shirt's price: rejected by the owner (Q5), and it would bend the one MSRP.
+  - Once per order: the owner said per shirt.
+
+## R16 — Urgency on a one-of-a-kind shirt (owner review, Q7)
+
+- **Decision**:
+  - `socialProofFor` returns null for a one-of-a-kind shirt.
+  - `stockLine` gets a `made` kind, and `cartStockLine` gets `madeMany`.
+  - The add message uses "make another" instead of "found another" when the shirt is one of a
+    kind.
+  - Countdowns are unchanged. The switches still govern each tactic: off is off.
+  - The shirt page passes a `madeToOrder` flag (one of a kind). A mass-produced shirt is ordinary
+    again.
+- **Rationale**: there's nobody else to look at it, and nothing to run out of. The joke becomes
+  "made to order" instead.
+
+## R17 — The dial's link and the console slider (owner review, Q9)
+
+- **Decision**:
+  - **The dial's link**: on `/shirts`, `DialCta` moves into the listing's left column, under the
+    filter drawer. On a phone that column stacks above the results, so the link sits under the
+    filter toggle. The home page is unchanged.
+  - **The console slider**: `ScoreField`, a client component, holds the number box (named `score`)
+    and an unnamed range of 0–100 steps mapped through `scoreAtStep(step, maxDial)`. Moving one
+    moves the other: a typed score snaps the slider to the nearest step.
+- **Rationale**: the same spacing as the dial, so 0–150 isn't a sliver of 10,249.
+
+## R18 — Mass production (owner review, Q6)
+
+- **Decision**:
+  - **It's `listed`**: R7's switch, renamed in the console. "Put it into mass production" sets
+    listed, and "Make it one of a kind again" clears it.
+  - **The review queue**: Dan finds shopper creations at `/admin/shirts?origin=dial`, with a
+    "Review shopper creations" link on the shirts list.
+  - **The editor**: shows the maker, linked to `/admin/customers/<id>`.
+  - **The list**: marks a mass-produced shirt as "Made by a shopper · mass-produced".
+- **Rationale**: no new state. The joke (pay to be unique, then Dan mass-produces it) needs only
+  what's there.

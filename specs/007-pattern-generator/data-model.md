@@ -52,3 +52,38 @@ so the shirt is still found by it.
   - never deleted
 - **Owner-generated shirt**: created resting and listed. Then it's an ordinary shirt.
 - **A recipe → shirt**: at most one (UNIQUE). A second request returns the first.
+
+## Owner review: migration `0013_made_to_order`
+
+### Changed: `shirts` (rebuilt for the new CHECK; every row copied)
+
+| Column | Type | Rule |
+|---|---|---|
+| `maker_user_id` | integer | NULL, FK `users.id`. Only a `dial` shirt may have one (CHECK `origin = 'dial' OR maker_user_id IS NULL`). Set by Make it mine (R14). Backfilled from each dial shirt's earliest order. |
+
+**One of a kind** (derived): `origin = 'dial' AND listed = 0`. Only `maker_user_id` may buy it.
+**Mass-produced** (derived): `origin = 'dial' AND listed = 1`, an ordinary shirt for everyone.
+
+### Changed: `store_settings`
+
+| Column | Type | Rule |
+|---|---|---|
+| `uniquity_surcharge` | integer (boolean) | NOT NULL, DEFAULT true. The surcharge's switch (R15). |
+| `uniquity_surcharge_usd` | text | NOT NULL, DEFAULT `'499.99'`. A USD string, `0.00` or more. |
+
+### Changed: `orders` and `order_items`
+
+| Column | Type | Rule |
+|---|---|---|
+| `orders.surcharge_usd` | text | NOT NULL, DEFAULT `'0.00'`. Every surcharge on the order, in all. Total = subtotal + surcharge + add-ons + shipping + tax. |
+| `order_items.surcharge_usd` | text | NOT NULL, DEFAULT `'0.00'`. The surcharge per shirt on this line, as charged. |
+
+Existing orders get `0.00`: nothing was charged.
+
+### Lifecycles (amended)
+
+- **Dial shirt**:
+  - created on "Make it mine": active, one of a kind, with its maker
+  - then mass-produced ⇄ one of a kind, by the owner
+  - then active ⇄ resting, by the owner
+  - never deleted

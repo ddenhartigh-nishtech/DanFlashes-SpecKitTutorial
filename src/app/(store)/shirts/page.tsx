@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { loadStorefront } from "@/app/_data/storefront";
+import { DialCta } from "@/components/DialCta";
 import { FilterDrawer } from "@/components/FilterDrawer";
 import { ListingFilters } from "@/components/ListingFilters";
 import { ShirtCard } from "@/components/ShirtCard";
@@ -16,6 +17,9 @@ export default function ShirtsPage({ searchParams }: PageProps<"/shirts">) {
       <h1 className="font-display field-backing w-fit text-3xl leading-tight md:text-5xl">
         {copy.listing.heading}
       </h1>
+      <Suspense fallback={null}>
+        <DialCta />
+      </Suspense>
       <Suspense fallback={<ListingFallback />}>
         <Listing searchParams={searchParams} />
       </Suspense>

@@ -125,7 +125,7 @@ the unpriceable top, and never a score.
 
 ### Tests for User Story 1 ⚠️
 
-- [ ] T013 [P] [US1] Write failing tests/integration/dial-view.test.ts for
+- [X] T013 [P] [US1] Write failing tests/integration/dial-view.test.ts for
   `buildDial(db, { r, seed, style })`:
   - 102 steps, and no step has a `score` or `complexity` key
   - prices are non-decreasing; step 101 has a null price
@@ -134,10 +134,10 @@ the unpriceable top, and never a score.
     re-scores it
   - an invalid `r` falls back to the default; a code between steps snaps to the nearest step
   - the switch off returns null
-- [ ] T014 [P] [US1] Write failing tests/integration/dial-route.test.ts for
+- [X] T014 [P] [US1] Write failing tests/integration/dial-route.test.ts for
   `GET /how-complicated/art/[code]`: SVG byte-equal to `generate` for a valid code, the stored art
   for a made shirt, `nosniff`, and a 404 for junk, beyond, or the switch off.
-- [ ] T015 [P] [US1] Write failing tests/e2e/dial.spec.ts (US1 journeys):
+- [X] T015 [P] [US1] Write failing tests/e2e/dial.spec.ts (US1 journeys):
   - `/shirts` and `/` link to the dial
   - steps 0, 10, … 100 give non-decreasing prices, and badges that move up through the tiers
   - step 0 is BLAND copy
@@ -150,10 +150,10 @@ the unpriceable top, and never a score.
 
 ### Implementation for User Story 1
 
-- [ ] T016 [US1] Create src/lib/pattern/dial-view.ts (`buildDial`, per R4) and src/app/_data/dial.ts
+- [X] T016 [US1] Create src/lib/pattern/dial-view.ts (`buildDial`, per R4) and src/app/_data/dial.ts
   (`loadDial`: `connection()`, `notFound()` while off). T013 passes.
-- [ ] T017 [US1] Create src/app/how-complicated/art/[code]/route.ts. T014 passes.
-- [ ] T018 [US1] Build the store side:
+- [X] T017 [US1] Create src/app/how-complicated/art/[code]/route.ts. T014 passes.
+- [X] T018 [US1] Build the store side:
   - src/components/Dial.tsx (client): a range input 0–101 with `aria-valuetext` set to the tier
     name, Shuffle, the style toggle, the preview `<img>` on settle, URL replace, and `data-steady`
     price, badge and button
@@ -176,7 +176,7 @@ buys it like any shirt.
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T019 [P] [US2] Write failing tests/integration/make-it-mine.test.ts for `makeItMineCore(db, form)`:
+- [X] T019 [P] [US2] Write failing tests/integration/make-it-mine.test.ts for `makeItMineCore(db, form)`:
   - it materializes and returns the slug; the same code twice gives the same slug
   - it's refused while the switch is off, and for an invalid or beyond code
   - step 0 makes a BLAND shirt, whose page runs the loop

@@ -853,6 +853,22 @@ export const copy = {
 
   /** The pattern generator's dial (007), in the store's voice. */
   dial: {
+    title: "How complicated can it get?",
+    intro: "Turn it up. Then turn it up again. Every notch is a real shirt, and it's all yours.",
+    cta: "How complicated can it get?",
+    ctaLine: "Build one nobody else has.",
+    label: "How complicated?",
+    beyondLabel: "Beyond",
+    beyond: "That's too complicated to price, even for Dan.",
+    blandLine: "Plain. Safe. Forgettable. Turn it up before someone sees you.",
+    shuffle: "Shuffle the shapes",
+    styles: { polo: "Polo", "button-down": "Button-down" },
+    styleLabel: "Style",
+    makeItMine: "Make it mine",
+    making: "Making it…",
+    made: (name: string) => `Already a shirt: ${name}`,
+    artAlt: "Your pattern, on the shirt",
+    refused: "That one can't be made. Turn the dial back a notch.",
     /** A generated shirt's description, and its picture's alt text (007 R6). */
     description: {
       bland:

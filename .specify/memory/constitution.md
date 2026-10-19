@@ -1,3 +1,16 @@
+<!--
+Sync Impact Report
+- Version change: 4.1.0 → 4.2.0 (MINOR: guidance added for a new kind of shirt; no MUST removed or
+  redefined)
+- Modified principles:
+  - II. Complexity Is the Price: a generated shirt (007) starts at the score counted from its own
+    pattern, and the owner can change it like any other. "The owner's judgment ... is final" stands.
+- Added sections: none
+- Removed sections: none
+- Templates requiring updates: none (read at runtime) ✅
+- Follow-up TODOs: the owner ratifies v4.2.0 by merging the 007 pull request
+-->
+
 # Dan Flashes Constitution
 
 > Complicated shirts. Complicated prices. All sales final.
@@ -24,8 +37,9 @@ Dan Flashes.
 Every shirt has a suggested MSRP that comes from its complexity score, and the store owner sets the
 final price.
 
-- The store owner assigns each shirt's complexity score in the catalog data. The owner's judgment
-  of how complicated a shirt is, is final.
+- The store owner assigns each shirt's complexity score in the catalog data. A **generated shirt**
+  (one the pattern generator draws) starts at the score counted from its own pattern, and the owner
+  can change it like any other. The owner's judgment of how complicated a shirt is, is final.
 - The **MSRP algorithm** MUST be a single, documented, deterministic, exponential function of the
   complexity score. It MUST live in exactly one place in the codebase.
 - The MSRP algorithm MUST be monotonic: a higher score MUST NEVER produce a lower MSRP. Its tuning
@@ -204,4 +218,4 @@ Rationale: the complexity goes in the product, never in the architecture.
   and `/speckit-analyze`. A violation needs either a Complexity Tracking justification or an amendment.
 - Like every Dan Flashes sale, this constitution is final until amended.
 
-**Version**: 4.1.0 | **Ratified**: 2026-10-12 | **Last Amended**: 2026-10-16
+**Version**: 4.2.0 | **Ratified**: 2026-10-12 | **Last Amended**: 2026-10-19

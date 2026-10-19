@@ -85,15 +85,17 @@ uses one shirt, not two.
 
 **Acceptance Scenarios**:
 
-1. **Given** a dial setting he likes, **When** he picks a size and adds it to the cart, **Then** the
-   pattern becomes a real shirt with its own name and page. The cart line behaves like any other.
+1. **Given** a dial setting he likes, **When** he presses "Make it mine", **Then** the pattern
+   becomes a real shirt with its own name and page, and he lands on that page. **When** he picks a
+   size and adds it, **Then** the cart line behaves like any other.
 2. **Given** a generated shirt in his cart, **When** he checks out by card, by Flash Credit, or
    split, **Then** the order is placed at the shirt's price, and order history shows it with its
    art.
 3. **Given** the same setting added twice, by him or by someone else, **When** it's added again,
    **Then** it's the same shirt, not a copy.
-4. **Given** the bottom of the dial with bland shaming on, **When** he tries to add the BLAND shirt,
-   **Then** he gets the store's usual "You sure about that?" loop, and it never reaches his cart.
+4. **Given** the bottom of the dial with bland shaming on, **When** he makes the BLAND shirt his and
+   tries to add it, **Then** he gets the store's usual "You sure about that?" loop on its page, and
+   it never reaches his cart.
 5. **Given** a generated shirt he bought, **When** he opens it later from order history, **Then** its
    page is still there, with the same art.
 
@@ -207,14 +209,15 @@ show which shirts came from the generator.
 
 **Buying (US2)**
 
-- **FR-014**: Picking a size and adding a dial setting to the cart MUST make it a real catalog shirt
-  at that moment:
+- **FR-014**: Pressing "Make it mine" on a dial setting MUST make it a real catalog shirt at that
+  moment, with:
   - a unique name in Dan's voice
   - its art
   - its counted score
-  - priced at its MSRP
+  - its MSRP as its price
 
-  The cart line then behaves like any other, with every tactic that applies to cart lines.
+  It then takes him to the shirt's own page. There he picks a size and adds it to the cart like any
+  shirt, with every tactic that applies (plan refinement: one Add to Cart, one shaming loop).
 - **FR-015**: The same recipe MUST always become the same shirt. Adding it again, by anyone, uses the
   shirt that exists.
 - **FR-016**: A generated shirt MUST be buyable by every payment method at the price the store

@@ -251,17 +251,24 @@ them, and lists or unlists the shopper-made ones.
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T026 [P] Update the README: the dial and the console generator, the `pattern_generator` row
+- [X] T026 [P] Update the README: the dial and the console generator, the `pattern_generator` row
   in the switch table, and that `art:generate` shares the silhouettes.
-- [ ] T027 [P] Hand-check `Dial`, `GeneratorForm` and `ListedControl` in `next dev` under React
+- [X] T027 [P] Hand-check `Dial`, `GeneratorForm` and `ListedControl` in `next dev` under React
   Strict Mode, on a scratch database. There should be no console errors or warnings.
-- [ ] T028 [P] Run Lighthouse on `/how-complicated` (mobile, applied throttling): LCP ≤ 2.5 s,
+- [X] T028 [P] Run Lighthouse on `/how-complicated` (mobile, applied throttling): LCP ≤ 2.5 s,
   CLS ≤ 0.1. Record the numbers.
-- [ ] T029 Script the quickstart scenarios e2e doesn't cover, on a scratch database (an owner
+- [X] T029 Script the quickstart scenarios e2e doesn't cover, on a scratch database (an owner
   re-score reprices, the switch off, `catalog:audit` = 0 errors). Record the results in
   quickstart.md, noting that SC-004 (under 2 minutes) and SC-005 (a mid-range phone) are
   approximated by the e2e timings and phone emulation (analysis A1).
-- [ ] T030 Run `npm run verify` until it's green. Record the counts and the coverage.
+- [X] T030 Run `npm run verify` until it's green. Record the counts and the coverage.
+  - **Result (2026-10-19)**: green on the second run. Unit and integration: 89 files, 955 tests.
+    E2E: 142 tests, desktop, phone and the console. Coverage: statements 94.25%, branches 91.8%,
+    functions 88.92%, lines 95.12%.
+  - **The first run's one failure**: 001's browse filter test on desktop. Its trace shows every
+    request waiting about 15 s early in the run, under 7 workers. It passed on phone in the same
+    run, and on both in the second. The dial's server work isn't the cause: the 101-step dial
+    builds in 2–4 ms, and art at the 120,000 maximum draws in 16 ms.
 
 ---
 

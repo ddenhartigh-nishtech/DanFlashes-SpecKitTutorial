@@ -41,3 +41,36 @@ npm run dev             # http://localhost:3000
 ```bash
 npm run verify
 ```
+
+## Results (2026-10-19)
+
+Scripted on a scratch database (`DATABASE_PATH=data/qs007.db`), beside the e2e suite.
+
+- **Strict Mode (T027)**: `next dev`, driving every new client component. The dial: steps 0, 30,
+  60, 100, 101, 60, then Shuffle, Button-down and Make it mine. The generator: score 48, Shuffle and
+  Save. The listed control: List, then Unlist. There were no browser console errors or warnings.
+- **Scenario 18**: a generated shirt re-scored from 48 to 60 went from $4,178.64 to $9,600.00 in
+  the store, and its picture was the same file.
+- **Scenarios 16–17**: the made shirt was under `?origin=dial`, marked "Made by a shopper". List put
+  it in `/shirts`, and Unlist took it out.
+- **Scenario 19**: with the switch off, `/how-complicated` was the store's 404, with the store's own
+  tab title. Its art was a 404, and the links on `/` and `/shirts` were gone. The made shirt's page
+  was a 200. `/admin/shirts/generate?score=48` still drew its preview, and its art was a 404 for a
+  guest.
+- **Scenario 20 (SC-006)**: `npm run catalog:audit` reported 0 errors and 0 warnings.
+- **Lighthouse (T028)**: Lighthouse 13.5.0 on `/how-complicated` (the default step 20), mobile,
+  applied throttling, on a production build. Budgets: LCP ≤ 2.5 s, CLS ≤ 0.1.
+
+  | Runs | LCP | CLS | TBT |
+  |---|---|---|---|
+  | 3 | 2.2 s, 2.2 s, 2.2 s | 0.032 each | 240–300 ms |
+
+- **Approximations (analysis A1)**: SC-004 (under 2 minutes) and SC-005 (a mid-range phone) aren't
+  measured with people or real devices.
+  - **SC-004**: e2e signs up, makes the shirt and buys it by card in 20–38 s (the US2 journey,
+    over two `npm run verify` runs on desktop and phone).
+  - **SC-005**: e2e times the step-100 preview at under 2 s, on phone emulation (Pixel 7) and
+    desktop.
+- **Found while scripting**: the dial page's title came from static metadata, so the 404 showed
+  "How complicated can it get?" in the tab. The title now renders inside the dial, behind the
+  switch.

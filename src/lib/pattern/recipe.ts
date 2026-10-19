@@ -13,14 +13,22 @@ export interface Recipe {
 
 export const RECIPE_VERSION = 1;
 const MAX_SCORE = 2 ** 20 - 1;
-const MASK = (1n << 64n) - 1n;
-const MULT = 0x9e3779b97f4a7c15n; // odd, so it has an inverse mod 2^64
 const LETTERS = "abcdefghijklmnopqrstuvwxyz";
+
+// BigInt() calls rather than literals: the project's TypeScript target predates them.
+const N = BigInt;
+const ZERO = N(0);
+const ONE = N(1);
+const TWO = N(2);
+const BASE = N(26);
+const MASK = (ONE << N(64)) - ONE;
+const MULT = N("0x9e3779b97f4a7c15"); // odd, so it has an inverse mod 2^64
+const SHIFT = N(29);
 
 /** The inverse of MULT mod 2^64 (Newton's iteration: each step doubles the correct bits). */
 const INVERSE = (() => {
   let x = MULT;
-  for (let i = 0; i < 6; i++) x = (x * (2n - MULT * x)) & MASK;
+  for (let i = 0; i < 6; i++) x = (x * (TWO - MULT * x)) & MASK;
   return x;
 })();
 
@@ -40,32 +48,32 @@ const isRecipe = (r: Recipe) =>
 export function encodeRecipe(recipe: Recipe): string {
   if (!isRecipe(recipe)) throw new RangeError(`Not a recipe: ${JSON.stringify(recipe)}`);
   const packed =
-    (BigInt(recipe.seed) << 25n) |
-    (BigInt(recipe.score) << 5n) |
-    (BigInt(recipe.style === "polo" ? 0 : 1) << 4n) |
-    BigInt(RECIPE_VERSION);
+    (N(recipe.seed) << N(25)) |
+    (N(recipe.score) << N(5)) |
+    (N(recipe.style === "polo" ? 0 : 1) << N(4)) |
+    N(RECIPE_VERSION);
   let x = (packed * MULT) & MASK;
-  x ^= x >> 29n;
+  x ^= x >> SHIFT;
   let code = "";
   do {
-    code = LETTERS[Number(x % 26n)] + code;
-    x /= 26n;
-  } while (x > 0n);
+    code = LETTERS[Number(x % BASE)] + code;
+    x /= BASE;
+  } while (x > ZERO);
   return code;
 }
 
 export function decodeRecipe(code: string): Recipe | null {
   if (!/^[a-z]{1,14}$/.test(code)) return null;
-  let y = 0n;
-  for (const ch of code) y = y * 26n + BigInt(LETTERS.indexOf(ch));
+  let y = ZERO;
+  for (const ch of code) y = y * BASE + N(LETTERS.indexOf(ch));
   if (y > MASK) return null;
-  const x = y ^ (y >> 29n) ^ (y >> 58n); // undo x ^= x >> 29
+  const x = y ^ (y >> SHIFT) ^ (y >> N(58)); // undo x ^= x >> 29
   const packed = (x * INVERSE) & MASK;
-  if (packed >> 57n !== 0n || (packed & 0xfn) !== BigInt(RECIPE_VERSION)) return null;
+  if (packed >> N(57) !== ZERO || (packed & N(15)) !== N(RECIPE_VERSION)) return null;
   const recipe: Recipe = {
-    seed: Number((packed >> 25n) & 0xffffffffn),
-    score: Number((packed >> 5n) & BigInt(MAX_SCORE)),
-    style: (packed >> 4n) & 1n ? "button-down" : "polo",
+    seed: Number((packed >> N(25)) & N(0xffffffff)),
+    score: Number((packed >> N(5)) & N(MAX_SCORE)),
+    style: (packed >> N(4)) & ONE ? "button-down" : "polo",
   };
   return isRecipe(recipe) && encodeRecipe(recipe) === code ? recipe : null;
 }

@@ -1,6 +1,6 @@
 import { expect, type Page } from "@playwright/test";
 import { copy } from "../../../src/lib/copy";
-import { test, visible } from "../helpers";
+import { signUp, test, uniqueEmail, visible } from "../helpers";
 import { consoleMessage, field, signInAsOwner, unique } from "./helpers";
 
 const g = copy.console.generator;
@@ -23,7 +23,12 @@ test.describe("US3 — Dan's generator (FR-019–FR-021)", () => {
     await page.goto("/admin/shirts");
     await visible(page.getByRole("link", { name: g.generateOne })).click();
     await expect(page).toHaveURL(/\/admin\/shirts\/generate/);
+    // FR-019 (owner review Q9): the slider is spaced like the dial, and each follows the other.
+    const slider = visible(page.getByRole("slider", { name: g.slider }));
+    await slider.fill("40");
+    await expect(field(page, g.score)).toHaveValue("100");
     await field(page, g.score).fill("48");
+    await expect(slider).toHaveValue("19");
     await field(page, g.style, false).selectOption("polo");
     await visible(page.getByRole("button", { name: g.preview })).click();
     await expect(page).toHaveURL(/score=48/);
@@ -74,26 +79,35 @@ test.describe("US3 — Dan's generator (FR-019–FR-021)", () => {
     );
   });
 
-  test("a shopper-made shirt shows under Made by a shopper, and Dan lists and unlists it", async ({
+  test("Dan reviews a shopper's creation, mass-produces it, and makes it one of a kind again", async ({
     page,
     browser,
   }, info) => {
-    test.slow(); // a guest at the dial, then the console and the store
-    const guest = await (await browser.newContext({ baseURL: info.project.use.baseURL })).newPage();
+    test.slow(); // a shopper at the dial, then the console and the store
+    const shopper = await (
+      await browser.newContext({ baseURL: info.project.use.baseURL })
+    ).newPage();
+    await shopper.goto("/sign-up");
+    await signUp(shopper, uniqueEmail(info.project.name));
+    await expect(shopper).toHaveURL(/\/account$/, { timeout: 30_000 });
     const seed = (Date.now() + (info.project.name.includes("phone") ? 1 : 0)) % 2 ** 32;
-    await guest.goto(`/how-complicated?seed=${seed}`);
-    await expect(visible(guest.getByTestId("dial-make"))).toBeEnabled();
-    await visible(guest.getByTestId("dial-make")).click();
-    await expect(guest).toHaveURL(/\/shirts\/[a-z-]+$/, { timeout: 30_000 });
-    const slug = new URL(guest.url()).pathname.split("/").pop()!;
-    await guest.context().close();
+    await shopper.goto(`/how-complicated?seed=${seed}`);
+    await expect(visible(shopper.getByTestId("dial-make"))).toBeEnabled();
+    await visible(shopper.getByTestId("dial-make")).click();
+    await expect(shopper).toHaveURL(/\/shirts\/[a-z-]+$/, { timeout: 30_000 });
+    const slug = new URL(shopper.url()).pathname.split("/").pop()!;
+    await shopper.context().close();
 
+    // FR-021 (owner review Q6): the shopper creations are Dan's review queue.
     await signInAsOwner(page);
-    await page.goto("/admin/shirts?origin=dial");
+    await page.goto("/admin/shirts");
+    await visible(page.getByRole("link", { name: g.review })).click();
+    await expect(page).toHaveURL(/origin=dial/);
     const row = visible(page.locator(`[data-testid="admin-shirt"][data-slug="${slug}"]`));
     await expect(row).toBeVisible();
     await expect(row).toContainText(g.origins.dial);
     await row.getByRole("link").first().click();
+    await expect(visible(page.getByTestId("shirt-maker"))).toContainText(`${g.maker} Greg`);
     await expect(visible(page.getByTestId("shirt-listed"))).toHaveText(g.oneOfAKind);
 
     await visible(page.getByRole("button", { name: g.list })).click();
@@ -103,10 +117,35 @@ test.describe("US3 — Dan's generator (FR-019–FR-021)", () => {
     await page.goto("/shirts");
     await expect(inListing(page, slug).first()).toBeVisible();
 
+    await page.goto("/admin/shirts?origin=dial");
+    await expect(row).toContainText(g.massProduced);
+
     await page.goto(editUrl);
     await visible(page.getByRole("button", { name: g.unlist })).click();
     await expect(consoleMessage(page)).toHaveText(g.unlistedNow);
     await page.goto("/shirts");
     await expect(inListing(page, slug)).toHaveCount(0);
+  });
+
+  test("the Uniquity Surcharge's amount saves, and the store follows (FR-027)", async ({
+    page,
+  }) => {
+    const u = copy.console.settings.surcharge;
+    await signInAsOwner(page);
+    await page.goto("/admin/settings");
+    const amount = field(page, u.label);
+    await amount.fill("123.45");
+    await visible(page.getByRole("button", { name: u.save })).click();
+    await expect(
+      visible(page.getByTestId("console-message")).filter({ hasText: copy.console.saved }),
+    ).toBeVisible();
+    await page.reload();
+    await expect(field(page, u.label)).toHaveValue("123.45");
+    // Back to the default: the shopper specs and the other console project expect it.
+    await field(page, u.label).fill("499.99");
+    await visible(page.getByRole("button", { name: u.save })).click();
+    await expect(
+      visible(page.getByTestId("console-message")).filter({ hasText: copy.console.saved }),
+    ).toBeVisible();
   });
 });

@@ -413,10 +413,24 @@ analyzes the money before polish.
     mass-produce, then one of a kind again; the maker link; the slider moves the score box
   - **tests/e2e/browse.spec.ts**: the dial's link sits under the filters
   - **switchboard**: 15 switches, and the surcharge amount saves
-- [ ] T043 Update the README and quickstart.md (scenarios 21–30): made to order, the surcharge row
+- [X] T043 Update the README and quickstart.md (scenarios 21–30): made to order, the surcharge row
   in the switch table, mass production, the art's density and budgets, and the slider.
-- [ ] T044 Analyze the money: run `/speckit-analyze` on the amended artifacts, and audit the
+- [X] T044 Analyze the money: run `/speckit-analyze` on the amended artifacts, and audit the
   surcharge's path from cart to receipt by hand. Record the findings and how they were fixed.
+  - **Result (2026-10-19)**: the path from the cart view through checkout, `placeOrder`'s
+    transaction, the snapshot, the receipt and history holds. These are the findings:
+    - **M1, fixed**: the console's order page showed add-ons and the total, but not the
+      surcharge, so Dan saw a total he couldn't account for. It now shows "Uniquity Surcharge™ ×
+      N".
+    - **M2, fixed**: no test combined the surcharge with add-ons (SC-010). One now does: shirts
+      plus surcharges plus add-ons, to the cent.
+    - **M3, noted**: the demo-shopper seed totals its order without a surcharge. That's safe,
+      because its seeded cart never holds a one-of-a-kind shirt.
+    - **T1, fixed**: dial.spec's no-score check built its regex with `\b` inside a template
+      literal, which is a backspace. So it could never fail. It now uses `\\b`, and the page's
+      text drops prices, the surcharge note and the countdowns before it looks.
+    - **Coverage**: the spec's Q4–Q9 and FR-026, FR-027, SC-009 and SC-010 each map to T031–T042.
+      No constitution conflicts (the plan's re-check).
 - [ ] T045 On a scratch database in `next dev`:
   - a Strict Mode pass over the new and changed client components
   - the scripted quickstart 21–30

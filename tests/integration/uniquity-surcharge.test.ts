@@ -153,6 +153,42 @@ describe("checkout charges it, by every payment method (007 FR-027, SC-010)", ()
     expectChargedRight(test.db, order.orderId, test.maker.id, test.slug);
   });
 
+  it("with add-ons too: shirts plus surcharges plus add-ons, to the cent (SC-010)", () => {
+    const test = cartWithBoth();
+    const addOns = test.sqlite
+      .prepare("SELECT id, price_usd FROM add_ons WHERE active = 1")
+      .all() as {
+      id: number;
+      price_usd: string;
+    }[];
+    expect(addOns.length).toBeGreaterThan(0);
+    const view = getCartView(test.db, test.cartId);
+    const expected = orderTotals({
+      subtotalUsd: view.subtotalUsd,
+      surchargeUsd: view.surchargeUsd,
+      addOnPrices: addOns.map((a) => a.price_usd),
+      shippingUsd: "0.00",
+      taxUsd: "0.00",
+    }).totalUsd;
+    const order = placeOrder(test.db, {
+      userId: test.maker.id,
+      cartId: null,
+      checkoutToken: "with-add-ons",
+      expectedTotalUsd: expected,
+      addOnIds: addOns.map((a) => a.id),
+      useFlashCredit: false,
+      card: CARD,
+      now: NOW,
+    });
+    if (!order.ok) throw new Error(order.code);
+    const placed = getOrderForUser(test.db, order.orderId, test.maker.id)!;
+    const addOnsUsd = placed.addOns.reduce((total, a) => add(total, a.priceUsd), "0.00");
+    expect(placed.totalUsd).toBe(
+      add(add(placed.subtotalUsd, placed.surcharge!.totalUsd), addOnsUsd),
+    );
+    expect(placed.totalUsd).toBe(expected);
+  });
+
   it.each([
     ["Dan changes the amount", (db: Db) => setSwitches(db, { uniquitySurchargeUsd: "1.00" })],
     ["Dan switches it off", (db: Db) => setSwitches(db, { uniquitySurcharge: false })],

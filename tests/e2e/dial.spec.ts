@@ -1,7 +1,8 @@
 import { expect, type Page } from "@playwright/test";
 import Database from "better-sqlite3";
 import { copy } from "../../src/lib/copy";
-import { awesomeButton, buyByCard, signUp, test, uniqueEmail, visible } from "./helpers";
+import { DEMO_SHOPPER } from "../../scripts/seed-data";
+import { addShirt, awesomeButton, buyByCard, signUp, test, uniqueEmail, visible } from "./helpers";
 
 const d = copy.dial;
 const slider = (page: Page) => visible(page.getByLabel(d.label, { exact: true }));
@@ -37,6 +38,20 @@ test.describe("US1 — how complicated can it get?", () => {
       await expect(page).toHaveURL(/\/how-complicated/);
       await expect(visible(page.getByRole("heading", { level: 1 }))).toHaveText(d.title);
     }
+  });
+
+  test("on the shirts page, the dial's link sits under the filters (owner review Q9)", async ({
+    page,
+  }) => {
+    await page.goto("/shirts");
+    const cta = visible(page.getByRole("link", { name: d.cta })).first();
+    // Wider screens show the filters in the sidebar; a phone shows their toggle.
+    const filters = page
+      .locator('form[aria-label="Filters"], button:has-text("Filters")')
+      .locator("visible=true")
+      .first();
+    const [link, above] = [await cta.boundingBox(), await filters.boundingBox()];
+    expect(link!.y).toBeGreaterThanOrEqual(above!.y + above!.height - 1);
   });
 
   test("turning it up never lowers the price, and the badge climbs from BLAND", async ({
@@ -137,18 +152,29 @@ function scoreOf(slug: string): number {
   }
 }
 
-/** The page's words, minus the prices (a score's digits may turn up inside a price). */
+/**
+ * The page's words, minus the money and the clock (a score's digits may turn up inside a price,
+ * the surcharge, or a ticking countdown).
+ */
 const wordsOnPage = (page: Page) =>
   page.evaluate(() => {
     const clone = document.body.cloneNode(true) as HTMLElement;
     clone
-      .querySelectorAll('[data-testid="price"],[data-testid="dial-price"]')
+      .querySelectorAll(
+        '[data-testid="price"],[data-testid="dial-price"],[data-testid="surcharge-note"],[data-testid="countdown"]',
+      )
       .forEach((e) => e.remove());
     return clone.innerText;
   });
 
+/**
+ * A seed nobody has used: the same setting is the same shirt (FR-015), and a shirt someone else
+ * made isn't his to buy (FR-018), so each run, and each project, makes its own.
+ */
+const freshSeed = () => (Date.now() ^ Math.floor(Math.random() * 2 ** 31)) >>> 0;
+
 async function makeItMineAt(page: Page, step: number) {
-  await page.goto("/how-complicated");
+  await page.goto(`/how-complicated?seed=${freshSeed()}`);
   await setStep(page, step);
   const dialUrl = page.url();
   await visible(page.getByRole("button", { name: d.makeItMine })).click();
@@ -156,14 +182,19 @@ async function makeItMineAt(page: Page, step: number) {
   return { dialUrl, slug: new URL(page.url()).pathname.split("/").pop()! };
 }
 
+async function signedUp(page: Page, project: string) {
+  await page.goto("/sign-up");
+  await signUp(page, uniqueEmail(project));
+  await expect(page).toHaveURL(/\/account$/, { timeout: 30_000 });
+}
+
 test.describe("US2 — buy the monster", () => {
   test("Make it mine lands on the one real shirt, bought by card and kept in order history", async ({
     page,
+    browser,
   }, info) => {
-    test.slow(); // a real sign-up and a checkout
-    await page.goto("/sign-up");
-    await signUp(page, uniqueEmail(info.project.name));
-    await expect(page).toHaveURL(/\/account$/, { timeout: 30_000 });
+    test.slow(); // real sign-ups and a checkout
+    await signedUp(page, info.project.name);
 
     // FR-014: its own page, with a name, its art, a badge and a price.
     const { dialUrl, slug } = await makeItMineAt(page, 33);
@@ -172,23 +203,50 @@ test.describe("US2 — buy the monster", () => {
     await expect(visible(page.locator('img[src*="/media/uploads/"]')).first()).toBeVisible();
     await expect(visible(page.getByTestId("tier-badge")).first()).toBeVisible();
 
+    // FR-026, FR-027: made to order for him, no fake crowd, and the surcharge said up front.
+    await expect(visible(page.getByTestId("stock-line"))).toHaveText(copy.urgency.made);
+    await expect(page.getByTestId("social-proof")).toHaveCount(0);
+    await expect(visible(page.getByTestId("surcharge-note"))).toHaveText(
+      copy.surcharge.note("$499.99"),
+    );
+
     // FR-008, SC-003: the score is nowhere: not in his words, the link, or the shirt's address.
     const score = String(scoreOf(slug));
-    expect(await wordsOnPage(page)).not.toMatch(new RegExp(`\b${score}\b`));
+    // \\b, not \b: in a template literal \b is a backspace, and the check could never fail.
+    const asAWord = new RegExp(`\\b${score}\\b`);
+    expect(await wordsOnPage(page)).not.toMatch(asAWord);
     expect(dialUrl).not.toContain(score);
     expect(slug).not.toContain(score);
     await page.goto(dialUrl);
-    expect(await wordsOnPage(page)).not.toMatch(new RegExp(`\b${score}\b`));
+    expect(await wordsOnPage(page)).not.toMatch(asAWord);
 
     // FR-015: the same setting lands on the same shirt.
     await visible(page.getByRole("button", { name: d.makeItMine })).click();
     await expect(page).toHaveURL(new RegExp(`/shirts/${slug}$`), { timeout: 30_000 });
 
-    // FR-016: bought by card, and order history shows its art.
+    // FR-016, FR-027: bought by card, and the order shows its art and its surcharge.
     await buyByCard(page, slug, "XL");
-    await expect(
-      visible(page.getByTestId("order-summary")).locator('img[src*="/media/uploads/"]').first(),
-    ).toBeVisible();
+    const summary = visible(page.getByTestId("order-summary"));
+    await expect(summary.locator('img[src*="/media/uploads/"]').first()).toBeVisible();
+    await expect(summary.getByTestId("surcharge-line")).toContainText(copy.surcharge.line(1));
+    await expect(summary.getByTestId("surcharge-line")).toContainText("$499.99");
+
+    // As many as he likes: two in the cart pay it twice, and Dan makes every one.
+    await addShirt(page, slug, "L");
+    await addShirt(page, slug, "L");
+    await expect(visible(page.getByText(copy.urgency.makeAnother))).toBeVisible();
+    await page.goto("/cart");
+    await expect(visible(page.getByTestId("surcharge-line"))).toContainText(copy.surcharge.line(2));
+    await expect(visible(page.getByTestId("surcharge-line"))).toContainText("$999.98");
+    await expect(visible(page.getByTestId("stock-line")).first()).toHaveText(copy.urgency.madeMany);
+
+    // FR-018: anyone else sees it, and can't buy it.
+    const other = await (await browser.newContext({ baseURL: info.project.use.baseURL })).newPage();
+    await signedUp(other, `${info.project.name}-other`);
+    await other.goto(`/shirts/${slug}`);
+    await expect(visible(other.getByTestId("one-of-a-kind"))).toContainText(copy.oneOfAKind.taken);
+    await expect(other.getByRole("button", { name: "Add to cart" })).toHaveCount(0);
+    await other.context().close();
 
     // FR-018, SC-008: one of a kind, so the listing and the home page never show it.
     await page.goto("/shirts");
@@ -197,9 +255,28 @@ test.describe("US2 — buy the monster", () => {
     await expect(page.locator(`a[href="/shirts/${slug}"]`)).toHaveCount(0);
   });
 
-  test("the BLAND end becomes a BLAND shirt, and Add to Cart runs the loop (FR-017)", async ({
+  test("a guest's Make it mine asks him to sign in, then brings him back to the setting", async ({
     page,
   }) => {
+    test.slow(); // a sign-in
+    await page.goto("/how-complicated");
+    await setStep(page, 25);
+    const dialUrl = page.url();
+    const code = new URL(dialUrl).searchParams.get("r")!;
+    await visible(page.getByRole("button", { name: d.makeItMine })).click();
+    await expect(page).toHaveURL(/\/sign-in\?next=/);
+    expect(new URL(page.url()).searchParams.get("next")).toBe(`/how-complicated?r=${code}`);
+    await visible(page.getByLabel("Email")).fill(DEMO_SHOPPER.email);
+    await visible(page.getByLabel("Password")).fill(DEMO_SHOPPER.password);
+    await visible(page.getByRole("button", { name: copy.auth.signIn })).click();
+    await expect(page).toHaveURL(new RegExp(`/how-complicated\\?r=${code}$`), { timeout: 30_000 });
+  });
+
+  test("the BLAND end becomes a BLAND shirt, and Add to Cart runs the loop (FR-017)", async ({
+    page,
+  }, info) => {
+    test.slow(); // a real sign-up
+    await signedUp(page, info.project.name);
     await makeItMineAt(page, 0);
     await visible(page.locator("label").filter({ hasText: /^M$/ })).click();
     await visible(page.getByRole("button", { name: "Add to cart" })).click();

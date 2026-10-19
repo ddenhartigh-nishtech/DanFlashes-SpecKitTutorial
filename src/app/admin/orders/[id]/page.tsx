@@ -124,6 +124,14 @@ async function Order({ params }: Pick<PageProps<"/admin/orders/[id]">, "params">
             <span className="text-office-muted">{o.flashCredit}: </span>
             {formatUsd(flashCreditUsd)}
           </p>
+          {order.surcharge ? (
+            <p data-testid="order-surcharge">
+              <span className="text-office-muted">
+                {copy.surcharge.line(order.surcharge.count)}:{" "}
+              </span>
+              {formatUsd(order.surcharge.totalUsd)}
+            </p>
+          ) : null}
           <p>
             <span className="text-office-muted">{o.total}: </span>
             <span className="font-medium">{formatUsd(order.totalUsd)}</span>

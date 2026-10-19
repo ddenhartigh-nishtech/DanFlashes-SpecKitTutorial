@@ -183,7 +183,7 @@ buys it like any shirt.
   - a materialized shirt can be bought by Flash Credit and by split (`placeOrder`, FR-016; analysis
     G1)
   - a setting whose shirt the owner rested lands on that shirt, now retired (analysis U1)
-- [ ] T020 [P] [US2] Extend tests/e2e/dial.spec.ts (US2 journeys):
+- [X] T020 [P] [US2] Extend tests/e2e/dial.spec.ts (US2 journeys):
   - **Make it mine**: it lands on the shirt's page (name, art, badge, price); the same setting
     again lands on the same page
   - **Buying**: add XL and check out by card (Flash Credit is covered by 001); order history shows
@@ -195,7 +195,7 @@ buys it like any shirt.
 
 ### Implementation for User Story 2
 
-- [ ] T021 [US2] Create src/lib/actions/dial.ts (`makeItMineCore`) and src/actions/dial.ts (the
+- [X] T021 [US2] Create src/lib/actions/dial.ts (`makeItMineCore`) and src/actions/dial.ts (the
   wrapper, which redirects to `/shirts/<slug>`). Wire up Make it mine in `Dial`. T019 and T020
   pass.
 

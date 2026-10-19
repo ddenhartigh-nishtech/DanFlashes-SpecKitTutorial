@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { makeItMine } from "@/actions/dial";
 import { PriceTag } from "@/components/PriceTag";
 import { ShirtBadge } from "@/components/ShirtBadge";
@@ -12,6 +12,7 @@ import type { DialView } from "@/lib/pattern/dial-view";
 
 const d = copy.dial;
 const SETTLE_MS = 150;
+const noSubscription = () => () => {};
 
 /**
  * How complicated can it get? (007 US1). Every step's code, badge and price came from the server,
@@ -23,6 +24,12 @@ export function Dial({ view }: { view: DialView }) {
   const [step, setStep] = useState(view.current);
   const [settled, setSettled] = useState(view.current);
   const [state, action, pending] = useActionState(makeItMine, null);
+  // Make it mine waits for hydration: a press before it would be lost.
+  const hydrated = useSyncExternalStore(
+    noSubscription,
+    () => true,
+    () => false,
+  );
 
   // A shuffle or a new style brings a fresh dial from the server, at the same level.
   const [shown, setShown] = useState(view);
@@ -32,14 +39,24 @@ export function Dial({ view }: { view: DialView }) {
     setSettled(view.current);
   }
 
+  // Once Make it mine is pressed the address bar must hold still: Next drops a pending action's
+  // redirect when the URL changes under it.
+  const settleTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   useEffect(() => {
+    if (pending) return;
     const timer = setTimeout(() => {
       setSettled(step);
       const code = view.steps[step].code;
-      if (code) window.history.replaceState(null, "", `/how-complicated?r=${code}`);
+      // Only while still on the dial, and only when it changed: a late timer must never pull the
+      // shopper back from the shirt page Make it mine just sent him to.
+      const here = new URL(window.location.href);
+      if (code && here.pathname === "/how-complicated" && here.search !== `?r=${code}`) {
+        window.history.replaceState(null, "", `/how-complicated?r=${code}`);
+      }
     }, SETTLE_MS);
+    settleTimer.current = timer;
     return () => clearTimeout(timer);
-  }, [step, view]);
+  }, [step, view, pending]);
 
   const here = view.steps[step];
   const beyond = step === BEYOND;
@@ -115,6 +132,7 @@ export function Dial({ view }: { view: DialView }) {
               key={style}
               type="button"
               aria-pressed={view.style === style}
+              disabled={pending}
               onClick={() => restyle(style)}
               className={`font-display border-ink min-h-11 border-4 px-3 uppercase ${view.style === style ? "bg-ink text-highlighter" : "bg-paper"}`}
             >
@@ -123,6 +141,7 @@ export function Dial({ view }: { view: DialView }) {
           ))}
           <button
             type="button"
+            disabled={pending}
             onClick={shuffle}
             className="font-display border-ink bg-electric-cyan min-h-11 border-4 px-3 uppercase"
           >
@@ -130,13 +149,13 @@ export function Dial({ view }: { view: DialView }) {
           </button>
         </div>
 
-        <form action={action}>
+        <form action={action} onSubmit={() => clearTimeout(settleTimer.current)}>
           <input type="hidden" name="code" value={here.code ?? ""} />
           <button
             data-steady
             data-testid="dial-make"
             type="submit"
-            disabled={beyond || pending}
+            disabled={!hydrated || beyond || pending}
             className="font-display bg-hot-pink text-paper min-h-12 px-6 text-lg uppercase shadow-[4px_4px_0_var(--color-ink)] disabled:opacity-60"
           >
             {pending ? d.making : d.makeItMine}

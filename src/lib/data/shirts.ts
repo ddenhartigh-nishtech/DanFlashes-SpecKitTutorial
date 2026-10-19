@@ -3,7 +3,7 @@
  * tiers) and the MSRP. Anything sent toward the browser goes through `toShopperShirt`, which
  * strips both — shoppers never see the score (constitution II, FR-002).
  */
-import { asc, count, eq, inArray } from "drizzle-orm";
+import { and, asc, count, eq, inArray } from "drizzle-orm";
 import { isBlandTier, tierOf } from "@/lib/catalog/tiers";
 import type { ShirtStatus, ShirtStyle, StoreSettings, Tier } from "@/lib/catalog/types";
 import { getSettings } from "@/lib/data/settings";
@@ -112,14 +112,25 @@ function hydrate(db: Db, rows: ShirtRow[]): CatalogShirt[] {
   return rows.map((row) => build(row, images.get(row.id) ?? [], settings, tiers));
 }
 
+/**
+ * The catalog the store shows around: the listing, the home page, the pop-ups, the shaming loop's
+ * picks. A shopper-made shirt stays out until the owner lists it (007 FR-018), and a shirt's own
+ * page, carts and orders read shirts directly.
+ */
 export function listCatalogShirts(
   db: Db,
-  options: { includeInactive?: boolean } = {},
+  options: { includeInactive?: boolean; includeUnlisted?: boolean } = {},
 ): CatalogShirt[] {
-  const query = db.select().from(shirts);
-  const rows = options.includeInactive
-    ? query.all()
-    : query.where(eq(shirts.status, "active")).all();
+  const rows = db
+    .select()
+    .from(shirts)
+    .where(
+      and(
+        options.includeInactive ? undefined : eq(shirts.status, "active"),
+        options.includeUnlisted ? undefined : eq(shirts.listed, true),
+      ),
+    )
+    .all();
   return hydrate(db, rows);
 }
 

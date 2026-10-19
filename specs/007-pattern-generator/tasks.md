@@ -89,15 +89,15 @@ materializing. Every story needs these.
 - [X] T008 Create src/lib/pattern/dial.ts (`DIAL_STEPS`, `scoreAtStep`, `maxPriceableScore`,
   `ART_MAX_SCORE`, `maxDial`), src/lib/pattern/recipe.ts (codes, keys) and src/lib/pattern/names.ts,
   with `copy.dial.names` word banks in src/lib/copy.ts. T006 passes.
-- [ ] T009 [P] Write failing tests/integration/listing-unlisted.test.ts. Insert an unlisted dial
+- [X] T009 [P] Write failing tests/integration/listing-unlisted.test.ts. Insert an unlisted dial
   shirt.
   - It's absent from `listCatalogShirts` (the default), `buildLadder` input and
     `listPopCandidates`.
   - It's present with `includeUnlisted`, in `getShirtBySlug` and in `getCatalogShirtsByIds`.
   - Once `listed = 1`, it's in the listing.
-- [ ] T010 Make `listCatalogShirts` in src/lib/data/shirts.ts return listed shirts only, with an
+- [X] T010 Make `listCatalogShirts` in src/lib/data/shirts.ts return listed shirts only, with an
   `includeUnlisted` option. T009 passes.
-- [ ] T011 [P] Write failing tests/integration/materialize.test.ts (`MEDIA_UPLOADS_DIR` pointed at a
+- [X] T011 [P] Write failing tests/integration/materialize.test.ts (`MEDIA_UPLOADS_DIR` pointed at a
   temp dir):
   - **The shirt**: a dial recipe becomes an active, unlisted `dial` shirt, and an owner recipe a
     resting, listed `owner` shirt.
@@ -109,7 +109,7 @@ materializing. Every story needs these.
     bland-rule break (anchor 0).
   - **Names**: colliding names get II; the slug is a kebab-case name with a code fragment.
   - **SC-006**: `auditCatalog` reports 0 errors after 50 materializations across the range.
-- [ ] T012 Create src/lib/pattern/materialize.ts, per R6. T011 passes.
+- [X] T012 Create src/lib/pattern/materialize.ts, per R6. T011 passes.
 
 **Checkpoint**: the generator, codes, names and materializing exist and are fully tested. The store
 is unchanged except that unlisted shirts never list.

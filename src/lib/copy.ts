@@ -853,6 +853,13 @@ export const copy = {
 
   /** The pattern generator's dial (007), in the store's voice. */
   dial: {
+    /** A generated shirt's description, and its picture's alt text (007 R6). */
+    description: {
+      bland:
+        "Made on the dial at its lowest setting. Muted. Hesitant. Exactly as brave as you were.",
+      loud: "Drawn by the machine, approved by Dan. Nobody else on Earth has this one.",
+    },
+    alt: (name: string) => `${name}: a generated pattern`,
     /** Generated names (007 R10): words only, never a number, so no score can hide in one. */
     names: {
       loud: {

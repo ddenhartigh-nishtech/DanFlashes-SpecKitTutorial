@@ -351,11 +351,11 @@ analyzes the money before polish.
   redirects a guest to sign in with the dial setting as `next`. Add `canBuy` and the guards in
   src/lib/cart/cart.ts (`NOT_YOURS`, removal reason `unique`, with copy). Give the shopper shirt a
   `oneOfAKind` flag and keep the maker server-side. `buildDial` marks `made.mine`. T034 passes.
-- [ ] T036 [P] Write failing unit tests:
+- [X] T036 [P] Write failing unit tests:
   - scarcity's `made` and `madeMany` lines
   - `socialProofFor` is null for a one-of-a-kind shirt
   - the add message on a one-of-a-kind shirt says "make another"
-- [ ] T037 Build the urgency changes and the shirt page's two states:
+- [X] T037 Build the urgency changes and the shirt page's two states:
   - **For the maker**: the made-to-order stock line, the surcharge note, the size picker and Add to
     Cart.
   - **For anyone else**: "One of a kind, and it's someone else's.", plus a sign-in link for a guest.

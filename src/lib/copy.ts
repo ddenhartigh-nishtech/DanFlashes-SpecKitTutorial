@@ -345,6 +345,10 @@ export const copy = {
     fewMore: "You're lucky, we actually found a few more!",
     plenty: "Plenty left. Nobody wants these.",
     foundAnother: "Oh wait, we found another one!",
+    /** 007 FR-026: a one-of-a-kind shirt is made to order, for him alone. */
+    made: "Made to order, just for you. Nobody else can have one.",
+    madeMany: "Made to order, every last one of them. By hand. Eventually.",
+    makeAnother: "We'll make another one, just for you.",
     deal: "This price won't last.",
     hold: "Your shirts are reserved for",
     looking: (n: number) => `${n} people are looking at this shirt right now.`,
@@ -898,6 +902,19 @@ export const copy = {
   },
 
   /** The pattern generator's dial (007), in the store's voice. */
+  /** 007 owner review: a one-of-a-kind shirt is made to order for its maker (FR-018, FR-027). */
+  oneOfAKind: {
+    taken: "One of a kind, and it's somebody else's.",
+    takenLine: "Only the guy who made it can buy it. Nobody's that unique twice.",
+    signIn: "Is it yours? Sign in.",
+    makeYourOwn: "Make your own",
+  },
+  surcharge: {
+    name: "Uniquity Surcharge™",
+    note: (amount: string) =>
+      `+ ${amount} Uniquity Surcharge™ per shirt. Being unique costs extra.`,
+    line: (count: number) => `Uniquity Surcharge™ × ${count}`,
+  },
   dial: {
     title: "How complicated can it get?",
     intro: "Turn it up. Then turn it up again. Every notch is a real shirt, and it's all yours.",
@@ -913,6 +930,8 @@ export const copy = {
     makeItMine: "Make it mine",
     making: "Making it…",
     made: (name: string) => `Already a shirt: ${name}`,
+    mine: (name: string) => `It's yours already: ${name}`,
+    taken: "Somebody already made this one. Shuffle for your own.",
     artAlt: "Your pattern, on the shirt",
     refused: "That one can't be made. Turn the dial back a notch.",
     /** A generated shirt's description, and its picture's alt text (007 R6). */

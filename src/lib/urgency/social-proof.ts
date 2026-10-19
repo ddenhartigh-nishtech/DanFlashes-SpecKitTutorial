@@ -36,13 +36,16 @@ export interface SocialProof {
   buyer: Coworker | null;
 }
 
-/** What the shirt page says, or null when it says nothing (switch off, or retired). */
+/**
+ * What the shirt page says, or null when it says nothing: switch off, retired, or one of a kind (007
+ * FR-026), since nobody else is looking at his shirt and nobody else bought it.
+ */
 export function socialProofFor(
   settings: Pick<StoreSettings, "socialProof">,
-  shirt: { id: number; isBland: boolean; active: boolean },
+  shirt: { id: number; isBland: boolean; active: boolean; oneOfAKind?: boolean },
   now: number,
 ): SocialProof | null {
-  if (!settings.socialProof || !shirt.active) return null;
+  if (!settings.socialProof || !shirt.active || shirt.oneOfAKind) return null;
   if (shirt.isBland) return { looking: 0, buyer: null };
   return { looking: lookingNow(shirt.id, now), buyer: buyerFor(shirt.id, now) };
 }

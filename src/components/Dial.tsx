@@ -121,9 +121,15 @@ export function Dial({ view }: { view: DialView }) {
         </div>
 
         {here.made && !beyond ? (
-          <Link href={`/shirts/${here.made.slug}`} className="field-backing w-fit underline">
-            {d.made(here.made.name)}
-          </Link>
+          here.made.taken ? (
+            <p data-testid="dial-taken" className="field-backing w-fit">
+              {d.taken}
+            </p>
+          ) : (
+            <Link href={`/shirts/${here.made.slug}`} className="field-backing w-fit underline">
+              {here.made.mine ? d.mine(here.made.name) : d.made(here.made.name)}
+            </Link>
+          )
         ) : null}
 
         <div className="flex flex-wrap gap-2" role="group" aria-label={d.styleLabel}>

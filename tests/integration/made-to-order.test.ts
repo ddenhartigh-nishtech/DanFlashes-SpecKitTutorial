@@ -3,6 +3,8 @@ import os from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { setShirtListedCore } from "@/lib/actions/admin/generator";
+import { addToCartCore } from "@/lib/actions/cart";
+import { copy } from "@/lib/copy";
 import { makeItMineCore } from "@/lib/actions/dial";
 import { addItem, getCartView, getOrCreateCart, mergeGuestCart, updateItem } from "@/lib/cart/cart";
 import { canBuy, isOneOfAKind } from "@/lib/catalog/one-of-a-kind";
@@ -200,5 +202,24 @@ describe("the dial knows whose a made setting is (007 R14)", () => {
     expect(buildDial(db, {}, maker.id)!.steps[40].made).toMatchObject({ mine: true });
     expect(buildDial(db, {}, other.id)!.steps[40].made).toMatchObject({ mine: false });
     expect(buildDial(db, {}, null)!.steps[40].made).toMatchObject({ mine: false });
+  });
+});
+
+describe("adding a made-to-order shirt (007 FR-026)", () => {
+  it("makes another one, instead of finding one", () => {
+    const { db, maker, slug } = madeShirt();
+    expect(addToCartCore(db, maker.jar, form({ slug, size: "M" }))).toMatchObject({
+      ok: true,
+      message: `${copy.product.added} ${copy.urgency.makeAnother}`,
+    });
+  });
+
+  it("tells anyone else it's somebody else's", () => {
+    const { db, other, slug } = madeShirt();
+    expect(addToCartCore(db, other.jar, form({ slug, size: "M" }))).toEqual({
+      ok: false,
+      code: "NOT_YOURS",
+      message: copy.codes.NOT_YOURS,
+    });
   });
 });

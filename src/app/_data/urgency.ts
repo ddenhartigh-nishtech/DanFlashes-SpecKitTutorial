@@ -8,7 +8,9 @@ import { getDb, type Db } from "@/lib/db/client";
 import { orderedShirtIds } from "@/lib/orders/orders";
 import { stockLine, type StockLine } from "@/lib/urgency/scarcity";
 
-export type StockOf = (shirt: Pick<ShopperShirt, "id" | "status" | "tier">) => StockLine | null;
+export type StockOf = (
+  shirt: Pick<ShopperShirt, "id" | "status" | "tier" | "oneOfAKind">,
+) => StockLine | null;
 
 /**
  * The current shopper's stock lines (004 R2). His own orders decide "again", so this reads his
@@ -24,6 +26,7 @@ export async function loadStockOf(db: Db, settings: StoreSettings): Promise<Stoc
         isBland: shirt.tier.isBland,
         active: shirt.status === "active",
         boughtBefore: bought.has(shirt.id),
+        madeToOrder: shirt.oneOfAKind,
       },
       settings.fakeScarcity,
     );

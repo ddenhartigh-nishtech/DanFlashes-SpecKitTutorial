@@ -180,6 +180,9 @@ buys it like any shirt.
   - it materializes and returns the slug; the same code twice gives the same slug
   - it's refused while the switch is off, and for an invalid or beyond code
   - step 0 makes a BLAND shirt, whose page runs the loop
+  - a materialized shirt can be bought by Flash Credit and by split (`placeOrder`, FR-016; analysis
+    G1)
+  - a setting whose shirt the owner rested lands on that shirt, now retired (analysis U1)
 - [ ] T020 [P] [US2] Extend tests/e2e/dial.spec.ts (US2 journeys):
   - **Make it mine**: it lands on the shirt's page (name, art, badge, price); the same setting
     again lands on the same page
@@ -224,6 +227,9 @@ them, and lists or unlists the shopper-made ones.
   - a shopper-made shirt (made from the dial in a guest context) appears under `?origin=dial`; List
     puts it in `/shirts`, and Unlist takes it out
   - changing a generated shirt's score changes its store price
+  - add `/admin/shirts/generate` and `/admin/shirts/generate?score=48` to `CONSOLE_PAGES` in
+    tests/e2e/admin/helpers.ts, so 008's door, calm and 360px sweeps cover the generator (FR-022,
+    FR-024; analysis G2)
 
 ### Implementation for User Story 3
 
@@ -253,7 +259,8 @@ them, and lists or unlists the shopper-made ones.
   CLS ≤ 0.1. Record the numbers.
 - [ ] T029 Script the quickstart scenarios e2e doesn't cover, on a scratch database (an owner
   re-score reprices, the switch off, `catalog:audit` = 0 errors). Record the results in
-  quickstart.md.
+  quickstart.md, noting that SC-004 (under 2 minutes) and SC-005 (a mid-range phone) are
+  approximated by the e2e timings and phone emulation (analysis A1).
 - [ ] T030 Run `npm run verify` until it's green. Record the counts and the coverage.
 
 ---

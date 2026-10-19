@@ -133,8 +133,9 @@ show which shirts came from the generator.
 
 ### Edge Cases
 
-- **Past the end of pricing.** The MSRP can only count so high under the current tuning. The dial
-  stops one step past the last priceable level, and that step can't be bought.
+- **Past the end of pricing.** The MSRP can only count so high under the current tuning, and the
+  art can only hold so much. The dial stops one step past whichever comes first, and that step
+  can't be bought.
 - **Retuned mid-cart.** If the owner retunes the MSRP, generated shirts reprice like every shirt.
   Carts follow on the next page load, and placed orders never change.
 - **Tiers moved.** A generated shirt's badge follows its score under the current tier bands, like
@@ -187,9 +188,13 @@ show which shirts came from the generator.
 - **FR-006**: Every pattern MUST be vector art that stays crisp in the store's zoom viewer, with each
   motif distinguishable at maximum zoom (constitution III). Once a pattern becomes a shirt, its art
   is stored with the store's other images.
-- **FR-007**: The range MUST run from the bottom of BLAND up to the highest score the MSRP can price
-  under the current tuning. One step beyond that shows "That's too complicated to price, even for
-  Dan." and can't be bought.
+- **FR-007**: The range MUST run from the bottom of BLAND up to whichever comes first:
+  - the highest score the MSRP can price under the current tuning
+  - the most the art can hold while staying fast on a phone (SC-005; only an extreme tuning
+    reaches it)
+
+  One step beyond that shows "That's too complicated to price, even for Dan." and can't be bought
+  (analysis I1).
 - **FR-008**: The score MUST NEVER reach shoppers (constitution II): not on the page, not on the
   dial, not in its labels or accessible names, not in a recipe link, not in a generated shirt's
   name, and not inside the art file.
@@ -312,6 +317,9 @@ show which shirts came from the generator.
 - Generated names come from word banks in Dan's voice, unique per shirt.
 - Changing the generator later may change settings nobody has made yet. Shirts already made keep
   their stored art.
+- Stored art never redraws. FR-005's palettes apply when a pattern is drawn. If Dan re-scores a
+  generated shirt into BLAND, or moves BLAND's band, the art stays as drawn, the same as hand-drawn
+  shirts (analysis U2).
 - **Constitution note.** II says "The store owner assigns each shirt's complexity score... The
   owner's judgment ... is final."
   - Per Q2, a generated shirt starts at its counted score, and the owner can change it.

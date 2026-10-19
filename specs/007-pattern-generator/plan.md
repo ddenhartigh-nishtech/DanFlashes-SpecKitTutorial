@@ -96,7 +96,8 @@ owner assigns each shirt's complexity score") wouldn't cover a dial shirt that a
 | C | Commerce constraints | Materializing regenerates on the server from the recipe and never trusts client art or prices. Checkout is unchanged. Money is exact. | ✅ | ✅ |
 | W | Workflow | Feature branch; specify (Q1–Q3) → plan → tasks → analyze → implement → converge; merge by PR, carrying the v4.2.0 amendment. | ✅ | ✅ |
 
-**Result**: PASS on v4.2.0, pre-research and post-design.
+**Result**: PASS on v4.2.0, pre-research and post-design. The PR description must say that merging
+ratifies v4.2.0 (analysis C1).
 
 ## Project Structure
 

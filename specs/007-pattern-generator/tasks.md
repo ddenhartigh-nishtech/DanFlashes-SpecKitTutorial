@@ -437,4 +437,8 @@ analyzes the money before polish.
   - Lighthouse on `/how-complicated`, whose art is heavier now
 
   Record the results.
-- [ ] T046 Run `npm run verify` until it's green. Record the counts and the coverage.
+- [X] T046 Run `npm run verify` until it's green. Record the counts and the coverage.
+  - **Result (2026-10-19)**: green on the first run.
+    - Unit and integration: 92 files, 1,009 tests.
+    - E2E: 148 tests in 6.2 min, at 4 workers.
+    - Coverage: statements 94.22%, branches 92.13%, functions 88.58%, lines 95.04%.

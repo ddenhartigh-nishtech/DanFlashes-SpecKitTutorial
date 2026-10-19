@@ -1,22 +1,3 @@
-<!--
-Sync Impact Report
-- Version change: 4.0.0 → 4.1.0 (MINOR: a rule added for a new surface; no shopper-facing MUST is
-  removed or weakened)
-- Modified principles:
-  - I. Built for the Dan Flashes Guy: "Every page" → "Every shopper-facing page". The owner's
-    console didn't exist when this was written (008 FR-005).
-  - V. Maximum Visual Assault: "The UI" → "The shopper's UI". Added "The back office is calm": the
-    owner's console is tranquil, runs no tactic or Flash Mode, and still works from 360px.
-  - V. Flash Mode (006 analysis K1, PATCH-level wording): "It starts off" now reads "off for every
-    shopper until he first turns it on, and then his browser remembers his choice".
-- Why MINOR and not MAJOR: every MUST a shopper experiences is unchanged. A strict reading could call
-  narrowing "every page" a redefinition (5.0.0); the owner decides at ratification.
-- Added sections: none
-- Removed sections: none
-- Templates requiring updates: none (read at runtime) ✅
-- Follow-up TODOs: the owner ratifies v4.1.0 by merging the 008 pull request
--->
-
 # Dan Flashes Constitution
 
 > Complicated shirts. Complicated prices. All sales final.

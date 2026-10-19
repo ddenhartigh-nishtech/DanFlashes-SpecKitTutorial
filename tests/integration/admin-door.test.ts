@@ -14,6 +14,7 @@ import {
 import {
   saveMediaSettingsCore,
   savePresetsCore,
+  saveSurchargeCore,
   saveTuningCore,
   setSwitchCore,
 } from "@/lib/actions/admin/settings";
@@ -103,6 +104,7 @@ const CORES: [string, Core, Record<string, string>][] = [
     { score: "48", style: "polo", seed: "7", name: "Sneaky" },
   ],
   ["setShirtListed", setShirtListedCore, { id: "1", listed: "0" }],
+  ["saveSurcharge", saveSurchargeCore, { amountUsd: "0.00" }],
 ];
 
 /** Every row of every table, so "changes nothing" means nothing. */

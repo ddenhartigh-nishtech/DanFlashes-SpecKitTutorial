@@ -8,7 +8,13 @@ import { isSwitchKey } from "@/lib/admin/switches";
 import type { Issue } from "@/lib/catalog/validate";
 import { copy } from "@/lib/copy";
 import { getMediaById } from "@/lib/data/media";
-import { saveMediaSettings, savePresets, saveSwitch, saveTuning } from "@/lib/data/settings";
+import {
+  saveMediaSettings,
+  savePresets,
+  saveSurchargeAmount,
+  saveSwitch,
+  saveTuning,
+} from "@/lib/data/settings";
 import type { Db } from "@/lib/db/client";
 import type { CookieJar } from "@/lib/http/cookies";
 import { cmp, tryParseUsd } from "@/lib/money";
@@ -80,6 +86,19 @@ export function savePresetsCore(db: Db, jar: CookieJar, form: FormData): Console
   }
   if (issues.length) return problems(issues);
   savePresets(db, amounts);
+  return saved();
+}
+
+/** 007 FR-027: what the Uniquity Surcharge charges per one-of-a-kind shirt. Zero is allowed. */
+export function saveSurchargeCore(db: Db, jar: CookieJar, form: FormData): ConsoleState {
+  const gate = asAdmin(db, jar);
+  if (gate.refusal) return gate.refusal;
+  const raw = text(form, "amountUsd").trim();
+  const amountUsd = raw === "" ? null : tryParseUsd(raw);
+  if (amountUsd === null || cmp(amountUsd, "0.00") < 0) {
+    return problems([{ field: "amountUsd", message: s.surcharge.format }]);
+  }
+  saveSurchargeAmount(db, amountUsd);
   return saved();
 }
 

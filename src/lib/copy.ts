@@ -729,6 +729,14 @@ export const copy = {
         baseUrlFormat: "Leave it blank, or start it with http:// or https://.",
         placeholderMissing: "Choose a placeholder picture.",
       },
+      /** 007 FR-027: the Uniquity Surcharge's amount. Its switch is on the switchboard. */
+      surcharge: {
+        title: "Uniquity Surcharge",
+        label: "Per one-of-a-kind shirt",
+        help: "Charged once for every shopper-made shirt in an order, on its own line. $0.00 waives it.",
+        save: "Save the surcharge",
+        format: "Dollars and cents, $0.00 or more, like 499.99.",
+      },
     },
     pricing: {
       title: "Pricing",

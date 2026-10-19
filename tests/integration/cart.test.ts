@@ -127,6 +127,8 @@ describe("getCartView", () => {
       lines: [],
       itemCount: 0,
       subtotalUsd: "0.00",
+      surchargeUsd: "0.00",
+      surchargeCount: 0,
       removed: [],
     });
   });

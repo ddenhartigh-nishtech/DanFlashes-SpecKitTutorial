@@ -176,6 +176,7 @@ async function AccountContents() {
                   taxUsd={order.taxUsd}
                   totalUsd={order.totalUsd}
                   addOns={order.addOns}
+                  surcharge={order.surcharge}
                   placeholderUrl={placeholderUrl}
                 />
               </li>

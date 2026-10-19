@@ -112,6 +112,14 @@ export function savePresets(db: Db, presetsUsd: string[]): void {
     .run();
 }
 
+/** The Uniquity Surcharge per shirt (007 FR-027). Carts follow on their next look. */
+export function saveSurchargeAmount(db: Db, amountUsd: string): void {
+  db.update(storeSettings)
+    .set({ uniquitySurchargeUsd: amountUsd })
+    .where(eq(storeSettings.id, 1))
+    .run();
+}
+
 export function saveMediaSettings(
   db: Db,
   media: { mediaBaseUrl: string; placeholderMediaId: number },

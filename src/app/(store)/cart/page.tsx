@@ -16,6 +16,7 @@ import { getCartView, type CartLine, type RemovalReason, type RemovedLine } from
 import { mostExpensive } from "@/lib/catalog/listing";
 import { sortTiers } from "@/lib/catalog/tiers";
 import { copy } from "@/lib/copy";
+import { formatUsd } from "@/lib/money";
 import { getSettings } from "@/lib/data/settings";
 import { toShopperShirt } from "@/lib/data/shirts";
 import { getDb } from "@/lib/db/client";
@@ -114,6 +115,15 @@ async function CartContents() {
           {copy.cart.subtotal}
           <PriceTag priceUsd={view.subtotalUsd} />
         </p>
+        {view.surchargeCount > 0 ? (
+          <p
+            data-testid="surcharge-line"
+            className="flex flex-wrap items-center justify-between gap-3 font-semibold"
+          >
+            {copy.surcharge.line(view.surchargeCount)}
+            <span className="tabular-nums">{formatUsd(view.surchargeUsd)}</span>
+          </p>
+        ) : null}
         <Link
           href="/checkout"
           className="font-display bg-hot-pink text-paper flex min-h-12 items-center justify-center px-4 text-lg uppercase shadow-[4px_4px_0_var(--color-ink)]"

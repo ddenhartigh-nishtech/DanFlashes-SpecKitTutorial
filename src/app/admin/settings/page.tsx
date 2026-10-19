@@ -3,6 +3,7 @@ import { requireAdmin } from "@/app/_data/admin";
 import { ConsoleLoading, ConsolePage } from "@/components/admin/ConsolePage";
 import { MediaSettingsForm } from "@/components/admin/MediaSettingsForm";
 import { PresetsForm } from "@/components/admin/PresetsForm";
+import { SurchargeForm } from "@/components/admin/SurchargeForm";
 import { SwitchBoard } from "@/components/admin/SwitchBoard";
 import { TuningForm } from "@/components/admin/TuningForm";
 import { SWITCH_KEYS } from "@/lib/admin/switches";
@@ -39,6 +40,7 @@ async function Settings() {
           placeholderMediaId={settings.placeholderMediaId}
           library={listLibrary(db)}
         />
+        <SurchargeForm amountUsd={settings.uniquitySurchargeUsd} />
       </div>
     </ConsolePage>
   );

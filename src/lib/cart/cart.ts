@@ -23,7 +23,7 @@ import {
 } from "@/lib/data/shirts";
 import type { Db } from "@/lib/db/client";
 import { cartItems, carts } from "@/lib/db/schema";
-import { mul, sum, type Usd } from "@/lib/money";
+import { cmp, mul, sum, ZERO, type Usd } from "@/lib/money";
 import type { Err, Ok } from "@/lib/result";
 
 export { MAX_QUANTITY };
@@ -67,6 +67,8 @@ export interface CartLine {
   quantity: number;
   addedAt: string;
   lineTotalUsd: Usd;
+  /** The Uniquity Surcharge per shirt on this line (007 FR-027): "0.00" unless one of a kind. */
+  surchargeUsd: Usd;
 }
 
 /** Server-only line shape (carries the CatalogShirt) for checkout. */
@@ -76,6 +78,7 @@ export interface CheckoutLine {
   quantity: number;
   addedAt: string;
   lineTotalUsd: Usd;
+  surchargeUsd: Usd;
 }
 
 export interface CartView {
@@ -83,6 +86,9 @@ export interface CartView {
   lines: CartLine[];
   itemCount: number;
   subtotalUsd: Usd;
+  /** Every Uniquity Surcharge in the cart, in all, and how many shirts pay one (007 FR-027). */
+  surchargeUsd: Usd;
+  surchargeCount: number;
   removed: RemovedLine[];
 }
 
@@ -275,8 +281,12 @@ export function auditCart(db: Db, cartId: string | null): RemovedLine[] {
   }));
 }
 
-/** Current lines with live catalog prices, newest first. Does not audit. */
+/**
+ * Current lines with live catalog prices and surcharges, newest first. Does not audit. Carts never
+ * store money: the surcharge, like the price, is whatever the settings say right now (R15).
+ */
 export function loadCheckoutLines(db: Db, cartId: string): CheckoutLine[] {
+  const settings = getSettings(db);
   const rows = db
     .select()
     .from(cartItems)
@@ -295,13 +305,37 @@ export function loadCheckoutLines(db: Db, cartId: string): CheckoutLine[] {
       quantity: row.quantity,
       addedAt: row.addedAt,
       lineTotalUsd: mul(shirt.finalPriceUsd, row.quantity),
+      surchargeUsd:
+        shirt.oneOfAKind && settings.uniquitySurcharge ? settings.uniquitySurchargeUsd : ZERO,
     };
   });
 }
 
+/** Every surcharge on these lines, in all, and how many shirts pay one. */
+export function surchargeOf(lines: readonly { quantity: number; surchargeUsd: Usd }[]): {
+  surchargeUsd: Usd;
+  surchargeCount: number;
+} {
+  const charged = lines.filter((l) => cmp(l.surchargeUsd, ZERO) > 0);
+  return {
+    surchargeUsd: sum(charged.map((l) => mul(l.surchargeUsd, l.quantity))),
+    surchargeCount: charged.reduce((n, l) => n + l.quantity, 0),
+  };
+}
+
 /** The shopper's cart: audits first, then resolves live prices (FR-015, FR-016). */
 export function getCartView(db: Db, cartId: string | null): CartView {
-  if (!cartId) return { cartId: null, lines: [], itemCount: 0, subtotalUsd: "0.00", removed: [] };
+  if (!cartId) {
+    return {
+      cartId: null,
+      lines: [],
+      itemCount: 0,
+      subtotalUsd: ZERO,
+      surchargeUsd: ZERO,
+      surchargeCount: 0,
+      removed: [],
+    };
+  }
   const removed = auditCart(db, cartId);
   const lines = loadCheckoutLines(db, cartId).map((line) => ({
     shirt: toShopperShirt(line.shirt),
@@ -309,12 +343,14 @@ export function getCartView(db: Db, cartId: string | null): CartView {
     quantity: line.quantity,
     addedAt: line.addedAt,
     lineTotalUsd: line.lineTotalUsd,
+    surchargeUsd: line.surchargeUsd,
   }));
   return {
     cartId,
     lines,
     itemCount: lines.reduce((n, l) => n + l.quantity, 0),
     subtotalUsd: sum(lines.map((l) => l.lineTotalUsd)),
+    ...surchargeOf(lines),
     removed,
   };
 }

@@ -1,10 +1,17 @@
 /**
  * Placing an order (research R10). Everything happens in one BEGIN IMMEDIATE transaction, so two
- * checkouts can't interleave: gate → replay → audit → live re-pricing → total check → payment →
- * order + snapshot → empty the cart. Any refusal writes nothing (audit removals excepted).
+ * checkouts can't interleave: gate → replay → audit → live re-pricing (and the Uniquity
+ * Surcharge, 007 R15) → total check → payment → order + snapshot → empty the cart. Any refusal
+ * writes nothing (audit removals excepted).
  */
 import { eq } from "drizzle-orm";
-import { auditCart, findCartId, loadCheckoutLines, type RemovedLine } from "@/lib/cart/cart";
+import {
+  auditCart,
+  findCartId,
+  loadCheckoutLines,
+  surchargeOf,
+  type RemovedLine,
+} from "@/lib/cart/cart";
 import { getSettings } from "@/lib/data/settings";
 import type { Db } from "@/lib/db/client";
 import {
@@ -83,6 +90,7 @@ export function placeOrder(db: Db, input: PlaceOrderInput): PlaceOrderResult {
       if (lines.length === 0) return { ok: false, code: "CART_EMPTY" };
 
       const subtotalUsd = sum(lines.map((l) => l.lineTotalUsd));
+      const { surchargeUsd } = surchargeOf(lines);
       const shippingUsd = ZERO;
       const taxUsd = ZERO;
 
@@ -97,6 +105,7 @@ export function placeOrder(db: Db, input: PlaceOrderInput): PlaceOrderResult {
       }
       const { totalUsd } = orderTotals({
         subtotalUsd,
+        surchargeUsd,
         addOnPrices: addOns.map((a) => a.priceUsd),
         shippingUsd,
         taxUsd,
@@ -159,6 +168,7 @@ export function placeOrder(db: Db, input: PlaceOrderInput): PlaceOrderResult {
           cardLast4: card?.last4 ?? null,
           flashCreditUsd: split.creditUsd,
           perDiemDrained: drains.perDiem,
+          surchargeUsd,
           createdAt: placedAt.toISOString(),
         })
         .returning({ id: orders.id })
@@ -176,6 +186,7 @@ export function placeOrder(db: Db, input: PlaceOrderInput): PlaceOrderResult {
             quantity: line.quantity,
             finalPriceUsd: line.shirt.finalPriceUsd,
             msrpUsd: line.shirt.msrpUsd,
+            surchargeUsd: line.surchargeUsd,
           })
           .run();
       }

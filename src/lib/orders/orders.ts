@@ -11,7 +11,7 @@ import { getCatalogShirtsByIds, type ShirtImageView, type TierBadge } from "@/li
 import { listTiers } from "@/lib/data/tiers";
 import type { Db } from "@/lib/db/client";
 import { orderAddOns, orderDrains, orderItems, orders, revenueStreams } from "@/lib/db/schema";
-import { formatUsd, mul, sub, type Usd } from "@/lib/money";
+import { cmp, formatUsd, mul, sub, ZERO, type Usd } from "@/lib/money";
 import { streamName } from "@/lib/streams/streams";
 import type { StreamPreset } from "@/lib/streams/types";
 
@@ -52,6 +52,8 @@ export interface OrderView {
   drainedStreams: DrainedStream[];
   /** The add-ons he bought (005 FR-007): separate lines, at the price he paid. */
   addOns: { name: string; priceUsd: Usd }[];
+  /** The Uniquity Surcharge it charged (007 FR-027): how many shirts, and in all. Null if none. */
+  surcharge: { count: number; totalUsd: Usd } | null;
   lines: SummaryLine[];
 }
 
@@ -184,6 +186,15 @@ export function hydrateOrders(db: Db, rows: (typeof orders.$inferSelect)[]): Ord
     addOns: extras
       .filter((extra) => extra.orderId === order.id)
       .map(({ name, priceUsd }) => ({ name, priceUsd })),
+    surcharge:
+      cmp(order.surchargeUsd, ZERO) > 0
+        ? {
+            count: items
+              .filter((i) => i.orderId === order.id && cmp(i.surchargeUsd, ZERO) > 0)
+              .reduce((n, i) => n + i.quantity, 0),
+            totalUsd: order.surchargeUsd,
+          }
+        : null,
     lines: items
       .filter((item) => item.orderId === order.id)
       .map((item) => ({

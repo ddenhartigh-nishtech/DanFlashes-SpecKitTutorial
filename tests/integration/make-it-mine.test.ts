@@ -8,6 +8,7 @@ import { placeOrder } from "@/lib/checkout/place-order";
 import { copy } from "@/lib/copy";
 import { getShirtBySlug } from "@/lib/data/shirts";
 import { topUp } from "@/lib/flash-credit/ledger";
+import { add } from "@/lib/money";
 import { getOrderForUser } from "@/lib/orders/orders";
 import { buildDial } from "@/lib/pattern/dial-view";
 import { encodeRecipe } from "@/lib/pattern/recipe";
@@ -89,7 +90,9 @@ describe("a generated shirt is bought like any other (007 FR-016, analysis G1)",
     topUp(test.db, userId, { amountInput: balance, card: CARD, now: NOW });
     const cartId = getOrCreateCart(test.db, { cartId: null, userId }).id;
     expect(addItem(test.db, cartId, { slug: state.slug, size: "XL" }).ok).toBe(true);
-    const total = getCartView(test.db, cartId).subtotalUsd;
+    // The shirt, plus its Uniquity Surcharge: it is one of a kind (FR-027).
+    const view = getCartView(test.db, cartId);
+    const total = add(view.subtotalUsd, view.surchargeUsd);
     return { ...test, userId, total, slug: state.slug };
   }
 

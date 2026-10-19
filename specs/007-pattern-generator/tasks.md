@@ -365,7 +365,7 @@ analyzes the money before polish.
 
 ### The Uniquity Surcharge™ (R15, money)
 
-- [ ] T038 [P] Write failing tests first:
+- [X] T038 [P] Write failing tests first:
   - tests/unit/checkout-totals.test.ts: `orderTotals` with a surcharge
   - tests/integration/uniquity-surcharge.test.ts:
     - the cart view's surcharge is the amount × quantity on one-of-a-kind lines only, with nothing
@@ -375,7 +375,7 @@ analyzes the money before polish.
     - a changed amount or a flipped switch is `PRICE_CHANGED`
     - the order keeps the surcharge per line and in all, and the order view shows its line
     - `saveSurchargeCore` validates the amount, and joins tests/integration/admin-door.test.ts
-- [ ] T039 Build it:
+- [X] T039 Build it:
   - src/lib/cart/cart.ts: the surcharge per line, and in all, on the cart view and checkout lines
   - src/lib/checkout/totals.ts and place-order.ts: the total, the check and the snapshot
   - src/lib/orders/orders.ts and `OrderSummary`: the "Uniquity Surcharge™ × N" line on the cart,

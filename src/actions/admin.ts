@@ -14,6 +14,7 @@ import {
 import {
   saveMediaSettingsCore,
   savePresetsCore,
+  saveSurchargeCore,
   saveTuningCore,
   setSwitchCore,
 } from "@/lib/actions/admin/settings";
@@ -79,6 +80,10 @@ export async function saveTuning(_prev: ConsoleState | null, form: FormData) {
 
 export async function savePresets(_prev: ConsoleState | null, form: FormData) {
   return run(savePresetsCore, form);
+}
+
+export async function saveSurcharge(_prev: ConsoleState | null, form: FormData) {
+  return run(saveSurchargeCore, form);
 }
 
 export async function saveMediaSettings(_prev: ConsoleState | null, form: FormData) {

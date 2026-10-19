@@ -639,6 +639,11 @@ export const copy = {
           description:
             "Sign-up asks for far too much, all marked Required. The answers never leave his browser.",
         },
+        patternGenerator: {
+          label: "Pattern generator",
+          description:
+            'The store\'s "How complicated can it get?" dial: shoppers crank it up and make their own one-of-a-kind shirt.',
+        },
       },
       tuning: {
         title: "MSRP dials",
@@ -843,6 +848,78 @@ export const copy = {
       payment: "Payment",
       flashCredit: "Flash Credit applied",
       drains: "Drain achievements",
+    },
+  },
+
+  /** The pattern generator's dial (007), in the store's voice. */
+  dial: {
+    /** Generated names (007 R10): words only, never a number, so no score can hide in one. */
+    names: {
+      loud: {
+        adjectives: [
+          "Hyperdimensional",
+          "Load-Bearing",
+          "Unapologetic",
+          "Executive",
+          "Forbidden",
+          "Quarterly",
+          "Synergistic",
+          "Industrial-Strength",
+          "Unlicensed",
+          "Overclocked",
+          "Mandatory",
+          "Unsupervised",
+          "Fiscally Irresponsible",
+          "Board-Approved",
+          "Weaponized",
+          "Fully Loaded",
+        ],
+        nouns: [
+          "Paisley",
+          "Spreadsheet",
+          "Kaleidoscope",
+          "Situation",
+          "Turbulence",
+          "Mosaic",
+          "Static",
+          "Confetti",
+          "Lattice",
+          "Fiesta",
+          "Tessellation",
+          "Overture",
+          "Incident",
+          "Manifesto",
+          "Doctrine",
+          "Expense Report",
+        ],
+        suffixes: [
+          "",
+          "",
+          "",
+          "Supreme",
+          "Deluxe",
+          "Unlimited",
+          "of Destiny",
+          "Maximus",
+          "Turbo",
+          "Gold Edition",
+          "Pro Max",
+          "Director's Cut",
+        ],
+      },
+      bland: {
+        adjectives: ["Khaki", "Oatmeal", "Greige", "Taupe", "Beige", "Ecru", "Putty", "Sand"],
+        nouns: [
+          "Compromise",
+          "Surrender",
+          "Shrug",
+          "Afterthought",
+          "Settlement",
+          "Resignation",
+          "Default",
+          "Sigh",
+        ],
+      },
     },
   },
 

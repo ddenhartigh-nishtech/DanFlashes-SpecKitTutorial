@@ -69,10 +69,21 @@ export const shirts = sqliteTable(
       .notNull()
       .default("active"),
     featured: integer("featured", { mode: "boolean" }).notNull().default(false),
+    /** Hand-made, from Dan's generator, or from a shopper's dial (007). */
+    origin: text("origin", { enum: ["catalog", "owner", "dial"] })
+      .notNull()
+      .default("catalog"),
+    /** A generated shirt's recipe key (007 R3), server-side only: the same recipe, the same shirt. */
+    recipe: text("recipe").unique(),
+    /** In the listing, the home page, the pop-ups and the suggestions (007 FR-018). */
+    listed: integer("listed", { mode: "boolean" }).notNull().default(true),
     ...timestamps,
     updatedAt: text("updated_at").notNull().default(nowIso),
   },
   (t) => [
+    check("shirts_origin", sql`${t.origin} IN ('catalog', 'owner', 'dial')`),
+    check("shirts_recipe", sql`(${t.origin} = 'catalog') = (${t.recipe} IS NULL)`),
+    check("shirts_listed", sql`${t.origin} = 'dial' OR ${t.listed} = 1`),
     check("shirts_slug", sql`${t.slug} <> '' AND ${t.slug} NOT GLOB '*[^a-z0-9-]*'`),
     check("shirts_name_length", sql`length(${t.name}) BETWEEN 1 AND 80`),
     check("shirts_style", sql`${t.style} IN ('polo', 'button-down')`),
@@ -153,6 +164,8 @@ export const storeSettings = sqliteTable(
     pipesBackground: integer("pipes_background", { mode: "boolean" }).notNull().default(true),
     /** The nosy sign-up (009): a data-grab played straight; the answers never leave the browser. */
     nosySignUp: integer("nosy_sign_up", { mode: "boolean" }).notNull().default(true),
+    /** The pattern generator's dial in the store (007). Dan's generator works either way. */
+    patternGenerator: integer("pattern_generator", { mode: "boolean" }).notNull().default(true),
   },
   (t) => [
     check("store_settings_singleton", sql`${t.id} = 1`),

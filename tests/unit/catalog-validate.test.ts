@@ -121,6 +121,7 @@ describe("validateSettings", () => {
     flashMode: true,
     pipesBackground: true,
     nosySignUp: true,
+    patternGenerator: true,
   };
 
   it("accepts the defaults and an https base URL", () => {
@@ -162,6 +163,8 @@ describe("validateSettings", () => {
     ["pipesBackground", { pipesBackground: undefined }],
     ["nosySignUp", { nosySignUp: "on" }],
     ["nosySignUp", { nosySignUp: undefined }],
+    ["patternGenerator", { patternGenerator: "on" }],
+    ["patternGenerator", { patternGenerator: undefined }],
   ])("flags an invalid %s", (field, patch) => {
     expect(fields(validateSettings({ ...settings, ...patch } as StoreSettings))).toContain(field);
   });

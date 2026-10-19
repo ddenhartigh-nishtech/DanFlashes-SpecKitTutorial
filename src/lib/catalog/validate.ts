@@ -76,6 +76,7 @@ const settingsSchema = z.object({
   flashMode: z.boolean(),
   pipesBackground: z.boolean(),
   nosySignUp: z.boolean(),
+  patternGenerator: z.boolean(),
 });
 
 function toIssues(error: z.ZodError): Issue[] {

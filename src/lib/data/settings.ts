@@ -34,6 +34,7 @@ export function getSettings(db: Db): StoreSettings {
     flashMode: row.flashMode,
     pipesBackground: row.pipesBackground,
     nosySignUp: row.nosySignUp,
+    patternGenerator: row.patternGenerator,
   };
 }
 
@@ -64,6 +65,7 @@ export function saveSettings(db: Db, settings: StoreSettings): void {
     flashMode: settings.flashMode,
     pipesBackground: settings.pipesBackground,
     nosySignUp: settings.nosySignUp,
+    patternGenerator: settings.patternGenerator,
   };
   db.insert(storeSettings)
     .values({ id: 1, ...values })

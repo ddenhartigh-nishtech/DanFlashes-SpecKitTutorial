@@ -17,6 +17,7 @@ export const SMALL_FIXTURE: CatalogFixture = {
     flashMode: true,
     pipesBackground: true,
     nosySignUp: true,
+    patternGenerator: true,
     flashCreditPresetsUsd: ["500.00", "1000.00", "5000.00"],
     mediaBaseUrl: "",
   },

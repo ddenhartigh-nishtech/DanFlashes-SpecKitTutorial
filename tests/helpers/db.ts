@@ -54,6 +54,7 @@ export function setSwitches(
       | "flashMode"
       | "pipesBackground"
       | "nosySignUp"
+      | "patternGenerator"
     >
   >,
 ): void {

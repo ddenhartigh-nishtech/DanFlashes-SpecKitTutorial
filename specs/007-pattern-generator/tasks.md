@@ -24,7 +24,7 @@
 
 ## Phase 1: Setup
 
-- [ ] T001 Record the baseline for the PR. Main is 008's merge (9f7e2b3), last verified at 863 unit
+- [X] T001 Record the baseline for the PR. Main is 008's merge (9f7e2b3), last verified at 863 unit
   and integration tests, 94.83% line coverage, and 124 e2e.
 
 ---
@@ -34,7 +34,7 @@
 **Purpose**: the columns and the switch (0012), the pure generator, the listing rule, and
 materializing. Every story needs these.
 
-- [ ] T002 [P] Write a failing tests/integration/migration-0012.test.ts (`databaseBefore("0012")`):
+- [X] T002 [P] Write a failing tests/integration/migration-0012.test.ts (`databaseBefore("0012")`):
   - **Existing rows**: existing shirts become `origin = 'catalog'`, `recipe` NULL, `listed` 1, with
     every other column unchanged (`toMatchObject`)
   - **The switch**: `store_settings` gains `pattern_generator = 1`
@@ -42,10 +42,10 @@ materializing. Every story needs these.
     unlisted non-dial shirt; an unknown origin; a duplicate recipe
   - **References**: `shirt_images`, `cart_items` and `order_items` still point at their shirts, and
     `foreign_key_check` is clean
-- [ ] T003 [P] Update the 008 switch tests: tests/unit/admin-switches.test.ts expects 14 keys,
+- [X] T003 [P] Update the 008 switch tests: tests/unit/admin-switches.test.ts expects 14 keys,
   including `patternGenerator`; tests/unit/catalog-validate.test.ts makes `validateSettings` require
   `patternGenerator`; tests/integration/settings-switches.test.ts covers its default and round trip.
-- [ ] T004 Extend src/lib/db/schema.ts per data-model.md:
+- [X] T004 Extend src/lib/db/schema.ts per data-model.md:
   - `shirts.origin`: text, NOT NULL, default `'catalog'`, CHECK in (`catalog`, `owner`, `dial`)
   - `shirts.recipe`: text, UNIQUE, NULL exactly when `origin = 'catalog'`
   - `shirts.listed`: boolean, NOT NULL, default true, with `origin = 'dial' OR listed = 1`
@@ -58,7 +58,7 @@ materializing. Every story needs these.
     `saveSettings`, scripts/seed-data.ts, tests/fixtures/catalog.ts, `setSwitches`, `SWITCH_KEYS`,
     and `copy.console.settings.switches.patternGenerator`.
   - T002 and T003 pass.
-- [ ] T005 [P] Write failing tests/unit/pattern-generate.test.ts:
+- [X] T005 [P] Write failing tests/unit/pattern-generate.test.ts:
   - **Determinism (SC-001)**: for 1,000 recipes from a fixed seed sequence, `generate` twice gives
     byte-identical SVG.
   - **Exact counts**: `countPattern` of every structure equals the target, across sampled scores
@@ -67,8 +67,8 @@ materializing. Every story needs these.
     only loud colors and the outline ink are used.
   - **The SVG itself**: one `<svg>` root, no `<title>`, `<desc>`, `<metadata>` or comments.
   - **The budget (SC-005)**: under 2 MB at `ART_MAX_SCORE`, and under 300 KB at 10,249.
-- [ ] T006 [P] Write failing tests/unit/pattern-dial.test.ts:
-  - **`scoreAtStep`**: non-decreasing over 0–100 for `maxDial` values 10,249, 150,000, 120 and 0;
+- [X] T006 [P] Write failing tests/unit/pattern-dial.test.ts:
+  - **`scoreAtStep`**: non-decreasing over 0–100 for `maxDial` values 10,249, 120,000, 120 and 0;
     step 0 is 0, step 100 is `maxDial`, step 101 is "beyond".
   - **`maxPriceableScore`**: at the default tuning it's 10,249 (`msrpUsd` prices it and throws one
     above), and it's lower with a doubling interval of 1.
@@ -78,7 +78,7 @@ materializing. Every story needs these.
     `v1:<style>:<score>:<seed>`.
   - **Names**: `nameFor` is deterministic, has no digits, and draws BLAND names from the bland bank;
     the uniqueness helper appends II, III, and so on.
-- [ ] T007 Create the generator:
+- [X] T007 Create the generator:
   - src/lib/pattern/rng.ts (mulberry32)
   - src/lib/pattern/silhouette.ts: move `BODY` and the collars out of scripts/shirt-art.ts, and make
     the script import them. Check `npm run art:generate` leaves `public/media` byte-identical
@@ -86,7 +86,7 @@ materializing. Every story needs these.
   - src/lib/pattern/count.ts and src/lib/pattern/generate.ts, per R1
 
   T005 passes.
-- [ ] T008 Create src/lib/pattern/dial.ts (`DIAL_STEPS`, `scoreAtStep`, `maxPriceableScore`,
+- [X] T008 Create src/lib/pattern/dial.ts (`DIAL_STEPS`, `scoreAtStep`, `maxPriceableScore`,
   `ART_MAX_SCORE`, `maxDial`), src/lib/pattern/recipe.ts (codes, keys) and src/lib/pattern/names.ts,
   with `copy.dial.names` word banks in src/lib/copy.ts. T006 passes.
 - [ ] T009 [P] Write failing tests/integration/listing-unlisted.test.ts. Insert an unlisted dial

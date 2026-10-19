@@ -99,3 +99,16 @@ describe("store_settings nosy sign-up switch (009, migration 0010)", () => {
     });
   });
 });
+
+describe("store_settings pattern generator switch (007, migration 0012)", () => {
+  it("defaults on, and round-trips off", () => {
+    const { db, sqlite } = createTestDb();
+    sqlite.prepare("INSERT INTO store_settings (id) VALUES (1)").run();
+    expect(getSettings(db)).toMatchObject({ patternGenerator: true });
+    saveSettings(db, { ...getSettings(db), patternGenerator: false });
+    expect(getSettings(db)).toMatchObject({ patternGenerator: false });
+    expect(sqlite.prepare("SELECT pattern_generator FROM store_settings").get()).toEqual({
+      pattern_generator: 0,
+    });
+  });
+});

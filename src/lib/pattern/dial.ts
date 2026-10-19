@@ -8,8 +8,11 @@ import { msrpUsd } from "@/lib/pricing/msrp";
 
 export const DIAL_STEPS = 102;
 export const BEYOND = 101;
-/** Past this, the art outgrows 2 MB (SC-005). Only an extreme tuning reaches it. */
-export const ART_MAX_SCORE = 120_000;
+/**
+ * Past this, the art outgrows 2 MB (SC-005): about 1.9 MB here, at 10 drawn points a score point
+ * (R13 as amended). Only an extreme tuning reaches it; the default top is 10,249.
+ */
+export const ART_MAX_SCORE = 24_000;
 
 const priceable = (score: number, msrp: MsrpSettings) => {
   try {

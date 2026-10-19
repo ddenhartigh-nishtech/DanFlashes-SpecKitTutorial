@@ -326,14 +326,14 @@ analyzes the money before polish.
 
 ### The art (R1, R13)
 
-- [ ] T032 [P] Amend tests/unit/pattern-generate.test.ts and tests/unit/pattern-dial.test.ts first:
+- [X] T032 [P] Amend tests/unit/pattern-generate.test.ts and tests/unit/pattern-dial.test.ts first:
   - the count is `⌊points ÷ 10⌋ + 5 × extra colors + 10 × extra layers`, exact over 1,000 recipes
     and up to `ART_MAX_SCORE` (24,000)
   - at score 130 there are at least 200 shapes, and the shape count never falls as the score climbs
     (sampled)
   - under 1 MB at the default top, under 2 MB at the art limit
   - the bland and loud palettes, determinism and no metadata, as before
-- [ ] T033 Recalibrate src/lib/pattern/count.ts, generate.ts and dial.ts (`ART_MAX_SCORE = 24_000`)
+- [X] T033 Recalibrate src/lib/pattern/count.ts, generate.ts and dial.ts (`ART_MAX_SCORE = 24_000`)
   to the scratch prototype (R1). T032 passes, and so do the dial, route and materialize tests.
 
 ### Made to order (R14, R16)

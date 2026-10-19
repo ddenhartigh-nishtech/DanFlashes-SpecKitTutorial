@@ -35,13 +35,23 @@ describe("generate: the same recipe, the same shirt (007 FR-002, SC-001)", () =>
   });
 });
 
-describe("the count is exactly the target (007 FR-003, R1)", () => {
+describe("the count is exactly the target (007 FR-003, R1 as amended)", () => {
+  it("is a point for every 10 drawn, plus 5 a color and 10 a layer past the first", () => {
+    const shapes = (points: number[], colors: string[]) =>
+      points.map((p, i) => ({ points: p, color: colors[i % colors.length] }));
+    expect(countPattern({ shapes: shapes([9], ["#000000"]), layers: 1 })).toBe(0);
+    expect(countPattern({ shapes: shapes([4, 6], ["#000000"]), layers: 1 })).toBe(1);
+    expect(countPattern({ shapes: shapes([25, 5], ["#000000", "#FFFFFF"]), layers: 3 })).toBe(
+      3 + 5 + 20,
+    );
+  });
+
   it("over 1,000 recipes, and on up to the art limit", () => {
     for (const recipe of recipes()) {
       expect(countPattern(buildPattern(recipe, { bland: recipe.score < 10 }))).toBe(recipe.score);
       expect(generate(recipe, { bland: false }).count).toBe(recipe.score);
     }
-    for (const score of [1_000, 5_000, 10_249, 40_000, ART_MAX_SCORE]) {
+    for (const score of [1_000, 5_000, 10_249, 20_000, ART_MAX_SCORE]) {
       const recipe: Recipe = { score, style: "polo", seed: score };
       expect(countPattern(buildPattern(recipe, { bland: false }))).toBe(score);
     }
@@ -50,8 +60,12 @@ describe("the count is exactly the target (007 FR-003, R1)", () => {
   it("never goes down when a shape, a color or a layer is added", () => {
     const pattern = buildPattern({ score: 300, style: "polo", seed: 9 }, { bland: false });
     const base = countPattern(pattern);
-    const shape = { ...pattern.shapes[0] };
-    expect(countPattern({ ...pattern, shapes: [...pattern.shapes, shape] })).toBeGreaterThan(base);
+    const shape = { ...pattern.shapes[0], points: 1 };
+    const big = { ...shape, points: 10 };
+    expect(countPattern({ ...pattern, shapes: [...pattern.shapes, shape] })).toBeGreaterThanOrEqual(
+      base,
+    );
+    expect(countPattern({ ...pattern, shapes: [...pattern.shapes, big] })).toBeGreaterThan(base);
     expect(
       countPattern({ ...pattern, shapes: [...pattern.shapes, { ...shape, color: "#ABCDEF" }] }),
     ).toBeGreaterThan(base);
@@ -62,6 +76,24 @@ describe("the count is exactly the target (007 FR-003, R1)", () => {
     const plain = buildPattern({ score: 0, style: "polo", seed: 3 }, { bland: true });
     expect(plain.shapes).toEqual([]);
     expect(countPattern(plain)).toBe(0);
+  });
+});
+
+describe("as busy as the seed shirts, and busier as it climbs (007 FR-003, owner review Q8)", () => {
+  it("draws at least 200 shapes at 130, where Dan's Masterpiece sits", () => {
+    for (const seed of [1, 2, 3]) {
+      const { shapes } = buildPattern({ score: 130, style: "polo", seed }, { bland: false });
+      expect(shapes.length).toBeGreaterThanOrEqual(200);
+    }
+  });
+
+  it("draws more the higher it goes", () => {
+    for (const seed of [1, 2, 3]) {
+      const counts = [12, 52, 130, 500, 2_000, 10_249].map(
+        (score) => buildPattern({ score, style: "polo", seed }, { bland: false }).shapes.length,
+      );
+      expect(counts).toEqual([...counts].sort((a, b) => a - b));
+    }
   });
 });
 
@@ -87,12 +119,13 @@ describe("the art says nothing about the score (007 FR-008)", () => {
 });
 
 describe("the art budget (007 SC-005, R13)", () => {
-  it("stays under 300 KB at the default top, and under 2 MB at the art limit", () => {
+  it("stays under 1 MB at the default top, and under 2 MB at the art limit (24,000)", () => {
     const size = (score: number) =>
       new TextEncoder().encode(
         generate({ score, style: "button-down", seed: 11 }, { bland: false }).svg,
       ).length;
-    expect(size(10_249)).toBeLessThan(300 * 1024);
+    expect(ART_MAX_SCORE).toBe(24_000);
+    expect(size(10_249)).toBeLessThan(1024 * 1024);
     expect(size(ART_MAX_SCORE)).toBeLessThan(2 * 1024 * 1024);
   });
 });

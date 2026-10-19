@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [ ] No [NEEDS CLARIFICATION] markers remain
+- [x] No [NEEDS CLARIFICATION] markers remain
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic (no implementation details)
@@ -31,10 +31,11 @@
 
 ## Notes
 
-- Three [NEEDS CLARIFICATION] markers are open for the owner:
-  - FR-001: where the generator lives (the shopper's dial, Dan's Office, or both)
-  - FR-003: whether the counted score is final or can be changed
-  - FR-018: whether a shopper-made shirt joins the listing
+- Q1–Q3 resolved 2026-10-19 (see the spec's Clarifications):
+  - FR-001: both, the shoppers' dial and Dan's generator
+  - FR-003: the count starts a generated shirt's score, and Dan can change it
+  - FR-018: a shopper-made shirt is one of a kind until Dan lists it
+- Constitution II needs a wording amendment for generated scores, drafted with the plan.
 - "SQLite" and "MSRP" appear only in the quoted input. Vector art and the 2 MB and 2 s bounds are
   product rules (zoomable imagery, phone speed), not technology choices.
 - Items marked incomplete require spec updates before `/speckit-clarify` or `/speckit-plan`.

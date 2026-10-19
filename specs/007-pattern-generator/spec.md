@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-19
 
-**Status**: Draft (Q1–Q3 open)
+**Status**: Draft (Q1–Q3 resolved 2026-10-19)
 
 **Input**: User description: "Pattern Generator (ROADMAP 007). Procedurally generated shirts whose complexity is derived from the generated pattern itself — the more shapes, colors and layers, the more complicated — answering "how complicated can it get?" literally: the pattern can keep getting more complicated until the store's one exponential MSRP can no longer price it. Generated patterns are crisp vector art (high-resolution and zoomable, like every shirt), loud and vibrant at every level above the bottom, with the bottom of the range producing bland foils. A pattern is reproducible: the same recipe always gives the same shirt. Generated shirts are real catalog shirts (data in SQLite, art stored like uploads), priced by the existing MSRP algorithm, tier-badged, addable to carts, buyable by every payment method, and kept in order history; shoppers never see the score, only the tier badge and the price climbing. The feature has its own owner on/off switch (constitution IV/V gimmick pattern). Works from a 360px phone up; loud in the store, calm in Dan's Office (constitution v4.1.0). Builds on 001 (catalog, pricing, tiers, media) and 008 (the console, uploads, shirt editor). No money paths change beyond buying shirts the normal way."
 
@@ -13,6 +13,22 @@
 - 002-brand-pages-and-shaming: bland shirts can't sit in a cart while bland shaming is on
 - 006-flash-mode-pipes: the sale stays readable under Extreme Awesomeness
 - 008-admin-console: Dan's Office, the shirt editor, uploaded art, the switchboard, the catalog check
+
+## Clarifications
+
+### Session 2026-10-19
+
+- Q1: Where does the generator live? → A: **Both.** Shoppers get the dial in the store (US1, US2).
+  Dan gets a generator in his office (US3), using the same generator.
+- Q2: Who has the last word on a generated shirt's score? → A: **The count starts it, and Dan can
+  change it.**
+  - A generated shirt starts at the score counted from its pattern.
+  - The owner can change it afterwards in the console, like any shirt's. The art stays as drawn.
+  - Constitution II gets a wording amendment to say so.
+- Q3: Does a shopper-made shirt join the store's listing? → A: **One of a kind.**
+  - It has its own page and lives in the shopper's orders.
+  - It never appears in the listing, on the home page, in the fake purchase pop-ups, or among the
+    store's suggestions, unless Dan lists it from his office.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -105,7 +121,11 @@ show which shirts came from the generator.
 3. **Given** the shirts list, **When** the owner filters to generated shirts, **Then** both the
    owner's and the shoppers' generated shirts are listed, each marked with where it came from.
 4. **Given** a generated shirt, **When** the owner edits it, **Then** everything a shirt editor
-   offers is there, with the score handled as decided in FR-003.
+   offers is there, the score included. Changing the score reprices the shirt, and the art stays as
+   drawn.
+5. **Given** a shopper-made shirt, **When** the owner lists it, **Then** it appears in the store's
+   listing like any shirt on the floor. **When** the owner unlists it, **Then** it's one of a kind
+   again.
 
 ---
 
@@ -122,6 +142,13 @@ show which shirts came from the generator.
 - **The switch turned off.** The dial page shows the store's ordinary 404 and its links disappear.
   Generated shirts already made stay real shirts: in carts, in orders, and on their own pages.
 - **The same recipe, two shoppers at once.** One shirt, never two.
+- **A setting that's already a shirt.** The dial shows the real shirt, priced as it is now. If Dan
+  re-scored it, that's his call. The dial's never-goes-down promise is about the counts, and Dan's
+  judgment is final (constitution II).
+- **Listed, then unlisted.** A shopper-made shirt the owner lists, then unlists, goes back to one of
+  a kind. Carts and orders that hold it are unaffected.
+- **One of a kind, but resting.** If the owner rests a shopper-made shirt, it's off the floor like
+  any resting shirt. Its page says retired, and order history keeps it.
 - **Names.** Every generated shirt gets a unique name and URL name in Dan's voice. Neither contains
   its score.
 - **A heavy pattern on a phone.** The most complicated patterns stay small enough to draw quickly on
@@ -137,8 +164,9 @@ show which shirts came from the generator.
 
 **Scope**
 
-- **FR-001**: Where the generator lives: [NEEDS CLARIFICATION: Is it a shopper-facing dial in the
-  store (US1, US2), an owner tool in Dan's Office (US3), or both?]
+- **FR-001**: The generator MUST live in two places, both drawing with the same generator:
+  - the shoppers' dial in the store (US1, US2)
+  - the owner's generator in Dan's Office (US3)
 
 **The generator**
 
@@ -146,10 +174,10 @@ show which shirts came from the generator.
   button-down), and a shuffle. The same recipe MUST always give the same art and the same counted
   score.
 - **FR-003**: A pattern's complexity score MUST be counted from the pattern itself: its shapes, its
-  distinct colors and its layers. Adding a shape, a color or a layer never lowers the count. Who has
-  the last word on a generated shirt's score: [NEEDS CLARIFICATION: Is the counted score final, or
-  can the owner change it afterwards like any shirt's? Either needs a constitution II wording change,
-  because II says the owner assigns every score.]
+  distinct colors and its layers. Adding a shape, a color or a layer never lowers the count.
+  - A generated shirt MUST start at its counted score.
+  - The owner MAY change that score afterwards in the console, like any shirt's (constitution II, as
+    amended for 007). The art stays as drawn, and the shirt is still found by its recipe.
 - **FR-004**: For any shuffle, a higher level MUST never produce a lower counted score. So turning
   the dial up never lowers the price.
 - **FR-005**: Every pattern above the BLAND tier MUST be loud: only the store's bright colors.
@@ -195,10 +223,16 @@ show which shirts came from the generator.
 - **FR-017**: Generated shirts MUST follow every catalog rule. A BLAND one is refused while bland
   shaming is on, through the usual loop. A setting whose price would break the bland rule can't be
   added. The catalog check stays at zero errors.
-- **FR-018**: Whether a shopper-made shirt joins the store's listing: [NEEDS CLARIFICATION: Is each
-  dial shirt one of a kind (it has its own page and lives in his orders, but never shows in the
-  listing unless the owner puts it there), does it join the listing like any shirt, or does it go to
-  a "recently generated" gallery?]
+- **FR-018**: A shopper-made shirt MUST be one of a kind. It has its own page, can be bought from
+  that page and from the dial, and lives in the orders of whoever buys it. It MUST NOT appear in:
+  - the shirts listing or its filters
+  - the home page
+  - the fake purchase pop-ups
+  - the store's suggestions (such as the shaming loop's better pick)
+
+  That lasts until the owner lists it from the console, after which it's an ordinary shirt on the
+  floor. The owner can unlist it again. Shirts the owner generates are ordinary shirts from the
+  start.
 
 **Dan's Office (US3)**
 
@@ -207,7 +241,9 @@ show which shirts came from the generator.
 - **FR-020**: The owner MUST be able to save a pattern as a new catalog shirt. It rests until the
   owner puts it on the floor, its art joins the media library, and its name is editable.
 - **FR-021**: The console's shirts list MUST mark generated shirts, made by the owner or by a
-  shopper, and filter to them. The owner edits them like any shirt; the score as FR-003 decides.
+  shopper, and filter to them.
+  - The owner edits them like any shirt, the score included (FR-003).
+  - For a shopper-made shirt, the owner can also list it in the store, or unlist it (FR-018).
 - **FR-022**: The generator in the console MUST stay calm, like the rest of the office (constitution
   V, "The back office is calm"): no animation, and the preview is still art.
 
@@ -233,8 +269,12 @@ show which shirts came from the generator.
   as a link that doesn't reveal the score.
 - **Pattern**: the art a recipe makes, and the complexity score counted from its shapes, colors and
   layers.
-- **Generated shirt**: a catalog shirt made from a recipe, with its stored art, its counted score,
-  its recipe (so the same recipe finds it again) and where it came from (the dial or the owner).
+- **Generated shirt**: a catalog shirt made from a recipe. It has:
+  - its stored art
+  - a score that starts at the count and that Dan can change
+  - its recipe, so the same recipe finds it again
+  - where it came from (the dial or the owner)
+  - for a shopper-made shirt, whether Dan has listed it
 - **Pattern generator switch**: a store setting, on by default.
 
 ## Success Criteria *(mandatory)*
@@ -243,8 +283,10 @@ show which shirts came from the generator.
 
 - **SC-001**: The same recipe gives byte-identical art and the same score every time, across a sample
   of at least 1,000 recipes.
-- **SC-002**: Across the whole dial, for every shuffle sampled, the price never goes down from one
-  step to the next.
+- **SC-002**: Across the whole dial, for every shuffle sampled, the counted price never goes down
+  from one step to the next.
+- **SC-008**: Zero shopper-made shirts appear in the listing, on the home page, in the pop-ups or in
+  the store's suggestions until the owner lists one.
 - **SC-003**: Zero complexity scores appear anywhere a shopper can reach: dial pages, recipe links,
   generated shirt names, pages and art files.
 - **SC-004**: A shopper can go from opening the dial to a placed order for a generated shirt in under
@@ -268,6 +310,7 @@ show which shirts came from the generator.
 - Changing the generator later may change settings nobody has made yet. Shirts already made keep
   their stored art.
 - **Constitution note.** II says "The store owner assigns each shirt's complexity score... The
-  owner's judgment ... is final." A score counted by the generator needs II to say how generated
-  shirts get theirs. That's an amendment either way FR-003 goes, drafted with the plan and ratified
-  by merging this feature's PR, as 008 did.
+  owner's judgment ... is final."
+  - Per Q2, a generated shirt starts at its counted score, and the owner can change it.
+  - II gets a wording amendment saying so, drafted with the plan and ratified by merging this
+    feature's PR, as 008 did.

@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { requireAdmin } from "@/app/_data/admin";
 import { ConsoleLoading, ConsolePage } from "@/components/admin/ConsolePage";
 import { ImageManager } from "@/components/admin/ImageManager";
+import { ListedControl } from "@/components/admin/ListedControl";
 import { ShirtForm } from "@/components/admin/ShirtForm";
 import { StatusControl } from "@/components/admin/StatusControl";
 import { ui } from "@/components/admin/ui";
@@ -42,10 +43,13 @@ async function EditShirt({
     <ConsolePage
       title={shirt.name}
       intro={
-        // A full load into the loud store, on purpose (008 R1).
-        <a href={`/shirts/${shirt.slug}`} className={ui.link}>
-          {s.viewInStore}
-        </a>
+        <span className="flex flex-wrap gap-x-3">
+          <span data-testid="shirt-origin">{copy.console.generator.origins[shirt.origin]}</span>
+          {/* A full load into the loud store, on purpose (008 R1). */}
+          <a href={`/shirts/${shirt.slug}`} className={ui.link}>
+            {s.viewInStore}
+          </a>
+        </span>
       }
     >
       <ShirtForm
@@ -55,7 +59,12 @@ async function EditShirt({
         initial={justSaved ? { ok: true, message: copy.console.saved } : null}
       />
       <div className="grid gap-6 md:grid-cols-2 md:items-start">
-        <StatusControl shirtId={shirt.id} name={shirt.name} status={shirt.status} />
+        <div className="flex flex-col gap-6">
+          <StatusControl shirtId={shirt.id} name={shirt.name} status={shirt.status} />
+          {shirt.origin === "dial" ? (
+            <ListedControl shirtId={shirt.id} listed={shirt.listed} />
+          ) : null}
+        </div>
         <ImageManager shirtId={shirt.id} images={shirt.images} library={listLibrary(db)} />
       </div>
     </ConsolePage>

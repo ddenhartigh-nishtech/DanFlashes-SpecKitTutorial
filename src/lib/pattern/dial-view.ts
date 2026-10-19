@@ -38,7 +38,7 @@ export interface DialView {
   seed: number;
 }
 
-const badge = (tier: Tier): TierBadge => ({
+export const badge = (tier: Tier): TierBadge => ({
   id: tier.id,
   name: tier.name,
   tagline: tier.tagline,
@@ -47,9 +47,9 @@ const badge = (tier: Tier): TierBadge => ({
   isBland: isBlandTier(tier),
 });
 
-const parseSeed = (raw: string | undefined) =>
+export const parseSeed = (raw: string | undefined) =>
   raw !== undefined && /^\d{1,10}$/.test(raw) && Number(raw) < 2 ** 32 ? Number(raw) : null;
-const parseStyle = (raw: string | undefined): ShirtStyle | null =>
+export const parseStyle = (raw: string | undefined): ShirtStyle | null =>
   raw === "polo" || raw === "button-down" ? raw : null;
 
 export function buildDial(

@@ -10,7 +10,8 @@ import type { Db } from "@/lib/db/client";
 import { SESSION_COOKIE, type CookieJar } from "@/lib/http/cookies";
 
 export type ConsoleState =
-  { ok: true; message: string; id?: number } | { ok: false; message: string; issues?: Issue[] };
+  | { ok: true; message: string; id?: number }
+  | { ok: false; message: string; issues?: Issue[]; link?: { href: string; label: string } };
 
 export const saved = (message: string = copy.console.saved): ConsoleState => ({
   ok: true,

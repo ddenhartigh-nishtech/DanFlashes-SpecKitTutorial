@@ -11,6 +11,11 @@ export function ConsoleMessage({ state }: { state: ConsoleState | null }) {
       className={`rounded-md border px-3 py-2 text-sm ${state.ok ? "border-office-sage/40 bg-[#eef3f0]" : "border-beige bg-[#f7f1e6]"}`}
     >
       <p>{state.message}</p>
+      {!state.ok && state.link ? (
+        <a href={state.link.href} className="underline underline-offset-4">
+          {state.link.label}
+        </a>
+      ) : null}
       {!state.ok && state.issues?.length ? (
         <ul className="mt-1 list-disc pl-5">
           {state.issues.map((issue, i) => (

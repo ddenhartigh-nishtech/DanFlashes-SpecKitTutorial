@@ -4,6 +4,7 @@
  * already a shirt shows that shirt, priced as it is now (Dan's re-score included).
  */
 import { and, eq, inArray } from "drizzle-orm";
+import { isOneOfAKind } from "@/lib/catalog/one-of-a-kind";
 import { isBlandTier, tierOf } from "@/lib/catalog/tiers";
 import type { ShirtStyle, Tier } from "@/lib/catalog/types";
 import { getSettings } from "@/lib/data/settings";
@@ -27,8 +28,11 @@ export interface DialStep {
   tier: TierBadge;
   /** Exact; null at BEYOND, where it's too complicated to price. */
   priceUsd: Usd | null;
-  /** This setting is already a shirt: its page, its name, its price as it is now. */
-  made: { slug: string; name: string; priceUsd: Usd } | null;
+  /**
+   * This setting is already a shirt: its page, its name, its price as it is now, whether it's the
+   * viewer's own, and whether it's one of a kind and someone else's (007 R14).
+   */
+  made: { slug: string; name: string; priceUsd: Usd; mine: boolean; taken: boolean } | null;
 }
 
 export interface DialView {
@@ -55,6 +59,7 @@ export const parseStyle = (raw: string | undefined): ShirtStyle | null =>
 export function buildDial(
   db: Db,
   query: { r?: string; seed?: string; style?: string },
+  viewerId: number | null = null,
 ): DialView | null {
   const settings = getSettings(db);
   if (!settings.patternGenerator) return null;
@@ -80,6 +85,7 @@ export function buildDial(
     db,
     recipes.filter((r): r is Recipe => r !== null).map(recipeKey),
     settings.msrp,
+    viewerId,
   );
   const top = tierOf(maxDial, tiers);
 
@@ -109,7 +115,12 @@ function nearest(scores: number[], score: number): number {
   return best;
 }
 
-function madeShirts(db: Db, keys: string[], msrp: Parameters<typeof msrpUsd>[1]) {
+function madeShirts(
+  db: Db,
+  keys: string[],
+  msrp: Parameters<typeof msrpUsd>[1],
+  viewerId: number | null,
+) {
   const rows = keys.length
     ? db
         .select({
@@ -118,16 +129,28 @@ function madeShirts(db: Db, keys: string[], msrp: Parameters<typeof msrpUsd>[1])
           name: shirts.name,
           complexity: shirts.complexity,
           finalPriceUsd: shirts.finalPriceUsd,
+          origin: shirts.origin,
+          listed: shirts.listed,
+          makerUserId: shirts.makerUserId,
         })
         .from(shirts)
         .where(inArray(shirts.recipe, keys))
         .all()
     : [];
   return new Map(
-    rows.map((row) => [
-      row.recipe!,
-      { slug: row.slug, name: row.name, priceUsd: resolvePrice(row, msrp).finalPriceUsd },
-    ]),
+    rows.map((row) => {
+      const mine = viewerId !== null && row.makerUserId === viewerId;
+      return [
+        row.recipe!,
+        {
+          slug: row.slug,
+          name: row.name,
+          priceUsd: resolvePrice(row, msrp).finalPriceUsd,
+          mine,
+          taken: isOneOfAKind(row) && !mine,
+        },
+      ];
+    }),
   );
 }
 

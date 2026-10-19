@@ -338,7 +338,7 @@ analyzes the money before polish.
 
 ### Made to order (R14, R16)
 
-- [ ] T034 [P] Write failing tests/integration/made-to-order.test.ts:
+- [X] T034 [P] Write failing tests/integration/made-to-order.test.ts:
   - **`makeItMineCore`**: a guest gets the sign-in redirect and nothing is made. A signed-in
     shopper becomes the maker. An unmade-by-anyone shirt is claimed. Someone else's stays theirs.
   - **`canBuy` everywhere**: the maker adds any quantity. Anyone else, or a guest cart, is refused
@@ -347,7 +347,7 @@ analyzes the money before polish.
     `CART_AUDITED`.
   - **Mass production**: anyone can buy it. Owner-generated and catalog shirts are unaffected.
   - **The dial**: a made setting says whether it's his.
-- [ ] T035 Build it: `materialize` takes a maker. `makeItMineCore` takes the user, and the wrapper
+- [X] T035 Build it: `materialize` takes a maker. `makeItMineCore` takes the user, and the wrapper
   redirects a guest to sign in with the dial setting as `next`. Add `canBuy` and the guards in
   src/lib/cart/cart.ts (`NOT_YOURS`, removal reason `unique`, with copy). Give the shopper shirt a
   `oneOfAKind` flag and keep the maker server-side. `buildDial` marks `made.mine`. T034 passes.

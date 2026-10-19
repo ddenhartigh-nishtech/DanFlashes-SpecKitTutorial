@@ -44,7 +44,11 @@ const fields = (over: Record<string, string> = {}) => ({
 
 /** A shirt a shopper made at the dial (unlisted, one of a kind). */
 function dialShirt(db: Db) {
-  const made = makeItMineCore(db, form({ code: buildDial(db, {})!.steps[40].code! }));
+  const made = makeItMineCore(
+    db,
+    form({ code: buildDial(db, {})!.steps[40].code! }),
+    person(db).id,
+  );
   if (!made.ok) throw new Error("not made");
   return getShirtBySlug(db, made.slug)!;
 }

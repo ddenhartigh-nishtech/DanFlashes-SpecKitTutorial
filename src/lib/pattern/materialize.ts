@@ -2,6 +2,7 @@
  * The only way a generated shirt comes to exist (007 R6): a recipe becomes the one real catalog
  * shirt it describes, with its art stored like an upload, its counted score and its MSRP. The same
  * recipe always finds the same shirt, and a shirt that would break a catalog rule is never made.
+ * A dial shirt remembers its maker; one made before makers were kept is claimed by the next (R14).
  */
 import { eq } from "drizzle-orm";
 import { isBlandTier, tierOf } from "@/lib/catalog/tiers";
@@ -26,7 +27,12 @@ export type MaterializeResult =
 
 function findByRecipe(db: Db, key: string) {
   return db
-    .select({ id: shirts.id, slug: shirts.slug })
+    .select({
+      id: shirts.id,
+      slug: shirts.slug,
+      origin: shirts.origin,
+      makerUserId: shirts.makerUserId,
+    })
     .from(shirts)
     .where(eq(shirts.recipe, key))
     .get();
@@ -38,11 +44,20 @@ const taken = (db: Db, column: typeof shirts.name | typeof shirts.slug) => (valu
 export function materialize(
   db: Db,
   recipe: Recipe,
-  { origin, name }: { origin: Origin; name?: string },
+  {
+    origin,
+    name,
+    makerUserId = null,
+  }: { origin: Origin; name?: string; makerUserId?: number | null },
 ): MaterializeResult {
   const key = recipeKey(recipe);
   const existing = findByRecipe(db, key);
-  if (existing) return { ok: true, shirtId: existing.id, slug: existing.slug, created: false };
+  if (existing) {
+    if (existing.origin === "dial" && existing.makerUserId === null && makerUserId !== null) {
+      db.update(shirts).set({ makerUserId }).where(eq(shirts.id, existing.id)).run();
+    }
+    return { ok: true, shirtId: existing.id, slug: existing.slug, created: false };
+  }
 
   const settings = getSettings(db);
   if (recipe.score > maxDialScore(settings.msrp)) return { ok: false, code: "BEYOND" };
@@ -79,7 +94,13 @@ export function materialize(
         .get();
       const made = db
         .insert(shirts)
-        .values({ ...draft, origin, recipe: key, listed: origin !== "dial" })
+        .values({
+          ...draft,
+          origin,
+          recipe: key,
+          listed: origin !== "dial",
+          makerUserId: origin === "dial" ? makerUserId : null,
+        })
         .returning({ id: shirts.id })
         .get();
       db.insert(shirtImages).values({ shirtId: made.id, mediaId: picture.id, position: 0 }).run();

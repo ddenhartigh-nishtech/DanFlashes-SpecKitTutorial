@@ -2,6 +2,8 @@ import type { Usd } from "@/lib/money";
 
 export type ShirtStyle = "polo" | "button-down";
 export type ShirtStatus = "active" | "inactive";
+/** Hand-made, from Dan's generator, or from a shopper's dial (007). */
+export type ShirtOrigin = "catalog" | "owner" | "dial";
 
 export const SHIRT_STYLES: readonly ShirtStyle[] = ["polo", "button-down"];
 export const SHIRT_STATUSES: readonly ShirtStatus[] = ["active", "inactive"];

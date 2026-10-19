@@ -4,8 +4,15 @@
  * strips both — shoppers never see the score (constitution II, FR-002).
  */
 import { and, asc, count, eq, inArray } from "drizzle-orm";
+import { isOneOfAKind } from "@/lib/catalog/one-of-a-kind";
 import { isBlandTier, tierOf } from "@/lib/catalog/tiers";
-import type { ShirtStatus, ShirtStyle, StoreSettings, Tier } from "@/lib/catalog/types";
+import type {
+  ShirtOrigin,
+  ShirtStatus,
+  ShirtStyle,
+  StoreSettings,
+  Tier,
+} from "@/lib/catalog/types";
 import { getSettings } from "@/lib/data/settings";
 import { listTiers } from "@/lib/data/tiers";
 import type { Db } from "@/lib/db/client";
@@ -39,12 +46,18 @@ export interface ShopperShirt {
   finalPriceUsd: Usd;
   tier: TierBadge;
   images: ShirtImageView[];
+  /** Made to order for the shopper who made it (007 FR-018): nobody else can buy it. */
+  oneOfAKind: boolean;
 }
 
 /** Server-only: never pass this to a Client Component or render `complexity`. */
 export interface CatalogShirt extends ShopperShirt {
   complexity: number;
   msrpUsd: Usd;
+  origin: ShirtOrigin;
+  listed: boolean;
+  /** Who made a dial shirt (007 R14). Never sent to a browser: it's another shopper's account. */
+  makerUserId: number | null;
 }
 
 type ShirtRow = typeof shirts.$inferSelect;
@@ -98,6 +111,10 @@ function build(
     msrpUsd: price.msrpUsd,
     tier: badgeFor(tierOf(row.complexity, tiers)),
     images,
+    oneOfAKind: isOneOfAKind(row),
+    origin: row.origin,
+    listed: row.listed,
+    makerUserId: row.makerUserId,
   };
 }
 
@@ -145,15 +162,26 @@ export function getCatalogShirtsByIds(db: Db, ids: readonly number[]): Map<numbe
   return new Map(hydrate(db, rows).map((s) => [s.id, s]));
 }
 
-/** A shirt's identity and status, without pricing — for cart and order bookkeeping. */
+/** A shirt's identity, status and who may buy it, without pricing: cart and order bookkeeping. */
 export interface ShirtRef {
   id: number;
   slug: string;
   name: string;
   status: ShirtStatus;
+  origin: ShirtOrigin;
+  listed: boolean;
+  makerUserId: number | null;
 }
 
-const refColumns = { id: shirts.id, slug: shirts.slug, name: shirts.name, status: shirts.status };
+const refColumns = {
+  id: shirts.id,
+  slug: shirts.slug,
+  name: shirts.name,
+  status: shirts.status,
+  origin: shirts.origin,
+  listed: shirts.listed,
+  makerUserId: shirts.makerUserId,
+};
 
 export function findShirtRef(db: Db, slug: string): ShirtRef | null {
   return db.select(refColumns).from(shirts).where(eq(shirts.slug, slug)).get() ?? null;
@@ -212,6 +240,7 @@ export function toShopperShirt(shirt: CatalogShirt): ShopperShirt {
     finalPriceUsd: shirt.finalPriceUsd,
     tier: shirt.tier,
     images: shirt.images,
+    oneOfAKind: shirt.oneOfAKind,
   };
 }
 

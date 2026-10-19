@@ -128,6 +128,7 @@ async function CartContents() {
 const REMOVAL_NOTICES: Record<RemovalReason, string> = {
   retired: copy.cart.removedNotice,
   bland: copy.cart.blandRemovedNotice,
+  unique: copy.cart.uniqueRemovedNotice,
 };
 
 function RemovedNotice({ removed }: { removed: RemovedLine[] }) {

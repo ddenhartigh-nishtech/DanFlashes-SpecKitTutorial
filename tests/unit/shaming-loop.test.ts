@@ -30,6 +30,10 @@ function shirt(
       isBland,
     },
     images: [],
+    oneOfAKind: false,
+    origin: "catalog",
+    listed: true,
+    makerUserId: null,
     ...extra,
   };
 }

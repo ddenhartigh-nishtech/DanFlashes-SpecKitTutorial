@@ -88,6 +88,8 @@ export const copy = {
     checkout: "Check out",
     removedNotice: "Dan pulled these from the floor while you were away:",
     blandRemovedNotice: "Dan took these out of your cart. You'll thank him later:",
+    /** 007 R14: a one-of-a-kind shirt that isn't his. */
+    uniqueRemovedNotice: "These are one of a kind, and they're somebody else's:",
     emptyTitle: "You sure about that?",
     emptyBody:
       "An empty cart. On purpose? Here's the most complicated thing we could find for you.",
@@ -998,6 +1000,7 @@ export const copy = {
     NOT_IN_CART: "That's not in your cart anymore.",
     INVALID_QUANTITY: "Quantity must be between 0 and 99. We checked.",
     BLAND_REFUSED: "Dan Flashes does not sell boring shirts. Not to you. Not to anyone.",
+    NOT_YOURS: "That one's one of a kind, and it's somebody else's. Make your own.",
     INVALID_EMAIL: "That doesn't look like an email address.",
     WEAK_PASSWORD: "Your password needs at least 8 characters. Make it complicated.",
     EMAIL_TAKEN: "There's already an account with that email. Sign in instead.",

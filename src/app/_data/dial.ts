@@ -4,6 +4,7 @@ import { connection } from "next/server";
 import { getSettings } from "@/lib/data/settings";
 import { getDb } from "@/lib/db/client";
 import { buildDial } from "@/lib/pattern/dial-view";
+import { currentUser } from "@/app/_data/request";
 
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
@@ -14,7 +15,12 @@ export async function loadDial(
   await connection();
   const query = await searchParams;
   const db = getDb();
-  const view = buildDial(db, { r: one(query.r), seed: one(query.seed), style: one(query.style) });
+  const viewer = await currentUser();
+  const view = buildDial(
+    db,
+    { r: one(query.r), seed: one(query.seed), style: one(query.style) },
+    viewer?.id ?? null,
+  );
   if (!view) notFound();
   return { view, blandShaming: getSettings(db).blandShaming };
 }

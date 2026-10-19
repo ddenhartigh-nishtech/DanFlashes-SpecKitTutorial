@@ -3,11 +3,13 @@
  * from the catalog (FR-028). Lines for deactivated shirts are removed by the cart audit (FR-016).
  * While bland-shirt shaming is on, a BLAND shirt can't be in a cart at all (002 FR-010): adds and
  * quantity raises are refused, sign-in merges leave bland lines behind, and the audit pulls any
- * that are already there.
+ * that are already there. A one-of-a-kind shirt (007 FR-018) goes only in its maker's cart: anyone
+ * else's add or raise is refused, and the audit takes out any such line that got there anyway.
  */
 import { randomUUID } from "node:crypto";
 import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { MAX_QUANTITY } from "@/lib/cart/limits";
+import { canBuy } from "@/lib/catalog/one-of-a-kind";
 import { SIZES, type Size } from "@/lib/catalog/types";
 import { getSettings } from "@/lib/data/settings";
 import {
@@ -32,7 +34,8 @@ export type CartErrorCode =
   | "SHIRT_INACTIVE"
   | "NOT_IN_CART"
   | "INVALID_QUANTITY"
-  | "BLAND_REFUSED";
+  | "BLAND_REFUSED"
+  | "NOT_YOURS";
 
 export type CartResult = Ok<{ itemCount: number }> | Err<CartErrorCode>;
 /** An add or an update also says which shirt changed and what its quantity was (004 R3). */
@@ -44,8 +47,11 @@ export interface CartOwner {
   userId: number | null;
 }
 
-/** Why the audit pulled a line: the shirt was retired, or it's bland while shaming is on. */
-export type RemovalReason = "retired" | "bland";
+/**
+ * Why the audit pulled a line: the shirt was retired, it's bland while shaming is on, or it's one of
+ * a kind and this cart isn't its maker's (007 R14).
+ */
+export type RemovalReason = "retired" | "bland" | "unique";
 
 export interface RemovedLine {
   slug: string;
@@ -108,6 +114,14 @@ export function getOrCreateCart(db: Db, owner: CartOwner): { id: string; created
   return { id, created: true };
 }
 
+/** The account a cart belongs to, or null for a guest's. */
+function ownerOf(db: Db, cartId: string): number | null {
+  return (
+    db.select({ userId: carts.userId }).from(carts).where(eq(carts.id, cartId)).get()?.userId ??
+    null
+  );
+}
+
 function touch(db: Db, cartId: string): void {
   db.update(carts)
     .set({ updatedAt: sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))` })
@@ -130,6 +144,7 @@ export function addItem(db: Db, cartId: string, input: { slug: string; size: str
   const shirt = findShirtRef(db, input.slug);
   if (!shirt) return { ok: false, code: "SHIRT_NOT_FOUND" };
   if (shirt.status !== "active") return { ok: false, code: "SHIRT_INACTIVE" };
+  if (!canBuy(shirt, ownerOf(db, cartId))) return { ok: false, code: "NOT_YOURS" };
   if (refusesBland(db, shirt.id)) return { ok: false, code: "BLAND_REFUSED" };
 
   const previousQuantity =
@@ -169,7 +184,7 @@ function findLine(db: Db, cartId: string, slug: string, size: string) {
     eq(cartItems.size, size),
   );
   const line = db.select().from(cartItems).where(where).get();
-  return line ? { where, line } : null;
+  return line ? { where, line, shirt } : null;
 }
 
 export function updateItem(
@@ -182,7 +197,10 @@ export function updateItem(
   }
   const found = findLine(db, cartId, input.slug, input.size);
   if (!found) return { ok: false, code: "NOT_IN_CART" };
-  const { where, line } = found;
+  const { where, line, shirt } = found;
+  if (input.quantity > line.quantity && !canBuy(shirt, ownerOf(db, cartId))) {
+    return { ok: false, code: "NOT_YOURS" };
+  }
   if (input.quantity > line.quantity && refusesBland(db, line.shirtId)) {
     return { ok: false, code: "BLAND_REFUSED" };
   }
@@ -214,9 +232,11 @@ export function auditCart(db: Db, cartId: string | null): RemovedLine[] {
     lines.map((l) => l.shirtId),
   );
   const blandShaming = getSettings(db).blandShaming;
+  const owner = ownerOf(db, cartId);
   const reasonFor = (shirtId: number): RemovalReason | null => {
     const ref = refs.get(shirtId);
     if (!ref || ref.status === "inactive") return "retired";
+    if (!canBuy(ref, owner)) return "unique";
     return blandShaming && isBlandShirt(db, shirtId) ? "bland" : null;
   };
   const doomed = lines.flatMap((line) => {

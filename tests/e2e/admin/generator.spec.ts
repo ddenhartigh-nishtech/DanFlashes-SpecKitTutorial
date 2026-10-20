@@ -27,13 +27,17 @@ test.describe("US3 — Dan's generator (FR-019–FR-021)", () => {
     const slider = visible(page.getByRole("slider", { name: g.slider }));
     await slider.fill("40");
     await expect(field(page, g.score)).toHaveValue("100");
+    // 010 FR-011: the generator stops where the dial does.
+    await field(page, g.score).fill("10250");
+    await visible(page.getByRole("button", { name: g.preview })).click();
+    await expect(visible(page.getByText(g.beyond)).first()).toBeVisible();
     await field(page, g.score).fill("48");
     await expect(slider).toHaveValue("19");
     await field(page, g.style, false).selectOption("polo");
     await visible(page.getByRole("button", { name: g.preview })).click();
     await expect(page).toHaveURL(/score=48/);
     await expect(visible(page.getByTestId("generator-count"))).toHaveText("48");
-    await expect(visible(page.getByTestId("generator-msrp"))).toHaveText(/^\$/);
+    await expect(visible(page.getByTestId("generator-msrp"))).toHaveText("$1,250.00");
     const first = await preview(page).getAttribute("src");
     await visible(page.getByRole("button", { name: g.shuffle })).click();
     await expect(preview(page)).not.toHaveAttribute("src", first!);

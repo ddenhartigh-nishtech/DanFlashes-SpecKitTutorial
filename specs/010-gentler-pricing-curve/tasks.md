@@ -143,11 +143,11 @@ line, no owner price remains, every order is identical, and the cart shows the n
     expected total → `PRICE_CHANGED` with the new total, and nothing is charged
   - **Placing at the new total** succeeds, and `order_items.msrp_usd` snapshots the new MSRP
   - **Carts follow**: a cart line shows the new price on its next `getCartView` (FR-009)
-- [ ] T009 [P] [US1] Write tests/e2e/straight-line.spec.ts (shopper projects). For every shirt on
+- [X] T009 [P] [US1] Write tests/e2e/straight-line.spec.ts (shopper projects). For every shirt on
   `/shirts` (and the home page's featured shirts), the shown price equals $50.00 + $25.00 × its
   score, read from `data/e2e.db` the way no-score.spec.ts reads scores. No price on those pages
   scrolls sideways at 360px (SC-001, SC-003).
-- [ ] T010 [US1] Bring the e2e journeys to the new prices, keeping each journey's meaning. Fix
+- [X] T010 [US1] Bring the e2e journeys to the new prices, keeping each journey's meaning. Fix
   whichever of these assert a shirt price or rely on one's size, until the shopper projects pass:
   - card-checkout, flash-credit-checkout and split-checkout: a split must still need card money
     beyond the credit, so pick the shirt by its new price
@@ -188,7 +188,7 @@ can't be bought, and the generator refuses 10,250.
   - **The joke's string**: move "That's too complicated to price, even for Dan." to
     `copy.console.generator.beyond`.
   - T011 passes.
-- [ ] T013 [US2] Update tests/e2e/dial.spec.ts and tests/e2e/admin/generator.spec.ts:
+- [X] T013 [US2] Update tests/e2e/dial.spec.ts and tests/e2e/admin/generator.spec.ts:
   - step 100 shows $256,275.00, and prices never go down (existing)
   - the generator refuses 10,250 with the dial's line
   - at 360px, the maker's step-100 shirt at quantity 99 shows a $25,371,225.00 subtotal in the
@@ -238,7 +238,7 @@ it back. A zero, negative or malformed dial is refused. The chart's MSRP is stra
     - remove `start`, `anchor`, `interval` and their formats
     - `copy.console.pricing.chartHelp` without "log"
   - T014 passes.
-- [ ] T016 [US3] E2E in the admin projects:
+- [X] T016 [US3] E2E in the admin projects:
   - **tests/e2e/admin/switchboard.spec.ts** (it drives the tuning form today; analysis A1):
     - type $40.00 a point, and see Dan's Masterpiece go from $3,300.00 to $5,250.00 in the preview
     - save, and see the store page show $5,250.00
@@ -254,7 +254,7 @@ it back. A zero, negative or malformed dial is refused. The chart's MSRP is stra
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T017 [P] Draft constitution v5.0.0 in .specify/memory/constitution.md (R10):
+- [X] T017 [P] Draft constitution v5.0.0 in .specify/memory/constitution.md (R10):
   - **II**: "a single, documented, deterministic, straight-line function of the complexity score: a
     base price plus a price per point". Its tuning parameters are "the base price and the price per
     point".
@@ -263,7 +263,7 @@ it back. A zero, negative or malformed dial is refused. The chart's MSRP is stra
   - **The Sync Impact Report**: 4.2.0 → 5.0.0, MAJOR because II's MUST is redefined, with the III
     wording batched in. Ratified by merging this PR, after 007's.
   - **The version line**: Last Amended 2026-10-20.
-- [ ] T018 [P] Living specs and the README (FR-018), each change marked "(010)":
+- [X] T018 [P] Living specs and the README (FR-018), each change marked "(010)":
   - specs/001-core-storefront/spec.md: the summary, the MSRP definition, the curve-shape Q,
     FR-003, and the MSRP Settings entity
   - specs/007-pattern-generator/spec.md: FR-007, and the edge cases "Past the end of pricing" and
@@ -274,7 +274,7 @@ it back. A zero, negative or malformed dial is refused. The chart's MSRP is stra
     before clearing Dan's prices
 - [ ] T019 [P] Hand-check `TuningForm` and `PricePreview` in `next dev` under React Strict Mode, on
   a scratch database: no console errors or warnings.
-- [ ] T020 Script the quickstart scenarios e2e doesn't cover, on a copy of a pre-0014 database:
+- [X] T020 Script the quickstart scenarios e2e doesn't cover, on a copy of a pre-0014 database:
   - 1, 3 and 4 (orders identical, Dan's prices cleared)
   - 5 (a cart from before)
   - 6 (retune mid-checkout)
@@ -282,7 +282,12 @@ it back. A zero, negative or malformed dial is refused. The chart's MSRP is stra
   - 17: `catalog:audit` = 0 errors after migrating and after `db:reset`
 
   Record the results in quickstart.md.
-- [ ] T021 Run `npm run verify` until it's green. Record the counts and the coverage here.
+- [X] T021 Run `npm run verify` until it's green. Record the counts and the coverage here.
+  - **Result (2026-10-20)**: green on the second run. Unit and integration: 93 files, 1,035 tests.
+    E2E: 154 tests (desktop, phone, admin-desktop, admin-phone) in 6.9 min. Coverage: statements
+    94.27%, branches 92.22%, functions 88.42%, lines 95%.
+  - **The first run's one failure**: the new straight-line spec counted the home page's cards on
+    the phone before they streamed in. It now waits for the first card.
 
 ---
 

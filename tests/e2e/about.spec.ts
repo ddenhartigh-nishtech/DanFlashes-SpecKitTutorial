@@ -69,7 +69,7 @@ test.describe("US3 — About Dan", () => {
     const card = exhibit.getByTestId("shirt-card");
     await expect(card).toContainText("Dan's Masterpiece");
     await expect(card.getByTestId("tier-badge")).toHaveText("Too Complicated for Most Men");
-    await expect(card.getByTestId("price")).toHaveText("$1,228,800.00");
+    await expect(card.getByTestId("price")).toHaveText("$3,300.00");
 
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,

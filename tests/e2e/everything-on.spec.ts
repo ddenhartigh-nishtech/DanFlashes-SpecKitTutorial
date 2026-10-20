@@ -50,14 +50,14 @@ test("everything on: the whole journey still works", async ({ page }, info) => {
   await line.getByRole("button", { name: copy.cart.update }).click();
   await confirmTwice(page);
   await expect(line.getByLabel(copy.cart.quantity)).toHaveValue("1");
-  await expect(line.getByTestId("price")).toHaveText("$344.61");
+  await expect(line.getByTestId("price")).toHaveText("$350.00");
 
   // Checkout by card.
   await visible(page.getByRole("link", { name: copy.cart.checkout, exact: true })).click();
   await expect(page).toHaveURL(/\/checkout$/);
   await on();
   await untickAddOns(page);
-  await expect(visible(page.getByTestId("total"))).toHaveText("$344.61");
+  await expect(visible(page.getByTestId("total"))).toHaveText("$350.00");
   await visible(page.getByLabel("Card number")).fill("4242 4242 4242 4242");
   await visible(page.getByLabel("Expiry (MM/YY)")).fill("12/29");
   await visible(page.getByLabel("CVC")).fill("123");

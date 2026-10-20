@@ -44,12 +44,41 @@ test.describe("US2 — the switchboard (FR-012–FR-016, SC-005)", () => {
     await roach.getByRole("button", { name: c.turnOn }).click();
     await expect(roach.getByTestId("switch-state")).toHaveText(c.on);
 
-    // FR-014: a preview of every MSRP, now and after, before anything is saved.
-    await field(page, c.tuning.start).fill("400");
-    const fury = visible(page.getByTestId("tuning-row")).filter({ hasText: "Fractal Fury" });
-    const now = await fury.getByTestId("msrp-now").innerText();
-    await expect(fury.getByTestId("msrp-after")).not.toHaveText(now);
-    await expect(fury.getByTestId("msrp-after")).toHaveText(/^\$[\d,]+\.\d{2}$/);
+    // FR-014 (010 FR-013): a preview of every MSRP, now and after, before anything is saved.
+    const masterpiece = visible(page.getByTestId("tuning-row")).filter({
+      hasText: "Dan's Masterpiece",
+    });
+    await expect(visible(page.getByTestId("real-shirt-start"))).toHaveText(
+      c.tuning.startsAt("$300.00", "Complicated", 10),
+    );
+    await field(page, c.tuning.perPoint).fill("40.00");
+    await expect(masterpiece.getByTestId("msrp-now")).toHaveText("$3,300.00");
+    await expect(masterpiece.getByTestId("msrp-after")).toHaveText("$5,250.00");
+    await expect(visible(page.getByTestId("real-shirt-start"))).toHaveText(
+      c.tuning.startsAt("$450.00", "Complicated", 10),
+    );
+
+    // Saved, the store follows on its next page load; then the dials go back.
+    const saveDials = visible(page.getByRole("button", { name: c.tuning.save }));
+    await saveDials.click();
+    await expect(consoleMessage(page).first()).toBeVisible();
+    const store = await (await browser.newContext({ baseURL: info.project.use.baseURL })).newPage();
+    await store.goto("/shirts/dans-masterpiece");
+    await expect(visible(store.getByText("$5,250.00")).first()).toBeVisible();
+    await field(page, c.tuning.perPoint).fill("25.00");
+    await saveDials.click();
+    await expect(masterpiece.getByTestId("msrp-now")).toHaveText("$3,300.00");
+    await store.reload();
+    await expect(visible(store.getByText("$3,300.00")).first()).toBeVisible();
+    await store.context().close();
+
+    // A free base is refused, and the refusal stays.
+    await field(page, c.tuning.base).fill("0.00");
+    await saveDials.click();
+    await expect(visible(page.getByText(c.tuning.baseFormat))).toBeVisible();
+    await page.waitForTimeout(4_500); // past a confirmation's lifetime (007 FR-028)
+    await expect(visible(page.getByText(c.tuning.baseFormat))).toBeVisible();
+    await field(page, c.tuning.base).fill("50.00");
 
     // FR-016: a new preset reaches the top-up, then the old ones go back.
     const presets = field(page, c.presets.label);

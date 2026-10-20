@@ -25,7 +25,11 @@ test.describe("US3 — priced against the grain (FR-018–FR-021, SC-006)", () =
     const editUrl = page.url().replace(/\?.*$/, "");
 
     await page.goto("/admin/pricing");
-    await expect(visible(page.getByTestId("price-chart"))).toBeVisible();
+    const chart = visible(page.getByTestId("price-chart"));
+    await expect(chart).toBeVisible();
+    // 010 FR-014: the MSRP is one straight segment on a linear axis from $0.
+    await expect(chart.locator("path")).toHaveAttribute("d", /^M[\d.]+ [\d.]+ L[\d.]+ [\d.]+$/);
+    await expect(chart.getByText("$0", { exact: true })).toBeVisible();
     const pairs = visible(page.getByTestId("inversion")).filter({ hasText: name });
     expect(await pairs.count()).toBeGreaterThan(0);
     await expect(pairs.first().getByRole("link", { name })).toBeVisible();

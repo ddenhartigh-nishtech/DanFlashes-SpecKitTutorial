@@ -76,7 +76,7 @@ Each one is refused and changes nothing.
    the console shows the resulting tier, MSRP and final price before saving. **When** the owner
    saves, **Then** the store shows the new price and badge on the next page load.
 3. **Given** a shirt whose score puts it in the BLAND tier, **When** the owner saves a final price at
-   or above the MSRP start price, **Then** the save is refused with the limit and the price it would
+   or above a real shirt's start (the MSRP where the first tier above BLAND begins, 010), **Then** the save is refused with the limit and the price it would
    have resolved to, and nothing changes.
 4. **Given** a shirt with no images, **When** the owner tries to make it active, **Then** it's
    refused (an active shirt needs at least one image).
@@ -104,9 +104,9 @@ Each one is refused and changes nothing.
 ### User Story 2 - The Switchboard (Priority: P2)
 
 A prospect wants to see the roach motel. Dan opens settings, flips Roach motel off and on again, and
-reloads the cart: one click, no database. Below the switches are the MSRP tuning knobs. He raises the
-start price. Before he saves, the console shows what every shirt's MSRP becomes. It won't let him
-raise it past a bland shirt's price, because a bland shirt must always cost less than a real one.
+reloads the cart: one click, no database. Below the switches are the MSRP tuning knobs (since 010, a
+base price and a price per point). He raises the price per point. Before he saves, the console shows what every shirt's MSRP becomes. It won't let him
+bring a real shirt's start down to a bland shirt's price, because a bland shirt must always cost less than a real one.
 
 **Why this priority**: every demo flips tactics, and today that means editing a database row. This is
 the owner's second reason for opening Studio.
@@ -123,10 +123,10 @@ change that would break the bland rule is refused.
    - one plain line saying what it does when it's on
 2. **Given** any switch, **When** the owner flips it, **Then** it's saved at once with one click.
    Nothing else on the page changes, and the store follows it on the next page load.
-3. **Given** new MSRP tuning (start price, anchor score, doubling interval), **When** the owner
+3. **Given** new MSRP tuning (the base price and the price per point, 010), **When** the owner
    previews it, **Then** the console lists each active shirt's MSRP now and after. **When** the
    owner saves, **Then** every shirt priced at MSRP shows the new price in the store.
-4. **Given** new tuning that would put any BLAND shirt at or above the new start price, **When** the
+4. **Given** new tuning that would put any BLAND shirt at or above a real shirt's new start, **When** the
    owner saves, **Then** it's refused, naming each shirt that would break the rule, and nothing
    changes.
 5. **Given** the Flash Credit top-up presets, **When** the owner adds, changes or removes an amount,
@@ -213,7 +213,7 @@ checkout follows. Confirm that past orders are unchanged.
    - how many active shirts it holds
 2. **Given** a change to a tier's starting score, **When** the owner previews it, **Then** the
    console lists the shirts that would change tier.
-3. **Given** a tier change that would put a shirt in the BLAND tier at or above the start price,
+3. **Given** a tier change that would put a shirt in the BLAND tier at or above a real shirt's start,
    **When** the owner saves, **Then** it's refused, naming those shirts.
 4. **Given** the tier that starts at score 0, **When** the owner tries to remove it, rename it, or
    move its start, **Then** it's refused. Its tagline and colors can still be edited.
@@ -286,8 +286,9 @@ built test-first (constitution VI).
 - **A new BLAND shirt.** A score change that moves a shirt into the BLAND tier is checked against the
   bland rule like any other price change. A shirt pulled into the BLAND tier also leaves shoppers'
   carts the next time they look, while bland shaming is on (the 002 behavior).
-- **Tuning that crosses a tier.** The anchor or doubling interval can push a BLAND score's MSRP up
-  to or past the start price. That's refused like a bland final price.
+- **Tuning that crosses a tier.** On the straight line (010), a BLAND score's MSRP always stays
+  under a real shirt's start, but a lower price per point can bring that start down to one of Dan's
+  own BLAND prices. That's refused like a bland final price.
 - **A price change with shirts in carts.** Carts show the new price on the next page load, and
   checkout charges the catalog price (the store never trusts a price sent from the browser). Placed
   orders never change.
@@ -393,7 +394,7 @@ built test-first (constitution VI).
   The console MUST NOT keep a second copy of the price math.
 - **FR-009**: The owner MUST be able to edit every field of a shirt except its URL name. A save MUST
   be refused, with a plain reason and nothing changed, when:
-  - a BLAND-tier shirt would resolve to a price at or above the MSRP start price (the message gives
+  - a BLAND-tier shirt would resolve to a price at or above a real shirt's start (the message gives
     the limit and the resolved price)
   - an active shirt would have no image
   - any value breaks its rule
@@ -425,10 +426,10 @@ built test-first (constitution VI).
   - nosy sign-up
 - **FR-013**: Each switch MUST flip with a single click and save at once. It MUST change nothing
   else.
-- **FR-014**: The owner MUST be able to change the MSRP tuning: the start price, the anchor score
-  and the doubling interval. Before saving, the console MUST show each active shirt's MSRP now and
+- **FR-014**: The owner MUST be able to change the MSRP tuning: the base price and the price per
+  point (010; before, the start price, the anchor score and the doubling interval). Before saving, the console MUST show each active shirt's MSRP now and
   after. The MSRP formula itself MUST NOT be editable, only its tuning (constitution II).
-- **FR-015**: A tuning change that would put any BLAND-tier shirt at or above the start price MUST
+- **FR-015**: A tuning change that would put any BLAND-tier shirt at or above a real shirt's start MUST
   be refused, naming each such shirt.
 - **FR-016**: The owner MUST be able to add, change and remove the Flash Credit top-up presets. Each
   must be a positive dollar amount.
@@ -438,7 +439,8 @@ built test-first (constitution VI).
 **The pricing analysis (US3)**
 
 - **FR-018**: A pricing page MUST plot every active shirt's score against its final price, with the
-  MSRP curve and the tier bands.
+  MSRP line and the tier bands. Since 010 the price axis is linear from $0, so the MSRP is a
+  straight line.
 - **FR-019**: The pricing page MUST list every pair of active shirts where the higher-scored shirt
   has the lower final price. Each listing shows both shirts' scores and prices, the gap, and a link
   to edit each one. Shirts with equal scores MUST NOT be flagged.
@@ -485,7 +487,7 @@ built test-first (constitution VI).
   that would change tier.
 - **FR-029**: The tier starting at 0 is the BLAND tier (constitution II). Its name (BLAND) and its
   start (0) MUST NOT change, and it MUST NOT be removed. Its tagline and colors can be edited.
-- **FR-030**: A tier change that would put any shirt in the BLAND tier at or above the start price
+- **FR-030**: A tier change that would put any shirt in the BLAND tier at or above a real shirt's start
   MUST be refused, naming each such shirt.
 - **FR-031**: The owner MUST be able to create, edit, retire, restore and reorder add-ons, with these
   rules:

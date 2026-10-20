@@ -69,7 +69,7 @@ test.describe("US2 — roach-motel cart", () => {
     await update.click();
     await dialog(page).getByRole("button", { name: labels.lowerYes.shamed }).click();
     await dialog(page).getByRole("button", { name: labels.lowerYes.shamed }).click();
-    await expect(line.getByTestId("price")).toHaveText("$689.22");
+    await expect(line.getByTestId("price")).toHaveText("$700.00");
     await expect(qty).toHaveValue("2");
 
     // 10: two yeses, and it's finally gone.

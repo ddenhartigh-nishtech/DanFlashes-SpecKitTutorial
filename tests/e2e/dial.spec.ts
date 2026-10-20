@@ -107,6 +107,7 @@ test.describe("US1 — how complicated can it get?", () => {
   }) => {
     await page.goto("/how-complicated");
     await setStep(page, 100);
+    await expect(price(page)).toHaveText("$256,275.00"); // 010: score 10,249 on the straight line
     const started = Date.now();
     await expect
       .poll(() => art(page).evaluate((img) => (img as HTMLImageElement).naturalWidth), {
@@ -256,6 +257,26 @@ test.describe("US2 — buy the monster", () => {
     await expect(page.locator(`a[href="/shirts/${slug}"]`)).toHaveCount(0);
     await page.goto("/");
     await expect(page.locator(`a[href="/shirts/${slug}"]`)).toHaveCount(0);
+  });
+
+  test("the top of the dial, 99 times over, fits a 360px cart (010 SC-003)", async ({
+    page,
+  }, info) => {
+    test.slow(); // a real sign-up
+    await signedUp(page, `${info.project.name}-top`);
+    const { slug } = await makeItMineAt(page, 100);
+    await addShirt(page, slug, "XL");
+    await page.setViewportSize({ width: 360, height: 800 });
+    await page.goto("/cart");
+    const line = visible(page.getByTestId("cart-line"));
+    await line.getByLabel("Qty").fill("99");
+    await line.getByRole("button", { name: "Update" }).click();
+    const summary = visible(page.getByTestId("cart-summary"));
+    await expect(summary).toContainText("$25,371,225.00");
+    const sideways = await page.evaluate(
+      () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    );
+    expect(sideways).toBe(false);
   });
 
   test("a guest's Make it mine asks him to sign in, then brings him back to the setting", async ({

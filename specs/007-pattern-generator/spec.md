@@ -186,15 +186,15 @@ show which shirts came from the generator.
 
 ### Edge Cases
 
-- **Past the end of pricing.** The MSRP can only count so high under the current tuning, and the
-  art can only hold so much. The dial stops one step past whichever comes first, and that step
-  can't be bought.
+- **Past the end of pricing.** The dial stops one step past its fixed top, 10,249, and that step
+  can't be bought (010).
 - **Retuned mid-cart.** If the owner retunes the MSRP, generated shirts reprice like every shirt.
   Carts follow on the next page load, and placed orders never change.
 - **Tiers moved.** A generated shirt's badge follows its score under the current tier bands, like
   every shirt.
-- **A bland rule broken by tuning.** If the tuning makes a BLAND pattern cost at or above the start
-  price, that setting can't be bought. The catalog never holds a shirt that breaks a rule.
+- **A bland rule broken by tuning.** If a BLAND pattern ever cost at or above a real shirt's start,
+  that setting couldn't be bought. On the straight line (010) a BLAND pattern at its MSRP never
+  does, but the rule stands: the catalog never holds a shirt that breaks one.
 - **The switch turned off.** The dial page shows the store's ordinary 404 and its links disappear.
   Generated shirts already made stay real shirts: in carts, in orders, and on their own pages.
 - **The same recipe, two shoppers at once.** One shirt, never two.
@@ -257,13 +257,10 @@ show which shirts came from the generator.
 - **FR-006**: Every pattern MUST be vector art that stays crisp in the store's zoom viewer, with each
   motif distinguishable at maximum zoom (constitution III). Once a pattern becomes a shirt, its art
   is stored with the store's other images.
-- **FR-007**: The range MUST run from the bottom of BLAND up to whichever comes first:
-  - the highest score the MSRP can price under the current tuning
-  - the most the art can hold while staying fast on a phone (SC-005; only an extreme tuning
-    reaches it)
-
-  One step beyond that shows "That's too complicated to price, even for Dan." and can't be bought
-  (analysis I1).
+- **FR-007**: The range MUST run from the bottom of BLAND up to a fixed score of 10,249, under any
+  tuning (010 FR-011). That's where the exponential MSRP ran out of numbers at its default tuning;
+  the straight line that replaced it never runs out, so the top stayed where it was. One step
+  beyond shows "That's too complicated to price, even for Dan." and can't be bought (analysis I1).
 - **FR-008**: The score MUST NEVER reach shoppers (constitution II): not on the page, not on the
   dial, not in its labels or accessible names, not in a recipe link, not in a generated shirt's
   name, and not inside the art file.

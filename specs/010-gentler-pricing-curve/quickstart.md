@@ -37,3 +37,27 @@ npm run dev             # http://localhost:3000
 ```bash
 npm run verify
 ```
+
+## Results (2026-10-20)
+
+Scripted on a copy of the owner's store, taken before 0014 (`DATABASE_PATH=data/qs010.db`), and on a
+freshly reset scratch store (`data/qs010r.db`).
+
+- **1, 3, 4 (orders, Dan's prices)**: 0014 backed up first. Afterward:
+  - all 13 orders, 17 lines and their add-ons were byte-for-byte identical
+  - the four owner prices were cleared, and no shirt was owner-priced
+  - every recipe was unchanged
+  - the dials were $50.00 + $25.00, and every other setting was identical (surcharge $499.99,
+    presets $500 / $1,000 / $5,000)
+  - Hawaiian Tax Return (22) is $600.00, Dan's Masterpiece (130) $3,300.00, and the dial shirt
+    (188) $4,750.00. The generated shirts: 133 → $3,375.00, 75 → $1,925.00, 63 → $1,625.00
+  - Hawaiian's description dropped "Priced by Dan personally."
+- **5, 6 (carts, retune mid-checkout)**: covered by tests/integration/place-order-card.test.ts
+  (T008). A retune between view and place is `PRICE_CHANGED` with the new total, then the order
+  places at the new line and snapshots the new MSRP.
+- **14–16**: covered by e2e:
+  - the editor preview at 1,000,000 shows $25,000,050.00
+  - the chart's MSRP is one straight segment from $0
+  - the dial's top shirt at quantity 99 is a $25,371,225.00 cart at 360px with no sideways scroll
+- **17 (SC-007)**: `catalog:audit` reported 0 errors and 0 warnings on both the upgraded copy and
+  the reset store.

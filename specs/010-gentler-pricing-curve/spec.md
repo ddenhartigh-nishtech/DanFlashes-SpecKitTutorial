@@ -140,8 +140,8 @@ first.
 - **Retuned mid-cart.** As today: carts follow on their next look. A checkout that started at the
   old prices is refused and shows the new total. Placed orders never change.
 - **Tiers moved.** "What a real shirt starts at" is the MSRP at the lowest score of the first tier
-  above BLAND, so it moves when Dan moves that tier. A BLAND shirt Dan priced himself at or above it
-  is flagged, like today.
+  above BLAND, so it moves when Dan moves that tier. If a BLAND shirt Dan priced himself would sit at
+  or above it, the save is refused, and the catalog check flags it, like today.
 - **No tier above BLAND.** If BLAND is the only tier, there's no real shirt to undercut, and the
   BLAND price rule has nothing to check.
 - **Tiny dials.** $0.01 a point and a $0.01 base are allowed. Prices barely climb, but they still

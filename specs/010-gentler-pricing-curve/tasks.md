@@ -42,6 +42,8 @@
     - `msrp(s + 1) − msrp(s)` is exactly the price per point
     - strictly increasing
     - always two decimals
+    - with random tier sets too (two to six tiers): every BLAND score's MSRP is less than
+      `realShirtStartUsd` (SC-004, analysis C1)
   - **Bad input throws**: a negative, fractional or `NaN` score (`RangeError`), and a malformed
     money string in the settings (`MoneyError`)
   - **`realShirtStartUsd`**:
@@ -61,6 +63,8 @@
     - with Complicated moved to 20, $500.00 passes
     - with BLAND the only tier, nothing is checked
   - **No ceiling**: a score of 1,000,000 is never refused as "too complicated to price"
+  - **The seed** (FR-010, analysis C2): tests/integration/catalog-audit.test.ts asserts no seeded
+    shirt has a final price
 - [ ] T004 [P] Write a failing tests/integration/migration-0014.test.ts (`databaseBefore("0014")`).
   Seed the old store with:
   - tuning $300.00 / 10 / 10
@@ -79,6 +83,7 @@
   - the CHECKs `store_settings_base_price` and `store_settings_per_point` refuse `'0.00'`, `'-1.00'`
     and `'abc'`
   - `foreign_key_check` is clean
+  - `auditIssues(db)` reports no errors on the upgraded store (FR-016, analysis C3)
 - [ ] T005 Implement the line (research R1, R2, R4), so T002 and T003 pass:
   - **src/lib/catalog/types.ts**: `MsrpSettings = { basePriceUsd: Usd; perPointUsd: Usd }`
   - **src/lib/pricing/msrp.ts**:
@@ -177,14 +182,17 @@ can't be bought, and the generator refuses 10,250.
     - `maxDialScore()` with no arguments
     - remove `maxPriceableScore` and `ART_MAX_SCORE`
   - **Callers**: update src/lib/pattern/dial-view.ts, src/lib/pattern/materialize.ts,
-    src/lib/pattern/generator-view.ts (`readRecipe` refuses above the top) and
-    src/lib/actions/admin/generator.ts.
+    src/lib/pattern/generator-view.ts (`readRecipe` refuses above the top),
+    src/lib/actions/admin/generator.ts, and src/app/admin/shirts/generate/page.tsx (the slider's
+    top comes from `view.maxScore`, so check it's 10,249; analysis U1).
   - **The joke's string**: move "That's too complicated to price, even for Dan." to
     `copy.console.generator.beyond`.
   - T011 passes.
 - [ ] T013 [US2] Update tests/e2e/dial.spec.ts and tests/e2e/admin/generator.spec.ts:
   - step 100 shows $256,275.00, and prices never go down (existing)
   - the generator refuses 10,250 with the dial's line
+  - at 360px, the maker's step-100 shirt at quantity 99 shows a $25,371,225.00 subtotal in the
+    cart with no sideways scroll (SC-003, analysis M1)
 
 **Checkpoint**: 007's dial plays as before, at the new prices.
 
@@ -231,7 +239,7 @@ it back. A zero, negative or malformed dial is refused. The chart's MSRP is stra
     - `copy.console.pricing.chartHelp` without "log"
   - T014 passes.
 - [ ] T016 [US3] E2E in the admin projects:
-  - **tests/e2e/admin/switchboard.spec.ts** (or wherever the tuning form is driven today):
+  - **tests/e2e/admin/switchboard.spec.ts** (it drives the tuning form today; analysis A1):
     - type $40.00 a point, and see Dan's Masterpiece go from $3,300.00 to $5,250.00 in the preview
     - save, and see the store page show $5,250.00
     - put it back to $25.00

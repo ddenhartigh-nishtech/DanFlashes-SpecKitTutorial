@@ -317,3 +317,10 @@ it back. A zero, negative or malformed dial is refused. The chart's MSRP is stra
 2. **Then**: US2 (the dial's top), then US3 (Dan's dials and chart).
 3. **Polish**: then verify, converge, and a PR that also ratifies constitution v5.0.0, after 007's
    PR is merged.
+
+---
+
+## Phase 7: Convergence
+
+- [X] T022 Reword the console's "GROWTH" poster in src/lib/copy.ts, which still says "Prices double every ten points of complexity." The price now climbs by the same amount every point, per FR-001 (contradicts)
+- [X] T023 Bring specs/008-admin-console/contracts/console.md's tuning fields (`startPriceUsd`, `anchorScore`, `doublingInterval`) and "the start price" in line with the two dials and a real shirt's start, per FR-018 (partial)

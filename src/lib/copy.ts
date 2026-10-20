@@ -452,7 +452,10 @@ export const copy = {
         word: "PATIENCE",
         line: "The right customer is out there, and he still has some per diem left.",
       },
-      { word: "GROWTH", line: "Prices double every ten points of complexity. So can you." },
+      {
+        word: "GROWTH",
+        line: "Every point of complexity adds to the price. Every day adds to you.",
+      },
       {
         word: "BALANCE",
         line: "Breathe in. Breathe out. Nobody is looking at the numbers but you.",

@@ -45,20 +45,20 @@ test.describe("US2 — zoom, enhance, add to cart", () => {
     await expect(line).toContainText("Geo Riot");
     await expect(line).toContainText("Size L");
     await expect(line.getByTestId("tier-badge")).toHaveText("Complicated");
-    await expect(line.getByTestId("price")).toHaveText("$344.61");
+    await expect(line.getByTestId("price")).toHaveText("$350.00");
 
     // Bug fix (2026-10-13): the quantity box only takes 1–99; a negative never submits.
     const qty = line.getByLabel("Qty");
     await expect(qty).toHaveAttribute("min", "1");
     await qty.fill("-2");
     await line.getByRole("button", { name: "Update" }).click();
-    await expect(line.getByTestId("price")).toHaveText("$344.61");
+    await expect(line.getByTestId("price")).toHaveText("$350.00");
     expect(await qty.evaluate((el: HTMLInputElement) => el.validity.valid)).toBe(false);
 
     // Quantity update re-prices the line exactly.
     await line.getByLabel("Qty").fill("3");
     await line.getByRole("button", { name: "Update" }).click();
-    await expect(line.getByTestId("price")).toHaveText("$1,033.83");
+    await expect(line.getByTestId("price")).toHaveText("$1,050.00");
 
     // Remove empties the cart and brings back the pitch.
     await line.getByRole("button", { name: "Remove (and lose your edge)" }).click();
@@ -94,7 +94,7 @@ test.describe("US2 — zoom, enhance, add to cart", () => {
     await line.getByLabel("Qty").fill("99");
     await line.getByRole("button", { name: "Update" }).click();
     const summary = visible(page.getByTestId("cart-summary"));
-    await expect(summary.getByTestId("price")).toHaveText("$121,651,200.00");
+    await expect(summary.getByTestId("price")).toHaveText("$326,700.00");
     const spill = await summary.evaluate((box) => {
       const outer = box.getBoundingClientRect();
       return [...box.querySelectorAll("*")].some((el) => {

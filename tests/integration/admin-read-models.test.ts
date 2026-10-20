@@ -21,7 +21,7 @@ function setup() {
   const buy = (slug: string, credit: boolean) => {
     const cartId = getOrCreateCart(db, { cartId: null, userId: greg }).id;
     addItem(db, cartId, { slug, size: "L" });
-    const total = slug === "geo-riot" ? "424.26" : "999.99";
+    const total = slug === "geo-riot" ? "425.00" : "999.99";
     const order = placeOrder(db, {
       userId: greg,
       cartId: null,
@@ -52,8 +52,8 @@ describe("listCustomers (008 FR-032)", () => {
       displayName: "Greg",
       isAdmin: false,
       orderCount: 2,
-      lifetimeSpendUsd: "1424.25",
-      balanceUsd: "575.74",
+      lifetimeSpendUsd: "1424.99",
+      balanceUsd: "575.00",
     });
     expect(rows.find((c) => c.id === owner)).toMatchObject({
       isAdmin: true,
@@ -76,7 +76,7 @@ describe("getCustomer (008 FR-033)", () => {
     const { db, sqlite, greg, cardOrder } = setup();
     sqlite.prepare("UPDATE orders SET per_diem_drained = 1 WHERE id = ?").run(cardOrder);
     const customer = getCustomer(db, greg)!;
-    expect(customer.customer.balanceUsd).toBe("575.74");
+    expect(customer.customer.balanceUsd).toBe("575.00");
     expect(customer.orders).toHaveLength(2);
     expect(customer.entries.map((e) => e.kind).sort()).toEqual(["spend", "top_up"]);
     expect(customer.streams).toEqual([]);
@@ -110,7 +110,7 @@ describe("orders (008 FR-034, FR-035)", () => {
         name: "Fractal Fury",
         tierName: "Very Complicated",
         complexity: 30,
-        msrpUsd: "1200.00",
+        msrpUsd: "800.00",
         finalPriceUsd: "999.99",
         size: "L",
         quantity: 1,
@@ -126,6 +126,6 @@ describe("orders (008 FR-034, FR-035)", () => {
   it("shows the Flash Credit an order spent", () => {
     const { db, creditOrder } = setup();
     expect(getAdminOrder(db, creditOrder)!.order.payment).toEqual({ method: "flash_credit" });
-    expect(getAdminOrder(db, creditOrder)!.flashCreditUsd).toBe("424.26");
+    expect(getAdminOrder(db, creditOrder)!.flashCreditUsd).toBe("425.00");
   });
 });

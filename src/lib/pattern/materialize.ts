@@ -60,7 +60,7 @@ export function materialize(
   }
 
   const settings = getSettings(db);
-  if (recipe.score > maxDialScore(settings.msrp)) return { ok: false, code: "BEYOND" };
+  if (recipe.score > maxDialScore()) return { ok: false, code: "BEYOND" };
 
   const tiers = listTiers(db);
   const bland = isBlandTier(tierOf(recipe.score, tiers));

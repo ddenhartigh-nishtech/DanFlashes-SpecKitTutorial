@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { runMigrations } from "@/lib/db/migrate";
-import { databaseBefore } from "../helpers/migrations";
+import { databaseBefore, withoutOldDials } from "../helpers/migrations";
 
 describe("migration 0006 (the drain jokes setting)", () => {
   it("turns the jokes on for the existing settings row, without touching the rest", () => {
@@ -14,7 +14,7 @@ describe("migration 0006 (the drain jokes setting)", () => {
 
     // Later migrations add more columns; this one only adds drain_jokes.
     expect(sqlite.prepare("SELECT * FROM store_settings").get()).toMatchObject({
-      ...before,
+      ...withoutOldDials(before),
       drain_jokes: 1,
     });
   });

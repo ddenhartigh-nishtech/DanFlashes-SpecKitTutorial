@@ -76,14 +76,24 @@ export interface Chart {
   /** The MSRP line, as an SVG path. */
   curve: string;
   bands: { name: string; color: string; x0: number; x1: number }[];
-  /** Price gridlines at powers of ten. */
+  /** Price gridlines: $0 and each fifth of the round top. */
   ticks: { y: number; label: string }[];
   xMax: number;
 }
 
 const round1 = (n: number) => Math.round(n * 10) / 10;
 
-/** FR-018: score across, price up on a log scale (so the exponential MSRP is a straight line). */
+/** The first 1, 2 or 5 × 10ⁿ dollars at or above `price`: the chart's round top. */
+function roundTop(price: number): number {
+  for (let magnitude = 1; ; magnitude *= 10) {
+    for (const m of [1, 2, 5]) if (m * magnitude >= price) return m * magnitude;
+  }
+}
+
+/**
+ * FR-018 (010 FR-014, R6): score across, price up on a linear axis from $0, so the straight MSRP is
+ * a straight line.
+ */
 export function chartPoints(
   shirts: readonly PricedShirt[],
   tiers: readonly Tier[],
@@ -96,32 +106,16 @@ export function chartPoints(
   );
   const x = (score: number) => round1(box.pad + (score / xMax) * (box.width - 2 * box.pad));
 
-  // The MSRP line, sampled across the chart, until the numbers run out (008 R7).
-  const samples: { score: number; price: number }[] = [];
-  for (let i = 0; i <= 40; i++) {
-    const score = Math.round((xMax * i) / 40);
-    try {
-      samples.push({ score, price: Number(msrpUsd(score, msrp)) });
-    } catch {
-      break;
-    }
-  }
-  const prices = [
-    ...shirts.map((s) => Number(s.finalPriceUsd)),
-    ...samples.map((s) => s.price),
-  ].filter((p) => p > 0 && Number.isFinite(p));
-  let lo = Math.log10(Math.min(...prices, 1));
-  let hi = Math.log10(Math.max(...prices, 10));
-  if (hi - lo < 1) [lo, hi] = [lo - 0.5, hi + 0.5];
-  const y = (price: number) =>
-    round1(
-      box.pad +
-        (1 - (Math.log10(Math.max(price, 10 ** lo)) - lo) / (hi - lo)) * (box.height - 2 * box.pad),
-    );
+  // The MSRP line: two points, since it's straight.
+  const ends = [0, xMax].map((score) => ({ score, price: Number(msrpUsd(score, msrp)) }));
+  // At least $5, so a fifth of it is still a whole dollar.
+  const top = roundTop(Math.max(5, ...shirts.map((s) => Number(s.finalPriceUsd)), ends[1].price));
+  const y = (price: number) => round1(box.pad + (1 - price / top) * (box.height - 2 * box.pad));
 
   const ticks: Chart["ticks"] = [];
-  for (let d = Math.ceil(lo); d <= Math.floor(hi); d++) {
-    ticks.push({ y: y(10 ** d), label: `$${(10 ** d).toLocaleString("en-US")}` });
+  for (let i = 0; i <= 5; i++) {
+    const price = (top * i) / 5;
+    ticks.push({ y: y(price), label: `$${price.toLocaleString("en-US")}` });
   }
 
   return {
@@ -129,7 +123,7 @@ export function chartPoints(
     points: [...shirts]
       .sort((a, b) => a.complexity - b.complexity)
       .map((s) => ({ ...s, x: x(s.complexity), y: y(Number(s.finalPriceUsd)) })),
-    curve: samples.map((s, i) => `${i ? " L" : "M"}${x(s.score)} ${y(s.price)}`).join(""),
+    curve: ends.map((e, i) => `${i ? " L" : "M"}${x(e.score)} ${y(e.price)}`).join(""),
     bands: sorted.map((tier, i) => ({
       name: tier.name,
       color: tier.badgeBgColor,

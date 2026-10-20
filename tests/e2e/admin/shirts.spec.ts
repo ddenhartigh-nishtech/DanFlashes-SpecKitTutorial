@@ -30,11 +30,14 @@ test.describe("US1 — Dan's shirts (FR-006–FR-011)", () => {
     await field(page, "Name").fill(name);
     await field(page, "URL name").fill(slug);
     await field(page, "Style", false).selectOption("polo");
+    // 010 FR-015: every whole score has a price, however complicated.
+    await field(page, "Complexity score").fill("1000000");
+    const preview = visible(page.getByTestId("price-preview"));
+    await expect(preview).toContainText("$25,000,050.00");
     await field(page, "Complexity score").fill("30");
     await field(page, "Description").fill("Made by a robot, approved by Dan.");
-    const preview = visible(page.getByTestId("price-preview"));
     await expect(preview).toContainText("Very Complicated");
-    await expect(preview).toContainText("$1,200.00");
+    await expect(preview).toContainText("$800.00");
     await visible(page.getByRole("button", { name: "Save" })).click();
     await expect(page).toHaveURL(/\/admin\/shirts\/\d+/);
     await expect(consoleMessage(page)).toHaveText(saved);
@@ -51,7 +54,7 @@ test.describe("US1 — Dan's shirts (FR-006–FR-011)", () => {
 
     await storePage(page, slug);
     await expect(visible(page.getByRole("heading", { level: 1 }))).toHaveText(name);
-    await expect(visible(page.getByText("$1,200.00").first())).toBeVisible();
+    await expect(visible(page.getByText("$800.00").first())).toBeVisible();
     await expect(visible(page.getByTestId("tier-badge").first())).toHaveText(/Very Complicated/i);
 
     // FR-009: a bland score at $400.00 is refused, and nothing changes.

@@ -31,10 +31,10 @@ test.describe("US2 — the per diem drain", () => {
     );
     expect(overflow).toBeLessThanOrEqual(0);
 
-    // $500.00 − $344.61: some left, no party yet.
+    // $500.00 − $350.00: some left, no party yet.
     await buyByCard(page, "geo-riot", "M");
     await expect(visible(page.getByTestId("achievements"))).toHaveCount(0);
-    await expect(gauge).toContainText("$155.39");
+    await expect(gauge).toContainText("$150.00");
 
     // The order that takes it to $0 turns the gauge GONE. No box covers the order (owner, round 5).
     await buyByCard(page, "geo-riot", "M");

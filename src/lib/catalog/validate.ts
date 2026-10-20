@@ -1,6 +1,6 @@
 /**
  * Catalog validation: shape rules (Zod) plus the business rules the database can't express,
- * chiefly constitution III — a BLAND-tier shirt must cost less than the MSRP start price.
+ * chiefly constitution III — a BLAND-tier shirt must cost less than a real shirt's start.
  */
 import { z } from "zod";
 import { isBlandTier, sortTiers, tierOf } from "@/lib/catalog/tiers";
@@ -14,7 +14,7 @@ import {
   type Tier,
 } from "@/lib/catalog/types";
 import { cmp, formatUsd, isUsdString } from "@/lib/money";
-import { msrpUsd } from "@/lib/pricing/msrp";
+import { realShirtStartUsd } from "@/lib/pricing/msrp";
 import { resolvePrice } from "@/lib/pricing/resolve";
 
 export interface Issue {
@@ -59,9 +59,8 @@ const shirtSchema = z.object({
 
 const settingsSchema = z.object({
   msrp: z.object({
-    startPriceUsd: positiveUsd,
-    anchorScore: z.number().int().min(0),
-    doublingInterval: z.number().int().min(1),
+    basePriceUsd: positiveUsd,
+    perPointUsd: positiveUsd,
   }),
   checkoutGate: z.boolean(),
   flashCreditPresetsUsd: z.array(positiveUsd),
@@ -104,19 +103,14 @@ export function validateShirt(
   const issues: Issue[] = [];
   const shirt = parsed.data;
 
-  // No ceiling, but the exponential has to be countable (008 R7): past ~2^1023 it's Infinity.
-  try {
-    msrpUsd(shirt.complexity, ctx.msrp);
-  } catch {
-    return [{ field: "complexity", message: "That's too complicated to price, even for Dan." }];
-  }
-
-  if (isBlandTier(tierOf(shirt.complexity, ctx.tiers))) {
+  // Constitution III against a real shirt's start (010 R4). With BLAND alone, there's none.
+  const start = realShirtStartUsd(ctx.tiers, ctx.msrp);
+  if (start !== null && isBlandTier(tierOf(shirt.complexity, ctx.tiers))) {
     const { finalPriceUsd } = resolvePrice(shirt, ctx.msrp);
-    if (cmp(finalPriceUsd, ctx.msrp.startPriceUsd) >= 0) {
+    if (cmp(finalPriceUsd, start) >= 0) {
       issues.push({
         field: "finalPriceUsd",
-        message: `BLAND shirts must cost less than ${formatUsd(ctx.msrp.startPriceUsd)}; this one resolves to ${formatUsd(finalPriceUsd)}.`,
+        message: `BLAND shirts must cost less than ${formatUsd(start)}; this one resolves to ${formatUsd(finalPriceUsd)}.`,
       });
     }
   }

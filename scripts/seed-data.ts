@@ -25,7 +25,7 @@ export const DEMO_OWNER: DemoOwner = {
 
 export const SEED: CatalogFixture = {
   settings: {
-    msrp: { startPriceUsd: "300.00", anchorScore: 10, doublingInterval: 10 },
+    msrp: { basePriceUsd: "50.00", perPointUsd: "25.00" },
     checkoutGate: true,
     blandShaming: true,
     confirmshaming: true,
@@ -181,8 +181,8 @@ export const SEED: CatalogFixture = {
       name: "Hawaiian Tax Return",
       style: "button-down",
       complexity: 22,
-      finalPriceUsd: "1040.00",
-      description: "Tropical, itemized, and deductible in your heart. Priced by Dan personally.",
+      finalPriceUsd: null,
+      description: "Tropical, itemized, and deductible in your heart.",
       image: {
         key: "shirts/hawaiian-tax-return.svg",
         alt: "A button-down packed with zigzags and ovals in lime, orange, and violet",

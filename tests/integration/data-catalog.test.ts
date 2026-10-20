@@ -20,7 +20,7 @@ describe("catalog data layer", () => {
 
     it("getSettings returns typed settings", () => {
       const s = getSettings(db);
-      expect(s.msrp).toEqual({ startPriceUsd: "300.00", anchorScore: 10, doublingInterval: 10 });
+      expect(s.msrp).toEqual({ basePriceUsd: "50.00", perPointUsd: "25.00" });
       expect(s.checkoutGate).toBe(true);
       expect(s.flashCreditPresetsUsd).toEqual(["500.00", "1000.00", "5000.00"]);
       expect(s.mediaBaseUrl).toBe("");
@@ -47,13 +47,13 @@ describe("catalog data layer", () => {
         "geo-riot",
       ]);
       const bySlug = Object.fromEntries(shirts.map((s) => [s.slug, s]));
-      expect(bySlug["beige-regret"].finalPriceUsd).toBe("184.67");
+      expect(bySlug["beige-regret"].finalPriceUsd).toBe("125.00");
       expect(bySlug["beige-regret"].tier).toMatchObject({ name: "BLAND", isBland: true });
-      expect(bySlug["geo-riot"].finalPriceUsd).toBe("424.26");
+      expect(bySlug["geo-riot"].finalPriceUsd).toBe("425.00");
       expect(bySlug["geo-riot"].tier.name).toBe("Complicated");
       expect(bySlug["fractal-fury"]).toMatchObject({
         finalPriceUsd: "999.99",
-        msrpUsd: "1200.00",
+        msrpUsd: "800.00",
         featured: true,
       });
       expect(bySlug["fractal-fury"].images).toEqual([

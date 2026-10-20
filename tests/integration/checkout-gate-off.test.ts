@@ -8,7 +8,7 @@ const TOKEN = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
 const checkout = (extra: Record<string, string> = {}) =>
   form({
     checkoutToken: TOKEN,
-    expectedTotalUsd: "424.26",
+    expectedTotalUsd: "425.00",
     cardNumber: "4242 4242 4242 4242",
     expiry: "12/29",
     cvc: "123",
@@ -32,7 +32,7 @@ describe("checkout with the gate switched off (FR-021)", () => {
     });
     expect(sqlite.prepare("SELECT user_id, total_usd FROM orders").get()).toEqual({
       user_id: null,
-      total_usd: "424.26",
+      total_usd: "425.00",
     });
   });
 

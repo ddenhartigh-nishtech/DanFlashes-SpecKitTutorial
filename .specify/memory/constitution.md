@@ -1,14 +1,24 @@
 <!--
 Sync Impact Report
-- Version change: 4.1.0 → 4.2.0 (MINOR: guidance added for a new kind of shirt; no MUST removed or
-  redefined)
+- Version change: 4.2.0 → 5.0.0 (MAJOR: Principle II's MSRP MUST is redefined, "exponential" →
+  "straight-line", and its "never deleted" rule is narrowed for abandoned creations; a PATCH-level
+  wording fix to III is batched in)
 - Modified principles:
-  - II. Complexity Is the Price: a generated shirt (007) starts at the score counted from its own
-    pattern, and the owner can change it like any other. "The owner's judgment ... is final" stands.
+  - II. Complexity Is the Price: the MSRP algorithm MUST be a straight line, a base price plus a
+    price per point (010). Its tuning parameters are now named: the base price and the price per
+    point. Every other MUST stands (one place, deterministic, monotonic, owner-tunable, no ceiling).
+  - II. "Shirts are deactivated, never deleted" gains one exception (011): an owner-run sweep MAY
+    delete an abandoned creation. That's a shopper-made shirt nobody bought, in no cart, never
+    mass-produced or changed by the owner, and past a grace period. Owner-made shirts are always
+    kept, and so is anything in an order.
+  - III. Relentlessly Vibrant: "the starting price of a real Dan Flashes shirt" is defined as the
+    MSRP where the first tier above BLAND begins. Before, it was a tuning dial the straight line no
+    longer has.
 - Added sections: none
 - Removed sections: none
 - Templates requiring updates: none (read at runtime) ✅
-- Follow-up TODOs: the owner ratifies v4.2.0 by merging the 007 pull request
+- Follow-up TODOs: the owner ratifies v5.0.0 by merging the 010 pull request, after 007's pull
+  request ratifies v4.2.0
 -->
 
 # Dan Flashes Constitution
@@ -40,11 +50,12 @@ final price.
 - The store owner assigns each shirt's complexity score in the catalog data. A **generated shirt**
   (one the pattern generator draws) starts at the score counted from its own pattern, and the owner
   can change it like any other. The owner's judgment of how complicated a shirt is, is final.
-- The **MSRP algorithm** MUST be a single, documented, deterministic, exponential function of the
-  complexity score. It MUST live in exactly one place in the codebase.
+- The **MSRP algorithm** MUST be a single, documented, deterministic, straight-line function of the
+  complexity score: a base price plus a price per point. It MUST live in exactly one place in the
+  codebase.
 - The MSRP algorithm MUST be monotonic: a higher score MUST NEVER produce a lower MSRP. Its tuning
-  parameters (such as the starting price and how fast prices climb) MUST be owner-adjustable
-  settings, not code changes.
+  parameters (the base price and the price per point) MUST be owner-adjustable settings, not code
+  changes.
 - The owner MAY set a **final price** for any shirt in the catalog data. When none is set, the final
   price is the MSRP. The final price is what the store displays and charges.
 - There is no price ceiling. More complicated means more expensive, forever.
@@ -52,8 +63,12 @@ final price.
   complexity in the pattern itself, and in a **complexity tier badge** (an owner-named band of
   scores, e.g. "Dangerously Complicated") wherever a shirt appears. The lowest tier's badge is
   **BLAND**.
-- Shirts are deactivated, never deleted. A shirt someone has bought MUST stay viewable from their
-  order history for as long as the order exists.
+- Shirts are deactivated, never deleted, with one exception: an **abandoned creation** MAY be
+  swept by a housekeeping command the owner runs. That's a shopper-made shirt (007) that nobody has
+  bought, that sits in no cart, that the owner hasn't mass-produced or changed in any way, and that
+  is older than a grace period the spec sets. Every shirt the owner made, released or not, is kept.
+  A shirt someone has bought MUST stay viewable from their order history for as long as the order
+  exists.
 
 Rationale: the shirts are expensive because the patterns are complicated. The math suggests the
 price, and Dan decides it. The guy doesn't need a number. He can *see* it's complicated.
@@ -67,7 +82,8 @@ overwhelmingly loud.
   foils that exist so the store can disparage them and steer him toward something more complicated.
   Beige is for guys who've given up.
 - A bland shirt is any shirt in the **lowest complexity tier**, the BLAND tier. Bland shirts MUST be
-  priced below the starting price of a real Dan Flashes shirt.
+  priced below the starting price of a real Dan Flashes shirt: the MSRP where the first tier above
+  BLAND begins.
 - Product imagery is the hero. It MUST be high-resolution and zoomable so he can count every shape
   he's paying for.
 
@@ -218,4 +234,4 @@ Rationale: the complexity goes in the product, never in the architecture.
   and `/speckit-analyze`. A violation needs either a Complexity Tracking justification or an amendment.
 - Like every Dan Flashes sale, this constitution is final until amended.
 
-**Version**: 4.2.0 | **Ratified**: 2026-10-12 | **Last Amended**: 2026-10-19
+**Version**: 5.0.0 | **Ratified**: 2026-10-12 | **Last Amended**: 2026-10-20

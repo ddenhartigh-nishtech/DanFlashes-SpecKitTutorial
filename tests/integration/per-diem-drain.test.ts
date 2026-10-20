@@ -38,7 +38,7 @@ function setup() {
       .get() as { id: number }
   ).id;
   let token = 0;
-  /** Buy one Geo Riot ($424.26 in the test catalog) by card at `now`. */
+  /** Buy one Geo Riot ($425.00 in the test catalog) by card at `now`. */
   const buy = (now: Date) => {
     const cartId = getOrCreateCart(test.db, { cartId: null, userId }).id;
     addItem(test.db, cartId, { slug: "geo-riot", size: "M" });
@@ -46,7 +46,7 @@ function setup() {
       userId,
       cartId: null,
       checkoutToken: `tok-${++token}`,
-      expectedTotalUsd: "424.26",
+      expectedTotalUsd: "425.00",
       useFlashCredit: false,
       card: CARD,
       now,
@@ -82,7 +82,7 @@ describe("getPerDiemMeter", () => {
     connectStream(db, userId, PER_DIEM, START);
     expect(meter()).toMatchObject({ leftUsd: "500.00" });
     buy(at(1));
-    expect(meter(at(1))).toMatchObject({ leftUsd: "75.74", drained: false });
+    expect(meter(at(1))).toMatchObject({ leftUsd: "75.00", drained: false });
 
     topUp(db, userId, { amountInput: "1000.00", card: CARD, now: at(2) });
     const cartId = getOrCreateCart(db, { cartId: null, userId }).id;
@@ -117,23 +117,23 @@ describe("placeOrder flags the order that drains the per diem", () => {
   it("flags only the crossing order, and again after a refill", () => {
     const { db, userId, buy, meter } = setup();
     connectStream(db, userId, PER_DIEM, START);
-    const first = buy(at(1)); // 500.00 → 75.74
-    const second = buy(at(2)); // 75.74 → 0.00: the drain
+    const first = buy(at(1)); // 500.00 → 75.00
+    const second = buy(at(2)); // 75.00 → 0.00: the drain
     const third = buy(at(3)); // already at 0.00: no second party
     expect([first, second, third].map((o) => o.perDiemDrained)).toEqual([false, true, false]);
     expect(meter(at(3))).toMatchObject({ leftUsd: "0.00", drained: true });
 
     // The next top-off (at minute 10) refills it, which arms the celebration again.
     expect(meter(at(10))).toMatchObject({ leftUsd: "500.00", drained: false });
-    const refilledDrain = buy(at(11)); // 500.00 → 75.74
-    const drainAgain = buy(at(12)); // 75.74 → 0.00
+    const refilledDrain = buy(at(11)); // 500.00 → 75.00
+    const drainAgain = buy(at(12)); // 75.00 → 0.00
     expect([refilledDrain.perDiemDrained, drainAgain.perDiemDrained]).toEqual([false, true]);
   });
 
   it("counts a top-off that came due before checkout (settled in the same transaction)", () => {
     const { db, userId, buy } = setup();
     connectStream(db, userId, { ...PER_DIEM, amountUsd: "300.00" }, START);
-    // At minute 10 a second $300 top-off is due: 600.00 − 424.26 is still above zero.
+    // At minute 10 a second $300 top-off is due: 600.00 − 425.00 is still above zero.
     expect(buy(at(10)).perDiemDrained).toBe(false);
     expect(buy(at(11)).perDiemDrained).toBe(true);
   });

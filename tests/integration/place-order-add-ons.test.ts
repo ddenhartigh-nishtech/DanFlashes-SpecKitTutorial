@@ -12,8 +12,8 @@ import { FakeCookieJar, form } from "../helpers/cookies";
 import { createSeededTestDb, setSwitches } from "../helpers/db";
 
 const CARD = { number: "4242 4242 4242 4242", expiry: "12/39", cvc: "123" };
-// Geo Riot is $424.26 in the test catalog; the four add-ons are $49.99, $89.99, $29.99, $19.99.
-const GEO_RIOT = "424.26";
+// Geo Riot is $425.00 in the test catalog; the four add-ons are $49.99, $89.99, $29.99, $19.99.
+const GEO_RIOT = "425.00";
 
 function setup() {
   const test = createSeededTestDb();
@@ -69,11 +69,11 @@ describe("placeOrder with add-ons", () => {
     const { db, userId, protection, insurance, place, rows } = setup();
     const result = place({
       addOnIds: [protection.id, insurance.id],
-      expectedTotalUsd: "564.24", // 424.26 + 49.99 + 89.99
+      expectedTotalUsd: "564.98", // 425.00 + 49.99 + 89.99
     });
     if (!result.ok) throw new Error(result.code);
     const order = getOrderForUser(db, result.orderId, userId)!;
-    expect(order).toMatchObject({ subtotalUsd: GEO_RIOT, totalUsd: "564.24" });
+    expect(order).toMatchObject({ subtotalUsd: GEO_RIOT, totalUsd: "564.98" });
     expect(order.addOns).toEqual([
       { name: "Pattern Protection Plan™", priceUsd: "49.99" },
       { name: "Complexity Insurance", priceUsd: "89.99" },
@@ -95,15 +95,15 @@ describe("placeOrder with add-ons", () => {
     topUp(db, userId, { amountInput: "1000.00", card: CARD });
     const result = place({
       addOnIds: addOns.map((a) => a.id),
-      expectedTotalUsd: "614.22",
+      expectedTotalUsd: "614.96",
       useFlashCredit: true,
-      expectedCreditUsd: "614.22",
+      expectedCreditUsd: "614.96",
     });
     expect(result.ok).toBe(true);
-    expect(getBalanceUsd(db, userId)).toBe("385.78");
+    expect(getBalanceUsd(db, userId)).toBe("385.04");
     expect(
       sqlite.prepare("SELECT amount_usd FROM flash_credit_entries WHERE kind = 'spend'").all(),
-    ).toEqual([{ amount_usd: "-614.22" }]);
+    ).toEqual([{ amount_usd: "-614.96" }]);
   });
 
   it("splits the whole total, add-ons included, and still needs his say-so", () => {
@@ -111,7 +111,7 @@ describe("placeOrder with add-ons", () => {
     topUp(db, userId, { amountInput: "100.00", card: CARD });
     const split = {
       addOnIds: addOns.map((a) => a.id),
-      expectedTotalUsd: "614.22",
+      expectedTotalUsd: "614.96",
       useFlashCredit: true,
       expectedCreditUsd: "100.00",
     };
@@ -119,14 +119,14 @@ describe("placeOrder with add-ons", () => {
       ok: false,
       code: "SPLIT_CONFIRMATION_REQUIRED",
       creditUsd: "100.00",
-      cardUsd: "514.22",
+      cardUsd: "514.96",
     });
     const result = place({ ...split, confirmSplit: true });
     if (!result.ok) throw new Error(result.code);
     expect(getOrderForUser(db, result.orderId, userId)!.payment).toMatchObject({
       method: "split",
       creditUsd: "100.00",
-      cardUsd: "514.22",
+      cardUsd: "514.96",
     });
   });
 
@@ -136,19 +136,19 @@ describe("placeOrder with add-ons", () => {
     const before = { orders: orders(), ledger: ledger() };
 
     sqlite.prepare("UPDATE add_ons SET price_usd = '59.99' WHERE id = ?").run(protection.id);
-    expect(place({ addOnIds: [protection.id], expectedTotalUsd: "474.25" })).toEqual({
+    expect(place({ addOnIds: [protection.id], expectedTotalUsd: "474.99" })).toEqual({
       ok: false,
       code: "PRICE_CHANGED",
-      totalUsd: "484.25",
+      totalUsd: "484.99",
     });
     sqlite.prepare("UPDATE add_ons SET active = 0 WHERE id = ?").run(insurance.id);
     expect(
       place({ addOnIds: [protection.id, insurance.id], expectedTotalUsd: "574.24" }),
-    ).toMatchObject({ ok: false, code: "PRICE_CHANGED", totalUsd: "484.25" });
+    ).toMatchObject({ ok: false, code: "PRICE_CHANGED", totalUsd: "484.99" });
     expect(place({ addOnIds: [999], expectedTotalUsd: GEO_RIOT })).toMatchObject({
       code: "PRICE_CHANGED",
     });
-    expect(place({ addOnIds: [], expectedTotalUsd: "474.25" })).toMatchObject({
+    expect(place({ addOnIds: [], expectedTotalUsd: "474.99" })).toMatchObject({
       code: "PRICE_CHANGED",
       totalUsd: GEO_RIOT,
     });
@@ -160,7 +160,7 @@ describe("placeOrder with add-ons", () => {
     const { db, userId, protection, place } = setup();
     const result = place({
       addOnIds: [protection.id, protection.id],
-      expectedTotalUsd: "474.25",
+      expectedTotalUsd: "474.99",
     });
     if (!result.ok) throw new Error(result.code);
     expect(getOrderForUser(db, result.orderId, userId)!.addOns).toHaveLength(1);
@@ -173,7 +173,7 @@ describe("placeOrder with add-ons", () => {
     if (!result.ok) throw new Error(result.code);
     expect(getOrderForUser(db, result.orderId, userId)!.totalUsd).toBe(GEO_RIOT);
     expect(rows(result.orderId)).toEqual([]);
-    expect(place({ addOnIds: addOns.map((a) => a.id), expectedTotalUsd: "614.22" })).toMatchObject({
+    expect(place({ addOnIds: addOns.map((a) => a.id), expectedTotalUsd: "614.96" })).toMatchObject({
       code: "PRICE_CHANGED", // a stale page that still showed them
       totalUsd: GEO_RIOT,
     });
@@ -187,7 +187,7 @@ describe("placeOrder with add-ons", () => {
       userId,
       cartId: null,
       checkoutToken: "tok-replay",
-      expectedTotalUsd: "474.25",
+      expectedTotalUsd: "474.99",
       useFlashCredit: false,
       card: CARD,
       addOnIds: [protection.id],
@@ -200,7 +200,7 @@ describe("placeOrder with add-ons", () => {
 
   it("keeps the order as it was when the owner renames or reprices an add-on later", () => {
     const { db, sqlite, userId, protection, place } = setup();
-    const result = place({ addOnIds: [protection.id], expectedTotalUsd: "474.25" });
+    const result = place({ addOnIds: [protection.id], expectedTotalUsd: "474.99" });
     if (!result.ok) throw new Error(result.code);
     sqlite
       .prepare(
@@ -208,7 +208,7 @@ describe("placeOrder with add-ons", () => {
       )
       .run(protection.id);
     expect(getOrderForUser(db, result.orderId, userId)).toMatchObject({
-      totalUsd: "474.25",
+      totalUsd: "474.99",
       addOns: [{ name: "Pattern Protection Plan™", priceUsd: "49.99" }],
     });
   });
@@ -226,8 +226,8 @@ describe("placeOrder with add-ons", () => {
       endsAt: "",
       ongoing: true,
     });
-    // $424.26 alone would leave $75.74; with the add-ons ($614.22) the per diem runs dry.
-    const result = place({ addOnIds: addOns.map((a) => a.id), expectedTotalUsd: "614.22" });
+    // $425.00 alone would leave $75.74; with the add-ons ($614.96) the per diem runs dry.
+    const result = place({ addOnIds: addOns.map((a) => a.id), expectedTotalUsd: "614.96" });
     if (!result.ok) throw new Error(result.code);
     expect(getOrderForUser(db, result.orderId, userId)!.perDiemDrained).toBe(true);
   });
@@ -244,7 +244,7 @@ describe("placeOrderCore and addOnId fields", () => {
     const [protection, insurance] = listOfferedAddOns(db, getSettings(db));
     const body = form({
       checkoutToken: "11111111-2222-3333-4444-555555555555",
-      expectedTotalUsd: "564.24",
+      expectedTotalUsd: "564.98",
       cardNumber: CARD.number,
       expiry: CARD.expiry,
       cvc: CARD.cvc,

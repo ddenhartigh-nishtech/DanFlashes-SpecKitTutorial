@@ -6,6 +6,7 @@ import {
   setSwitchCore,
 } from "@/lib/actions/admin/settings";
 import { SWITCH_KEYS } from "@/lib/admin/switches";
+import { copy } from "@/lib/copy";
 import { getSettings } from "@/lib/data/settings";
 import type { Sqlite } from "@/lib/db/client";
 import { form } from "../helpers/cookies";
@@ -40,7 +41,7 @@ describe("setSwitch (008 FR-012, FR-013)", () => {
   });
 
   it.each([
-    [{ key: "msrpAnchorScore", on: "0" }],
+    [{ key: "msrpPerPointUsd", on: "0" }],
     [{ key: "__proto__", on: "0" }],
     [{ key: "roachMotel", on: "maybe" }],
   ])("refuses %j and changes nothing", (fields) => {
@@ -51,50 +52,52 @@ describe("setSwitch (008 FR-012, FR-013)", () => {
   });
 });
 
-describe("saveTuning (008 FR-014, FR-015)", () => {
-  const tuning = (start: string, anchor = "10", interval = "10") =>
-    form({ startPriceUsd: start, anchorScore: anchor, doublingInterval: interval });
+describe("saveTuning (008 FR-014, FR-015; 010 FR-003, FR-013)", () => {
+  const tuning = (base: string, perPoint = "25.00") =>
+    form({ basePriceUsd: base, perPointUsd: perPoint });
+  const t = copy.console.settings.tuning;
 
-  it("saves only the MSRP dials, and keeps whole dollars as dollars and cents", () => {
+  it("saves only the two dials, and keeps whole dollars as dollars and cents", () => {
     const { db, sqlite, jar } = setup();
-    const others = rest(
-      sqlite,
-      "msrp_start_price_usd",
-      "msrp_anchor_score",
-      "msrp_doubling_interval",
-    );
-    expect(saveTuningCore(db, jar, tuning("400", "12", "8")).ok).toBe(true);
-    expect(getSettings(db).msrp).toEqual({
-      startPriceUsd: "400.00",
-      anchorScore: 12,
-      doublingInterval: 8,
-    });
-    expect(
-      rest(sqlite, "msrp_start_price_usd", "msrp_anchor_score", "msrp_doubling_interval"),
-    ).toEqual(others);
+    const others = rest(sqlite, "msrp_base_price_usd", "msrp_per_point_usd");
+    expect(saveTuningCore(db, jar, tuning("40", "30.5")).ok).toBe(true);
+    expect(getSettings(db).msrp).toEqual({ basePriceUsd: "40.00", perPointUsd: "30.50" });
+    expect(rest(sqlite, "msrp_base_price_usd", "msrp_per_point_usd")).toEqual(others);
   });
 
   it.each([
-    [tuning("0")],
-    [tuning("abc")],
-    [tuning("300.001")],
-    [tuning("300", "-1")],
-    [tuning("300", "1.5")],
-    [tuning("300", "10", "0")],
-  ])("refuses dials that aren't numbers it can use (%#)", (fields) => {
+    ["a blank base", tuning(""), "basePriceUsd", t.baseFormat],
+    ["a free base", tuning("0"), "basePriceUsd", t.baseFormat],
+    ["a negative base", tuning("-5"), "basePriceUsd", t.baseFormat],
+    ["a base that isn't money", tuning("lots"), "basePriceUsd", t.baseFormat],
+    ["a base past the cent", tuning("50.001"), "basePriceUsd", t.baseFormat],
+    ["a blank point", tuning("50", ""), "perPointUsd", t.perPointFormat],
+    ["a free point", tuning("50", "0"), "perPointUsd", t.perPointFormat],
+    ["a negative point", tuning("50", "-5"), "perPointUsd", t.perPointFormat],
+    ["a point that isn't money", tuning("50", "lots"), "perPointUsd", t.perPointFormat],
+  ])("refuses %s, saving nothing", (_name, fields, field, message) => {
     const { db, jar } = setup();
     const before = getSettings(db).msrp;
-    expect(saveTuningCore(db, jar, fields).ok).toBe(false);
+    const state = saveTuningCore(db, jar, fields);
+    expect(state.ok).toBe(false);
+    expect(!state.ok && state.issues).toEqual([{ field, message }]);
     expect(getSettings(db).msrp).toEqual(before);
   });
 
-  it("refuses tuning that would lift a BLAND shirt to the start price, naming it", () => {
-    const { db, jar } = setup();
-    const state = saveTuningCore(db, jar, tuning("300", "0"));
+  it("refuses dials that would put Dan's own BLAND price at a real shirt's start, naming it", () => {
+    const { db, sqlite, jar } = setup();
+    sqlite
+      .prepare("UPDATE shirts SET final_price_usd = '250.00' WHERE slug = 'beige-regret'")
+      .run();
+    // $10 + $30 a point: a real shirt starts at $310.00, still above Dan's $250.00.
+    expect(saveTuningCore(db, jar, tuning("10", "30")).ok).toBe(true);
+    // $10 + $20 a point: a real shirt starts at $210.00, under it.
+    const state = saveTuningCore(db, jar, tuning("10", "20"));
     expect(state.ok).toBe(false);
+    expect(!state.ok && state.message).toBe(t.breaks);
     expect(!state.ok && state.issues?.map((i) => i.field)).toContain("beige-regret");
     expect(!state.ok && state.issues?.[0].message).toContain("Beige Regret");
-    expect(getSettings(db).msrp.anchorScore).toBe(10);
+    expect(getSettings(db).msrp).toEqual({ basePriceUsd: "10.00", perPointUsd: "30.00" });
   });
 });
 

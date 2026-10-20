@@ -46,7 +46,7 @@ test.describe("US1 — fake scarcity", () => {
     await line.getByLabel(copy.cart.quantity).fill("2");
     await line.getByRole("button", { name: copy.cart.update }).click();
     await confirmTwice(page); // lowering goes through the roach motel (005)
-    await expect(line.getByTestId("price")).toHaveText("$689.22");
+    await expect(line.getByTestId("price")).toHaveText("$700.00");
     await expect(line.getByLabel(copy.cart.quantity)).toHaveValue("2");
     await expect(line.getByTestId("stock-line")).toHaveText(u.fewMore);
     const overflow = await page.evaluate(

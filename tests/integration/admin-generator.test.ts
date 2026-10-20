@@ -10,6 +10,7 @@ import {
 import { makeItMineCore } from "@/lib/actions/dial";
 import { copy } from "@/lib/copy";
 import { getAdminShirt, listAdminShirts } from "@/lib/data/admin-shirts";
+import { getSettings, saveSettings } from "@/lib/data/settings";
 import { getShirtBySlug, listCatalogShirts } from "@/lib/data/shirts";
 import type { Db } from "@/lib/db/client";
 import { SESSION_COOKIE } from "@/lib/http/cookies";
@@ -92,6 +93,22 @@ describe("the console's generator preview (007 FR-019)", () => {
     const { db } = createSeededTestDb();
     expect(generatorPreview(db, query)).toMatchObject({ ok: false, reason, maxScore: 10_249 });
   });
+
+  it("previews the dial's top at its full price, and stops there under any dials (010 FR-011)", () => {
+    const { db } = createSeededTestDb();
+    expect(generatorPreview(db, { score: "10249" })).toMatchObject({
+      ok: true,
+      msrpUsd: "256275.00",
+      maxScore: 10_249,
+    });
+    saveSettings(db, { ...getSettings(db), msrp: { basePriceUsd: "0.01", perPointUsd: "0.01" } });
+    expect(generatorPreview(db, { score: "10250" })).toMatchObject({
+      ok: false,
+      reason: "unpriceable",
+      message: copy.console.generator.beyond,
+      maxScore: 10_249,
+    });
+  });
 });
 
 describe("saveGeneratedShirt (007 FR-020, contracts: the console)", () => {
@@ -122,8 +139,8 @@ describe("saveGeneratedShirt (007 FR-020, contracts: the console)", () => {
 
   it.each([
     ["a score that isn't one", { score: "lots" }, g.scoreRange(10_249)],
-    ["a score past the top", { score: "200000" }, copy.console.shirts.preview.cantPrice],
-    ["one it can't price", { score: "10250" }, copy.console.shirts.preview.cantPrice],
+    ["a score past the top", { score: "200000" }, copy.console.generator.beyond],
+    ["one past the dial's top", { score: "10250" }, copy.console.generator.beyond],
     ["a style we don't make", { style: "tank" }, g.badStyle],
     ["a seed that isn't one", { seed: "-2" }, g.badSeed],
     ["no name", { name: "   " }, g.nameLength],

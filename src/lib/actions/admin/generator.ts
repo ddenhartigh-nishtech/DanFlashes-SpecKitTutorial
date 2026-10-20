@@ -3,10 +3,10 @@
  * tested directly; src/actions/admin.ts wraps them. Each starts at the door (`asAdmin`).
  */
 import { eq } from "drizzle-orm";
+import { dansChange } from "@/lib/admin/owner-mark";
 import { asAdmin, id, problems, refused, saved, text, type ConsoleState } from "@/lib/admin/state";
 import { findSessionUser } from "@/lib/auth/session";
 import { copy } from "@/lib/copy";
-import { getSettings } from "@/lib/data/settings";
 import type { Db } from "@/lib/db/client";
 import { shirts } from "@/lib/db/schema";
 import { SESSION_COOKIE, type CookieJar } from "@/lib/http/cookies";
@@ -24,10 +24,11 @@ export function saveGeneratedShirtCore(db: Db, jar: CookieJar, form: FormData): 
   const gate = asAdmin(db, jar);
   if (gate.refusal) return gate.refusal;
 
-  const read = readRecipe(
-    { score: text(form, "score"), style: text(form, "style"), seed: text(form, "seed") },
-    getSettings(db).msrp,
-  );
+  const read = readRecipe({
+    score: text(form, "score"),
+    style: text(form, "style"),
+    seed: text(form, "seed"),
+  });
   const issues = read.ok ? [] : [...read.issues];
   const name = text(form, "name").trim();
   if (name.length < 1 || name.length > 80) issues.push({ field: "name", message: g.nameLength });
@@ -45,7 +46,7 @@ export function saveGeneratedShirtCore(db: Db, jar: CookieJar, form: FormData): 
   if (!made.ok) {
     return made.code === "RULE"
       ? problems(made.issues)
-      : problems([{ field: "score", message: copy.console.shirts.preview.cantPrice }]);
+      : problems([{ field: "score", message: g.beyond }]);
   }
   return { ok: true, message: copy.console.saved, id: made.shirtId };
 }
@@ -65,7 +66,7 @@ export function setShirtListedCore(db: Db, jar: CookieJar, form: FormData): Cons
   if (listed !== "1" && listed !== "0") return refused(g.badListed);
 
   db.update(shirts)
-    .set({ listed: listed === "1" })
+    .set({ listed: listed === "1", ...dansChange() })
     .where(eq(shirts.id, shirtId))
     .run();
   return saved(listed === "1" ? g.listedNow : g.unlistedNow);

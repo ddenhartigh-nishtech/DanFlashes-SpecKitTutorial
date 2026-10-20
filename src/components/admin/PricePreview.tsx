@@ -26,16 +26,12 @@ export function PricePreview({
   let tier: string | null = null;
   let msrpUsd: string | null = null;
   let finalUsd: string | null = null;
-  let tooComplicated = false;
   if (complexity !== null) {
+    // Every whole score has a price (010 FR-015).
     tier = tierOf(complexity, tiers).name;
-    try {
-      const resolved = resolvePrice({ complexity, finalPriceUsd: owner }, msrp);
-      msrpUsd = formatUsd(resolved.msrpUsd);
-      finalUsd = formatUsd(resolved.finalPriceUsd);
-    } catch {
-      tooComplicated = true;
-    }
+    const resolved = resolvePrice({ complexity, finalPriceUsd: owner }, msrp);
+    msrpUsd = formatUsd(resolved.msrpUsd);
+    finalUsd = formatUsd(resolved.finalPriceUsd);
   }
   return (
     <dl
@@ -46,7 +42,7 @@ export function PricePreview({
       <dt className="text-office-muted">{p.tier}</dt>
       <dd>{tier ?? "—"}</dd>
       <dt className="text-office-muted">{p.msrp}</dt>
-      <dd>{tooComplicated ? p.cantPrice : (msrpUsd ?? "—")}</dd>
+      <dd>{msrpUsd ?? "—"}</dd>
       <dt className="text-office-muted">{p.final}</dt>
       <dd>
         {finalUsd ?? "—"}

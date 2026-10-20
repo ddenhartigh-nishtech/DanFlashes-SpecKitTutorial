@@ -10,6 +10,7 @@ import { SWITCH_KEYS } from "@/lib/admin/switches";
 import { copy } from "@/lib/copy";
 import { listAdminShirts, listLibrary } from "@/lib/data/admin-shirts";
 import { getSettings } from "@/lib/data/settings";
+import { listTiers } from "@/lib/data/tiers";
 import { getDb } from "@/lib/db/client";
 
 export default function SettingsPage() {
@@ -32,7 +33,7 @@ async function Settings() {
   return (
     <ConsolePage title={copy.console.settings.title} intro={copy.console.settings.intro}>
       <SwitchBoard switches={SWITCH_KEYS.map((key) => ({ key, on: settings[key] }))} />
-      <TuningForm msrp={settings.msrp} shirts={shirts} />
+      <TuningForm msrp={settings.msrp} tiers={listTiers(db)} shirts={shirts} />
       <div className="grid gap-6 md:grid-cols-2 md:items-start">
         <PresetsForm presetsUsd={settings.flashCreditPresetsUsd} />
         <MediaSettingsForm

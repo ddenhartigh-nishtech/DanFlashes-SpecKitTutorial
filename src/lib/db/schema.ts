@@ -30,6 +30,11 @@ function money(column: AnySQLiteColumn): SQL {
   )`;
 }
 
+/** A money string above zero (the app writes canonical amounts, so zero is only ever '0.00'). */
+function positiveMoney(column: AnySQLiteColumn): SQL {
+  return sql`${money(column)} AND ${column} NOT GLOB '-*' AND ${column} <> '0.00'`;
+}
+
 const timestamps = {
   createdAt: text("created_at").notNull().default(nowIso),
 };
@@ -83,6 +88,8 @@ export const shirts = sqliteTable(
     }),
     ...timestamps,
     updatedAt: text("updated_at").notNull().default(nowIso),
+    /** When Dan last changed it in his office (011 R2). The sweep keeps every shirt he touched. */
+    ownerChangedAt: text("owner_changed_at"),
   },
   (t) => [
     check("shirts_origin", sql`${t.origin} IN ('catalog', 'owner', 'dial')`),
@@ -140,9 +147,9 @@ export const storeSettings = sqliteTable(
   "store_settings",
   {
     id: integer("id").primaryKey(),
-    msrpStartPriceUsd: text("msrp_start_price_usd").notNull().default("300.00"),
-    msrpAnchorScore: integer("msrp_anchor_score").notNull().default(10),
-    msrpDoublingInterval: integer("msrp_doubling_interval").notNull().default(10),
+    // The MSRP's two dials (010 R2): price = base + per point × score.
+    msrpBasePriceUsd: text("msrp_base_price_usd").notNull().default("50.00"),
+    msrpPerPointUsd: text("msrp_per_point_usd").notNull().default("25.00"),
     checkoutGate: integer("checkout_gate", { mode: "boolean" }).notNull().default(true),
     flashCreditPresetsUsd: text("flash_credit_presets_usd", { mode: "json" })
       .$type<string[]>()
@@ -177,9 +184,8 @@ export const storeSettings = sqliteTable(
   },
   (t) => [
     check("store_settings_singleton", sql`${t.id} = 1`),
-    check("store_settings_start_price", money(t.msrpStartPriceUsd)),
-    check("store_settings_anchor", sql`${t.msrpAnchorScore} >= 0`),
-    check("store_settings_interval", sql`${t.msrpDoublingInterval} >= 1`),
+    check("store_settings_base_price", positiveMoney(t.msrpBasePriceUsd)),
+    check("store_settings_per_point", positiveMoney(t.msrpPerPointUsd)),
     check("store_settings_presets_json", sql`json_valid(${t.flashCreditPresetsUsd})`),
     check(
       "store_settings_surcharge",

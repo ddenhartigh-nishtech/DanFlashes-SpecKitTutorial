@@ -31,44 +31,44 @@ test.describe("US1 — pre-checked add-ons", () => {
       await expect(box).toBeChecked();
     }
     const total = visible(page.getByTestId("total"));
-    await expect(total).toHaveText("$534.57");
+    await expect(total).toHaveText("$539.96");
 
     // 2: untick, and Dan says something; tick again, and it's back.
     const insurance = visible(page.getByRole("checkbox", { name: /Complexity Insurance/ }));
     const decline = "No thanks, I'll take my chances with complexity.";
     await insurance.uncheck();
-    await expect(total).toHaveText("$444.58");
+    await expect(total).toHaveText("$449.97");
     await expect(visible(page.getByText(decline))).toBeVisible();
     await insurance.check();
-    await expect(total).toHaveText("$534.57");
+    await expect(total).toHaveText("$539.96");
     await expect(page.getByText(decline).filter({ visible: true })).toHaveCount(0);
 
     // 3: unticks don't stick.
     await insurance.uncheck();
     await visible(page.getByRole("checkbox", { name: /Extended Vibrancy Warranty/ })).uncheck();
     await page.reload();
-    await expect(visible(page.getByTestId("total"))).toHaveText("$534.57");
+    await expect(visible(page.getByTestId("total"))).toHaveText("$539.96");
     await expect(
       visible(page.getByRole("checkbox", { name: /Complexity Insurance/ })),
     ).toBeChecked();
     // Nor a trip to the cart and back: Next keeps the page he left mounted, just hidden.
     await visible(page.getByRole("checkbox", { name: /Complexity Insurance/ })).uncheck();
-    await expect(visible(page.getByTestId("total"))).toHaveText("$444.58");
+    await expect(visible(page.getByTestId("total"))).toHaveText("$449.97");
     await visible(page.getByTestId("cart-link")).click();
     await expect(page).toHaveURL(/\/cart$/);
     await visible(page.getByRole("link", { name: copy.cart.checkout, exact: true })).click();
     await expect(page).toHaveURL(/\/checkout$/);
-    await expect(visible(page.getByTestId("total"))).toHaveText("$534.57");
+    await expect(visible(page.getByTestId("total"))).toHaveText("$539.96");
     await expect(
       visible(page.getByRole("checkbox", { name: /Complexity Insurance/ })),
     ).toBeChecked();
 
     // 5 (US1 AC4): untick the protection plan and split the rest: credit plus card, add-ons included.
     await visible(page.getByRole("checkbox", { name: /Pattern Protection Plan/ })).uncheck();
-    await expect(visible(page.getByTestId("total"))).toHaveText("$484.58");
+    await expect(visible(page.getByTestId("total"))).toHaveText("$489.97");
     await visible(page.getByRole("button", { name: c.applyCredit("$100.00") })).click();
-    await expect(visible(page.getByTestId("card-line"))).toHaveText(c.cardLine("$384.58"));
-    await visible(page.getByLabel(c.confirmSplit("$384.58"))).check();
+    await expect(visible(page.getByTestId("card-line"))).toHaveText(c.cardLine("$389.97"));
+    await visible(page.getByLabel(c.confirmSplit("$389.97"))).check();
     await visible(page.getByLabel("Card number")).fill("4242 4242 4242 4242");
     await visible(page.getByLabel("Expiry (MM/YY)")).fill("12/29");
     await visible(page.getByLabel("CVC")).fill("123");
@@ -85,7 +85,7 @@ test.describe("US1 — pre-checked add-ons", () => {
     await expect(lines.filter({ hasText: "Complexity Insurance" })).toContainText("$89.99");
     await expect(lines.filter({ hasText: "Pattern Protection Plan" })).toHaveCount(0);
     await expect(visible(page.getByTestId("payment"))).toHaveText(
-      copy.order.paidSplit("$100.00", "Visa", "4242", "$384.58"),
+      copy.order.paidSplit("$100.00", "Visa", "4242", "$389.97"),
     );
     await page.goto("/account");
     await expect(visible(page.getByTestId("add-on-line"))).toHaveCount(3);

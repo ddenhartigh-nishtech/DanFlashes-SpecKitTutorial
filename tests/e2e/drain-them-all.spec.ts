@@ -40,7 +40,7 @@ test.describe("US4 — drain them all", () => {
     });
     await expect(left(page, s.presets.garage_sale)).toHaveText(s.left("$50.00"));
 
-    // 20: Geo Riot ($344.61) spends the per diem first, then the oldest money (College Fund). The
+    // 20: Geo Riot ($350.00) spends the per diem first, then the oldest money (College Fund). The
     // confirmation has no achievement box: the corner is the celebration (owner, round 5).
     const corner = visible(page.getByTestId("drain-corner"));
     const gauge = corner.getByTestId("per-diem-meter");
@@ -52,7 +52,7 @@ test.describe("US4 — drain them all", () => {
     await expect(corner.getByTestId("drain-pop")).toHaveCount(0);
     await page.goto("/account");
     await expect(left(page, s.presets.per_diem)).toHaveText(s.gone);
-    await expect(left(page, s.presets.college_fund)).toHaveText(s.left("$55.39"));
+    await expect(left(page, s.presets.college_fund)).toHaveText(s.left("$50.00"));
     await expect(left(page, s.presets.garage_sale)).toHaveText(s.left("$50.00"));
 
     // 21: one order empties both, and both pop in the corner on its confirmation.

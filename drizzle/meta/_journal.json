@@ -99,6 +99,20 @@
       "when": 1792433489488,
       "tag": "0013_made_to_order",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "6",
+      "when": 1792513892015,
+      "tag": "0014_gentler_pricing_curve",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "6",
+      "when": 1792520100715,
+      "tag": "0015_owner_changed",
+      "breakpoints": true
     }
   ]
 }

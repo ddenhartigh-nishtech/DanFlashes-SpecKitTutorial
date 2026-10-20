@@ -62,8 +62,8 @@ Success calls `refresh()`. Each one runs in a single transaction. "Refused" mean
   - **Refused when**:
     - the slug is malformed or already taken
     - `validateShirt` fails (name, style, score, price, description)
-    - the BLAND price is ≥ the start price
-    - the MSRP can't be computed
+    - the BLAND price is ≥ a real shirt's start (the MSRP where the first tier above BLAND begins;
+      010 R4)
     - `active` is set without an image
   - **On success**: the shirt is created, inactive if it has no image, with the image at position
     0.
@@ -87,9 +87,10 @@ Success calls `refresh()`. Each one runs in a single transaction. "Refused" mean
   - **Fields**: `key` (one of the 13 in `src/lib/admin/switches.ts`) and `on` (`"1"` or `"0"`).
   - Updates only that column. An unknown key is refused.
 - **`saveTuning`**:
-  - **Fields**: `startPriceUsd`, `anchorScore`, `doublingInterval`.
-  - **Refused when**: shape rules fail, or `checkCatalog` under the new tuning names any shirt (the
-    bland rule, an MSRP that can't be computed).
+  - **Fields**: `basePriceUsd`, `perPointUsd` (010; before, `startPriceUsd`, `anchorScore`,
+    `doublingInterval`).
+  - **Refused when**: either dial isn't dollars and cents of at least $0.01, or `checkCatalog` under
+    the new tuning names any shirt (the bland rule). Since 010, every whole score has an MSRP.
   - Saves only the MSRP columns.
 - **`savePresets`**:
   - **Fields**: `presetsUsd`, one amount per line or comma-separated.

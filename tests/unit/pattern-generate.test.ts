@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { countPattern } from "@/lib/pattern/count";
 import { buildPattern, generate } from "@/lib/pattern/generate";
-import { ART_MAX_SCORE } from "@/lib/pattern/dial";
+import { DIAL_MAX_SCORE } from "@/lib/pattern/dial";
 import { BLAND_PALETTE, LOUD_PALETTE } from "@/lib/pattern/silhouette";
 import { mulberry32 } from "@/lib/pattern/rng";
 import type { Recipe } from "@/lib/pattern/recipe";
@@ -51,7 +51,7 @@ describe("the count is exactly the target (007 FR-003, R1 as amended)", () => {
       expect(countPattern(buildPattern(recipe, { bland: recipe.score < 10 }))).toBe(recipe.score);
       expect(generate(recipe, { bland: false }).count).toBe(recipe.score);
     }
-    for (const score of [1_000, 5_000, 10_249, 20_000, ART_MAX_SCORE]) {
+    for (const score of [1_000, 5_000, DIAL_MAX_SCORE, 20_000, 24_000]) {
       const recipe: Recipe = { score, style: "polo", seed: score };
       expect(countPattern(buildPattern(recipe, { bland: false }))).toBe(score);
     }
@@ -119,13 +119,11 @@ describe("the art says nothing about the score (007 FR-008)", () => {
 });
 
 describe("the art budget (007 SC-005, R13)", () => {
-  it("stays under 1 MB at the default top, and under 2 MB at the art limit (24,000)", () => {
+  it("stays under 1 MB at the dial's top (010 R5)", () => {
     const size = (score: number) =>
       new TextEncoder().encode(
         generate({ score, style: "button-down", seed: 11 }, { bland: false }).svg,
       ).length;
-    expect(ART_MAX_SCORE).toBe(24_000);
-    expect(size(10_249)).toBeLessThan(1024 * 1024);
-    expect(size(ART_MAX_SCORE)).toBeLessThan(2 * 1024 * 1024);
+    expect(size(DIAL_MAX_SCORE)).toBeLessThan(1024 * 1024);
   });
 });

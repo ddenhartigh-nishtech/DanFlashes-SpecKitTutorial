@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { addItem, getCartView, getOrCreateCart, updateItem } from "@/lib/cart/cart";
 import { placeOrder, type PlaceOrderInput } from "@/lib/checkout/place-order";
+import { getSettings, saveSettings } from "@/lib/data/settings";
 import { getOrderForUser, listOrdersForUser } from "@/lib/orders/orders";
 import { createSeededTestDb, setSwitches } from "../helpers/db";
 
@@ -21,12 +22,12 @@ function setup() {
   addItem(test.db, cartId, { slug: "geo-riot", size: "L" });
   updateItem(test.db, cartId, { slug: "geo-riot", size: "L", quantity: 2 });
   addItem(test.db, cartId, { slug: "beige-regret", size: "S" });
-  // geo-riot 424.26 × 2 + beige-regret 184.67 = 1033.19
+  // geo-riot 425.00 × 2 + beige-regret 125.00 = 975.00
   const input = (patch: Partial<PlaceOrderInput> = {}): PlaceOrderInput => ({
     userId,
     cartId: null,
     checkoutToken: "tok-1",
-    expectedTotalUsd: "1033.19",
+    expectedTotalUsd: "975.00",
     useFlashCredit: false,
     card: CARD,
     now: NOW,
@@ -46,10 +47,10 @@ describe("placeOrder — card", () => {
 
     const order = sqlite.prepare("SELECT * FROM orders").get() as Record<string, unknown>;
     expect(order).toMatchObject({
-      subtotal_usd: "1033.19",
+      subtotal_usd: "975.00",
       shipping_usd: "0.00",
       tax_usd: "0.00",
-      total_usd: "1033.19",
+      total_usd: "975.00",
       payment_method: "card",
       card_brand: "Visa",
       card_last4: "4242",
@@ -59,7 +60,7 @@ describe("placeOrder — card", () => {
   it("snapshots each line: name, tier, complexity, final price, and MSRP", () => {
     const { db, sqlite, input } = setup();
     sqlite.prepare("UPDATE shirts SET final_price_usd = '500.00' WHERE slug = 'geo-riot'").run();
-    placeOrder(db, input({ expectedTotalUsd: "1184.67" }));
+    placeOrder(db, input({ expectedTotalUsd: "1125.00" }));
     const items = sqlite
       .prepare(
         "SELECT shirt_name, tier_name, complexity, size, quantity, final_price_usd, msrp_usd FROM order_items ORDER BY shirt_name",
@@ -72,8 +73,8 @@ describe("placeOrder — card", () => {
         complexity: 3,
         size: "S",
         quantity: 1,
-        final_price_usd: "184.67",
-        msrp_usd: "184.67",
+        final_price_usd: "125.00",
+        msrp_usd: "125.00",
       },
       {
         shirt_name: "Geo Riot",
@@ -82,7 +83,7 @@ describe("placeOrder — card", () => {
         size: "L",
         quantity: 2,
         final_price_usd: "500.00",
-        msrp_usd: "424.26",
+        msrp_usd: "425.00",
       },
     ]);
   });
@@ -100,12 +101,41 @@ describe("placeOrder — card", () => {
     expect(placeOrder(db, input({ expectedTotalUsd: "0.01" }))).toEqual({
       ok: false,
       code: "PRICE_CHANGED",
-      totalUsd: "1033.19",
+      totalUsd: "975.00",
     });
     expect(placeOrder(db, input({ expectedTotalUsd: "garbage" }))).toMatchObject({
       code: "PRICE_CHANGED",
     });
     expect(count(sqlite, "orders")).toBe(0);
+  });
+
+  it("refuses the old total after Dan retunes mid-checkout, then charges the new line (010 FR-009)", () => {
+    const { db, sqlite, cartId, input } = setup();
+    expect(getCartView(db, cartId).subtotalUsd).toBe("975.00"); // what he saw
+    saveSettings(db, { ...getSettings(db), msrp: { basePriceUsd: "50.00", perPointUsd: "40.00" } });
+    // geo-riot $650.00 × 2 + beige-regret $170.00 = $1,470.00
+    expect(getCartView(db, cartId).lines.map((l) => l.shirt.finalPriceUsd)).toEqual([
+      "170.00",
+      "650.00",
+    ]);
+    expect(placeOrder(db, input())).toEqual({
+      ok: false,
+      code: "PRICE_CHANGED",
+      totalUsd: "1470.00",
+    });
+    expect(count(sqlite, "orders")).toBe(0);
+    expect(placeOrder(db, input({ expectedTotalUsd: "1470.00" }))).toEqual({
+      ok: true,
+      orderId: expect.any(Number),
+    });
+    expect(
+      sqlite.prepare("SELECT final_price_usd, msrp_usd FROM order_items ORDER BY id").all(),
+    ).toEqual(
+      expect.arrayContaining([
+        { final_price_usd: "650.00", msrp_usd: "650.00" },
+        { final_price_usd: "170.00", msrp_usd: "170.00" },
+      ]),
+    );
   });
 
   it("a replayed checkout token returns the same order instead of a second one", () => {
@@ -177,16 +207,16 @@ describe("order read model", () => {
     const order = getOrderForUser(db, orderId, userId)!;
     expect(order.number).toBe(`DF-${String(orderId).padStart(6, "0")}`);
     expect(order).toMatchObject({
-      subtotalUsd: "1033.19",
+      subtotalUsd: "975.00",
       shippingUsd: "0.00",
       taxUsd: "0.00",
-      totalUsd: "1033.19",
+      totalUsd: "975.00",
     });
     expect(order.payment).toEqual({ method: "card", brand: "Visa", last4: "4242" });
     expect(order.lines.map((l) => [l.slug, l.quantity, l.lineTotalUsd, l.tier.name])).toEqual([
       // Same order the cart showed: newest line first.
-      ["beige-regret", 1, "184.67", "BLAND"],
-      ["geo-riot", 2, "848.52", "Complicated"],
+      ["beige-regret", 1, "125.00", "BLAND"],
+      ["geo-riot", 2, "850.00", "Complicated"],
     ]);
     expect(order.lines[1].image?.url).toBe("/media/shirts/geo-riot.svg");
 

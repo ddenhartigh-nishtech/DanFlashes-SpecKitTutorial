@@ -5,6 +5,7 @@
  */
 import { and, asc, eq } from "drizzle-orm";
 import { validateShirt, type Issue, type ShirtDraft } from "@/lib/catalog/validate";
+import { dansChange, markDans } from "@/lib/admin/owner-mark";
 import { asAdmin, id, problems, refused, saved, text, type ConsoleState } from "@/lib/admin/state";
 import { copy } from "@/lib/copy";
 import { getMediaById } from "@/lib/data/media";
@@ -62,8 +63,6 @@ function imagesOf(db: Db, shirtId: number) {
     .orderBy(asc(shirtImages.position))
     .all();
 }
-
-const now = () => new Date().toISOString();
 
 /** FR-007: a new shirt. Inactive unless it has a main picture and the owner asked for the floor. */
 export function createShirtCore(db: Db, jar: CookieJar, form: FormData): ConsoleState {
@@ -128,7 +127,7 @@ export function updateShirtCore(db: Db, jar: CookieJar, form: FormData): Console
   if (ruleIssues.length) return problems(ruleIssues);
 
   db.update(shirts)
-    .set({ ...fields, style: fields.style as ShirtRow["style"], updatedAt: now() })
+    .set({ ...fields, style: fields.style as ShirtRow["style"], ...dansChange() })
     .where(eq(shirts.id, row.id))
     .run();
   return saved();
@@ -147,7 +146,10 @@ export function setShirtStatusCore(db: Db, jar: CookieJar, form: FormData): Cons
     const ruleIssues = check(db, { ...row, status }, imagesOf(db, row.id).length);
     if (ruleIssues.length) return problems(ruleIssues);
   }
-  db.update(shirts).set({ status, updatedAt: now() }).where(eq(shirts.id, row.id)).run();
+  db.update(shirts)
+    .set({ status, ...dansChange() })
+    .where(eq(shirts.id, row.id))
+    .run();
   return saved(status === "active" ? s.onTheFloor : s.resting);
 }
 
@@ -163,7 +165,10 @@ export function attachImageCore(db: Db, jar: CookieJar, form: FormData): Console
   const current = imagesOf(db, row.id);
   if (current.some((image) => image.mediaId === mediaId)) return refused(s.alreadyAttached);
   const position = current.length ? current[current.length - 1].position + 1 : 0;
-  db.insert(shirtImages).values({ shirtId: row.id, mediaId, position }).run();
+  db.transaction(() => {
+    db.insert(shirtImages).values({ shirtId: row.id, mediaId, position }).run();
+    markDans(db, row.id);
+  });
   return saved();
 }
 
@@ -192,6 +197,7 @@ export function moveImageCore(db: Db, jar: CookieJar, form: FormData): ConsoleSt
     move(a.mediaId, parked);
     move(b.mediaId, a.position);
     move(a.mediaId, b.position);
+    markDans(db, row.id);
   });
   return saved();
 }
@@ -220,6 +226,7 @@ export function detachImageCore(db: Db, jar: CookieJar, form: FormData): Console
           .run();
       }
     });
+    markDans(db, row.id);
   });
   return saved();
 }

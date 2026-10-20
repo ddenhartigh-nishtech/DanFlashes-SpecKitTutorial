@@ -11,7 +11,7 @@ import { createSeededTestDb } from "../helpers/db";
 const NOW = new Date("2026-10-14T12:00:00.000Z");
 const CARD = { number: "4242 4242 4242 4242", expiry: "12/39", cvc: "123" };
 
-/** $155.39 of Flash Credit against a Geo Riot ($424.26 in the test catalog): $268.87 on the card. */
+/** $155.39 of Flash Credit against a Geo Riot ($425.00 in the test catalog): $269.61 on the card. */
 function setup(balance = "155.39") {
   const test = createSeededTestDb();
   const userId = (
@@ -26,7 +26,7 @@ function setup(balance = "155.39") {
     userId,
     cartId: null,
     checkoutToken: "split-1",
-    expectedTotalUsd: "424.26",
+    expectedTotalUsd: "425.00",
     useFlashCredit: true,
     expectedCreditUsd: balance,
     confirmSplit: true,
@@ -55,7 +55,7 @@ describe("placeOrder — split between Flash Credit and a card", () => {
     ).toEqual({
       payment_method: "split",
       flash_credit_usd: "155.39",
-      total_usd: "424.26",
+      total_usd: "425.00",
       card_brand: "Visa",
       card_last4: "4242",
     });
@@ -69,12 +69,12 @@ describe("placeOrder — split between Flash Credit and a card", () => {
     expect(payment).toEqual({
       method: "split",
       creditUsd: "155.39",
-      cardUsd: "268.87",
+      cardUsd: "269.61",
       brand: "Visa",
       last4: "4242",
     });
     expect(describePayment(payment)).toBe(
-      "$155.39 in Flash Credit, $268.87 charged to Visa ending 4242",
+      "$155.39 in Flash Credit, $269.61 charged to Visa ending 4242",
     );
   });
 
@@ -84,7 +84,7 @@ describe("placeOrder — split between Flash Credit and a card", () => {
       ok: false,
       code: "SPLIT_CONFIRMATION_REQUIRED",
       creditUsd: "155.39",
-      cardUsd: "268.87",
+      cardUsd: "269.61",
     });
     expect(count("orders")).toBe(0);
     expect(getBalanceUsd(db, userId)).toBe("155.39");
@@ -97,7 +97,7 @@ describe("placeOrder — split between Flash Credit and a card", () => {
       ok: false,
       code: "CREDIT_CHANGED",
       creditUsd: "175.39",
-      cardUsd: "248.87",
+      cardUsd: "249.61",
     });
     expect(count("orders")).toBe(0);
   });
@@ -126,7 +126,7 @@ describe("placeOrder — split between Flash Credit and a card", () => {
         db,
         input({ expectedCreditUsd: "100.00", now: new Date(NOW.getTime() + 5 * 60_000) }),
       ),
-    ).toMatchObject({ ok: false, code: "CREDIT_CHANGED", creditUsd: "200.00", cardUsd: "224.26" });
+    ).toMatchObject({ ok: false, code: "CREDIT_CHANGED", creditUsd: "200.00", cardUsd: "225.00" });
     expect(sqlite.prepare("SELECT count(*) AS n FROM orders").get()).toEqual({ n: 0 });
   });
 
@@ -143,13 +143,13 @@ describe("placeOrder — split between Flash Credit and a card", () => {
   });
 
   it("pays by Flash Credit alone when it covers the total: no confirmation, no card", () => {
-    const { db, sqlite, input } = setup("424.26");
+    const { db, sqlite, input } = setup("425.00");
     expect(
-      placeOrder(db, input({ expectedCreditUsd: "424.26", confirmSplit: false, card: undefined })),
+      placeOrder(db, input({ expectedCreditUsd: "425.00", confirmSplit: false, card: undefined })),
     ).toMatchObject({ ok: true });
     expect(sqlite.prepare("SELECT payment_method, flash_credit_usd FROM orders").get()).toEqual({
       payment_method: "flash_credit",
-      flash_credit_usd: "424.26",
+      flash_credit_usd: "425.00",
     });
   });
 
@@ -193,7 +193,7 @@ describe("placeOrder — split between Flash Credit and a card", () => {
       },
       NOW,
     );
-    // $300.00 of per diem credit + $124.26 on the card: the whole $424.26 counts, so it drains.
+    // $300.00 of per diem credit + $124.26 on the card: the whole $425.00 counts, so it drains.
     const result = placeOrder(db, input({ expectedCreditUsd: "300.00" }));
     expect(result).toMatchObject({ ok: true });
     expect(getPerDiemMeter(db, userId, getSettings(db))).toMatchObject({
@@ -203,7 +203,7 @@ describe("placeOrder — split between Flash Credit and a card", () => {
     const order = getOrderForUser(db, (result as { orderId: number }).orderId, userId)!;
     expect(order).toMatchObject({
       perDiemDrained: true,
-      payment: { method: "split", cardUsd: "124.26" },
+      payment: { method: "split", cardUsd: "125.00" },
     });
   });
 });

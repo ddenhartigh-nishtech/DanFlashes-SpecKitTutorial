@@ -98,17 +98,6 @@ export function roundHalfUp2(value: string): Usd {
   return toUsd(new Big(s));
 }
 
-/**
- * The single sanctioned float bridge, used only by the MSRP algorithm: an exact amount is
- * scaled by a floating-point factor (the exponential) and immediately snapped to exact cents.
- */
-export function scaleByFloat(amount: Usd, factor: number): Usd {
-  if (typeof factor !== "number" || !Number.isFinite(factor) || factor < 0) {
-    throw new MoneyError(`Not a finite, non-negative factor: ${factor}`);
-  }
-  return toUsd(toBig(amount).times(new Big(factor)));
-}
-
 /** "$1,234,567.89" — always in full, never abbreviated or in exponent notation. */
 export function formatUsd(value: Usd): string {
   const s = toBig(value).toFixed(2);

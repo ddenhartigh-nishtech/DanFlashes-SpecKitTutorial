@@ -13,11 +13,7 @@ export function getSettings(db: Db): StoreSettings {
     throw new Error("Store settings are missing. Run `npm run db:reset` (or `npm run db:seed`).");
   }
   return {
-    msrp: {
-      startPriceUsd: row.msrpStartPriceUsd,
-      anchorScore: row.msrpAnchorScore,
-      doublingInterval: row.msrpDoublingInterval,
-    },
+    msrp: { basePriceUsd: row.msrpBasePriceUsd, perPointUsd: row.msrpPerPointUsd },
     checkoutGate: row.checkoutGate,
     flashCreditPresetsUsd: row.flashCreditPresetsUsd,
     mediaBaseUrl: row.mediaBaseUrl,
@@ -48,9 +44,8 @@ export function saveSettings(db: Db, settings: StoreSettings): void {
     );
   }
   const values = {
-    msrpStartPriceUsd: settings.msrp.startPriceUsd,
-    msrpAnchorScore: settings.msrp.anchorScore,
-    msrpDoublingInterval: settings.msrp.doublingInterval,
+    msrpBasePriceUsd: settings.msrp.basePriceUsd,
+    msrpPerPointUsd: settings.msrp.perPointUsd,
     checkoutGate: settings.checkoutGate,
     flashCreditPresetsUsd: settings.flashCreditPresetsUsd,
     mediaBaseUrl: settings.mediaBaseUrl,
@@ -96,11 +91,7 @@ export function saveSwitch(db: Db, key: SwitchKey, on: boolean): void {
 
 export function saveTuning(db: Db, msrp: MsrpSettings): void {
   db.update(storeSettings)
-    .set({
-      msrpStartPriceUsd: msrp.startPriceUsd,
-      msrpAnchorScore: msrp.anchorScore,
-      msrpDoublingInterval: msrp.doublingInterval,
-    })
+    .set({ msrpBasePriceUsd: msrp.basePriceUsd, msrpPerPointUsd: msrp.perPointUsd })
     .where(eq(storeSettings.id, 1))
     .run();
 }

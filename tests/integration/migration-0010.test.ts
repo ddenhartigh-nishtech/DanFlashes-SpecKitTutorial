@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { runMigrations } from "@/lib/db/migrate";
-import { databaseBefore } from "../helpers/migrations";
+import { databaseBefore, withoutOldDials } from "../helpers/migrations";
 
 describe("migration 0010 (the nosy sign-up switch)", () => {
   it("turns the switch on for the existing settings row, leaving the rest alone", () => {
@@ -9,7 +9,7 @@ describe("migration 0010 (the nosy sign-up switch)", () => {
     const before = sqlite.prepare("SELECT * FROM store_settings").get() as object;
     runMigrations(db);
     expect(sqlite.prepare("SELECT * FROM store_settings").get()).toMatchObject({
-      ...before,
+      ...withoutOldDials(before),
       nosy_sign_up: 1,
     });
     expect(sqlite.pragma("foreign_key_check")).toEqual([]);

@@ -36,6 +36,8 @@ console at `/admin` (008):
 npm run db:reset                          # also creates the demo owner (DEMO_OWNER in scripts/seed-data.ts)
 npm run admin:grant -- you@example.com    # make an existing account an admin; admin:revoke undoes it
 npm run catalog:audit                     # the catalog check, also on the console's Pricing page
+npm run shirts:sweep                      # list abandoned creations and stray pictures
+npm run shirts:sweep:delete               # back up, then delete them
 ```
 
 Sign in as an admin and a **Back office** link appears in the store header. Anyone else gets the
@@ -76,8 +78,13 @@ of the tactics run there, nothing flashes, and every page has a motivational pos
 
 - **Complexity score** (`shirts.complexity`) is owner-only and never shown to shoppers. It sets
   the shirt's tier badge and its MSRP.
-- **MSRP** = start price × 2^((score − anchor) / interval), rounded to the cent. The values live in
-  `store_settings`.
+- **MSRP** = base price + price per point × score, exact to the cent (010: a straight line, $50.00
+  + $25.00 a point by default). The two dials live in `store_settings`, and Dan tunes them in
+  Settings.
+- **Gentler pricing** (010). After pulling, run `npm run db:migrate` (0014). It backs the database
+  up first, then puts the store on the default line and clears every final price Dan set himself,
+  so every shirt sells at its new MSRP. Orders keep what they charged. The old prices are in that
+  backup (`npm run db:restore`) if you want them back.
 - **Final price** is `shirts.final_price_usd` if you set one, otherwise the MSRP.
 - **How complicated can it get?** (007, `/how-complicated`, linked from the home page and from
   under the shirt listing's filters). A dial from BLAND to "too complicated to price". The badge
@@ -85,8 +92,8 @@ of the tactics run there, nothing flashes, and every page has a motivational pos
   that link reopens the exact shirt. Shuffle and the style toggle draw another pattern at the same
   level. A pattern's count is its score: one point for every 10 points it's drawn with, plus 5 for
   each extra color, plus 10 for each extra layer, so a generated shirt is about as busy as a
-  hand-drawn one at the same score. The dial's top is the highest score the MSRP can price (at most
-  24,000, the art's limit), and no score ever reaches the browser.
+  hand-drawn one at the same score. The dial's top is a fixed score of 10,249 (where the old
+  exponential ran out of numbers), and no score ever reaches the browser.
 - **One of a kind** (007). **Make it mine** needs an account (a guest signs in and comes back to
   the same setting). It turns the setting into a real shirt on its own page, made to order for him:
   only he can buy it, as many as he likes, and the same setting always lands on the same shirt.
@@ -151,10 +158,12 @@ of the tactics run there, nothing flashes, and every page has a motivational pos
 | `npm run db:seed` / `db:seed-demo` | Demo catalog / demo shopper and owner (both idempotent) |
 | `npm run admin:grant -- <email>` / `admin:revoke -- <email>` | Make an account the owner, or stop it being one (the only way) |
 | `npm run catalog:audit` | The catalog check: errors exit 1, warnings exit 0 |
+| `npm run shirts:sweep` / `shirts:sweep:delete` | Housekeeping (011). Lists the **abandoned creations**: shirts a shopper made at the dial that nobody bought, that are in no cart, that Dan never mass-produced or changed in his office, and that are over 30 days old. Also lists the picture files in the uploads folder that no library entry uses. It changes nothing; `shirts:sweep:delete` backs up first and deletes them, with their pictures. Every shirt Dan made (released or not), every catalog shirt, and anything in an order or cart is kept. After pulling 011, run `npm run db:migrate` (0015, which records which shopper creations Dan already changed). |
 | `npm run art:generate` | Regenerate the placeholder shirt art (it shares the pattern generator's shirt silhouettes and palettes) |
 
-The e2e suite builds into `.next-e2e/` and uses `data/e2e.db`, so it can run while your own
-`npm run dev` is running.
+The e2e suite builds into `.next-e2e/`, uses `data/e2e.db`, and keeps its pictures in
+`data/e2e-uploads/`, emptied before and after every run, so it never touches your store's
+`data/uploads/` (the run fails if it did). It can run while your own `npm run dev` is running.
 
 ### When a page 500s
 

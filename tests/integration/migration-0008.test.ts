@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { runMigrations } from "@/lib/db/migrate";
-import { databaseBefore } from "../helpers/migrations";
+import { databaseBefore, withoutOldDials } from "../helpers/migrations";
 
 describe("migration 0008 (add-ons and the checkout squeeze switches)", () => {
   function migrated() {
@@ -36,7 +36,7 @@ describe("migration 0008 (add-ons and the checkout squeeze switches)", () => {
   it("turns both switches on for the existing settings row, leaving the rest alone", () => {
     const { sqlite, settingsBefore } = migrated();
     expect(sqlite.prepare("SELECT * FROM store_settings").get()).toMatchObject({
-      ...settingsBefore,
+      ...withoutOldDials(settingsBefore),
       pre_checked_add_ons: 1,
       roach_motel: 1,
     });

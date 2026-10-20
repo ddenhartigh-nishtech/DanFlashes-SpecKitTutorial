@@ -82,6 +82,14 @@ describe("auditIssues (008 analysis U3: each problem says what it's about)", () 
     expect(auditIssues(db)).toEqual([]);
   });
 
+  it("seeds no owner prices: every demo shirt sells at its MSRP (010 FR-010)", () => {
+    const { db, sqlite } = createTestDb();
+    seedCatalog(db, SEED);
+    expect(
+      sqlite.prepare("SELECT slug FROM shirts WHERE final_price_usd IS NOT NULL").all(),
+    ).toEqual([]);
+  });
+
   it("names the shirt, the setting or the tier each problem belongs to", () => {
     const { db, sqlite } = createTestDb();
     seedCatalog(db, SEED);

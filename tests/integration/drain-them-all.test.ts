@@ -31,7 +31,7 @@ const stream = (patch: Partial<ConnectInput>): ConnectInput => ({
 });
 const PER_DIEM = stream({});
 const COLLEGE_FUND = stream({ preset: "college_fund", amountUsd: "300.00", schedule: "one_time" });
-const GARAGE_SALE = stream({ preset: "garage_sale", amountUsd: "50.00", schedule: "one_time" });
+const GARAGE_SALE = stream({ preset: "garage_sale", amountUsd: "60.00", schedule: "one_time" });
 const CRAIG = stream({
   preset: "custom",
   customName: "Craig owes me",
@@ -52,7 +52,7 @@ function setup() {
     return result.streamId;
   };
   let token = 0;
-  /** Buy one Geo Riot ($424.26 in the test catalog) by card at `now`. */
+  /** Buy one Geo Riot ($425.00 in the test catalog) by card at `now`. */
   const buy = (now: Date) => {
     const cartId = getOrCreateCart(test.db, { cartId: null, userId }).id;
     addItem(test.db, cartId, { slug: "geo-riot", size: "M" });
@@ -60,7 +60,7 @@ function setup() {
       userId,
       cartId: null,
       checkoutToken: `tok-${++token}`,
-      expectedTotalUsd: "424.26",
+      expectedTotalUsd: "425.00",
       useFlashCredit: false,
       card: CARD,
       now,
@@ -87,15 +87,15 @@ describe("getStreamBalances", () => {
     const perDiem = connect(PER_DIEM, at(2)); // connected last, still spent first
     expect(balances(at(2))).toEqual({
       [college]: "300.00",
-      [garage]: "50.00",
+      [garage]: "60.00",
       [perDiem]: "500.00",
     });
 
-    buy(at(3)); // 500.00 − 424.26
-    expect(balances(at(3))).toEqual({ [college]: "300.00", [garage]: "50.00", [perDiem]: "75.74" });
+    buy(at(3)); // 500.00 − 425.00
+    expect(balances(at(3))).toEqual({ [college]: "300.00", [garage]: "60.00", [perDiem]: "75.00" });
 
-    buy(at(4)); // the per diem's last 75.74, then the oldest money: College Fund, then Garage Sale
-    expect(balances(at(4))).toEqual({ [college]: "0.00", [garage]: "1.48", [perDiem]: "0.00" });
+    buy(at(4)); // the per diem's last 75.00, then the oldest money: College Fund, then Garage Sale
+    expect(balances(at(4))).toEqual({ [college]: "0.00", [garage]: "10.00", [perDiem]: "0.00" });
   });
 
   it("is null while the drain is off", () => {
@@ -124,7 +124,7 @@ describe("placeOrder records every stream it drains", () => {
     const college = connect(COLLEGE_FUND, START);
     const garage = connect(GARAGE_SALE, START);
 
-    const order = buy(at(1)); // $370.00 of stream money against $424.26: all three run dry
+    const order = buy(at(1)); // $380.00 of stream money against $425.00: all three run dry
     expect(order.perDiemDrained).toBe(true); // the current per diem keeps its own flag
     expect(order.drainedStreams).toEqual([
       { streamId: college, name: "My Kid's College Fund", preset: "college_fund" },
@@ -143,8 +143,8 @@ describe("placeOrder records every stream it drains", () => {
     const garage = connect(GARAGE_SALE, at(1));
     connect(PER_DIEM, at(2));
 
-    const first = buy(at(3)); // per diem 500.00 → 75.74
-    const second = buy(at(4)); // per diem → 0.00, College Fund → 0.00, Garage Sale → 1.48
+    const first = buy(at(3)); // per diem 500.00 → 75.00
+    const second = buy(at(4)); // per diem → 0.00, College Fund → 0.00, Garage Sale → 10.00
     const third = buy(at(5)); // Garage Sale → 0.00
     const fourth = buy(at(6)); // nothing left to drain
     expect([first, second, third, fourth].map((o) => o.perDiemDrained)).toEqual([

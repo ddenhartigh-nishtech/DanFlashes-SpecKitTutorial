@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { runMigrations } from "@/lib/db/migrate";
-import { databaseBefore } from "../helpers/migrations";
+import { databaseBefore, withoutOldDials } from "../helpers/migrations";
 
 describe("migration 0007 (the urgency switches)", () => {
   it("turns all three on for the existing settings row, without touching the rest", () => {
@@ -12,7 +12,7 @@ describe("migration 0007 (the urgency switches)", () => {
 
     // Later migrations may add more columns; this one adds the three switches.
     expect(sqlite.prepare("SELECT * FROM store_settings").get()).toMatchObject({
-      ...before,
+      ...withoutOldDials(before),
       fake_scarcity: 1,
       countdown_timers: 1,
       social_proof: 1,

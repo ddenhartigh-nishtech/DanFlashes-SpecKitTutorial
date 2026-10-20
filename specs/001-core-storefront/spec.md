@@ -19,8 +19,8 @@ tie-in."
 
 - **Complexity score**: a whole number the owner assigns to each shirt. It is owner-only and never
   shown to shoppers.
-- **MSRP**: the calculated price. It comes from the complexity score through the exponential MSRP
-  algorithm.
+- **MSRP**: the calculated price. It comes from the complexity score through the MSRP algorithm,
+  a straight line since 010: a base price plus a price per point.
 - **Final price**: what the store displays and charges. It is the owner's price if one is set,
   otherwise the MSRP.
 - **Complexity tier**: an owner-named band of complexity scores (e.g. "Dangerously Complicated").
@@ -39,7 +39,8 @@ tie-in."
 - Q: Where do shirt designs come from? → A: A curated catalog maintained by the owner now.
   Procedurally generated shirts come later as their own feature.
 - Q: What shape is the price curve? → A: Exponential, with the starting price and growth rate tuned
-  at the owner's discretion.
+  at the owner's discretion. (010: superseded by a straight line, a base price plus a price per
+  point, after a score of 9,000 priced at a 274-digit number.)
 - Q: Who sets the final price? → A: The owner. The exponential algorithm produces the MSRP, and the
   owner can set a final price for any shirt. Without one, the final price is the MSRP.
 - Q: Who can check out? → A: Anyone can build a cart, but checkout requires an account. The gate is
@@ -249,11 +250,11 @@ the account shows every change.
   score, an optional final price, a short hype description, and an active/inactive status. Until an admin page exists, the owner edits it with a database editing tool.
 - **FR-002**: The complexity score MUST be a whole number of zero or more, set by the owner, with no
   upper limit. It MUST NEVER be shown to shoppers.
-- **FR-003**: Each shirt MUST have an MSRP, calculated from its complexity score by one exponential
-  MSRP algorithm. The MSRP MUST be deterministic, monotonic (a higher score never gives a lower
-  MSRP), and rounded to the nearest cent.
-- **FR-004**: The MSRP settings (at least the starting price, the score where the starting price
-  applies, and the doubling interval) MUST be owner-editable without changing code.
+- **FR-003**: Each shirt MUST have an MSRP, calculated from its complexity score by one MSRP
+  algorithm: a base price plus a price per point (010). The MSRP MUST be deterministic, monotonic (a
+  higher score never gives a lower MSRP), and exact to the cent.
+- **FR-004**: The MSRP settings (the base price and the price per point, 010) MUST be
+  owner-editable without changing code.
 - **FR-005**: The owner MAY set a final price for any shirt. A shirt's final price is the owner's
   price (dollars and cents) if one is set, and its MSRP otherwise. The final price is what the store
   displays and charges. Size and style MUST NOT affect price.
@@ -357,8 +358,8 @@ the account shows every change.
 - **Shirt**: a catalog item maintained by the owner. It has a name, a style, images, a complexity
   score, an optional final price, a hype description, a status (active or inactive),
   and an optional featured flag.
-- **MSRP Settings**: the owner-tunable values for the exponential MSRP algorithm (starting price,
-  anchor score, doubling interval).
+- **MSRP Settings**: the owner-tunable values for the MSRP algorithm: the base price and the price
+  per point (010; before, an exponential's starting price, anchor score and doubling interval).
 - **Complexity Tier**: an owner-defined band of complexity scores, with a name (badge text), an
   optional tagline, the lowest score it covers, and badge colors. Tiers are ordered, contiguous, and
   start at 0. The lowest is BLAND.

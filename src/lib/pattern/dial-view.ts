@@ -64,7 +64,7 @@ export function buildDial(
   const settings = getSettings(db);
   if (!settings.patternGenerator) return null;
   const tiers = listTiers(db);
-  const maxDial = maxDialScore(settings.msrp);
+  const maxDial = maxDialScore();
 
   const linked = query.r ? decodeRecipe(query.r) : null;
   const style = parseStyle(query.style) ?? linked?.style ?? "polo";
@@ -166,7 +166,7 @@ export function artForCode(
   const settings = getSettings(db);
   if (!ignoreSwitch && !settings.patternGenerator) return null;
   const recipe = decodeRecipe(code);
-  if (!recipe || recipe.score > maxDialScore(settings.msrp)) return null;
+  if (!recipe || recipe.score > maxDialScore()) return null;
 
   const stored = db
     .select({ key: media.key })

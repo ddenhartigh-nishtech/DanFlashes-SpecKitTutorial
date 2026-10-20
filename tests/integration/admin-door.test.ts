@@ -86,11 +86,7 @@ const CORES: [string, Core, Record<string, string>][] = [
   ["grantFlashCredit", grantFlashCreditCore, { userId: "1", amountUsd: "1000000", token: "x" }],
   // US2
   ["setSwitch", setSwitchCore, { key: "roachMotel", on: "0" }],
-  [
-    "saveTuning",
-    saveTuningCore,
-    { startPriceUsd: "1.00", anchorScore: "0", doublingInterval: "1" },
-  ],
+  ["saveTuning", saveTuningCore, { basePriceUsd: "1.00", perPointUsd: "1.00" }],
   ["savePresets", savePresetsCore, { presetsUsd: "1" }],
   [
     "saveMediaSettings",

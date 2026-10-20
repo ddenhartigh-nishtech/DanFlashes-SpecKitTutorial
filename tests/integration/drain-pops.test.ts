@@ -58,7 +58,7 @@ async function setup() {
     return result.streamId;
   };
   let token = 0;
-  /** Buy one Geo Riot ($424.26 in the test catalog) by card at `now`. */
+  /** Buy one Geo Riot ($425.00 in the test catalog) by card at `now`. */
   const buy = (now: Date) => {
     const cartId = getOrCreateCart(test.db, { cartId: null, userId }).id;
     addItem(test.db, cartId, { slug: "geo-riot", size: "M" });
@@ -66,7 +66,7 @@ async function setup() {
       userId,
       cartId: null,
       checkoutToken: `tok-${++token}`,
-      expectedTotalUsd: "424.26",
+      expectedTotalUsd: "425.00",
       useFlashCredit: false,
       card: CARD,
       now,
@@ -95,7 +95,7 @@ describe("getDrainPops", () => {
 
     cashIn(db, userId, { streamId: craig, paymentNo: 1, now: START });
     disconnectStream(db, userId, craig, at(1)); // its money still counts, and still drains
-    buy(at(2)); // $410.00 of stream money against $424.26: everything runs dry
+    buy(at(2)); // $410.00 of stream money against $425.00: everything runs dry
     expect(pops(at(2))).toEqual([
       { streamId: college, name: "My Kid's College Fund", preset: "college_fund", paymentNo: 1 },
       { streamId: garage, name: "Garage Sale", preset: "garage_sale", paymentNo: 1 },
@@ -169,7 +169,7 @@ describe("dismissDrain", () => {
     const { db, userId, connect, buy, meter } = await setup();
     const perDiem = connect(stream({}), START);
     buy(at(1));
-    buy(at(2)); // 500.00 → 75.74 → 0.00
+    buy(at(2)); // 500.00 → 75.00 → 0.00
     expect(meter(at(2))).toMatchObject({ drained: true, dismissed: false, paymentNo: 1 });
 
     dismissDrain(db, userId, { streamId: perDiem, paymentNo: 1 });

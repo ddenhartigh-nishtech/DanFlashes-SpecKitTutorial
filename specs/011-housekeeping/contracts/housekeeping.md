@@ -50,11 +50,11 @@ Each of these stamps `shirts.owner_changed_at` on success: `updateShirt`, `setSh
 
 ## The command (FR-006, R6)
 
-`npm run shirts:sweep [-- --yes]`
+`npm run shirts:sweep` (list), `npm run shirts:sweep:delete` (the script with `--yes`)
 
 | Run | Prints | Changes |
 |---|---|---|
-| plain, something to sweep | each shirt: name, age, maker; each stray file; "Run with --yes to delete them." | none |
+| plain, something to sweep | each shirt: name, age, maker; each stray file; "Run `npm run shirts:sweep:delete` to back up and delete them." | none |
 | plain, nothing | "Nothing to sweep." | none |
 | `--yes`, something | "Backed up to …", then "Swept N shirts, M pictures and F stray files." | backup, then the sweep |
 | `--yes`, nothing | "Nothing to sweep." | none (no backup) |

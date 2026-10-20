@@ -1,5 +1,5 @@
 /**
- * npm run shirts:sweep [-- --yes] (011 FR-006, R6). Lists the abandoned creations (shopper-made
+ * npm run shirts:sweep, and npm run shirts:sweep:delete (the same with --yes) (011 FR-006, R6). Lists the abandoned creations (shopper-made
  * shirts nobody bought, in no cart, untouched by Dan, over 30 days old) and the stray picture files.
  * Run plainly, it changes nothing. With --yes it backs the database up first, then deletes them.
  */
@@ -40,7 +40,7 @@ async function main() {
     for (const f of strays) console.log(`  ${f}`);
 
     if (!yes) {
-      console.log("\nRun with --yes to delete them.");
+      console.log("\nRun `npm run shirts:sweep:delete` to back up and delete them.");
       return;
     }
     const backup = await backupDatabaseFile(file);

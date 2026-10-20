@@ -36,7 +36,8 @@ console at `/admin` (008):
 npm run db:reset                          # also creates the demo owner (DEMO_OWNER in scripts/seed-data.ts)
 npm run admin:grant -- you@example.com    # make an existing account an admin; admin:revoke undoes it
 npm run catalog:audit                     # the catalog check, also on the console's Pricing page
-npm run shirts:sweep                      # list abandoned creations and stray pictures; -- --yes deletes
+npm run shirts:sweep                      # list abandoned creations and stray pictures
+npm run shirts:sweep:delete               # back up, then delete them
 ```
 
 Sign in as an admin and a **Back office** link appears in the store header. Anyone else gets the
@@ -157,7 +158,7 @@ of the tactics run there, nothing flashes, and every page has a motivational pos
 | `npm run db:seed` / `db:seed-demo` | Demo catalog / demo shopper and owner (both idempotent) |
 | `npm run admin:grant -- <email>` / `admin:revoke -- <email>` | Make an account the owner, or stop it being one (the only way) |
 | `npm run catalog:audit` | The catalog check: errors exit 1, warnings exit 0 |
-| `npm run shirts:sweep` / `-- --yes` | Housekeeping (011). Lists the **abandoned creations**: shirts a shopper made at the dial that nobody bought, that are in no cart, that Dan never mass-produced or changed in his office, and that are over 30 days old. Also lists the picture files in the uploads folder that no library entry uses. It changes nothing until you add `--yes`; then it backs up first and deletes them, with their pictures. Every shirt Dan made (released or not), every catalog shirt, and anything in an order or cart is kept. After pulling 011, run `npm run db:migrate` (0015, which records which shopper creations Dan already changed). |
+| `npm run shirts:sweep` / `shirts:sweep:delete` | Housekeeping (011). Lists the **abandoned creations**: shirts a shopper made at the dial that nobody bought, that are in no cart, that Dan never mass-produced or changed in his office, and that are over 30 days old. Also lists the picture files in the uploads folder that no library entry uses. It changes nothing; `shirts:sweep:delete` backs up first and deletes them, with their pictures. Every shirt Dan made (released or not), every catalog shirt, and anything in an order or cart is kept. After pulling 011, run `npm run db:migrate` (0015, which records which shopper creations Dan already changed). |
 | `npm run art:generate` | Regenerate the placeholder shirt art (it shares the pattern generator's shirt silhouettes and palettes) |
 
 The e2e suite builds into `.next-e2e/`, uses `data/e2e.db`, and keeps its pictures in

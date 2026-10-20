@@ -61,7 +61,7 @@ describe("npm run shirts:sweep (011 FR-006, R6)", { timeout: 30_000 }, () => {
     expect(output).toMatch(/1 abandoned creation/);
     expect(output).toMatch(/40 days/);
     expect(output).toContain("22222222-2222-4222-8222-222222222222.svg");
-    expect(output).toContain("Run with --yes to delete them.");
+    expect(output).toContain("Run `npm run shirts:sweep:delete` to back up and delete them.");
     expect(shirtCount(sqlite)).toBe(before);
     expect(fs.readdirSync(backups)).toEqual([]);
   });

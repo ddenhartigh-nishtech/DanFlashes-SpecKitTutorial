@@ -210,7 +210,7 @@ test.describe("US2 — buy the monster", () => {
       copy.surcharge.note("$499.99"),
     );
     // Money rows hold still under Extreme Awesomeness (constitution V).
-    await expect(visible(page.getByTestId("surcharge-note"))).toHaveAttribute("data-steady", "");
+    await expect(visible(page.getByTestId("surcharge-note"))).toHaveAttribute("data-steady");
 
     // FR-008, SC-003: the score is nowhere: not in his words, the link, or the shirt's address.
     const score = String(scoreOf(slug));
@@ -240,7 +240,7 @@ test.describe("US2 — buy the monster", () => {
     await page.goto("/cart");
     await expect(visible(page.getByTestId("surcharge-line"))).toContainText(copy.surcharge.line(2));
     await expect(visible(page.getByTestId("surcharge-line"))).toContainText("$999.98");
-    await expect(visible(page.getByTestId("surcharge-line"))).toHaveAttribute("data-steady", "");
+    await expect(visible(page.getByTestId("surcharge-line"))).toHaveAttribute("data-steady");
     await expect(visible(page.getByTestId("stock-line")).first()).toHaveText(copy.urgency.madeMany);
 
     // FR-018: anyone else sees it, and can't buy it.

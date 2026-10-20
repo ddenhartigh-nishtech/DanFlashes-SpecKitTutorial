@@ -8,7 +8,8 @@ export const CHART_BOX = { width: 720, height: 340, pad: 44 } as const;
 
 /**
  * Price against complexity (008 FR-018): server-drawn SVG, quiet colors, nothing animated. The MSRP
- * is a straight line on the log price axis; tier bands sit behind; each dot opens its shirt.
+ * is a straight line on a linear price axis from $0 (010 R6); tier bands sit behind; each dot
+ * opens its shirt.
  */
 export function PriceChart({ chart }: { chart: Chart }) {
   const { width, height, pad } = CHART_BOX;

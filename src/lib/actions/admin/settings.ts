@@ -38,27 +38,19 @@ export function setSwitchCore(db: Db, jar: CookieJar, form: FormData): ConsoleSt
   return saved(s.switched(s.switches[key].label, on === "1"));
 }
 
-/** FR-014, FR-015: new dials, refused if any shirt would break a rule under them. */
+/** FR-014, FR-015 (010 FR-003): new dials, refused if any shirt would break a rule under them. */
 export function saveTuningCore(db: Db, jar: CookieJar, form: FormData): ConsoleState {
   const gate = asAdmin(db, jar);
   if (gate.refusal) return gate.refusal;
   const t = s.tuning;
   const issues: Issue[] = [];
-  const startPriceUsd = positiveUsd(text(form, "startPriceUsd"));
-  if (startPriceUsd === null) issues.push({ field: "startPriceUsd", message: t.startFormat });
-  const anchor = text(form, "anchorScore").trim();
-  if (!/^\d+$/.test(anchor)) issues.push({ field: "anchorScore", message: t.anchorFormat });
-  const interval = text(form, "doublingInterval").trim();
-  if (!/^\d+$/.test(interval) || Number(interval) < 1) {
-    issues.push({ field: "doublingInterval", message: t.intervalFormat });
-  }
+  const basePriceUsd = positiveUsd(text(form, "basePriceUsd"));
+  if (basePriceUsd === null) issues.push({ field: "basePriceUsd", message: t.baseFormat });
+  const perPointUsd = positiveUsd(text(form, "perPointUsd"));
+  if (perPointUsd === null) issues.push({ field: "perPointUsd", message: t.perPointFormat });
   if (issues.length) return problems(issues);
 
-  const msrp = {
-    startPriceUsd: startPriceUsd!,
-    anchorScore: Number(anchor),
-    doublingInterval: Number(interval),
-  };
+  const msrp = { basePriceUsd: basePriceUsd!, perPointUsd: perPointUsd! };
   return db.transaction(() => {
     const broken = checkCatalog(db, { msrp });
     if (broken.length) return refused(t.breaks, broken);

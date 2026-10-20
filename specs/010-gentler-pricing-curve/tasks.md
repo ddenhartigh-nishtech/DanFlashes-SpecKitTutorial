@@ -22,7 +22,7 @@
 
 ## Phase 1: Setup
 
-- [ ] T001 Record the baseline for the PR. The branch starts at 007's head (72b2d37, PR #9), last
+- [X] T001 Record the baseline for the PR. The branch starts at 007's head (72b2d37, PR #9), last
   verified at 1,009 unit and integration tests, 95.04% line coverage, and 150 e2e.
 
 ---
@@ -32,7 +32,7 @@
 **Purpose**: the straight-line MSRP, its two dials, the BLAND rule's new threshold, and migration
 0014. Every story needs these.
 
-- [ ] T002 [P] Rewrite tests/unit/msrp.test.ts to fail against the exponential (contracts/pricing.md):
+- [X] T002 [P] Rewrite tests/unit/msrp.test.ts to fail against the exponential (contracts/pricing.md):
   - **The table** at `DEFAULT_MSRP_SETTINGS` (`{ basePriceUsd: "50.00", perPointUsd: "25.00" }`):
     0 → `"50.00"`, 2 → `"100.00"`, 10 → `"300.00"`, 130 → `"3300.00"`, 9,000 → `"225050.00"`,
     10,249 → `"256275.00"`, 1,000,000 → `"25000050.00"`
@@ -51,7 +51,7 @@
     - tiers given out of order → it sorts them
     - Complicated moved to 20 → `"550.00"`
     - BLAND alone → `null`
-- [ ] T003 [P] Update tests/unit/resolve.test.ts and tests/unit/catalog-validate.test.ts to the new
+- [X] T003 [P] Update tests/unit/resolve.test.ts and tests/unit/catalog-validate.test.ts to the new
   dials, failing first:
   - **`resolvePrice`**: Dan's price if set, else the MSRP, under the new dials
   - **`validateSettings`**: requires `msrp.basePriceUsd` and `msrp.perPointUsd`, each a money string
@@ -65,7 +65,7 @@
   - **No ceiling**: a score of 1,000,000 is never refused as "too complicated to price"
   - **The seed** (FR-010, analysis C2): tests/integration/catalog-audit.test.ts asserts no seeded
     shirt has a final price
-- [ ] T004 [P] Write a failing tests/integration/migration-0014.test.ts (`databaseBefore("0014")`).
+- [X] T004 [P] Write a failing tests/integration/migration-0014.test.ts (`databaseBefore("0014")`).
   Seed the old store with:
   - tuning $300.00 / 10 / 10
   - four owner-priced shirts (catalog, owner and dial origins, one resting) and one without a price
@@ -84,7 +84,7 @@
     and `'abc'`
   - `foreign_key_check` is clean
   - `auditIssues(db)` reports no errors on the upgraded store (FR-016, analysis C3)
-- [ ] T005 Implement the line (research R1, R2, R4), so T002 and T003 pass:
+- [X] T005 Implement the line (research R1, R2, R4), so T002 and T003 pass:
   - **src/lib/catalog/types.ts**: `MsrpSettings = { basePriceUsd: Usd; perPointUsd: Usd }`
   - **src/lib/pricing/msrp.ts**:
     - `msrpUsd(score, settings) = add(basePriceUsd, mul(perPointUsd, score))`, throwing
@@ -97,7 +97,7 @@
     - the settings schema takes the two dials (`positiveUsd`)
     - the BLAND rule uses `realShirtStartUsd`, skipping when it's null
     - remove the "too complicated to price" try/catch and its 008 R7 comment
-- [ ] T006 The columns and the upgrade (R2, R3, data-model.md), so T004 passes:
+- [X] T006 The columns and the upgrade (R2, R3, data-model.md), so T004 passes:
   - **src/lib/db/schema.ts**: replace `msrpStartPriceUsd`, `msrpAnchorScore` and
     `msrpDoublingInterval` (and their CHECKs) with:
     - `msrpBasePriceUsd`: `msrp_base_price_usd`, text, NOT NULL, default `'50.00'`, CHECK
@@ -115,7 +115,7 @@
   - **scripts/seed-data.ts**: `msrp: { basePriceUsd: "50.00", perPointUsd: "25.00" }`, and Hawaiian
     Tax Return's `finalPriceUsd: null` (FR-010).
   - **tests/fixtures/catalog.ts**: the new dials.
-- [ ] T007 Sweep the remaining unit and integration tests that name the old dials or hard-code
+- [X] T007 Sweep the remaining unit and integration tests that name the old dials or hard-code
   exponential prices, until `npm test` is green:
   - tests/integration/admin-door.test.ts, admin-generator.test.ts, admin-settings.test.ts,
     admin-shirts.test.ts, data-catalog.test.ts, materialize.test.ts
@@ -137,7 +137,7 @@ and orders don't move.
 **Independent Test**: upgrade a store with owner prices, a cart and orders. Every price is on the
 line, no owner price remains, every order is identical, and the cart shows the new prices.
 
-- [ ] T008 [P] [US1] Add to tests/integration/place-order-card.test.ts (failing first where it's
+- [X] T008 [P] [US1] Add to tests/integration/place-order-card.test.ts (failing first where it's
   new):
   - **Retune mid-checkout**: view checkout, retune to $40.00 a point, then place at the old
     expected total → `PRICE_CHANGED` with the new total, and nothing is charged
@@ -167,7 +167,7 @@ the same shirts.
 **Independent Test**: step the dial 0 → 101. Prices never fall, step 100 is $256,275.00, step 101
 can't be bought, and the generator refuses 10,250.
 
-- [ ] T011 [P] [US2] Failing tests for the fixed top (R5):
+- [X] T011 [P] [US2] Failing tests for the fixed top (R5):
   - **tests/unit/pattern-dial.test.ts**: `maxDialScore()` is 10,249, and `DIAL_MAX_SCORE` is
     exported. `scoreAtStep(step, 10_249)` gives the same scores as before for every step.
   - **tests/unit/pattern-generate.test.ts**: the art budget runs at `DIAL_MAX_SCORE` (under 1 MB).
@@ -176,7 +176,7 @@ can't be bought, and the generator refuses 10,250.
     - at 10,250 it gives `reason: "unpriceable"` with `copy.console.generator.beyond`
   - **tests/integration/materialize.test.ts**: 10,250 → `BEYOND`, under any tuning, including
     $0.01 a point.
-- [ ] T012 [US2] Implement the fixed top:
+- [X] T012 [US2] Implement the fixed top:
   - **src/lib/pattern/dial.ts**:
     - `export const DIAL_MAX_SCORE = 10_249`, with a comment saying where the number came from
     - `maxDialScore()` with no arguments
@@ -206,7 +206,7 @@ editor preview that prices any score.
 **Independent Test**: retune to $40.00 a point, check the preview, save, see the store reprice, put
 it back. A zero, negative or malformed dial is refused. The chart's MSRP is straight.
 
-- [ ] T014 [P] [US3] Failing tests:
+- [X] T014 [P] [US3] Failing tests:
   - **tests/integration/admin-settings.test.ts**, `saveTuningCore`:
     - `basePriceUsd` and `perPointUsd` blank, `"0"`, `"-5"` or `"lots"` → issues with
       `baseFormat` / `perPointFormat`, and nothing saved
@@ -220,7 +220,7 @@ it back. A zero, negative or malformed dial is refused. The chart's MSRP is stra
     - every shirt at its MSRP lies on the line within 0.1 px
     - ticks start at $0 and step by a fifth of a 1/2/5 × 10ⁿ top at or above the highest price
     - labels are whole dollars
-- [ ] T015 [US3] Implement Dan's Office (R6, R7):
+- [X] T015 [US3] Implement Dan's Office (R6, R7):
   - **src/lib/actions/admin/settings.ts**: `saveTuningCore` reads `basePriceUsd` and `perPointUsd`.
   - **src/components/admin/TuningForm.tsx**:
     - two fields

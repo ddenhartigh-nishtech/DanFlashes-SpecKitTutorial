@@ -87,7 +87,6 @@ describe("createShirt (008 FR-007, FR-009)", () => {
     [{ complexity: "-1" }, "complexity"],
     [{ complexity: "2.5" }, "complexity"],
     [{ complexity: "" }, "complexity"],
-    [{ complexity: "999999" }, "complexity"],
     [{ finalPriceUsd: "0.001" }, "finalPriceUsd"],
     [{ finalPriceUsd: "abc" }, "finalPriceUsd"],
     [{ description: "  " }, "description"],
@@ -231,18 +230,23 @@ describe("a shirt's images (008 FR-024)", () => {
 
 describe("checkCatalog (008 R10)", () => {
   it("names each shirt a proposed tier set or tuning would break", () => {
-    const { db, jar } = setup();
+    const { db, sqlite, jar } = setup();
     const tiers = listTiers(db).map((t) => (t.name === "Complicated" ? { ...t, minScore: 20 } : t));
-    // Geo Riot (15) slides into BLAND at $424.26: over the $300.00 line.
+    // At its MSRP, Geo Riot (15) slides into BLAND at $425.00, under the new $550.00 start (010 R4).
+    expect(checkCatalog(db, { tiers })).toEqual([]);
+    // At Dan's $600.00, it would sit over that line.
+    sqlite.prepare("UPDATE shirts SET final_price_usd = '600.00' WHERE slug = 'geo-riot'").run();
     expect(checkCatalog(db, { tiers }).map((i) => i.field)).toEqual(["geo-riot"]);
-    // Anchor 0 lifts every BLAND MSRP above the start price.
-    const anchored = { startPriceUsd: "300.00", anchorScore: 0, doublingInterval: 10 };
-    expect(checkCatalog(db, { msrp: anchored }).map((i) => i.field)).toContain("beige-regret");
-    // A huge score that prices today can't be priced once prices double every point.
-    createShirtCore(db, jar, draft({ complexity: "2000" }));
-    const steep = { startPriceUsd: "300.00", anchorScore: 10, doublingInterval: 1 };
-    expect(checkCatalog(db, { msrp: steep }).map((i) => i.field)).toContain("test-pattern");
-    expect(checkCatalog(db, {})).toEqual([]);
+    // Dials that bring a real shirt's start down to Dan's BLAND price break it too.
+    sqlite
+      .prepare("UPDATE shirts SET final_price_usd = '250.00' WHERE slug = 'beige-regret'")
+      .run();
+    const cheap = { basePriceUsd: "10.00", perPointUsd: "20.00" };
+    expect(checkCatalog(db, { msrp: cheap }).map((i) => i.field)).toContain("beige-regret");
+    // No score is too complicated to price under any dials (010 FR-002).
+    createShirtCore(db, jar, draft({ complexity: "2000000" }));
+    const tiny = { basePriceUsd: "0.01", perPointUsd: "0.01" };
+    expect(checkCatalog(db, { msrp: tiny }).map((i) => i.field)).not.toContain("test-pattern");
   });
 });
 
@@ -258,8 +262,8 @@ describe("listAdminShirts (008 FR-006)", () => {
     ]);
     expect(rows.find((r) => r.slug === "geo-riot")).toMatchObject({
       complexity: 15,
-      msrpUsd: "424.26",
-      finalPriceUsd: "424.26",
+      msrpUsd: "425.00",
+      finalPriceUsd: "425.00",
       priceIsDans: false,
       status: "active",
       tier: { name: "Complicated" },

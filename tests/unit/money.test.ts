@@ -11,7 +11,6 @@ import {
   sub,
   sum,
   tryParseUsd,
-  scaleByFloat,
 } from "@/lib/money";
 
 describe("isUsdString", () => {
@@ -98,18 +97,6 @@ describe("rounding", () => {
     expect(roundHalfUp2("424.264")).toBe("424.26");
     expect(roundHalfUp2("424.265")).toBe("424.27");
     expect(roundHalfUp2("0.005")).toBe("0.01");
-  });
-
-  it("scales an exact amount by a float factor (MSRP only), snapping to cents", () => {
-    expect(scaleByFloat("300.00", Math.SQRT2)).toBe("424.26");
-    expect(scaleByFloat("300.00", 1)).toBe("300.00");
-    expect(scaleByFloat("1.50", 1e21)).toBe("1500000000000000000000.00");
-  });
-
-  it("rejects non-finite or negative factors", () => {
-    expect(() => scaleByFloat("1.00", Number.POSITIVE_INFINITY)).toThrow();
-    expect(() => scaleByFloat("1.00", Number.NaN)).toThrow();
-    expect(() => scaleByFloat("1.00", -2)).toThrow();
   });
 });
 

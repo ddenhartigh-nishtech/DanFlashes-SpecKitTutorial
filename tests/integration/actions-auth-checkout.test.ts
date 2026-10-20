@@ -89,7 +89,7 @@ describe("placeOrder action", () => {
   const checkoutForm = (extra: Record<string, string> = {}) =>
     form({
       checkoutToken: TOKEN,
-      expectedTotalUsd: "424.26",
+      expectedTotalUsd: "425.00",
       cardNumber: "4242 4242 4242 4242",
       expiry: "12/29",
       cvc: "123",
@@ -125,8 +125,8 @@ describe("placeOrder action", () => {
     expect(placeOrderCore(db, jar, checkoutForm({ expectedTotalUsd: "1.00" }))).toEqual({
       ok: false,
       code: "PRICE_CHANGED",
-      totalUsd: "424.26",
-      message: copy.checkout.priceChanged("$424.26"),
+      totalUsd: "425.00",
+      message: copy.checkout.priceChanged("$425.00"),
     });
   });
 

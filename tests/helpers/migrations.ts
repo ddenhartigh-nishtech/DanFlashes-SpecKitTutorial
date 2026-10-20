@@ -37,3 +37,12 @@ export function databaseBefore(nextTag: string): { sqlite: Sqlite; db: Db } {
   runMigrations(opened.db, migrationsBefore(nextTag));
   return opened;
 }
+
+/**
+ * A settings row read before 0014, minus the exponential's three dials, which 0014 replaced with
+ * the straight line's two (010 R3). Older migration tests run every migration after their own.
+ */
+export function withoutOldDials(row: object): object {
+  const old = ["msrp_start_price_usd", "msrp_anchor_score", "msrp_doubling_interval"];
+  return Object.fromEntries(Object.entries(row).filter(([key]) => !old.includes(key)));
+}

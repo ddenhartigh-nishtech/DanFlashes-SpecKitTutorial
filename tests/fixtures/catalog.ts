@@ -3,7 +3,7 @@ import type { CatalogFixture } from "@/lib/data/seed";
 /** A tiny catalog for integration tests: BLAND, Complicated, and Very Complicated tiers. */
 export const SMALL_FIXTURE: CatalogFixture = {
   settings: {
-    msrp: { startPriceUsd: "300.00", anchorScore: 10, doublingInterval: 10 },
+    msrp: { basePriceUsd: "50.00", perPointUsd: "25.00" },
     checkoutGate: true,
     blandShaming: true,
     confirmshaming: true,

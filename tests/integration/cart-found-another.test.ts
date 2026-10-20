@@ -142,8 +142,8 @@ describe("orderedShirtIds", () => {
     };
     const dan = user("dan@x.io");
     const gary = user("gary@x.io");
-    buy(dan, "geo-riot", "424.26", "tok-1");
-    buy(dan, "geo-riot", "424.26", "tok-2");
+    buy(dan, "geo-riot", "425.00", "tok-1");
+    buy(dan, "geo-riot", "425.00", "tok-2");
     buy(gary, "fractal-fury", "999.99", "tok-3");
 
     expect([...orderedShirtIds(db, dan)]).toEqual([findShirtRef(db, "geo-riot")!.id]);

@@ -518,7 +518,6 @@ export const copy = {
         final: "Final price",
         dans: "set by you",
         isMsrp: "the MSRP",
-        cantPrice: "That's too complicated to price, even for Dan.",
       },
       status: { active: "On the floor", inactive: "Resting (not in the store)" },
       activate: "Put it on the floor",
@@ -574,6 +573,8 @@ export const copy = {
     },
     /** 007 US3: Dan's generator, as calm as the rest of the office. */
     generator: {
+      /** Past the dial's top (010 FR-011): the dial's own joke. */
+      beyond: "That's too complicated to price, even for Dan.",
       title: "Generate a shirt",
       intro: "Pick a level and a style. The pattern does the work; you take the credit.",
       generateOne: "Generate one",
@@ -701,17 +702,17 @@ export const copy = {
       },
       tuning: {
         title: "MSRP dials",
-        help: "MSRP = start price × 2 ^ ((score − anchor) ÷ doubling interval). Only the dials change, never the formula.",
-        start: "Start price",
-        anchor: "Anchor score",
-        interval: "Doubling interval",
+        help: "MSRP = base price + price per point × score. Only the dials change, never the formula.",
+        base: "Base price",
+        perPoint: "Price per point",
+        startsAt: (price: string, tier: string, score: number) =>
+          `A real shirt starts at ${price} (${tier}, score ${score}).`,
         now: "MSRP now",
         after: "MSRP after",
         shirt: "Shirt",
         save: "Save the dials",
-        startFormat: "A dollar amount of at least $0.01, like 300.00.",
-        anchorFormat: "A whole number, 0 or more.",
-        intervalFormat: "A whole number, 1 or more.",
+        baseFormat: "A dollar amount of at least $0.01, like 50.00.",
+        perPointFormat: "A dollar amount of at least $0.01, like 25.00.",
         breaks: "These shirts wouldn't follow the rules with those dials:",
       },
       presets: {

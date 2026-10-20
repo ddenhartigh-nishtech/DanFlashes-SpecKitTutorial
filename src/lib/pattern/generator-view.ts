@@ -5,7 +5,6 @@
  */
 import { eq } from "drizzle-orm";
 import { isBlandTier, tierOf } from "@/lib/catalog/tiers";
-import type { MsrpSettings } from "@/lib/catalog/types";
 import type { Issue } from "@/lib/catalog/validate";
 import { copy } from "@/lib/copy";
 import { getSettings } from "@/lib/data/settings";
@@ -15,7 +14,7 @@ import type { Db } from "@/lib/db/client";
 import { shirts } from "@/lib/db/schema";
 import type { Usd } from "@/lib/money";
 import { countPattern } from "@/lib/pattern/count";
-import { ART_MAX_SCORE, maxDialScore, maxPriceableScore } from "@/lib/pattern/dial";
+import { maxDialScore } from "@/lib/pattern/dial";
 import { badge, parseSeed, parseStyle } from "@/lib/pattern/dial-view";
 import { buildPattern } from "@/lib/pattern/generate";
 import { nameFor } from "@/lib/pattern/names";
@@ -36,28 +35,21 @@ export type RecipeRead =
   { ok: true; recipe: Recipe } | { ok: false; reason: RecipeProblem; issues: Issue[] };
 
 /**
- * A recipe from what Dan typed: a score from 0 to the top the MSRP can price (and the art can
- * draw); polo and seed 1 unless he said otherwise.
+ * A recipe from what Dan typed: a score from 0 to the dial's top (010 FR-011); polo and seed 1
+ * unless he said otherwise.
  */
-export function readRecipe(input: RecipeInput, msrp: MsrpSettings): RecipeRead {
+export function readRecipe(input: RecipeInput): RecipeRead {
   const problems: { reason: RecipeProblem; issue: Issue }[] = [];
   const raw = input.score?.trim() ?? "";
   const score = /^\d+$/.test(raw) ? Number(raw) : null;
   if (score === null) {
     problems.push({
       reason: raw === "" ? "empty" : "range",
-      issue: { field: "score", message: g.scoreRange(maxDialScore(msrp)) },
+      issue: { field: "score", message: g.scoreRange(maxDialScore()) },
     });
-  } else if (score > maxPriceableScore(msrp)) {
-    problems.push({
-      reason: "unpriceable",
-      issue: { field: "score", message: copy.console.shirts.preview.cantPrice },
-    });
-  } else if (score > ART_MAX_SCORE) {
-    problems.push({
-      reason: "range",
-      issue: { field: "score", message: g.scoreRange(maxDialScore(msrp)) },
-    });
+  } else if (score > maxDialScore()) {
+    // The dial's joke, at the dial's top (010 FR-011).
+    problems.push({ reason: "unpriceable", issue: { field: "score", message: g.beyond } });
   }
   const style = input.style ? parseStyle(input.style) : "polo";
   if (!style) problems.push({ reason: "style", issue: { field: "style", message: g.badStyle } });
@@ -101,8 +93,8 @@ export type GeneratorPreview =
 
 export function generatorPreview(db: Db, input: RecipeInput): GeneratorPreview {
   const { msrp } = getSettings(db);
-  const maxScore = maxDialScore(msrp);
-  const read = readRecipe(input, msrp);
+  const maxScore = maxDialScore();
+  const read = readRecipe(input);
   if (!read.ok) {
     const message = read.reason === "empty" ? g.empty : read.issues[0].message;
     return { ok: false, reason: read.reason, message, maxScore };

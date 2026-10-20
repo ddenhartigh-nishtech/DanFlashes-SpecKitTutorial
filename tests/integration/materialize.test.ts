@@ -6,7 +6,7 @@ import { auditCatalog } from "@/lib/catalog/audit";
 import { getSettings, saveSettings } from "@/lib/data/settings";
 import { getShirtBySlug } from "@/lib/data/shirts";
 import type { Sqlite } from "@/lib/db/client";
-import { ART_MAX_SCORE } from "@/lib/pattern/dial";
+import { DIAL_MAX_SCORE } from "@/lib/pattern/dial";
 import { generate } from "@/lib/pattern/generate";
 import { materialize } from "@/lib/pattern/materialize";
 import type { Recipe } from "@/lib/pattern/recipe";
@@ -95,37 +95,31 @@ describe("materialize: a recipe becomes the one shirt (007 R6)", () => {
     expect([counts(sqlite), fs.readdirSync(dir).length]).toEqual(before);
   });
 
-  it("refuses past the top of the dial, and when the MSRP can't price it, writing nothing", () => {
+  it("refuses past the dial's fixed top under any tuning, writing nothing (010 FR-011)", () => {
     const { db, sqlite } = createSeededTestDb();
     const before = [counts(sqlite), fs.readdirSync(dir).length];
-    expect(materialize(db, recipe(ART_MAX_SCORE + 1), { origin: "dial" })).toMatchObject({
+    expect(materialize(db, recipe(DIAL_MAX_SCORE + 1), { origin: "dial" })).toMatchObject({
       ok: false,
       code: "BEYOND",
     });
-    saveSettings(db, {
-      ...getSettings(db),
-      msrp: { startPriceUsd: "300.00", anchorScore: 10, doublingInterval: 1 },
-    });
-    expect(materialize(db, recipe(5_000), { origin: "dial" })).toMatchObject({
+    saveSettings(db, { ...getSettings(db), msrp: { basePriceUsd: "0.01", perPointUsd: "0.01" } });
+    expect(materialize(db, recipe(DIAL_MAX_SCORE + 1), { origin: "dial" })).toMatchObject({
       ok: false,
       code: "BEYOND",
     });
     expect([counts(sqlite), fs.readdirSync(dir).length]).toEqual(before);
+    expect(materialize(db, recipe(DIAL_MAX_SCORE), { origin: "dial" }).ok).toBe(true);
   });
 
-  it("refuses a pattern that would break the bland rule, writing nothing", () => {
+  it("makes a BLAND pattern under any dials: on a climbing line it's always under a real shirt", () => {
     const { db, sqlite } = createSeededTestDb();
-    // Anchor 0: every BLAND score's MSRP reaches the $300.00 start price.
     saveSettings(db, {
       ...getSettings(db),
-      msrp: { startPriceUsd: "300.00", anchorScore: 0, doublingInterval: 10 },
+      msrp: { basePriceUsd: "9999.99", perPointUsd: "0.01" },
     });
-    const before = [counts(sqlite), fs.readdirSync(dir).length];
-    expect(materialize(db, recipe(5), { origin: "dial" })).toMatchObject({
-      ok: false,
-      code: "RULE",
-    });
-    expect([counts(sqlite), fs.readdirSync(dir).length]).toEqual(before);
+    const made = materialize(db, recipe(5), { origin: "dial" });
+    if (!made.ok) throw new Error("not made");
+    expect(row(sqlite, made.shirtId).final_price_usd).toBeNull();
   });
 
   it("gives a taken name a numeral, and keeps the catalog check clean after 50 shirts (SC-006)", () => {

@@ -77,14 +77,14 @@ describe("grantCredit: the balance (FR-036)", () => {
     expect(garage.ok).toBe(true);
     grantCredit(db, userId, { amountInput: "250.25", token: "mix-1" });
     const cartId = getOrCreateCart(db, { cartId: null, userId }).id;
-    addItem(db, cartId, { slug: "geo-riot", size: "M" }); // $424.26
+    addItem(db, cartId, { slug: "geo-riot", size: "M" }); // $425.00
     const order = placeOrder(db, {
       userId,
       cartId: null,
       checkoutToken: "mix-order",
-      expectedTotalUsd: "424.26",
+      expectedTotalUsd: "425.00",
       useFlashCredit: true,
-      expectedCreditUsd: "424.26",
+      expectedCreditUsd: "425.00",
       now: NOW,
     });
     expect(order.ok).toBe(true);
@@ -100,7 +100,7 @@ describe("grantCredit: the balance (FR-036)", () => {
     ]);
     const balance = getBalanceUsd(db, userId);
     expect(balance).toBe(sum(entries.map((e) => e.amountUsd)));
-    expect(balance).toBe("202.48"); // 300 + 75.50 + 250.25 − 424.26 + 0.99
+    expect(balance).toBe("201.74"); // 300 + 75.50 + 250.25 − 425.00 + 0.99
     expect(cmp(balance, "0.00")).toBeGreaterThanOrEqual(0);
   });
 });
@@ -152,13 +152,13 @@ describe("granted credit in the shopper's world (FR-036)", () => {
       userId,
       cartId: null,
       checkoutToken: "gift-order",
-      expectedTotalUsd: "424.26",
+      expectedTotalUsd: "425.00",
       useFlashCredit: true,
-      expectedCreditUsd: "424.26",
+      expectedCreditUsd: "425.00",
       now: NOW,
     });
     expect(order.ok).toBe(true);
-    expect(getBalanceUsd(db, userId)).toBe("1575.74");
+    expect(getBalanceUsd(db, userId)).toBe("1575.00");
   });
 
   it("is other money to the per diem drain: the meter and each stream's left don't move", () => {

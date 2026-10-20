@@ -150,11 +150,11 @@ describe("getCartView", () => {
     expect(view.lines[0]).toMatchObject({
       size: "XL",
       quantity: 3,
-      lineTotalUsd: "1272.78",
-      shirt: { finalPriceUsd: "424.26", tier: { name: "Complicated" } },
+      lineTotalUsd: "1275.00",
+      shirt: { finalPriceUsd: "425.00", tier: { name: "Complicated" } },
     });
     expect(view.lines[1].shirt.tier).toMatchObject({ name: "BLAND", isBland: true });
-    expect(view.subtotalUsd).toBe("1457.45");
+    expect(view.subtotalUsd).toBe("1400.00");
     expect(view.itemCount).toBe(4);
     expect(JSON.stringify(view)).not.toMatch(/complexity|msrp/i);
   });

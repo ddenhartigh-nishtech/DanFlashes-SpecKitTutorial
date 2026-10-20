@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { runMigrations } from "@/lib/db/migrate";
-import { databaseBefore } from "../helpers/migrations";
+import { databaseBefore, withoutOldDials } from "../helpers/migrations";
 
 describe("migration 0009 (the Flash Mode and Pipes switches)", () => {
   it("turns both switches on for the existing settings row, leaving the rest alone", () => {
@@ -9,7 +9,7 @@ describe("migration 0009 (the Flash Mode and Pipes switches)", () => {
     const before = sqlite.prepare("SELECT * FROM store_settings").get() as object;
     runMigrations(db);
     expect(sqlite.prepare("SELECT * FROM store_settings").get()).toMatchObject({
-      ...before,
+      ...withoutOldDials(before),
       flash_mode: 1,
       pipes_background: 1,
     });

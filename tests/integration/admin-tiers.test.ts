@@ -57,8 +57,10 @@ describe("saveTiers (008 FR-027–FR-030)", () => {
     expect(listTiers(db).map((t) => t.name)).toEqual(["BLAND", b.name, a.name]);
   });
 
-  it("refuses a change that drops a shirt into BLAND at or above the start price, naming it", () => {
-    const { db, jar } = setup();
+  it("refuses a change that drops Dan's own price into BLAND at or above a real shirt's start, naming it", () => {
+    const { db, sqlite, jar } = setup();
+    // At its MSRP, Geo Riot (15) would be BLAND under a $550.00 start (010 R4); at Dan's $600.00, no.
+    sqlite.prepare("UPDATE shirts SET final_price_usd = '600.00' WHERE slug = 'geo-riot'").run();
     const before = listTiers(db);
     const [bland, complicated, very] = drafts(db);
     const state = saveTiersCore(db, jar, save([bland, { ...complicated, minScore: 20 }, very]));

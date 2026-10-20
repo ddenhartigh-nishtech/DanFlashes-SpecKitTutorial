@@ -19,16 +19,16 @@ function setup(balance: string) {
   if (balance !== "0.00") topUp(test.db, userId, { amountInput: balance, card: CARD, now: NOW });
   const fill = () => {
     const cartId = getOrCreateCart(test.db, { cartId: null, userId }).id;
-    addItem(test.db, cartId, { slug: "geo-riot", size: "M" }); // 424.26
+    addItem(test.db, cartId, { slug: "geo-riot", size: "M" }); // 425.00
   };
   fill();
   const input = (patch: Partial<PlaceOrderInput> = {}): PlaceOrderInput => ({
     userId,
     cartId: null,
     checkoutToken: "fc-token-1",
-    expectedTotalUsd: "424.26",
+    expectedTotalUsd: "425.00",
     useFlashCredit: true,
-    expectedCreditUsd: "424.26",
+    expectedCreditUsd: "425.00",
     now: NOW,
     ...patch,
   });
@@ -45,10 +45,10 @@ describe("placeOrder — Flash Credit", () => {
     expect(result).toEqual({ ok: true, orderId: expect.any(Number) });
     const { orderId } = result as { orderId: number };
 
-    expect(getBalanceUsd(db, userId)).toBe("75.74");
+    expect(getBalanceUsd(db, userId)).toBe("75.00");
     expect(listEntries(db, userId)[0]).toMatchObject({
       kind: "spend",
-      amountUsd: "-424.26",
+      amountUsd: "-425.00",
       orderId,
     });
     expect(
@@ -61,34 +61,34 @@ describe("placeOrder — Flash Credit", () => {
   });
 
   it("spends a balance that exactly matches the total down to $0.00", () => {
-    const { db, userId, input } = setup("424.26");
+    const { db, userId, input } = setup("425.00");
     expect(placeOrder(db, input())).toMatchObject({ ok: true });
     expect(getBalanceUsd(db, userId)).toBe("0.00");
   });
 
   it("turns a short balance into a split that needs confirming, writing nothing", () => {
-    const { db, sqlite, userId, input } = setup("424.25");
-    expect(placeOrder(db, input({ expectedCreditUsd: "424.25" }))).toEqual({
+    const { db, sqlite, userId, input } = setup("424.99");
+    expect(placeOrder(db, input({ expectedCreditUsd: "424.99" }))).toEqual({
       ok: false,
       code: "SPLIT_CONFIRMATION_REQUIRED",
-      creditUsd: "424.25",
+      creditUsd: "424.99",
       cardUsd: "0.01",
     });
     expect(count(sqlite, "orders")).toBe(0);
-    expect(getBalanceUsd(db, userId)).toBe("424.25");
+    expect(getBalanceUsd(db, userId)).toBe("424.99");
   });
 
   it("two checkouts that together exceed the balance: the second is refused, never negative", () => {
     const { db, userId, input, fill } = setup("500.00");
     expect(placeOrder(db, input({ checkoutToken: "fc-token-a" }))).toMatchObject({ ok: true });
     fill();
-    // He saw $424.26 of credit, but only $75.74 is left: the split changed, so nothing is charged.
+    // He saw $425.00 of credit, but only $75.00 is left: the split changed, so nothing is charged.
     expect(placeOrder(db, input({ checkoutToken: "fc-token-b" }))).toMatchObject({
       ok: false,
       code: "CREDIT_CHANGED",
-      creditUsd: "75.74",
+      creditUsd: "75.00",
     });
-    expect(getBalanceUsd(db, userId)).toBe("75.74");
+    expect(getBalanceUsd(db, userId)).toBe("75.00");
   });
 
   it("a replayed checkout token doesn't double-spend", () => {
@@ -96,7 +96,7 @@ describe("placeOrder — Flash Credit", () => {
     const first = placeOrder(db, input());
     expect(placeOrder(db, input())).toEqual(first);
     expect(count(sqlite, "flash_credit_entries")).toBe(2); // one top-up, one spend
-    expect(getBalanceUsd(db, userId)).toBe("575.74");
+    expect(getBalanceUsd(db, userId)).toBe("575.00");
   });
 
   it("refuses Flash Credit for a guest when the gate is off", () => {
@@ -109,9 +109,9 @@ describe("placeOrder — Flash Credit", () => {
         userId: null,
         cartId: guestCart,
         checkoutToken: "guest-token",
-        expectedTotalUsd: "424.26",
+        expectedTotalUsd: "425.00",
         useFlashCredit: true,
-        expectedCreditUsd: "424.26",
+        expectedCreditUsd: "425.00",
       }),
     ).toEqual({ ok: false, code: "SIGN_IN_REQUIRED" });
   });

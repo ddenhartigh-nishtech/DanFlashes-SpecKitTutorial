@@ -1,12 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  ART_MAX_SCORE,
-  BEYOND,
-  DIAL_STEPS,
-  maxDialScore,
-  maxPriceableScore,
-  scoreAtStep,
-} from "@/lib/pattern/dial";
+import { BEYOND, DIAL_MAX_SCORE, DIAL_STEPS, maxDialScore, scoreAtStep } from "@/lib/pattern/dial";
 import { nameFor, slugFor, uniqueName } from "@/lib/pattern/names";
 import { decodeRecipe, encodeRecipe, recipeKey, type Recipe } from "@/lib/pattern/recipe";
 import { mulberry32 } from "@/lib/pattern/rng";
@@ -19,7 +12,7 @@ describe("the dial's steps (007 FR-004, FR-007, R2)", () => {
     expect(scoreAtStep(BEYOND, 10_249)).toBeNull();
   });
 
-  it.each([[10_249], [ART_MAX_SCORE], [120], [0]])(
+  it.each([[10_249], [24_000], [120], [0]])(
     "never goes down from step to step (maxDial %i), from 0 to the top",
     (maxDial) => {
       const scores = Array.from({ length: 101 }, (_, step) => scoreAtStep(step, maxDial)!);
@@ -39,29 +32,29 @@ describe("the dial's steps (007 FR-004, FR-007, R2)", () => {
   });
 });
 
-describe("maxPriceableScore (007 R2)", () => {
-  it("is the most the MSRP can price at the default tuning", () => {
-    const max = maxPriceableScore(DEFAULT_MSRP_SETTINGS);
-    expect(max).toBe(10_249);
-    expect(() => msrpUsd(max, DEFAULT_MSRP_SETTINGS)).not.toThrow();
-    expect(() => msrpUsd(max + 1, DEFAULT_MSRP_SETTINGS)).toThrow();
+describe("the dial's top (010 FR-011, R5)", () => {
+  it("is a fixed 10,249, where the old exponential ran out of numbers", () => {
+    expect(DIAL_MAX_SCORE).toBe(10_249);
+    expect(maxDialScore()).toBe(10_249);
   });
 
-  it("drops when prices double faster, and the dial stops at the art limit when they barely climb", () => {
-    expect(maxPriceableScore({ ...DEFAULT_MSRP_SETTINGS, doublingInterval: 1 })).toBeLessThan(
-      2_000,
-    );
-    const slow = { ...DEFAULT_MSRP_SETTINGS, doublingInterval: 1_000 };
-    expect(maxPriceableScore(slow)).toBeGreaterThan(ART_MAX_SCORE);
-    expect(maxDialScore(slow)).toBe(ART_MAX_SCORE);
-    expect(maxDialScore(DEFAULT_MSRP_SETTINGS)).toBe(10_249);
+  it("is priced in full at the defaults: $256,275.00", () => {
+    expect(msrpUsd(DIAL_MAX_SCORE, DEFAULT_MSRP_SETTINGS)).toBe("256275.00");
+  });
+
+  it("keeps every step's score from before 010, so old links open the same shirts (FR-012)", () => {
+    const steps = Array.from({ length: 101 }, (_, step) => scoreAtStep(step, maxDialScore()));
+    expect(steps.slice(0, 5)).toEqual([0, 3, 5, 8, 10]);
+    expect(steps[80]).toBe(200);
+    expect(steps[90]).toBe(1432);
+    expect(steps[100]).toBe(10_249);
   });
 });
 
 describe("recipe codes (007 FR-008, FR-011, R3)", () => {
   const rand = mulberry32(42);
   const sample: Recipe[] = Array.from({ length: 1000 }, () => ({
-    score: Math.floor(rand() * (ART_MAX_SCORE + 1)),
+    score: Math.floor(rand() * (DIAL_MAX_SCORE + 1)),
     style: rand() < 0.5 ? "polo" : "button-down",
     seed: Math.floor(rand() * 2 ** 32),
   }));

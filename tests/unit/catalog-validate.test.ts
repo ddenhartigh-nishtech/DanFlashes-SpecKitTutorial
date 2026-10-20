@@ -71,20 +71,36 @@ describe("validateShirt", () => {
     expect(fields(validateShirt({ ...valid, ...patch } as ShirtDraft, ctx))).toContain(field);
   });
 
-  it("refuses a BLAND-tier shirt priced at or above the MSRP start price", () => {
+  it("refuses a BLAND-tier shirt priced at or above a real shirt's start (010 FR-006)", () => {
     const bland = { ...valid, complexity: 3, finalPriceUsd: "300.00" };
-    expect(fields(validateShirt(bland, ctx))).toContain("finalPriceUsd");
+    expect(validateShirt(bland, ctx)).toEqual([
+      {
+        field: "finalPriceUsd",
+        message: "BLAND shirts must cost less than $300.00; this one resolves to $300.00.",
+      },
+    ]);
   });
 
-  it("allows a BLAND-tier shirt under the start price, including at MSRP", () => {
+  it("allows a BLAND-tier shirt under a real shirt's start, including at MSRP", () => {
     expect(validateShirt({ ...valid, complexity: 3, finalPriceUsd: "299.99" }, ctx)).toEqual([]);
-    expect(validateShirt({ ...valid, complexity: 3 }, ctx)).toEqual([]);
+    expect(validateShirt({ ...valid, complexity: 9 }, ctx)).toEqual([]);
   });
 
-  it("refuses a BLAND tier whose MSRP crosses the start price (owner widened BLAND)", () => {
+  it("moves a real shirt's start with the first tier above BLAND (owner widened BLAND)", () => {
     const wideBland: Tier[] = [{ ...tiers[0] }, { ...tiers[1], minScore: 20 }];
-    const issues = validateShirt({ ...valid, complexity: 15 }, { ...ctx, tiers: wideBland });
-    expect(fields(issues)).toContain("finalPriceUsd");
+    const wide = { ...ctx, tiers: wideBland };
+    expect(validateShirt({ ...valid, complexity: 15, finalPriceUsd: "500.00" }, wide)).toEqual([]);
+    expect(validateShirt({ ...valid, complexity: 19 }, wide)).toEqual([]);
+    expect(
+      fields(validateShirt({ ...valid, complexity: 15, finalPriceUsd: "550.00" }, wide)),
+    ).toContain("finalPriceUsd");
+  });
+
+  it("has nothing to undercut when BLAND is the only tier", () => {
+    const onlyBland = { ...ctx, tiers: [tiers[0]] };
+    expect(validateShirt({ ...valid, complexity: 3, finalPriceUsd: "9999.00" }, onlyBland)).toEqual(
+      [],
+    );
   });
 
   it("requires at least one image for an active shirt, but not an inactive one", () => {
@@ -92,13 +108,9 @@ describe("validateShirt", () => {
     expect(validateShirt({ ...valid, status: "inactive" }, { ...ctx, imageCount: 0 })).toEqual([]);
   });
 
-  it("refuses a score whose MSRP can't be computed, and nothing below that (008 R7)", () => {
-    const issues = validateShirt({ ...valid, complexity: 999_999 }, ctx);
-    expect(issues).toEqual([
-      { field: "complexity", message: "That's too complicated to price, even for Dan." },
-    ]);
-    // No ceiling below the limit: score 10,000 at the default tuning is ~2^999 × $300, in full.
-    expect(validateShirt({ ...valid, complexity: 10_000 }, ctx)).toEqual([]);
+  it("prices every whole score: nothing is too complicated to price (010 FR-002)", () => {
+    expect(validateShirt({ ...valid, complexity: 1_000_000 }, ctx)).toEqual([]);
+    expect(validateShirt({ ...valid, complexity: 999_999_999 }, ctx)).toEqual([]);
   });
 });
 
@@ -134,11 +146,14 @@ describe("validateSettings", () => {
   });
 
   it.each([
-    ["msrp.startPriceUsd", { msrp: { ...DEFAULT_MSRP_SETTINGS, startPriceUsd: "0.00" } }],
-    ["msrp.startPriceUsd", { msrp: { ...DEFAULT_MSRP_SETTINGS, startPriceUsd: "300" } }],
-    ["msrp.anchorScore", { msrp: { ...DEFAULT_MSRP_SETTINGS, anchorScore: -1 } }],
-    ["msrp.doublingInterval", { msrp: { ...DEFAULT_MSRP_SETTINGS, doublingInterval: 0 } }],
-    ["msrp.doublingInterval", { msrp: { ...DEFAULT_MSRP_SETTINGS, doublingInterval: 2.5 } }],
+    ["msrp.basePriceUsd", { msrp: { ...DEFAULT_MSRP_SETTINGS, basePriceUsd: "0.00" } }],
+    ["msrp.basePriceUsd", { msrp: { ...DEFAULT_MSRP_SETTINGS, basePriceUsd: "-1.00" } }],
+    ["msrp.basePriceUsd", { msrp: { ...DEFAULT_MSRP_SETTINGS, basePriceUsd: "50" } }],
+    ["msrp.basePriceUsd", { msrp: { perPointUsd: "25.00" } }],
+    ["msrp.perPointUsd", { msrp: { ...DEFAULT_MSRP_SETTINGS, perPointUsd: "0.00" } }],
+    ["msrp.perPointUsd", { msrp: { ...DEFAULT_MSRP_SETTINGS, perPointUsd: "-25.00" } }],
+    ["msrp.perPointUsd", { msrp: { ...DEFAULT_MSRP_SETTINGS, perPointUsd: "lots" } }],
+    ["msrp.perPointUsd", { msrp: { basePriceUsd: "50.00" } }],
     ["flashCreditPresetsUsd", { flashCreditPresetsUsd: ["500"] }],
     ["flashCreditPresetsUsd", { flashCreditPresetsUsd: ["0.00"] }],
     ["mediaBaseUrl", { mediaBaseUrl: "ftp://files.example.com" }],

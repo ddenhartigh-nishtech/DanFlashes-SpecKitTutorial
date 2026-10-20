@@ -10,10 +10,10 @@ export const SHIRT_STATUSES: readonly ShirtStatus[] = ["active", "inactive"];
 export const SIZES = ["S", "M", "L", "XL", "XXL"] as const;
 export type Size = (typeof SIZES)[number];
 
+/** The MSRP's two dials (constitution II, 010 R2): price = base + per point × score. */
 export interface MsrpSettings {
-  startPriceUsd: Usd;
-  anchorScore: number;
-  doublingInterval: number;
+  basePriceUsd: Usd;
+  perPointUsd: Usd;
 }
 
 export interface StoreSettings {

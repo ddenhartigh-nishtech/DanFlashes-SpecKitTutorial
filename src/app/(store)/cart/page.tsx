@@ -117,6 +117,7 @@ async function CartContents() {
         </p>
         {view.surchargeCount > 0 ? (
           <p
+            data-steady
             data-testid="surcharge-line"
             className="flex flex-wrap items-center justify-between gap-3 font-semibold"
           >

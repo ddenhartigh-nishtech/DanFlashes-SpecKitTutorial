@@ -32,7 +32,10 @@ so the shirt is still found by it.
 - **`media`**: a generated shirt's art is a row with `kind = 'shirt'`, key `uploads/<uuid>.svg`,
   and alt "<name>: a generated pattern". The file is in the uploads folder (008 R8).
 - **`shirt_images`**: the art at position 0. The owner can attach more in the editor.
-- **`cart_items`, `orders`, `order_items`**: unchanged. A generated shirt is bought like any other.
+- **`cart_items`**: unchanged. A generated shirt goes in a cart like any other, and its surcharge
+  is worked out live, never stored.
+- **`orders`, `order_items`**: unchanged by 0012. Migration 0013 adds the surcharge columns (see
+  the owner review section below).
 
 ## Derived, never stored
 

@@ -7,7 +7,7 @@ hand-run walkthrough, and the source for `tests/e2e/dial.spec.ts` and
 ## Setup
 
 ```bash
-npm run db:migrate      # 0012 (an existing database), or: npm run db:reset
+npm run db:migrate      # 0012 and 0013 (an existing database), or: npm run db:reset
 npm run dev             # http://localhost:3000
 ```
 
@@ -58,6 +58,11 @@ These scenarios replace 9–12's assumption that anyone can buy a made shirt.
 ```bash
 npm run verify
 ```
+
+The e2e runs at 4 workers (`playwright.config.ts`). Every browser drives one single-threaded
+production server, which also runs pure-JS bcrypt at cost 12 on each sign-up. At 7 workers (half
+of 14 cores), a burst of sign-ups stalled pages past the 15 s expect timeout, failing a different
+older test each run. At 4, the suite passed 148 of 148 in about 6 minutes.
 
 ## Results (2026-10-19)
 

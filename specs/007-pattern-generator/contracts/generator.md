@@ -7,7 +7,7 @@
 | `GET /how-complicated` | The dial (R4). Query: `r` (a recipe code, optional), `seed` (a 32-bit override, optional), `style` (`polo` or `button-down`, optional). An invalid `r` falls back to the default (step 20, polo, seed 1). Switch off: the store's 404. |
 | `GET /how-complicated/art/[code]` | `image/svg+xml` for a valid code at or under `maxDial`. A made shirt's stored art, otherwise freshly generated. `nosniff`. Switch off, or an invalid or beyond code: 404. |
 | `/shirts` and `/` | While the switch is on, a call to action: "How complicated can it get?" → `/how-complicated`. |
-| `/shirts/<slug>` of a dial shirt | The ordinary shirt page (unlisted shirts render normally). |
+| `/shirts/<slug>` of a dial shirt | The shirt's own page. While it's one of a kind, the page depends on who's looking: see "One-of-a-kind shirts in the store" below. Mass-produced, it's an ordinary shirt page. |
 
 **The dial page's contract with the browser**:
 - The step list holds no score. The slider's `aria-valuenow` is the step (0–101), and its

@@ -451,3 +451,19 @@ analyzes the money before polish.
   after `CONFIRMATION_MS` (4 s), in place, and every new answer shows again. The console e2e passed
   17/17 on each of admin-desktop and admin-phone, run one after the other. (Run together with
   `--no-deps`, the two projects share the switches and race, as the config warns.)
+
+---
+
+## Phase 8: Convergence
+
+- [X] T048 Hold the cart's `surcharge-line` and the shirt page's `surcharge-note` steady under
+  Extreme Awesomeness (`data-steady`), like the other money rows, per Constitution V (partial)
+- [X] T049 Point contracts/generator.md's store-routes row for a dial shirt's page at the
+  one-of-a-kind table, instead of "the ordinary shirt page", per FR-018 (contradicts)
+- [X] T050 Note migration 0013's surcharge columns on `orders` and `order_items` in data-model.md's
+  "Unchanged" list, per data-model 0013 (contradicts)
+- [X] T051 Give `ART_MAX_SCORE` as 24,000 in research.md R2 and plan.md's technical context, per R13
+  as amended (contradicts)
+- [X] T052 Name migrations 0012 and 0013 in quickstart.md's setup, per quickstart: Setup (partial)
+- [X] T053 Record the e2e's 4-worker cap and its reason in quickstart.md's Automated section, per
+  plan: e2e (unrequested)

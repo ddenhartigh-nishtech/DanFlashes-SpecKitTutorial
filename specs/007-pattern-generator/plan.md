@@ -90,7 +90,7 @@ See [data-model.md](./data-model.md).
 
 **Scale/Scope**:
 - 102 dial steps
-- art budget `ART_MAX_SCORE = 120,000` units (R2)
+- art budget `ART_MAX_SCORE = 24,000` units (R2; 120,000 before the owner review, R13)
 - 2 new store routes, 1 new console page plus an art route, 3 actions
 
 All Technical Context items are resolved. See [research.md](./research.md) (R1–R13).

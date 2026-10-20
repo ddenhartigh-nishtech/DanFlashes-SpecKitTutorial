@@ -54,7 +54,8 @@ plan.md, data-model.md, contracts/generator.md and tasks.md.
   - `maxPriceableScore(msrp)` binary-searches for the largest whole score `msrpUsd` can price
     (10,249 at the default tuning).
   - The dial's top is `maxDial = min(maxPriceableScore, ART_MAX_SCORE)`, where `ART_MAX_SCORE` is
-    120,000. Above that, the art would pass 2 MB (R13). Only an extreme tuning can reach it.
+    24,000. It was 120,000 before the owner review's denser art (R1, R13 as amended). Above that,
+    the art would pass 2 MB (R13). Only an extreme tuning can reach it.
   - `DIAL_STEPS = 102`, numbered 0–101. `scoreAtStep(step, maxDial)`:
     - steps 0–80 are linear, `round(2.5·step)` (scores 0–200, every seeded tier's band)
     - steps 81–100 are exponential from 200 up to `maxDial`

@@ -83,7 +83,7 @@ async function ShirtDetail({ params }: Pick<PageProps<"/shirts/[slug]">, "params
           </div>
         )}
         {!retired && !taken && surchargeUsd ? (
-          <p data-testid="surcharge-note" className="field-backing w-fit font-semibold">
+          <p data-steady data-testid="surcharge-note" className="field-backing w-fit font-semibold">
             {copy.surcharge.note(formatUsd(surchargeUsd))}
           </p>
         ) : null}

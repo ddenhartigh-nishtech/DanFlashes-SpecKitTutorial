@@ -3,6 +3,7 @@
  * tested directly; src/actions/admin.ts wraps them. Each starts at the door (`asAdmin`).
  */
 import { eq } from "drizzle-orm";
+import { dansChange } from "@/lib/admin/owner-mark";
 import { asAdmin, id, problems, refused, saved, text, type ConsoleState } from "@/lib/admin/state";
 import { findSessionUser } from "@/lib/auth/session";
 import { copy } from "@/lib/copy";
@@ -65,7 +66,7 @@ export function setShirtListedCore(db: Db, jar: CookieJar, form: FormData): Cons
   if (listed !== "1" && listed !== "0") return refused(g.badListed);
 
   db.update(shirts)
-    .set({ listed: listed === "1" })
+    .set({ listed: listed === "1", ...dansChange() })
     .where(eq(shirts.id, shirtId))
     .run();
   return saved(listed === "1" ? g.listedNow : g.unlistedNow);

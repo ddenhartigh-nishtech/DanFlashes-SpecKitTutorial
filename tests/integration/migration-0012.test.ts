@@ -40,6 +40,7 @@ describe("migration 0012 (generated shirts and the pattern generator switch)", (
         recipe: null,
         listed: 1,
         maker_user_id: null,
+        owner_changed_at: null, // 0015
       })),
     );
     expect(sqlite.prepare("SELECT * FROM store_settings").get()).toMatchObject({

@@ -31,7 +31,7 @@
 
 ## Notes
 
-- Q1–Q4 (powers, what he knows, the approach, contacting Dan) were asked and answered before the spec
-  was written, so no [NEEDS CLARIFICATION] markers were needed.
+- Q1–Q6 (powers, what he knows, the approach, contacting Dan, where the model runs, the excuse) were
+  asked and answered before the spec was written, so no [NEEDS CLARIFICATION] markers were needed.
 - "A locally hosted language model" and "an Ollama-style chat endpoint" appear only in Assumptions, to
   record the owner's constraint. Which model, and how the store talks to it, are left to the plan.

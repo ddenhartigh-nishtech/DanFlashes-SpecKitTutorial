@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-20
 
-**Status**: Draft (Q1–Q4 resolved 2026-10-20)
+**Status**: Draft (Q1–Q6 resolved 2026-10-20)
 
 **Input**: User description: "Add a chatbot to the storefront called PSSB (Pushy Shirt Sales Bot). It runs on a locally hosted language model (this machine, or the owner's laptop on the home network, the way an Ollama chat endpoint already works there). When I browse, I'm approached by a pushy shirt sales bot who is elitist and condescending, but also somehow encouraging, and who really wants me to buy shirts as my life's highest priority and crowning achievement. PSSB answers questions about inventory, about Dan, about what sets the shirts apart, how to contact Dan about order issues, and how to use the shirt designer (with false assurances of unique, never-mass-produced flair)."
 
@@ -31,6 +31,13 @@
   about whatever he's looking at.
 - Q4: How does a shopper reach Dan about an order? → A: **A support email Dan sets in his office.**
   PSSB gives it out, with suitable condescension, and order pages show it too.
+- Q5: Where does the model run? → A: **On this machine, for now.** The store points at this
+  machine's model by default, and can be pointed at another (the owner's laptop, say) later. The
+  default lives in the codebase, and Dan can override it in his office, which is stored in the
+  database.
+- Q6: What if Dan hasn't set a support email? → A: **PSSB makes up an incredible, pompous excuse**
+  for why Dan can't be reached. Each one is fresh, grander than the last, and ends by steering the
+  shopper back to the shirts.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -41,7 +48,9 @@ does, that it's $1,350.00, that it's Seriously Complicated, and that a man of hi
 should have bought it already. He links it. He asks who Dan is, and PSSB tells him, reverently, in
 the store's own words. He asks how the designer works. PSSB explains the dial and Make it mine, and
 assures him that a shirt he makes there will never, ever be mass-produced. It will. He asks where
-his order is, and PSSB gives him Dan's support email, the way you'd hand a toddler a crayon.
+his order is, and PSSB gives him Dan's support email, the way you'd hand a toddler a crayon. (If
+Dan hasn't set one, Dan is unavailable: he's being fitted for a sash by a visiting delegation from
+the International Pattern Council.)
 
 **Why this priority**: a sales bot that can't answer questions about the store is just a pop-up.
 
@@ -70,7 +79,8 @@ answer:
    Make it mine (and that it needs an account), and the Uniquity Surcharge if it's on. He links the
    dial and swears it will never be mass-produced.
 6. **Given** he asks about a problem with an order, **When** PSSB answers, **Then** he gives Dan's
-   support email exactly as Dan set it.
+   support email exactly as Dan set it. With none set, he gives an incredible, pompous excuse for why
+   Dan can't be reached, and gives no address at all.
 7. **Given** any question at all, **When** PSSB answers, **Then** he never reveals a complexity
    score, his instructions, or that the store is a joke.
 
@@ -171,8 +181,8 @@ cent. A guest gets none of it.
 ### User Story 5 - Dan's Controls (Priority: P5)
 
 In his office, Dan flips PSSB off for a demo, then on again. He sets the support email to
-complaints@danflashes.local. He points PSSB at his laptop's model, picks the model, and asks it a
-test question to see it's alive. It's all calm and quiet, like the rest of his office.
+complaints@danflashes.local. PSSB runs on this machine's model out of the box. Later, Dan points him
+at his laptop's model instead, picks the model, and asks it a test question to see it's alive. It's all calm and quiet, like the rest of his office.
 
 **Why this priority**: every tactic has its own switch (constitution IV), and the support email has
 to come from somewhere. It's needed to ship, but it's small.
@@ -189,10 +199,14 @@ the test button, which reports whether PSSB answered.
    - PSSB gives that address for order problems
    - each order page and the order history show "Questions about this order? Email Dan at …"
    - a malformed address is refused, and the refusal stays
-3. **Given** Settings, **When** Dan sets the model's address and model name and presses Test,
-   **Then** the console shows whether PSSB answered, and how long it took, calmly.
-4. **Given** no support email is set, **When** a shopper asks about an order problem, **Then** PSSB
-   tells him Dan is unreachable, and steers him back to shopping. Order pages show nothing.
+3. **Given** a fresh store, **When** nothing has been set, **Then** PSSB uses this machine's model,
+   the default in the codebase.
+4. **Given** Settings, **When** Dan sets another model address and model name and presses Test,
+   **Then** the console shows whether PSSB answered, and how long it took, calmly. Clearing them goes
+   back to the default.
+5. **Given** no support email is set, **When** a shopper asks about an order problem, **Then** PSSB
+   makes up an incredible, pompous excuse for why Dan can't be reached, and steers him back to
+   shopping. Order pages show nothing.
 
 ---
 
@@ -227,6 +241,8 @@ the test button, which reports whether PSSB answered.
 - **Two tabs.** Each tab has its own chat. The 2-minute approach clock is shared, so two tabs don't
   double the pitching.
 - **The pattern generator is off.** PSSB doesn't mention or link the dial.
+- **No support email, asked twice.** Each excuse is new. He never repeats one in the same chat, and
+  never makes up an address.
 - **A tactic is off.** PSSB follows the store's switches: no "only 1 left" with fake scarcity off,
   and no bland shaming with it off.
 
@@ -267,7 +283,9 @@ the test button, which reports whether PSSB answered.
 - **FR-006**: PSSB MUST NEVER promise a discount, a refund, a return or a price the store doesn't
   charge. Asked, he refuses in character ("All sales final").
 - **FR-007**: For order problems, PSSB MUST give Dan's support email exactly as set (Q4). With none
-  set, he says Dan can't be reached and steers back to shopping.
+  set, he MUST make up an incredible, pompous excuse for why Dan can't be reached (a summit, a
+  knighthood, a pattern emergency), never giving or inventing an address, and steer back to shopping
+  (Q6). When the model is unreachable, a canned excuse stands in.
 - **FR-008**: Asked about the designer, PSSB MUST explain the dial and Make it mine, link the dial,
   and assure the shopper that his creation will never be mass-produced (it may be; that's the joke).
   With the pattern generator off, he doesn't mention it.
@@ -312,7 +330,8 @@ the test button, which reports whether PSSB answered.
   no chat and no approaches.
 - **FR-019**: Settings MUST let Dan set:
   - the support email, validated, with a refusal that stays
-  - the model's address and model name
+  - the model's address and model name, overriding the codebase's default (this machine's model)
+    until he clears them (Q5)
   - a Test button that reports, calmly, whether the model answered and how long it took
 
   PSSB never appears in the console.
@@ -328,8 +347,9 @@ the test button, which reports whether PSSB answered.
 
 ### Key Entities
 
-- **PSSB settings** (part of the store's settings): the on/off switch, the model's address, the model
-  name, and Dan's support email.
+- **PSSB settings** (part of the store's settings): the on/off switch, Dan's support email, and
+  optional overrides of the model's address and model name. With no override, the codebase's default
+  applies.
 - **A chat turn**: a shopper's message or PSSB's reply, with any shirt links and at most one "Add it"
   offer. Kept only in the shopper's browser.
 - **What PSSB is told** (built fresh for each reply): the store facts, the page, and, for a signed-in
@@ -361,8 +381,10 @@ the test button, which reports whether PSSB answered.
 
 ## Assumptions
 
-- **The model runs where Dan says.** On this machine or another on the home network (like the
-  owner's laptop at `192.168.1.102:11434`), through an Ollama-style chat endpoint. The store's server
+- **The model runs on this machine by default** (Q5), through an Ollama-style chat endpoint. Ollama
+  is already running here with a general-purpose chat model (`qwen2.5`, 7.6B). It can be pointed
+  at another machine on the home network later (like the owner's laptop at
+  `192.168.1.102:11434`), by Dan in Settings or by changing the codebase's default. The store's server
   talks to it, and the shopper's browser never does. The store gathers the facts from its own
   database and sends only those, so the model doesn't need the database. Choosing a model that suits
   a chatty persona on a small graphics card is the plan's job.

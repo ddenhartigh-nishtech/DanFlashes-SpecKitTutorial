@@ -105,8 +105,14 @@ one, and `--yes` deletes only it, with its art.
 - [X] T013 Run the sweep on a copy of the owner's store: the plain list, then `--yes`. Record what
   it found (expected: no shirts, since the one dial shirt is under 30 days old, and the ~59 stray
   files from earlier test runs). Record in quickstart.md.
-- [ ] T014 Run `npm run verify` until it's green, with `data/uploads/` checked by the teardown.
+- [X] T014 Run `npm run verify` until it's green, with `data/uploads/` checked by the teardown.
   Record the counts.
+  - **Result (2026-10-20)**: green on the first run. Unit and integration: 97 files, 1,052 tests.
+    E2E: 154 in 6.5 min. Coverage: statements 94.33%, lines 95.09%.
+  - **The folders**: `data/uploads/` held 129 files before and after (the teardown checked).
+    `data/e2e-uploads/` was empty afterward.
+  - **Converge** (2026-10-20): converged, with no tasks appended. FR-001–FR-011 and SC-001–SC-004
+    were checked against the code, and constitution v5.0.0's II exception holds.
 
 ---
 

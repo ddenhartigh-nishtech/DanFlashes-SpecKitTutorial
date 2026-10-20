@@ -33,10 +33,10 @@ describe("migration 0013 (made to order, and the Uniquity Surcharge)", () => {
     const before = sqlite.prepare("SELECT * FROM shirts ORDER BY id").all() as object[];
     runMigrations(db);
     expect(sqlite.prepare("SELECT * FROM shirts ORDER BY id").all()).toEqual([
-      { ...before[0], maker_user_id: null },
+      { ...before[0], maker_user_id: null, owner_changed_at: null },
       // Order 1 (by user 2) came first, though user 1's order holds the lower line id.
-      { ...before[1], maker_user_id: 2 },
-      { ...before[2], maker_user_id: null },
+      { ...before[1], maker_user_id: 2, owner_changed_at: null },
+      { ...before[2], maker_user_id: null, owner_changed_at: null },
     ]);
     expect(sqlite.pragma("foreign_key_check")).toEqual([]);
   });

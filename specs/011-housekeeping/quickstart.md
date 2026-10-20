@@ -23,3 +23,16 @@ npm run db:migrate      # 0015 on an existing database (it backs up first)
 ```bash
 npm run verify
 ```
+
+## Results (2026-10-20)
+
+On a copy of the owner's store and its pictures folder (`data/qs011.db`, `data/qs011-uploads`):
+
+- **0015**: the one shopper-made shirt (made 2026-10-19, untouched) stayed unmarked. Dan's three
+  generated shirts are `origin = 'owner'`, which the sweep never considers.
+- **2 (plain run)**: 0 abandoned creations (the dial shirt is a day old) and 125 stray picture
+  files, left by test runs before this feature. Nothing changed.
+- **3 (`--yes`)**: backed up, then "Swept 0 shirts, 0 pictures and 125 stray files." The folder
+  kept 4 files: exactly the 4 the library refers to (the dial shirt's and Dan's three).
+- **7**: `catalog:audit` reported 0 errors and 0 warnings. The real `data/uploads/` was untouched
+  (129 files before and after).

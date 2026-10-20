@@ -23,6 +23,7 @@
     "db:seed-demo": "tsx scripts/seed-demo.ts",
     "db:studio": "drizzle-kit studio",
     "catalog:audit": "tsx scripts/catalog-audit.ts",
+    "shirts:sweep": "tsx scripts/shirts-sweep.ts",
     "admin:grant": "tsx scripts/admin.ts grant",
     "admin:revoke": "tsx scripts/admin.ts revoke",
     "art:generate": "tsx scripts/generate-shirt-art.ts"

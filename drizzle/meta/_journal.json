@@ -106,6 +106,13 @@
       "when": 1792513892015,
       "tag": "0014_gentler_pricing_curve",
       "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "6",
+      "when": 1792520100715,
+      "tag": "0015_owner_changed",
+      "breakpoints": true
     }
   ]
 }

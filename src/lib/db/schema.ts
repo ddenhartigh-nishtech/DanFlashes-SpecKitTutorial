@@ -88,6 +88,8 @@ export const shirts = sqliteTable(
     }),
     ...timestamps,
     updatedAt: text("updated_at").notNull().default(nowIso),
+    /** When Dan last changed it in his office (011 R2). The sweep keeps every shirt he touched. */
+    ownerChangedAt: text("owner_changed_at"),
   },
   (t) => [
     check("shirts_origin", sql`${t.origin} IN ('catalog', 'owner', 'dial')`),

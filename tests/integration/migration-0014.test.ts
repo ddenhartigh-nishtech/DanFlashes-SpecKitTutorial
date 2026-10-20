@@ -67,7 +67,13 @@ describe("migration 0014 (the gentler pricing curve)", () => {
     after.forEach((shirt, i) => {
       const old = before[i];
       expect(shirt.final_price_usd).toBeNull();
-      expect({ ...shirt, final_price_usd: null, updated_at: null }).toEqual({
+      // owner_changed_at is 0015's (Dan's mark), not this migration's.
+      expect({
+        ...shirt,
+        final_price_usd: null,
+        updated_at: null,
+        owner_changed_at: undefined,
+      }).toEqual({
         ...old,
         final_price_usd: null,
         updated_at: null,

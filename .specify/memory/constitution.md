@@ -1,11 +1,16 @@
 <!--
 Sync Impact Report
 - Version change: 4.2.0 → 5.0.0 (MAJOR: Principle II's MSRP MUST is redefined, "exponential" →
-  "straight-line"; a PATCH-level wording fix to III is batched in)
+  "straight-line", and its "never deleted" rule is narrowed for abandoned creations; a PATCH-level
+  wording fix to III is batched in)
 - Modified principles:
   - II. Complexity Is the Price: the MSRP algorithm MUST be a straight line, a base price plus a
     price per point (010). Its tuning parameters are now named: the base price and the price per
     point. Every other MUST stands (one place, deterministic, monotonic, owner-tunable, no ceiling).
+  - II. "Shirts are deactivated, never deleted" gains one exception (011): an owner-run sweep MAY
+    delete an abandoned creation. That's a shopper-made shirt nobody bought, in no cart, never
+    mass-produced or changed by the owner, and past a grace period. Owner-made shirts are always
+    kept, and so is anything in an order.
   - III. Relentlessly Vibrant: "the starting price of a real Dan Flashes shirt" is defined as the
     MSRP where the first tier above BLAND begins. Before, it was a tuning dial the straight line no
     longer has.
@@ -58,8 +63,12 @@ final price.
   complexity in the pattern itself, and in a **complexity tier badge** (an owner-named band of
   scores, e.g. "Dangerously Complicated") wherever a shirt appears. The lowest tier's badge is
   **BLAND**.
-- Shirts are deactivated, never deleted. A shirt someone has bought MUST stay viewable from their
-  order history for as long as the order exists.
+- Shirts are deactivated, never deleted, with one exception: an **abandoned creation** MAY be
+  swept by a housekeeping command the owner runs. That's a shopper-made shirt (007) that nobody has
+  bought, that sits in no cart, that the owner hasn't mass-produced or changed in any way, and that
+  is older than a grace period the spec sets. Every shirt the owner made, released or not, is kept.
+  A shirt someone has bought MUST stay viewable from their order history for as long as the order
+  exists.
 
 Rationale: the shirts are expensive because the patterns are complicated. The math suggests the
 price, and Dan decides it. The guy doesn't need a number. He can *see* it's complicated.

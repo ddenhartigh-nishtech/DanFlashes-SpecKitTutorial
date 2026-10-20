@@ -61,3 +61,10 @@ freshly reset scratch store (`data/qs010r.db`).
   - the dial's top shirt at quantity 99 is a $25,371,225.00 cart at 360px with no sideways scroll
 - **17 (SC-007)**: `catalog:audit` reported 0 errors and 0 warnings on both the upgraded copy and
   the reset store.
+- **Strict Mode (T019)**: `next dev` on the reset scratch store, two scripted runs. They covered:
+  - the tuning form: $40.00 a point → Dan's Masterpiece after $5,250.00, "A real shirt starts at
+    $450.00 (Complicated, score 10).", and a malformed base price → "—"
+  - the editor preview at 1,000,000 → $25,000,050.00
+  - the pricing chart: a single segment `M44 293.5 L676 113.3`
+
+  There were no browser console errors or warnings.

@@ -272,7 +272,7 @@ it back. A zero, negative or malformed dial is refused. The chart's MSRP is stra
     crosses a tier" edge case, and the chart's axis
   - README.md: the MSRP line, the dial's top, migration 0014, and that `db:migrate` backs up
     before clearing Dan's prices
-- [ ] T019 [P] Hand-check `TuningForm` and `PricePreview` in `next dev` under React Strict Mode, on
+- [X] T019 [P] Hand-check `TuningForm` and `PricePreview` in `next dev` under React Strict Mode, on
   a scratch database: no console errors or warnings.
 - [X] T020 Script the quickstart scenarios e2e doesn't cover, on a copy of a pre-0014 database:
   - 1, 3 and 4 (orders identical, Dan's prices cleared)

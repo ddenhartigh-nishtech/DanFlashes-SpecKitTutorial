@@ -4,14 +4,14 @@ import { copy } from "@/lib/copy";
 import { SMALL_FIXTURE } from "../fixtures/catalog";
 
 describe("the switchboard (008 FR-012, R11)", () => {
-  it("has every one of the store's 13 tactic switches, once", () => {
+  it("has every one of the store's 15 switches, once", () => {
     const booleans = Object.entries(SMALL_FIXTURE.settings)
       .filter(([, value]) => typeof value === "boolean")
       .map(([key]) => key)
       .sort();
     expect([...SWITCH_KEYS].sort()).toEqual(booleans);
-    expect(SWITCH_KEYS).toHaveLength(13);
-    expect(new Set(SWITCH_KEYS).size).toBe(13);
+    expect(SWITCH_KEYS).toHaveLength(15); // 007 added the pattern generator and the Uniquity Surcharge
+    expect(new Set(SWITCH_KEYS).size).toBe(15);
   });
 
   it("gives each one a label and one plain line on what it does", () => {

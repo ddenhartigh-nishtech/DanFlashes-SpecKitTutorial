@@ -15,12 +15,14 @@ interface OrderSummaryProps {
   totalUsd?: Usd;
   /** The add-ons on the order (005 FR-007): their own lines, at the price paid. */
   addOns?: { name: string; priceUsd: Usd }[];
+  /** The Uniquity Surcharge (007 FR-027): one line, "× N", in all. */
+  surcharge?: { count: number; totalUsd: Usd } | null;
   placeholderUrl: string | null;
 }
 
 /**
- * Lines, then Subtotal / add-ons / Shipping $0.00 / Tax $0.00 / Total — used by checkout, receipts,
- * history.
+ * Lines, then Subtotal / Uniquity Surcharge / add-ons / Shipping $0.00 / Tax $0.00 / Total — used
+ * by checkout, receipts, history.
  */
 export function OrderSummary(props: OrderSummaryProps) {
   return (
@@ -70,6 +72,17 @@ export function OrderSummary(props: OrderSummaryProps) {
         <dd data-testid="subtotal" className="text-right tabular-nums">
           {formatUsd(props.subtotalUsd)}
         </dd>
+        {props.surcharge ? (
+          <div
+            data-testid="surcharge-line"
+            className="col-span-2 flex flex-wrap justify-between gap-x-4"
+          >
+            <dt className="[overflow-wrap:anywhere]">
+              {copy.surcharge.line(props.surcharge.count)}
+            </dt>
+            <dd className="text-right tabular-nums">{formatUsd(props.surcharge.totalUsd)}</dd>
+          </div>
+        ) : null}
         {props.addOns?.map((addOn) => (
           <div
             key={addOn.name}

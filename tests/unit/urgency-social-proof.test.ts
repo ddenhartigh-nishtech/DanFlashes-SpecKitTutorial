@@ -80,3 +80,10 @@ describe("socialProofFor", () => {
     expect(socialProofFor(on, { ...shirt, active: false }, START)).toBeNull();
   });
 });
+
+describe("socialProofFor a one-of-a-kind shirt (007 FR-026, R16)", () => {
+  it("says nothing: nobody else is looking at his, and nobody else bought it", () => {
+    const shirt = { id: 15, isBland: false, active: true, oneOfAKind: true };
+    expect(socialProofFor({ socialProof: true }, shirt, START)).toBeNull();
+  });
+});

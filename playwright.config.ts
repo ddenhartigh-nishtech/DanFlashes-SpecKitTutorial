@@ -5,6 +5,11 @@ const PORT = 3100;
 export default defineConfig({
   testDir: "tests/e2e",
   fullyParallel: false,
+  // Every browser drives one single-threaded production server that also runs pure-JS bcrypt
+  // (cost 12) on each sign-up. At 7 workers (half of 14 cores) a burst of sign-ups stalled pages
+  // past the 15 s expect timeout, failing a different old test each run (007 review). Four keeps
+  // the server responsive.
+  workers: 4,
   // Real bcrypt (cost 12) under two parallel browsers needs headroom; 5s flaked at ~3.7s actions.
   expect: { timeout: 15_000 },
   // Journeys span many pages plus real bcrypt; the no-score audit alone takes ~30s.

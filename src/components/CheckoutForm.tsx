@@ -20,8 +20,10 @@ export interface CheckoutAddOn {
 
 interface CheckoutFormProps {
   checkoutToken: string;
-  /** The shirts. The total adds the add-ons he keeps ticked (005 R4). */
+  /** The shirts. The total adds the surcharges and the add-ons he keeps ticked (005 R4). */
   subtotalUsd: Usd;
+  /** Every Uniquity Surcharge in the cart (007 FR-027). It can't be unticked. */
+  surchargeUsd: Usd;
   /** Every offered add-on (005 US1): all ticked on every visit. Empty while it's off. */
   addOns: CheckoutAddOn[];
   /** Decline lines show only while confirmshaming is on (002). */
@@ -37,6 +39,7 @@ const c = copy.checkout;
 export function CheckoutForm({
   checkoutToken,
   subtotalUsd,
+  surchargeUsd,
   addOns,
   confirmshaming,
   balanceUsd,
@@ -61,9 +64,11 @@ export function CheckoutForm({
       return next;
     });
 
-  // The total he's looking at: the shirts plus what he kept ticked. Only used to detect a change.
+  // The total he's looking at: the shirts, the surcharges and what he kept ticked. Only used to
+  // detect a change.
   const expectedTotalUsd = orderTotals({
     subtotalUsd,
+    surchargeUsd,
     addOnPrices: ticked.map((a) => a.priceUsd),
     shippingUsd: ZERO,
     taxUsd: ZERO,

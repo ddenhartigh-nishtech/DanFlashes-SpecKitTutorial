@@ -43,7 +43,8 @@ async function CheckoutContents() {
   if (view.lines.length === 0) redirect("/cart");
   if (user) settleStreams(db, user.id); // the balance below includes every payday that came due
 
-  // Shipping and tax are $0.00 (FR-029). The total is live in the form: shirts plus add-ons (005 R4).
+  // Shipping and tax are $0.00 (FR-029). The total is live in the form: shirts plus surcharges
+  // plus add-ons (005 R4, 007 FR-027).
   const addOns = listOfferedAddOns(db, settings);
   return (
     <div className="grid gap-6 md:grid-cols-[1fr_22rem] md:items-start">
@@ -61,6 +62,11 @@ async function CheckoutContents() {
         <OrderSummary
           lines={cartSummaryLines(view)}
           subtotalUsd={view.subtotalUsd}
+          surcharge={
+            view.surchargeCount > 0
+              ? { count: view.surchargeCount, totalUsd: view.surchargeUsd }
+              : null
+          }
           shippingUsd="0.00"
           taxUsd="0.00"
           placeholderUrl={getPlaceholderUrl(db, settings)}
@@ -72,6 +78,7 @@ async function CheckoutContents() {
           // message about them. The form forgets unticks when he leaves instead (005 R4).
           checkoutToken={randomUUID()}
           subtotalUsd={view.subtotalUsd}
+          surchargeUsd={view.surchargeUsd}
           addOns={addOns.map(({ id, name, pitch, declineLine, priceUsd }) => ({
             id,
             name,

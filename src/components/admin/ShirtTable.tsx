@@ -41,6 +41,12 @@ export function ShirtTable({ shirts }: { shirts: AdminShirtRow[] }) {
               <span className={ui.muted}>
                 {copy.styles[shirt.style]}
                 {shirt.featured ? ` · ${copy.console.shirts.featured}` : ""}
+                {shirt.origin !== "catalog"
+                  ? ` · ${copy.console.generator.origins[shirt.origin]}`
+                  : ""}
+                {shirt.origin === "dial" && shirt.listed
+                  ? ` · ${copy.console.generator.massProduced}`
+                  : ""}
               </span>
             </span>
             <span>

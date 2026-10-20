@@ -40,6 +40,12 @@ const positiveUsd = z
   .refine(isUsdString, "Must be dollars and cents, e.g. 299.99")
   .refine((v) => !isUsdString(v) || cmp(v, MIN_PRICE) >= 0, "Must be at least $0.01");
 
+/** Dollars and cents, $0.00 or more (a fee Dan may waive by setting it to zero). */
+const feeUsd = z
+  .string()
+  .refine(isUsdString, "Must be dollars and cents, e.g. 299.99")
+  .refine((v) => !isUsdString(v) || cmp(v, "0.00") >= 0, "Can't be negative");
+
 const shirtSchema = z.object({
   slug: z.string().regex(/^[a-z0-9-]+$/, "Lowercase letters, digits, and hyphens only"),
   name: z.string().trim().min(1, "Required").max(80, "80 characters max"),
@@ -76,6 +82,9 @@ const settingsSchema = z.object({
   flashMode: z.boolean(),
   pipesBackground: z.boolean(),
   nosySignUp: z.boolean(),
+  patternGenerator: z.boolean(),
+  uniquitySurcharge: z.boolean(),
+  uniquitySurchargeUsd: feeUsd,
 });
 
 function toIssues(error: z.ZodError): Issue[] {

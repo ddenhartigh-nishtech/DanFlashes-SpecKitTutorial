@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cartStockLine, foundAnother, stockLine } from "@/lib/urgency/scarcity";
+import { cartStockLine, foundAnother, makesAnother, stockLine } from "@/lib/urgency/scarcity";
 
 describe("stockLine", () => {
   const shirt = (patch: Partial<{ isBland: boolean; active: boolean; boughtBefore: boolean }>) => ({
@@ -56,5 +56,34 @@ describe("cartStockLine (owner, 2026-10-16)", () => {
     [null, 5, null], // switch off, or retired
   ] as const)("%s at quantity %i → %s", (line, quantity, expected) => {
     expect(cartStockLine(line, quantity)).toBe(expected);
+  });
+});
+
+describe("made to order (007 FR-026, R16)", () => {
+  const made = { isBland: false, active: true, boughtBefore: false, madeToOrder: true };
+
+  it("says it's made to order instead of 1 left, bought before or not, even when it's bland", () => {
+    expect(stockLine(made, true)).toBe("made");
+    expect(stockLine({ ...made, boughtBefore: true }, true)).toBe("made");
+    expect(stockLine({ ...made, isBland: true }, true)).toBe("made");
+  });
+
+  it("says nothing with the switch off, or for a retired one", () => {
+    expect(stockLine(made, false)).toBeNull();
+    expect(stockLine({ ...made, active: false }, true)).toBeNull();
+  });
+
+  it("makes every one of them, however many are in the cart", () => {
+    expect(cartStockLine("made", 1)).toBe("made");
+    expect(cartStockLine("made", 3)).toBe("madeMany");
+  });
+
+  it("makes another one instead of finding one", () => {
+    const add = { previous: 0, next: 1, isBland: false, madeToOrder: true };
+    expect(foundAnother(add, true)).toBe(false);
+    expect(makesAnother(add, true)).toBe(true);
+    expect(makesAnother({ ...add, previous: 2, next: 2 }, true)).toBe(false);
+    expect(makesAnother(add, false)).toBe(false);
+    expect(makesAnother({ ...add, madeToOrder: false }, true)).toBe(false);
   });
 });

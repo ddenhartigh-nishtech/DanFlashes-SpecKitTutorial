@@ -38,6 +38,10 @@ function shirt(
     msrpUsd: finalPriceUsd,
     tier: tierBadge(tierId, `T${tierId}`),
     images: [],
+    oneOfAKind: false,
+    origin: "catalog",
+    listed: true,
+    makerUserId: null,
     ...extra,
   };
 }

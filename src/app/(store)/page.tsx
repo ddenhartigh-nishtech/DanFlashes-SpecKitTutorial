@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { loadStorefront } from "@/app/_data/storefront";
+import { DialCta } from "@/components/DialCta";
 import { ShirtCard } from "@/components/ShirtCard";
 import { featuredShirts } from "@/lib/catalog/listing";
 import { copy } from "@/lib/copy";
@@ -23,6 +24,10 @@ export default function HomePage() {
           </Link>
         </div>
       </section>
+
+      <Suspense fallback={null}>
+        <DialCta />
+      </Suspense>
 
       <section aria-labelledby="featured-heading" className="flex flex-col gap-4">
         <h2 id="featured-heading" className="font-display field-backing w-fit text-2xl md:text-4xl">

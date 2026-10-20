@@ -17,7 +17,8 @@ describe("migration 0004 (order_drains: every stream an order emptied)", () => {
 
     runMigrations(db);
 
-    expect(orders()).toEqual(before);
+    // Later migrations only add a column: 0013 gives every old order $0.00 of surcharge.
+    expect(orders()).toEqual(before.map((o) => ({ ...(o as object), surcharge_usd: "0.00" })));
     const insert = (orderId: number, streamId: number) =>
       sqlite
         .prepare("INSERT INTO order_drains (order_id, stream_id) VALUES (?, ?)")

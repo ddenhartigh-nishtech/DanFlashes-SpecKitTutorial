@@ -14,6 +14,7 @@ import {
 import {
   saveMediaSettingsCore,
   savePresetsCore,
+  saveSurchargeCore,
   saveTuningCore,
   setSwitchCore,
 } from "@/lib/actions/admin/settings";
@@ -26,6 +27,7 @@ import {
 } from "@/lib/actions/admin/add-ons";
 import { saveTiersCore } from "@/lib/actions/admin/tiers";
 import { grantFlashCreditCore } from "@/lib/actions/admin/grants";
+import { saveGeneratedShirtCore, setShirtListedCore } from "@/lib/actions/admin/generator";
 import type { ConsoleState } from "@/lib/admin/state";
 import { copy } from "@/lib/copy";
 import type { Db, Sqlite } from "@/lib/db/client";
@@ -95,6 +97,14 @@ const CORES: [string, Core, Record<string, string>][] = [
     saveMediaSettingsCore,
     { mediaBaseUrl: "https://evil.example", placeholderMediaId: "2" },
   ],
+  // 007 US3
+  [
+    "saveGeneratedShirt",
+    saveGeneratedShirtCore,
+    { score: "48", style: "polo", seed: "7", name: "Sneaky" },
+  ],
+  ["setShirtListed", setShirtListedCore, { id: "1", listed: "0" }],
+  ["saveSurcharge", saveSurchargeCore, { amountUsd: "0.00" }],
 ];
 
 /** Every row of every table, so "changes nothing" means nothing. */

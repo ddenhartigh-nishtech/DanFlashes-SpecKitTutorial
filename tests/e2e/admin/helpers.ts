@@ -3,12 +3,15 @@ import { DEMO_OWNER } from "../../../scripts/seed-data";
 import { copy } from "../../../src/lib/copy";
 import { visible } from "../helpers";
 
-/** Every console page (008), for the door and calm sweeps. */
+/** Every console page (008, 007), for the door and calm sweeps. */
 export const CONSOLE_PAGES = [
   "/admin",
   "/admin/shirts",
   "/admin/shirts/new",
   "/admin/shirts/1",
+  // 007: the generator, before and after asking for a level
+  "/admin/shirts/generate",
+  "/admin/shirts/generate?score=48",
   "/admin/pricing",
   "/admin/media",
   "/admin/tiers",

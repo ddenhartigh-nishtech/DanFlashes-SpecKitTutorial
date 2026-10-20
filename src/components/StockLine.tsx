@@ -7,6 +7,8 @@ const text: Record<Line, string> = {
   again: u.again,
   few: u.fewMore,
   plenty: u.plenty,
+  made: u.made,
+  madeMany: u.madeMany,
 };
 
 /** Fake scarcity (004 US1): "Only 1 left!", or its variants. Renders nothing when it's off. */

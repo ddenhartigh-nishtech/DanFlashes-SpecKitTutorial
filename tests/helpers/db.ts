@@ -54,6 +54,9 @@ export function setSwitches(
       | "flashMode"
       | "pipesBackground"
       | "nosySignUp"
+      | "patternGenerator"
+      | "uniquitySurcharge"
+      | "uniquitySurchargeUsd"
     >
   >,
 ): void {

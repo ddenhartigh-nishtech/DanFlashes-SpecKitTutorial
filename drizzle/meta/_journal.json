@@ -85,6 +85,20 @@
       "when": 1792188179792,
       "tag": "0011_admin_console",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1792425570632,
+      "tag": "0012_pattern_generator",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "6",
+      "when": 1792433489488,
+      "tag": "0013_made_to_order",
+      "breakpoints": true
     }
   ]
 }

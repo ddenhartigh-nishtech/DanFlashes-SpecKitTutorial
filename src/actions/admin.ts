@@ -14,6 +14,7 @@ import {
 import {
   saveMediaSettingsCore,
   savePresetsCore,
+  saveSurchargeCore,
   saveTuningCore,
   setSwitchCore,
 } from "@/lib/actions/admin/settings";
@@ -26,6 +27,7 @@ import {
 } from "@/lib/actions/admin/add-ons";
 import { saveTiersCore } from "@/lib/actions/admin/tiers";
 import { grantFlashCreditCore } from "@/lib/actions/admin/grants";
+import { saveGeneratedShirtCore, setShirtListedCore } from "@/lib/actions/admin/generator";
 import type { ConsoleState } from "@/lib/admin/state";
 import { getDb } from "@/lib/db/client";
 import type { CookieJar } from "@/lib/http/cookies";
@@ -80,6 +82,10 @@ export async function savePresets(_prev: ConsoleState | null, form: FormData) {
   return run(savePresetsCore, form);
 }
 
+export async function saveSurcharge(_prev: ConsoleState | null, form: FormData) {
+  return run(saveSurchargeCore, form);
+}
+
 export async function saveMediaSettings(_prev: ConsoleState | null, form: FormData) {
   return run(saveMediaSettingsCore, form);
 }
@@ -122,4 +128,15 @@ export async function manageAddOn(_prev: ConsoleState | null, form: FormData) {
 
 export async function grantFlashCredit(_prev: ConsoleState | null, form: FormData) {
   return run(grantFlashCreditCore, form);
+}
+
+/** 007 US3: a generated pattern becomes a resting shirt, and the editor opens on it. */
+export async function saveGeneratedShirt(_prev: ConsoleState | null, form: FormData) {
+  const state = saveGeneratedShirtCore(getDb(), await cookieJar(), form);
+  if (state.ok && state.id) redirect(`/admin/shirts/${state.id}?saved=1`);
+  return state;
+}
+
+export async function setShirtListed(_prev: ConsoleState | null, form: FormData) {
+  return run(setShirtListedCore, form);
 }

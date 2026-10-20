@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { orderTotals } from "@/lib/checkout/totals";
 
-const zero = { shippingUsd: "0.00", taxUsd: "0.00" };
+const zero = { surchargeUsd: "0.00", shippingUsd: "0.00", taxUsd: "0.00" };
 
 describe("orderTotals", () => {
   it("is the shirts alone with no add-ons", () => {
@@ -30,10 +30,25 @@ describe("orderTotals", () => {
     ).toEqual({ addOnsUsd: "0.03", totalUsd: "1228800.03" });
   });
 
+  it("adds the Uniquity Surcharge to the shirts, to the cent (007 FR-027, SC-010)", () => {
+    expect(
+      orderTotals({
+        ...zero,
+        subtotalUsd: "4178.64",
+        surchargeUsd: "999.98",
+        addOnPrices: ["49.99"],
+      }),
+    ).toEqual({ addOnsUsd: "49.99", totalUsd: "5228.61" });
+    expect(orderTotals({ ...zero, subtotalUsd: "0.10", addOnPrices: ["0.20"] }).totalUsd).toBe(
+      "0.30",
+    );
+  });
+
   it("still adds shipping and tax", () => {
     expect(
       orderTotals({
         subtotalUsd: "100.00",
+        surchargeUsd: "0.00",
         addOnPrices: ["10.00"],
         shippingUsd: "5.50",
         taxUsd: "0.25",

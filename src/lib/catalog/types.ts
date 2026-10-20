@@ -2,6 +2,8 @@ import type { Usd } from "@/lib/money";
 
 export type ShirtStyle = "polo" | "button-down";
 export type ShirtStatus = "active" | "inactive";
+/** Hand-made, from Dan's generator, or from a shopper's dial (007). */
+export type ShirtOrigin = "catalog" | "owner" | "dial";
 
 export const SHIRT_STYLES: readonly ShirtStyle[] = ["polo", "button-down"];
 export const SHIRT_STATUSES: readonly ShirtStatus[] = ["active", "inactive"];
@@ -44,6 +46,12 @@ export interface StoreSettings {
   pipesBackground: boolean;
   /** The nosy sign-up (009): sign-up asks for far too much. The answers are props, never sent. */
   nosySignUp: boolean;
+  /** The pattern generator (007): the store's "How complicated can it get?" dial. */
+  patternGenerator: boolean;
+  /** The Uniquity Surcharge™ (007 R15): a flat fee on every one-of-a-kind shirt, per shirt. */
+  uniquitySurcharge: boolean;
+  /** What it charges per shirt: dollars and cents, $0.00 or more. */
+  uniquitySurchargeUsd: string;
 }
 
 /** An owner-defined band of complexity scores. The tier with minScore 0 is the BLAND tier. */

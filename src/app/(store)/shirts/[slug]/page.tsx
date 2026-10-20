@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { loadShirt } from "@/app/_data/storefront";
@@ -10,6 +11,7 @@ import { ShirtBadge } from "@/components/ShirtBadge";
 import { ZoomViewer } from "@/components/ZoomViewer";
 import { copy } from "@/lib/copy";
 import { toShopperShirt } from "@/lib/data/shirts";
+import { formatUsd } from "@/lib/money";
 import { shameFor } from "@/lib/shaming/loop";
 import { showCountdown } from "@/lib/urgency/countdown";
 
@@ -32,10 +34,16 @@ async function ShirtDetail({ params }: Pick<PageProps<"/shirts/[slug]">, "params
     stock,
     countdownTimers,
     proof,
+    buyable,
+    signedIn,
+    surchargeUsd,
+    dialOn,
   } = await loadShirt(slug);
   if (!catalogShirt) notFound();
   const shirt = toShopperShirt(catalogShirt);
   const retired = shirt.status === "inactive";
+  // A one-of-a-kind shirt that's somebody else's: look, but there's no way to buy it (007 FR-018).
+  const taken = !retired && !buyable;
   const image = shirt.images[0];
 
   return (
@@ -68,14 +76,40 @@ async function ShirtDetail({ params }: Pick<PageProps<"/shirts/[slug]">, "params
         {retired ? null : (
           <div className="flex flex-wrap items-center gap-3">
             <PriceTag priceUsd={shirt.finalPriceUsd} size="lg" />
-            <StockLine line={stock} />
-            {showCountdown({ countdownTimers }, "deal", 0) ? (
+            {taken ? null : <StockLine line={stock} />}
+            {!taken && showCountdown({ countdownTimers }, "deal", 0) ? (
               <Countdown kind="deal" label={copy.urgency.deal} />
             ) : null}
           </div>
         )}
+        {!retired && !taken && surchargeUsd ? (
+          <p data-steady data-testid="surcharge-note" className="field-backing w-fit font-semibold">
+            {copy.surcharge.note(formatUsd(surchargeUsd))}
+          </p>
+        ) : null}
         <p className="bg-paper text-lg">{shirt.description}</p>
-        {retired ? null : (
+        {taken ? (
+          <div data-testid="one-of-a-kind" className="solid-backing flex flex-col gap-2 p-4">
+            <p className="font-display text-xl uppercase">{copy.oneOfAKind.taken}</p>
+            <p>{copy.oneOfAKind.takenLine}</p>
+            <p className="flex flex-wrap gap-4">
+              {signedIn ? null : (
+                <Link
+                  href={`/sign-in?next=${encodeURIComponent(`/shirts/${shirt.slug}`)}`}
+                  className="underline"
+                >
+                  {copy.oneOfAKind.signIn}
+                </Link>
+              )}
+              {dialOn ? (
+                <Link href="/how-complicated" className="underline">
+                  {copy.oneOfAKind.makeYourOwn}
+                </Link>
+              ) : null}
+            </p>
+          </div>
+        ) : null}
+        {retired || taken ? null : (
           <AddToCart
             slug={shirt.slug}
             placeholderUrl={placeholderUrl}

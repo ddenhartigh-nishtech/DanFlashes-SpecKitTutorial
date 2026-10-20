@@ -34,6 +34,9 @@ export function getSettings(db: Db): StoreSettings {
     flashMode: row.flashMode,
     pipesBackground: row.pipesBackground,
     nosySignUp: row.nosySignUp,
+    patternGenerator: row.patternGenerator,
+    uniquitySurcharge: row.uniquitySurcharge,
+    uniquitySurchargeUsd: row.uniquitySurchargeUsd,
   };
 }
 
@@ -64,6 +67,9 @@ export function saveSettings(db: Db, settings: StoreSettings): void {
     flashMode: settings.flashMode,
     pipesBackground: settings.pipesBackground,
     nosySignUp: settings.nosySignUp,
+    patternGenerator: settings.patternGenerator,
+    uniquitySurcharge: settings.uniquitySurcharge,
+    uniquitySurchargeUsd: settings.uniquitySurchargeUsd,
   };
   db.insert(storeSettings)
     .values({ id: 1, ...values })
@@ -102,6 +108,14 @@ export function saveTuning(db: Db, msrp: MsrpSettings): void {
 export function savePresets(db: Db, presetsUsd: string[]): void {
   db.update(storeSettings)
     .set({ flashCreditPresetsUsd: presetsUsd })
+    .where(eq(storeSettings.id, 1))
+    .run();
+}
+
+/** The Uniquity Surcharge per shirt (007 FR-027). Carts follow on their next look. */
+export function saveSurchargeAmount(db: Db, amountUsd: string): void {
+  db.update(storeSettings)
+    .set({ uniquitySurchargeUsd: amountUsd })
     .where(eq(storeSettings.id, 1))
     .run();
 }

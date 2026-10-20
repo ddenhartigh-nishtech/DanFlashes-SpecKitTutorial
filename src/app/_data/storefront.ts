@@ -1,6 +1,8 @@
 import "server-only";
 import { connection } from "next/server";
+import { currentUser } from "@/app/_data/request";
 import { loadStockOf } from "@/app/_data/urgency";
+import { canBuy } from "@/lib/catalog/one-of-a-kind";
 import { getPlaceholderUrl, getSettings } from "@/lib/data/settings";
 import { getShirtBySlug, listCatalogShirts } from "@/lib/data/shirts";
 import { listTiers } from "@/lib/data/tiers";
@@ -38,15 +40,28 @@ export async function loadShirt(slug: string) {
   const shirt = getShirtBySlug(db, slug);
   const shamed = Boolean(shirt?.tier.isBland && settings.blandShaming);
   const stockOf = await loadStockOf(db, settings);
+  const viewer = await currentUser();
   return {
     shirt,
+    /** Made to order for its maker only (007 FR-018): may this shopper buy it? */
+    buyable: shirt ? canBuy(shirt, viewer?.id ?? null) : false,
+    signedIn: viewer !== null,
+    /** The Uniquity Surcharge per shirt, when it applies to this one (007 FR-027). */
+    surchargeUsd:
+      shirt?.oneOfAKind && settings.uniquitySurcharge ? settings.uniquitySurchargeUsd : null,
+    dialOn: settings.patternGenerator,
     stock: shirt ? stockOf(shirt) : null,
     countdownTimers: settings.countdownTimers,
     /** Who's looking and who just bought it (004 US3), worked out at request time. */
     proof: shirt
       ? socialProofFor(
           settings,
-          { id: shirt.id, isBland: shirt.tier.isBland, active: shirt.status === "active" },
+          {
+            id: shirt.id,
+            isBland: shirt.tier.isBland,
+            active: shirt.status === "active",
+            oneOfAKind: shirt.oneOfAKind,
+          },
           Date.now(),
         )
       : null,

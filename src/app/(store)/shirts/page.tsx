@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { loadStorefront } from "@/app/_data/storefront";
+import { DialCta } from "@/components/DialCta";
 import { FilterDrawer } from "@/components/FilterDrawer";
 import { ListingFilters } from "@/components/ListingFilters";
 import { ShirtCard } from "@/components/ShirtCard";
@@ -30,9 +31,14 @@ async function Listing({ searchParams }: Pick<PageProps<"/shirts">, "searchParam
 
   return (
     <div className="grid gap-6 md:grid-cols-[16rem_1fr] md:items-start">
-      <FilterDrawer label={copy.listing.filters}>
-        <ListingFilters tiers={tiers} query={query} />
-      </FilterDrawer>
+      {/* The dial sits under the filters: the sidebar on wider screens, under the toggle on a phone
+          (007 FR-009, owner review Q9). */}
+      <div className="flex min-w-0 flex-col gap-6">
+        <FilterDrawer label={copy.listing.filters}>
+          <ListingFilters tiers={tiers} query={query} />
+        </FilterDrawer>
+        <DialCta />
+      </div>
 
       <section aria-label={copy.nav.shirts}>
         <p className="font-display bg-highlighter mb-4 inline-block px-2 text-sm uppercase">

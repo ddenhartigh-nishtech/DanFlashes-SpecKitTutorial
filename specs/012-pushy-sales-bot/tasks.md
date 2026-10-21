@@ -80,6 +80,7 @@
     chunks from Ollama's NDJSON, with `stream: true`, `keep_alive: "2h"`, and `options: { num_predict:
     90, num_ctx: 4096, temperature: 0.8 }`
   - `warm(endpoint, system)`: a detached one-token call
+  - a 5 s connection deadline: no response headers in 5 s throws `PssbUnreachable` (analysis I1)
 
   Test it with a stand-in `fetch` (tests/unit/pssb-ollama.test.ts): chunks in order; the deadlines
   abort and throw `PssbTimeout`; an unreachable model throws `PssbUnreachable`.
@@ -104,6 +105,8 @@ score appears.
   - canned on unreachable, on no first words in 20 s, and past 45 s (fake timers)
   - nothing is logged (spy on `console`)
   - the stable prompt's hash change triggers one `warm`
+  - `{ kind: "warm" }` answers 204 at once and warms only when the prompt changed (analysis U1)
+  - an address that never answers gives the canned line within 5 s (SC-004, analysis I1)
 - [ ] T011 [US1] Implement src/app/api/pssb/route.ts per contracts/pssb.md (R6): the request-time
   read, the session's shopper, redaction, `buildFacts`, `streamChat`, `guardStream`, `linkShirts`,
   canned lines, deadlines and warming. T010 passes.
@@ -119,6 +122,9 @@ score appears.
   - the messages, streaming text then the linked final HTML
   - the "judging you…" indicator, the text box (500-character limit)
   - the conversation in `sessionStorage`, sent as the last 6 turns, plus the page
+  - it sends `{ kind: "warm" }` on mount (analysis U1)
+  - the launcher, bubble and panel have a solid backing behind their text, so the pipes check's "no
+    text on a pipe" holds (analysis C1)
 
   Load it from src/components/StoreChrome.tsx with `next/dynamic` (`ssr: false`) only while the
   switch is on. Add 80 px of bottom padding to `<main>` while it's on. Move src/components/PurchasePops.tsx
@@ -130,7 +136,9 @@ score appears.
     the email it was given)
 
   Add it to playwright.config.ts's `webServer` list, and set `PSSB_MODEL_URL=http://localhost:3101`
-  on the store's e2e server.
+  on the store's e2e server. Extend the shared fixture in tests/e2e/helpers.ts to push PSSB's
+  approach clock an hour ahead (like `pushPopsAway`), so the journeys from 001–011 never meet a
+  bubble. pssb.spec.ts opts in (analysis C1).
 - [ ] T015 [US1] Write tests/e2e/pssb.spec.ts (shopper projects). Open the launcher, then ask about
   Fractal Fury:
   - the reply links it, with no "$750.00", and "$1,350.00" appears via the link's own page
@@ -234,9 +242,14 @@ score appears.
 ## Phase 8: Polish & Cross-Cutting Concerns
 
 - [ ] T030 [P] Write scripts/pssb-eval.ts (`npm run pssb:eval`) per R11: 30 questions and 20 attacks
-  against the configured model. It reports per reply the first-words time, the total time, amounts
-  outside the allowed set before the guard, named shirts linked, and discount words, with a summary
-  against SC-001–SC-003. It writes transcripts to `data/pssb-eval-<date>.md`.
+  against the configured model. It reports per reply:
+  - the first-words time and the total time
+  - amounts outside the allowed set, before the guard
+  - named shirts linked, and discount words
+  - the sentence count, and whether it ends by pushing a shirt, the dial or the cart (FR-002,
+    analysis C2)
+
+  It summarizes against SC-001–SC-003, and writes transcripts to `data/pssb-eval-<date>.md`.
 - [ ] T031 Run `npm run pssb:eval` against `llama3.2:3b` here. Tune src/lib/pssb/persona.ts (brevity,
   condescension, encouragement, the excuse) until SC-001–SC-003 hold. Record the numbers and three
   sample exchanges in quickstart.md.

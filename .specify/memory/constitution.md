@@ -1,24 +1,18 @@
 <!--
 Sync Impact Report
-- Version change: 4.2.0 → 5.0.0 (MAJOR: Principle II's MSRP MUST is redefined, "exponential" →
-  "straight-line", and its "never deleted" rule is narrowed for abandoned creations; a PATCH-level
-  wording fix to III is batched in)
+- Version change: 5.0.0 → 5.1.0 (MINOR: a new commerce constraint and expanded testing guidance for
+  features built on a language model; no MUST removed or redefined)
 - Modified principles:
-  - II. Complexity Is the Price: the MSRP algorithm MUST be a straight line, a base price plus a
-    price per point (010). Its tuning parameters are now named: the base price and the price per
-    point. Every other MUST stands (one place, deterministic, monotonic, owner-tunable, no ceiling).
-  - II. "Shirts are deactivated, never deleted" gains one exception (011): an owner-run sweep MAY
-    delete an abandoned creation. That's a shopper-made shirt nobody bought, in no cart, never
-    mass-produced or changed by the owner, and past a grace period. Owner-made shirts are always
-    kept, and so is anything in an order.
-  - III. Relentlessly Vibrant: "the starting price of a real Dan Flashes shirt" is defined as the
-    MSRP where the first tier above BLAND begins. Before, it was a tuning dial the straight line no
-    longer has.
-- Added sections: none
+  - VI. Fully Tested, Money Math First: a feature built on a language model is tested against a
+    deterministic stand-in model in `npm run verify`, and measured against the real model before
+    merge (012).
+- Added sections: none. Commerce & Security Constraints gains one bullet, "A bot is a voice, not a
+  source" (012, PSSB): prices, shirts, links and cart actions come from the store's own data, never
+  from a model's words; a model is told only what the store chooses; chats are never stored or
+  logged; no store page waits on a model.
 - Removed sections: none
 - Templates requiring updates: none (read at runtime) ✅
-- Follow-up TODOs: the owner ratifies v5.0.0 by merging the 010 pull request, after 007's pull
-  request ratifies v4.2.0
+- Follow-up TODOs: the owner ratifies v5.1.0 by merging the 012 pull request
 -->
 
 # Dan Flashes Constitution
@@ -156,6 +150,9 @@ write the tests, watch them fail, then implement (Red → Green → Refactor).
   `src/lib/` MUST keep at least 90% line coverage.
 - Every user story's primary journey MUST have an end-to-end test. Purely visual changes (copy,
   color, layout) need no new tests.
+- A feature built on a language model MUST be tested against a deterministic stand-in model inside
+  `npm run verify`. It MUST also be measured against the real model before merge, against the
+  spec's success criteria, because no test can pin down what a model will say.
 
 Rationale: the joke only lands if the $1,400 shirt actually rings up at $1,400, every time, after
 every change.
@@ -198,6 +195,14 @@ Rationale: the complexity goes in the product, never in the architecture.
 - **Exact money.** Money is US dollars to the cent. It MUST be stored as an exact two-decimal value
   (e.g., `200.18`) and calculated with exact decimal arithmetic. Binary floating-point math on money
   is prohibited, because `0.10 + 0.20` must equal `0.30`.
+- **A bot is a voice, not a source.** Everything a language model says to a shopper is checked
+  against the store:
+  - Prices, shirts, links and cart actions MUST come from the store's own data, never from the
+    model's words.
+  - A model MUST be told only what the store chooses: never a complexity score, card data, a nosy
+    field, a password, or a shopper's email address.
+  - Chats MUST NOT be stored or logged.
+  - No store page may wait on a model: when it's slow or gone, the store carries on.
 - **Secrets stay out of git.** Secrets live in environment configuration. `.env.example` documents every
   required variable without real values.
 
@@ -234,4 +239,4 @@ Rationale: the complexity goes in the product, never in the architecture.
   and `/speckit-analyze`. A violation needs either a Complexity Tracking justification or an amendment.
 - Like every Dan Flashes sale, this constitution is final until amended.
 
-**Version**: 5.0.0 | **Ratified**: 2026-10-12 | **Last Amended**: 2026-10-20
+**Version**: 5.1.0 | **Ratified**: 2026-10-12 | **Last Amended**: 2026-10-20

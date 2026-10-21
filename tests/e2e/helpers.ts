@@ -9,9 +9,24 @@ import { copy } from "../../src/lib/copy";
 export const test = base.extend({
   page: async ({ page }, provide) => {
     await pushPopsAway(page);
+    await pushPssbAway(page);
     await provide(page);
   },
 });
+
+/**
+ * PSSB's approaches an hour away (012 analysis C1), so journeys from 001–011 never meet his bubble.
+ * pssb.spec.ts opts back in with `pssbClockAt`, whose init script runs after this one.
+ */
+export async function pushPssbAway(page: Page) {
+  await page.addInitScript(() => {
+    try {
+      localStorage.setItem("df-pssb-last", String(Date.now() + 3_600_000));
+    } catch {
+      // no storage: no approaches either
+    }
+  });
+}
 
 /** The fixture's pop-up schedule, for pages a test opens itself (`context.newPage()`). */
 export async function pushPopsAway(page: Page) {

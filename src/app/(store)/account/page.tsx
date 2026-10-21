@@ -7,6 +7,7 @@ import { currentUser } from "@/app/_data/request";
 import { CollapsibleSection } from "@/components/CollapsibleSection";
 import { ConnectStreamForm } from "@/components/ConnectStreamForm";
 import { OrderSummary } from "@/components/OrderSummary";
+import { SupportLine } from "@/components/SupportLine";
 import { PriceTag } from "@/components/PriceTag";
 import { StreamList } from "@/components/StreamList";
 import { TopUpForm } from "@/components/TopUpForm";
@@ -156,6 +157,7 @@ async function AccountContents() {
         heading={copy.account.ordersHeading}
         className="mt-4 flex flex-col gap-4"
       >
+        {orders.length ? <SupportLine email={settings.supportEmail} /> : null}
         {orders.length === 0 ? (
           <p className="solid-backing p-4">{copy.account.noOrders}</p>
         ) : (

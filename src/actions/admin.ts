@@ -18,6 +18,7 @@ import {
   saveTuningCore,
   setSwitchCore,
 } from "@/lib/actions/admin/settings";
+import { savePssbCore, saveSupportEmailCore, testPssbCore } from "@/lib/actions/admin/pssb";
 import { removeMediaCore, updateMediaAltCore, uploadMediaCore } from "@/lib/actions/admin/media";
 import {
   createAddOnCore,
@@ -84,6 +85,19 @@ export async function savePresets(_prev: ConsoleState | null, form: FormData) {
 
 export async function saveSurcharge(_prev: ConsoleState | null, form: FormData) {
   return run(saveSurchargeCore, form);
+}
+
+/** PSSB (012 US5): his model, Dan's support email, and a Test. */
+export async function savePssb(_prev: ConsoleState | null, form: FormData) {
+  return run(savePssbCore, form);
+}
+
+export async function saveSupportEmail(_prev: ConsoleState | null, form: FormData) {
+  return run(saveSupportEmailCore, form);
+}
+
+export async function testPssb(_prev: ConsoleState | null, form: FormData) {
+  return testPssbCore(getDb(), await cookieJar(), form);
 }
 
 export async function saveMediaSettings(_prev: ConsoleState | null, form: FormData) {

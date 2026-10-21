@@ -125,3 +125,16 @@ export function saveMediaSettings(
 ): void {
   db.update(storeSettings).set(media).where(eq(storeSettings.id, 1)).run();
 }
+
+/** PSSB's model overrides (012 R10). Null falls back to the environment, then the code's default. */
+export function savePssbModel(db: Db, { url, model }: { url: string | null; model: string | null }): void {
+  db.update(storeSettings)
+    .set({ pssbModelUrl: url, pssbModel: model })
+    .where(eq(storeSettings.id, 1))
+    .run();
+}
+
+/** Dan's support email (012 FR-019). Null means none: PSSB makes up an excuse. */
+export function saveSupportEmail(db: Db, email: string | null): void {
+  db.update(storeSettings).set({ supportEmail: email }).where(eq(storeSettings.id, 1)).run();
+}

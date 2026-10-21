@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import { currentUser } from "@/app/_data/request";
 import { OrderSummary } from "@/components/OrderSummary";
+import { SupportLine } from "@/components/SupportLine";
 import { copy } from "@/lib/copy";
 import { getPlaceholderUrl, getSettings } from "@/lib/data/settings";
 import { getDb } from "@/lib/db/client";
@@ -54,6 +55,7 @@ async function OrderContents({ params }: Pick<PageProps<"/orders/[id]">, "params
         surcharge={order.surcharge}
         placeholderUrl={getPlaceholderUrl(db, getSettings(db))}
       />
+      <SupportLine email={getSettings(db).supportEmail} />
       <div className="flex flex-wrap gap-3">
         <Link
           href="/shirts"

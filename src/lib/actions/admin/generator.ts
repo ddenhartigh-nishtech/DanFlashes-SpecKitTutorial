@@ -9,7 +9,7 @@ import { findSessionUser } from "@/lib/auth/session";
 import { copy } from "@/lib/copy";
 import type { Db } from "@/lib/db/client";
 import { shirts } from "@/lib/db/schema";
-import { SESSION_COOKIE, type CookieJar } from "@/lib/http/cookies";
+import { requestCookie, SESSION_COOKIE, type CookieJar } from "@/lib/http/cookies";
 import { artForCode } from "@/lib/pattern/dial-view";
 import { readRecipe, shirtForRecipe } from "@/lib/pattern/generator-view";
 import { materialize } from "@/lib/pattern/materialize";
@@ -72,26 +72,12 @@ export function setShirtListedCore(db: Db, jar: CookieJar, form: FormData): Cons
   return saved(listed === "1" ? g.listedNow : g.unlistedNow);
 }
 
-/** The session token in a request's Cookie header, if there is one. */
-function sessionToken(request: Request): string | undefined {
-  for (const part of (request.headers.get("cookie") ?? "").split(";")) {
-    const [name, ...value] = part.trim().split("=");
-    if (name !== SESSION_COOKIE) continue;
-    try {
-      return decodeURIComponent(value.join("="));
-    } catch {
-      return undefined;
-    }
-  }
-  return undefined;
-}
-
 /**
  * The console's preview art (GET /admin/generator/art/[code]): for an admin only, and it draws
  * while the store's pattern generator is off. Null means the store's 404.
  */
 export function generatorArt(db: Db, request: Request, code: string): Uint8Array | null {
-  const user = findSessionUser(db, sessionToken(request));
+  const user = findSessionUser(db, requestCookie(request, SESSION_COOKIE));
   if (!user?.isAdmin) return null;
   return artForCode(db, code, { ignoreSwitch: true });
 }

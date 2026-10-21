@@ -20,7 +20,7 @@
 |---|---|
 | `{ "t": "text", "s": "Two? " }` | guarded words, as they arrive (R4's price guard applied) |
 | `{ "t": "done", "html": "…", "offer": { "slug", "name", "size", "priceUsd" } \| null }` | the end: the reply with shirt links (only `<a href="/shirts/…">` and text, escaped), and an offer when `detectOffer` found one |
-| `{ "t": "canned", "s": "PSSB is at the tailor. Buy something while you wait." }` | the model didn't respond within 5 s, gave no first words within 20 s, or ran past 45 s |
+| `{ "t": "canned", "s": "PSSB is at the tailor. Buy something while you wait.", "offer": … | null }` | the model didn't respond within 5 s, gave no first words within 20 s, or ran past 45 s |
 
 | Case | Status |
 |---|---|

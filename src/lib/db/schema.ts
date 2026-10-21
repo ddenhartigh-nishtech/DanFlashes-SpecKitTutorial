@@ -181,6 +181,11 @@ export const storeSettings = sqliteTable(
     /** The Uniquity Surcharge™ (007 R15): a flat fee on every one-of-a-kind shirt, and its switch. */
     uniquitySurcharge: integer("uniquity_surcharge", { mode: "boolean" }).notNull().default(true),
     uniquitySurchargeUsd: text("uniquity_surcharge_usd").notNull().default("499.99"),
+    // PSSB (012): his switch, optional overrides of the code's default model, and Dan's support email.
+    pushySalesBot: integer("pushy_sales_bot", { mode: "boolean" }).notNull().default(true),
+    pssbModelUrl: text("pssb_model_url"),
+    pssbModel: text("pssb_model"),
+    supportEmail: text("support_email"),
   },
   (t) => [
     check("store_settings_singleton", sql`${t.id} = 1`),
@@ -190,6 +195,18 @@ export const storeSettings = sqliteTable(
     check(
       "store_settings_surcharge",
       sql`${money(t.uniquitySurchargeUsd)} AND ${t.uniquitySurchargeUsd} NOT GLOB '-*'`,
+    ),
+    check(
+      "store_settings_pssb_model_url",
+      sql`${t.pssbModelUrl} IS NULL OR ((${t.pssbModelUrl} GLOB 'http://*' OR ${t.pssbModelUrl} GLOB 'https://*') AND length(${t.pssbModelUrl}) <= 200)`,
+    ),
+    check(
+      "store_settings_pssb_model",
+      sql`${t.pssbModel} IS NULL OR length(${t.pssbModel}) BETWEEN 1 AND 80`,
+    ),
+    check(
+      "store_settings_support_email",
+      sql`${t.supportEmail} IS NULL OR (length(${t.supportEmail}) BETWEEN 3 AND 120 AND length(${t.supportEmail}) - length(replace(${t.supportEmail}, '@', '')) = 1)`,
     ),
   ],
 );

@@ -28,3 +28,17 @@ export function cookieOptions(maxAgeDays: number): CookieOptions {
     maxAge: maxAgeDays * 86_400,
   };
 }
+
+/** One cookie's value from a request's Cookie header (route handlers), if it's there. */
+export function requestCookie(request: Request, name: string): string | undefined {
+  for (const part of (request.headers.get("cookie") ?? "").split(";")) {
+    const [key, ...value] = part.trim().split("=");
+    if (key !== name) continue;
+    try {
+      return decodeURIComponent(value.join("="));
+    } catch {
+      return undefined;
+    }
+  }
+  return undefined;
+}

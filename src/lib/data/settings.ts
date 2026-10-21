@@ -33,6 +33,10 @@ export function getSettings(db: Db): StoreSettings {
     patternGenerator: row.patternGenerator,
     uniquitySurcharge: row.uniquitySurcharge,
     uniquitySurchargeUsd: row.uniquitySurchargeUsd,
+    pushySalesBot: row.pushySalesBot,
+    pssbModelUrl: row.pssbModelUrl,
+    pssbModel: row.pssbModel,
+    supportEmail: row.supportEmail,
   };
 }
 
@@ -65,6 +69,10 @@ export function saveSettings(db: Db, settings: StoreSettings): void {
     patternGenerator: settings.patternGenerator,
     uniquitySurcharge: settings.uniquitySurcharge,
     uniquitySurchargeUsd: settings.uniquitySurchargeUsd,
+    pushySalesBot: settings.pushySalesBot,
+    pssbModelUrl: settings.pssbModelUrl,
+    pssbModel: settings.pssbModel,
+    supportEmail: settings.supportEmail,
   };
   db.insert(storeSettings)
     .values({ id: 1, ...values })

@@ -11,7 +11,7 @@ import type { Db } from "@/lib/db/client";
 import { getSettings } from "@/lib/data/settings";
 import { CART_COOKIE, requestCookie, SESSION_COOKIE } from "@/lib/http/cookies";
 import { pssbEndpoint } from "@/lib/pssb/endpoint";
-import { pageLine, shopperFacts, stableFacts } from "@/lib/pssb/facts";
+import { hintsFor, pageLine, shopperFacts, stableFacts } from "@/lib/pssb/facts";
 import { guardStream, linkShirts } from "@/lib/pssb/guard";
 import { streamChat, warm, type ChatMessage } from "@/lib/pssb/ollama";
 import { detectOffer, type Offer } from "@/lib/pssb/offer";
@@ -129,6 +129,7 @@ export async function handlePssb(db: Db, request: Request, deps: PssbDeps): Prom
   let offer: Offer | null = null;
   const notes = [pageLine(body.page, stable.shirts)];
   if (body.kind === "reply") {
+    notes.push(...hintsFor(body.message, stable.shirts));
     const result = detectOffer(db, body.message, body.page, user?.id ?? null);
     if (result.kind === "offer") {
       offer = result.offer;

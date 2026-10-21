@@ -156,7 +156,7 @@ describe("POST /api/pssb (012 R6, contracts/pssb.md)", () => {
       size: "L",
       priceUsd: "999.99",
     });
-    expect(sent[0].body.messages.at(-2)!.content).toContain("He is buying Fractal Fury in L.");
+    expect(sent[0].body.messages.at(-2)!.content).toContain("He wants Fractal Fury in L.");
   });
 
   it("tells PSSB to refuse a BLAND shirt, with no offer", async () => {

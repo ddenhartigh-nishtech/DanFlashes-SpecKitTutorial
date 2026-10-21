@@ -1,5 +1,6 @@
 import { Suspense, type ReactNode } from "react";
 import { AwesomeIsland } from "@/app/_data/awesome";
+import { PssbIsland } from "@/app/_data/pssb";
 import { DrainCorner } from "@/components/DrainCorner";
 import { InlineScript } from "@/components/InlineScript";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -9,7 +10,8 @@ import { copy } from "@/lib/copy";
 
 /**
  * The loud store around every shopper page (008 R1): Extreme Awesomeness's first-paint script and
- * strobe colors, the header with its pop-ups, the drain corner, the awesome island and the footer.
+ * strobe colors, the header with its pop-ups, the drain corner, the awesome island, PSSB (012) and
+ * the footer.
  * The (store) layout and the store's 404 render it; the owner's console never does, so nothing in
  * here can reach the calm back office.
  */
@@ -27,6 +29,9 @@ export function StoreChrome({ children }: { children: ReactNode }) {
       </Suspense>
       <Suspense fallback={null}>
         <AwesomeIsland />
+      </Suspense>
+      <Suspense fallback={null}>
+        <PssbIsland />
       </Suspense>
       <footer className="loud-dots border-ink border-t-4">
         <p className="mx-auto max-w-6xl px-4 py-3">

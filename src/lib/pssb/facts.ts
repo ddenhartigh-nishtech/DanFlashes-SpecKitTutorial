@@ -26,6 +26,8 @@ export interface SellableShirt {
   name: string;
   priceUsd: Usd;
   bland: boolean;
+  tier: string;
+  style: string;
 }
 
 export interface Shopper {
@@ -54,6 +56,8 @@ export function stableFacts(db: Db): StableFacts {
     name: s.name,
     priceUsd: s.finalPriceUsd,
     bland: s.tier.isBland,
+    tier: s.tier.name,
+    style: s.style,
   }));
   const allowed = new Set(shirts.map((s) => s.priceUsd));
 
@@ -61,12 +65,13 @@ export function stableFacts(db: Db): StableFacts {
     .sort((a, b) => a.name.localeCompare(b.name))
     .map(
       (s) =>
-        `- ${s.name}: ${s.style}, ${s.tier.name}${s.tier.isBland ? " (BLAND)" : ""}, ${formatUsd(s.finalPriceUsd)}, sizes ${SIZES.join(" ")}${s.featured ? ", featured" : ""}`,
+        `- ${s.name}: ${s.style}, ${s.tier.name}${s.tier.isBland ? " (BLAND)" : ""}, ${formatUsd(s.finalPriceUsd)}${s.featured ? ", featured" : ""}`,
     );
 
   const sections = [
     PERSONA,
     `SHIRTS FOR SALE:\n${lines.join("\n")}`,
+    `SIZES: every shirt comes in every size: ${SIZES.join(", ")}. Never say a shirt lacks a size.`,
     settings.blandShaming
       ? "BLAND SHIRTS: never sell one. If he wants a BLAND shirt, refuse, shame him, and push something more complicated."
       : "BLAND SHIRTS: for sale, but beneath him. Say so.",
@@ -90,7 +95,7 @@ export function stableFacts(db: Db): StableFacts {
   sections.push(
     settings.supportEmail
       ? `ORDER PROBLEMS: Dan's support email is ${settings.supportEmail}. Give it exactly, condescendingly.`
-      : "ORDER PROBLEMS: Dan cannot be reached and has no email. Invent an incredible, pompous excuse for why (a summit, a knighthood, a pattern emergency), a new one each time. Never give or invent an email address. Then steer him back to the shirts.",
+      : "ORDER PROBLEMS: Dan himself cannot be reached, and has no email. Invent an incredible, pompous excuse for why Dan is unavailable (a summit, a knighthood, a pattern emergency), a new one each time. Refer to Dan by name, in the third person. Never give or invent an email address. Then steer him back to the shirts.",
   );
 
   return { text: sections.join("\n\n"), shirts, allowed, settings };
@@ -148,6 +153,25 @@ export function shopperFacts(
   ];
   if (meter) parts.push(`HIS PER DIEM LEFT: ${amount(meter.leftUsd)}.`);
   return { text: parts.join("\n"), allowed, cart };
+}
+
+const SIZE_TALK = /\b(size|sizes|xxl|xl|fit|fits|come in|comes in|small|medium|large)\b/i;
+const escapeRegex = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/**
+ * The facts his question touches, repeated in the last note before he answers (R2): a 3B model
+ * heeds what's next to the question far better than a line deep in the prompt (tuned in T031).
+ */
+export function hintsFor(message: string, shirts: readonly SellableShirt[]): string[] {
+  const hints = shirts
+    .filter((s) => new RegExp(`(?<![\\w'’])${escapeRegex(s.name)}(?![\\w'’])`, "i").test(message))
+    .map(
+      (s) =>
+        `Fact: ${s.name} is a ${s.tier} ${s.style}, ${formatUsd(s.priceUsd)}, in every size ${SIZES.join(", ")}.`,
+    );
+  if (SIZE_TALK.test(message))
+    hints.push(`Fact: every shirt comes in ${SIZES.join(", ")}. Yes, XXL too.`);
+  return hints;
 }
 
 /** The page he's on, in a few words (R2). */

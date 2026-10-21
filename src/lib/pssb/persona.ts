@@ -31,5 +31,5 @@ export const TELLS = {
   unavailable:
     "He asked for a shirt that is not for sale (resting, someone else's one of a kind, or not a real shirt), or a size that does not exist. Tell him no, in character, and push a shirt that is for sale.",
   offer: (name: string, size: string) =>
-    `He is buying ${name} in ${size}. Congratulate him grandly on the best decision of his adult life. The store shows him the button to add it.`,
+    `He wants ${name} in ${size}. In one or two sentences, congratulate him grandly on the best decision of his adult life, and tell him to press the "Add it" button below. It is not in his cart until he presses it: never say it was added.`,
 } as const;

@@ -4,7 +4,7 @@ import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { Db, Sqlite } from "@/lib/db/client";
 import { materialize } from "@/lib/pattern/materialize";
-import { pageLine, shopperFacts, stableFacts } from "@/lib/pssb/facts";
+import { hintsFor, pageLine, shopperFacts, stableFacts } from "@/lib/pssb/facts";
 import { createSeededTestDb, setSwitches } from "../helpers/db";
 import { person } from "../helpers/people";
 
@@ -45,7 +45,8 @@ describe("stableFacts (012 R2, FR-003, FR-004)", () => {
   it("lists every shirt for sale with the store's price, tier and sizes", () => {
     const { db } = store();
     const { text, shirts, allowed } = stableFacts(db);
-    expect(text).toContain("- Geo Riot: button-down, Complicated, $425.00, sizes S M L XL XXL");
+    expect(text).toContain("- Geo Riot: button-down, Complicated, $425.00");
+    expect(text).toContain("SIZES: every shirt comes in every size: S, M, L, XL, XXL.");
     expect(text).toContain("Fractal Fury");
     expect(text).toContain("$999.99"); // Dan's price, not the MSRP
     expect(shirts.map((s) => s.slug).sort()).toEqual(["beige-regret", "fractal-fury", "geo-riot"]);
@@ -142,6 +143,18 @@ describe("shopperFacts (012 R2, FR-005, US4)", () => {
     expect(text).toContain("HIS CART: empty");
     expect(text).not.toMatch(/ORDERS|CREDIT|PER DIEM/);
     expect(allowed.size).toBe(0);
+  });
+});
+
+describe("hintsFor (012 R2, tuned in T031)", () => {
+  it("repeats the facts a question touches, next to the question", () => {
+    const { db } = store();
+    const { shirts } = stableFacts(db);
+    expect(hintsFor("Does fractal fury come in XXL?", shirts)).toEqual([
+      "Fact: Fractal Fury is a Very Complicated polo, $999.99, in every size S, M, L, XL, XXL.",
+      "Fact: every shirt comes in S, M, L, XL, XXL. Yes, XXL too.",
+    ]);
+    expect(hintsFor("Who is Dan?", shirts)).toEqual([]);
   });
 });
 

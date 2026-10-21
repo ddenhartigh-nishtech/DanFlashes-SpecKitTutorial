@@ -108,11 +108,17 @@ three parts, ordered so that Ollama's prompt cache keeps the expensive part:
     - `{ t: "text", s }`: guarded words as they come
     - `{ t: "done", html, offer? }`: the final reply, linked
     - `{ t: "canned", s }`: when the model fails or is slow
-- **Deadlines**: no first words within 20 s, or more than 45 s in all, aborts the model call and
-  sends a canned line (FR-017).
+- **Deadlines** (FR-017): any of these aborts the model call and sends a canned line:
+  - no response from the model's address within 5 s (unreachable, e.g. the laptop is off;
+    analysis I1)
+  - no first words within 20 s
+  - more than 45 s in all
 - **Warming**: when the stable prompt's hash changes, the server sends Ollama a one-token request in
   the background, detached from any shopper, so the next shopper finds it cached. `keep_alive` is
   "2h", and Dan's Test button warms it too.
+  - **The chat warms it on load** (analysis U1): `Pssb` sends `{ kind: "warm" }` when it mounts.
+    The route answers `204` at once and warms Ollama if the stable prompt is new. On this CPU, a
+    cold ~900-token prompt takes ~30 s, so it's cached before he's done typing.
 - **Nothing is logged**: the route never logs message bodies (FR-015). An error logs only its kind.
 
 ## R7 — Redacting personal numbers

@@ -275,7 +275,7 @@ the test button, which reports whether PSSB answered.
 - **FR-005**: For a signed-in shopper, PSSB MUST also be given:
   - his display name
   - his cart
-  - his order history (shirts, dates, totals)
+  - his recent orders (the last 5: shirts, dates, totals; analysis I3)
   - his Flash Credit balance and his per diem left
 
   For a guest, only his cart. Card details, the nosy sign-up fields, passwords and email addresses
@@ -340,8 +340,10 @@ the test button, which reports whether PSSB answered.
 
 **The store's rules**
 
-- **FR-021**: The chat MUST work from 360px up, never cover the price, the tier badge or Add to
-  Cart, and keep its text, prices and buttons steady under Extreme Awesomeness (constitution V).
+- **FR-021**: The chat MUST work from 360px up and keep its text, prices and buttons steady under
+  Extreme Awesomeness (constitution V). On his own, PSSB MUST NEVER cover the price, the tier badge
+  or Add to Cart: the launcher and the approach bubble keep clear of them. The panel the shopper
+  opens himself closes in one tap (analysis I2).
 - **FR-022**: PSSB MUST NOT slow the store's pages. The chat loads after the page, and pages meet
   their existing speed budgets with PSSB on (constitution VII).
 

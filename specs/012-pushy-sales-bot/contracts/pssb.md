@@ -6,7 +6,7 @@
 
 ```ts
 {
-  kind: "reply" | "approach";
+  kind: "reply" | "approach" | "warm";   // "warm": 204 at once, and warms the model if the prompt changed
   message?: string;              // "reply" only, 1–500 characters
   history: { role: "shopper" | "pssb"; text: string }[];  // at most the last 6, each ≤ 500 characters
   page: string;                  // the store path, e.g. "/shirts/geo-riot"
@@ -20,7 +20,7 @@
 |---|---|
 | `{ "t": "text", "s": "Two? " }` | guarded words, as they arrive (R4's price guard applied) |
 | `{ "t": "done", "html": "…", "offer": { "slug", "name", "size", "priceUsd" } \| null }` | the end: the reply with shirt links (only `<a href="/shirts/…">` and text, escaped), and an offer when `detectOffer` found one |
-| `{ "t": "canned", "s": "PSSB is at the tailor. Buy something while you wait." }` | the model is unreachable, gave no first words within 20 s, or ran past 45 s |
+| `{ "t": "canned", "s": "PSSB is at the tailor. Buy something while you wait." }` | the model didn't respond within 5 s, gave no first words within 20 s, or ran past 45 s |
 
 | Case | Status |
 |---|---|

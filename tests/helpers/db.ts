@@ -57,6 +57,8 @@ export function setSwitches(
       | "patternGenerator"
       | "uniquitySurcharge"
       | "uniquitySurchargeUsd"
+      | "pushySalesBot"
+      | "supportEmail"
     >
   >,
 ): void {

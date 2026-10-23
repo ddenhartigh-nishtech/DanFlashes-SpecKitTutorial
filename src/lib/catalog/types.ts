@@ -52,6 +52,13 @@ export interface StoreSettings {
   uniquitySurcharge: boolean;
   /** What it charges per shirt: dollars and cents, $0.00 or more. */
   uniquitySurchargeUsd: string;
+  /** PSSB, the Pushy Shirt Sales Bot (012): his switch. */
+  pushySalesBot: boolean;
+  /** Overrides of the code's default model (012 R1, R10). Null means the default. */
+  pssbModelUrl: string | null;
+  pssbModel: string | null;
+  /** Dan's support email (012 FR-019). Null means none set: PSSB invents an excuse. */
+  supportEmail: string | null;
 }
 
 /** An owner-defined band of complexity scores. The tier with minScore 0 is the BLAND tier. */

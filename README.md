@@ -81,6 +81,15 @@ of the tactics run there, nothing flashes, and every page has a motivational pos
 - **MSRP** = base price + price per point × score, exact to the cent (010: a straight line, $50.00
   + $25.00 a point by default). The two dials live in `store_settings`, and Dan tunes them in
   Settings.
+- **PSSB** (012) runs on [Ollama](https://ollama.com) on this machine by default:
+  `ollama pull llama3.2:3b`, with Ollama serving at `http://localhost:11434`. Point him somewhere
+  else (a bigger model, another machine) in Settings → PSSB, or with `PSSB_MODEL_URL` and
+  `PSSB_MODEL` in `.env`. Settings wins, then the environment, then the default. Settings → PSSB
+  also has a Test button and Dan's support email, which PSSB gives out and order pages show (with
+  none set, PSSB invents a pompous excuse for why Dan can't be reached). Without Ollama the store
+  works normally and PSSB answers with canned lines. Chats are never stored or logged.
+  `npm run pssb:eval` measures him against the real model (run it before merging PSSB changes).
+  After pulling 012, run `npm run db:migrate` (0016).
 - **Gentler pricing** (010). After pulling, run `npm run db:migrate` (0014). It backs the database
   up first, then puts the store on the default line and clears every final price Dan set himself,
   so every shirt sells at its new MSRP. Orders keep what they charged. The old prices are in that
@@ -137,6 +146,7 @@ of the tactics run there, nothing flashes, and every page has a motivational pos
   | `nosy_sign_up` | on | Sign-up asks for far too much after the real fields: Social Security Number, mother's maiden name, blood type, current medications and more, each marked "Required". They're props: unnamed, outside the form, no autofill. Nothing typed into them is ever sent, stored or logged. Blanks get one line from Dan ("He'll allow it."), and the next press signs up. Email and password carry `**`: "Actually required." After pulling 009, run `npm run db:migrate` (0010). |
   | `pattern_generator` | on | The "How complicated can it get?" dial and its calls to action. Off: the dial and its art are the store's 404, and nobody can make a shirt there. Shirts already made stay as they are, and Dan's generator in the console keeps working. |
   | `uniquity_surcharge` | on | Every one-of-a-kind (shopper-made, not mass-produced) shirt pays a flat Uniquity Surcharge™, once per shirt, on its own line in the cart, at checkout, on the receipt and in order history. The amount is `uniquity_surcharge_usd` ($499.99), set in Settings. Orders keep what they were charged; a changed amount makes checkout ask him to look again. |
+  | `pushy_sales_bot` | on | PSSB, the Pushy Shirt Sales Bot (012): a chat in the corner of every store page, voiced by a local language model. He answers from the store's own data (shirts, prices, tiers, Dan, the designer, Dan's support email), knows a signed-in shopper's cart, orders, Flash Credit and per diem, approaches every 2 minutes, and offers an "Add it" button that goes through Add to Cart. Prices, links and the button come from the store, never from the model. Off: no chat and no approaches. |
 
   **Extreme Awesomeness** is the shopper's own toggle, in the header of every page. It starts off,
   applies at once, and his browser remembers it (every tab, later visits). It's never sent to the
@@ -158,6 +168,7 @@ of the tactics run there, nothing flashes, and every page has a motivational pos
 | `npm run db:seed` / `db:seed-demo` | Demo catalog / demo shopper and owner (both idempotent) |
 | `npm run admin:grant -- <email>` / `admin:revoke -- <email>` | Make an account the owner, or stop it being one (the only way) |
 | `npm run catalog:audit` | The catalog check: errors exit 1, warnings exit 0 |
+| `npm run pssb:eval` | PSSB against the real model (012): 30 questions and 20 attempts to break him, timed, with transcripts in `data/pssb-eval-<date>.md` |
 | `npm run shirts:sweep` / `shirts:sweep:delete` | Housekeeping (011). Lists the **abandoned creations**: shirts a shopper made at the dial that nobody bought, that are in no cart, that Dan never mass-produced or changed in his office, and that are over 30 days old. Also lists the picture files in the uploads folder that no library entry uses. It changes nothing; `shirts:sweep:delete` backs up first and deletes them, with their pictures. Every shirt Dan made (released or not), every catalog shirt, and anything in an order or cart is kept. After pulling 011, run `npm run db:migrate` (0015, which records which shopper creations Dan already changed). |
 | `npm run art:generate` | Regenerate the placeholder shirt art (it shares the pattern generator's shirt silhouettes and palettes) |
 

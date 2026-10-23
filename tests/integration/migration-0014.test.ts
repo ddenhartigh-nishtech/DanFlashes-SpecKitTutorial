@@ -55,6 +55,11 @@ describe("migration 0014 (the gentler pricing curve)", () => {
       ...withoutOldDials(before),
       msrp_base_price_usd: "50.00",
       msrp_per_point_usd: "25.00",
+      // 0016 (PSSB), which runs after this one
+      pushy_sales_bot: 1,
+      pssb_model_url: null,
+      pssb_model: null,
+      support_email: null,
     });
     expect(after).not.toHaveProperty("msrp_start_price_usd");
   });

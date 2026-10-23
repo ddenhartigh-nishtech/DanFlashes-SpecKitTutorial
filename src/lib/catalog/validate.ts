@@ -40,6 +40,19 @@ const positiveUsd = z
   .refine(isUsdString, "Must be dollars and cents, e.g. 299.99")
   .refine((v) => !isUsdString(v) || cmp(v, MIN_PRICE) >= 0, "Must be at least $0.01");
 
+/** PSSB's overrides and Dan's support email (012 R10). The console's actions use the same rules. */
+export const pssbModelUrl = z
+  .string()
+  .max(200, "200 characters max")
+  .regex(/^https?:\/\/\S+$/, "Must be http(s)://");
+export const pssbModelName = z
+  .string()
+  .regex(/^[A-Za-z0-9._:/-]{1,80}$/, "Letters, digits, and . _ : / - only, 80 max");
+export const supportEmail = z
+  .string()
+  .max(120, "120 characters max")
+  .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Must be an email address");
+
 /** Dollars and cents, $0.00 or more (a fee Dan may waive by setting it to zero). */
 const feeUsd = z
   .string()
@@ -84,6 +97,10 @@ const settingsSchema = z.object({
   patternGenerator: z.boolean(),
   uniquitySurcharge: z.boolean(),
   uniquitySurchargeUsd: feeUsd,
+  pushySalesBot: z.boolean(),
+  pssbModelUrl: pssbModelUrl.nullable(),
+  pssbModel: pssbModelName.nullable(),
+  supportEmail: supportEmail.nullable(),
 });
 
 function toIssues(error: z.ZodError): Issue[] {

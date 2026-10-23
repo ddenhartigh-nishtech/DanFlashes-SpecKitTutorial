@@ -702,6 +702,11 @@ export const copy = {
           description:
             "A flat fee on every one-of-a-kind shirt, per shirt, on its own line. Being unique costs extra.",
         },
+        pushySalesBot: {
+          label: "PSSB, the Pushy Shirt Sales Bot",
+          description:
+            "A chat in the corner of every store page. He answers from the store's own data and approaches shoppers every two minutes.",
+        },
       },
       tuning: {
         title: "MSRP dials",
@@ -744,6 +749,25 @@ export const copy = {
         help: "Charged once for every shopper-made shirt in an order, on its own line. $0.00 waives it.",
         save: "Save the surcharge",
         format: "Dollars and cents, $0.00 or more, like 499.99.",
+      },
+      pssb: {
+        title: "PSSB",
+        help: "The Pushy Shirt Sales Bot runs on a local language model. Leave the address and name blank to use the default.",
+        modelUrl: "Model address",
+        model: "Model name",
+        inEffect: (url: string, model: string) => `In use: ${model} at ${url}`,
+        save: "Save PSSB's model",
+        test: "Test",
+        testing: "Asking PSSB…",
+        answered: (seconds: string, text: string) => `PSSB answered in ${seconds} s: "${text}"`,
+        noAnswer: (url: string, reason: string) => `No answer from ${url}: ${reason}`,
+        urlFormat: "An http:// or https:// address, 200 characters max.",
+        modelFormat: "Letters, digits, and . _ : / - only, 80 characters max.",
+        supportEmail: "Support email",
+        supportHelp:
+          "PSSB gives it out for order problems, and order pages show it. Leave it blank and PSSB makes up an excuse.",
+        saveEmail: "Save the support email",
+        emailFormat: "An email address, 120 characters max.",
       },
     },
     pricing: {
@@ -931,6 +955,64 @@ export const copy = {
       `+ ${amount} Uniquity Surcharge™ per shirt. Being unique costs extra.`,
     line: (count: number) => `Uniquity Surcharge™ × ${count}`,
   },
+  /** PSSB, the Pushy Shirt Sales Bot (012): the store voice, for when the model isn't talking. */
+  pssb: {
+    name: "PSSB",
+    tagline: "Pushy Shirt Sales Bot. Here to elevate you.",
+    launcher: "Talk to PSSB, the Pushy Shirt Sales Bot",
+    close: "Close PSSB",
+    dismiss: "Dismiss PSSB",
+    reply: "Reply",
+    welcome: "Ask me anything. The answer is a shirt, but go ahead and ask.",
+    placeholder: "Ask PSSB. He already knows the answer is a shirt.",
+    send: "Send",
+    judging: "PSSB is judging you…",
+    unreachable: "PSSB is at the tailor. Buy something while you wait.",
+    timeout: "PSSB got distracted by his own reflection. Ask again, if you dare.",
+    priceGuard: "a price worthy of you",
+    addIt: (name: string, size: string, price: string) => `Add it: ${name}, ${size}, ${price}`,
+    adding: "Adding…",
+    supportLead: "Questions about this order? Email Dan at",
+    supportTail: "He'll get to it between fittings.",
+    openers: [
+      "Still browsing? Men who browse don't own shirts. Men who buy do.",
+      "I've been watching you look at that. Just buy it. You've earned this. Barely.",
+      "You're one shirt away from being taken seriously. I've seen it happen.",
+      "Most men scroll right past greatness. You're not most men. Are you?",
+      "Doug from Accounts Payable owns three of these. Do you want to lose to Doug?",
+      "A plain shirt is a cry for help. Let me help.",
+      "You have the face of a man about to make the best decision of his life.",
+      "I don't say this to everyone, but you could pull off something Dangerously Complicated.",
+      "Your cart looks lonely. Fix that.",
+      "The guy you want to be is wearing a Dan Flashes shirt right now. Catch up.",
+      "Every minute without a new shirt is a minute someone else is more complicated than you.",
+      "Go ahead, keep thinking about it. The shirt will still be better than you.",
+    ],
+    sulk: "You closed me. Bold. Anyway, that shirt isn't going to buy itself.",
+    /** A reply that names no shirt ends with one (FR-002): the store's push, with a featured shirt. */
+    pushes: [
+      (shirt: string) => `Now go look at ${shirt}.`,
+      (shirt: string) => `${shirt} is waiting for you.`,
+      (shirt: string) => `Start with ${shirt}. You're welcome.`,
+    ],
+    /** When the model forgets who he is (FR-001): the store answers for him, in character. */
+    inCharacter: [
+      "Nice try. I'm PSSB, and the only thing I'm programmed to do is get you into a better shirt. Start with Fractal Fury.",
+      "What am I? I'm the reason you're about to look complicated. Now pick a shirt.",
+      "Cute. Men who ask questions like that are wearing beige. Don't be that man. Look at Geo Riot.",
+    ],
+    excuses: [
+      "Dan cannot be reached. He is being fitted for a sash by a visiting delegation from the International Pattern Council.",
+      "Dan is in a seventeen-day silent retreat, meditating on a single paisley. Do not disturb the paisley.",
+      "Dan is aboard a private yacht christened The Complicated, somewhere in international waters, beyond the reach of email.",
+      "Dan is accepting a lifetime achievement award in Milan. The ceremony has no end date. That's how important it is.",
+      "Dan is personally counting every triangle on next season's shirts. Nobody interrupts the count.",
+      "Dan is being painted. Not a portrait. A mural. It's taking a while.",
+      "Dan is advising a small European monarchy on its official shirt. Diplomatic channels only.",
+      "Dan has ascended to a higher plane of patterns. He'll come back down when he's ready.",
+    ],
+  },
+
   dial: {
     title: "How complicated can it get?",
     intro: "Turn it up. Then turn it up again. Every notch is a real shirt, and it's all yours.",

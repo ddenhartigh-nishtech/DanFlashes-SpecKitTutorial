@@ -1,6 +1,6 @@
 /**
- * The switchboard (008 FR-012, R11): the store's 15 switches (the tactics, Flash Mode's two, and 007's pattern generator and
- * Uniquity Surcharge), each a boolean in
+ * The switchboard (008 FR-012, R11): the store's 16 switches (the tactics, Flash Mode's two, 007's pattern generator and
+ * Uniquity Surcharge, and 012's PSSB), each a boolean in
  * store_settings with the same name. Labels and one-line descriptions live in
  * copy.console.settings.switches.
  */
@@ -22,6 +22,7 @@ export const SWITCH_KEYS = [
   "nosySignUp",
   "patternGenerator",
   "uniquitySurcharge",
+  "pushySalesBot",
 ] as const satisfies readonly (keyof StoreSettings)[];
 
 export type SwitchKey = (typeof SWITCH_KEYS)[number];

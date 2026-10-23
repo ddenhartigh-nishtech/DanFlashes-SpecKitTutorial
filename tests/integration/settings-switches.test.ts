@@ -113,6 +113,38 @@ describe("store_settings pattern generator switch (007, migration 0012)", () => 
   });
 });
 
+describe("store_settings PSSB (012, migration 0016)", () => {
+  it("defaults PSSB on with no overrides and no support email, and round-trips them", () => {
+    const { db, sqlite } = createTestDb();
+    sqlite.prepare("INSERT INTO store_settings (id) VALUES (1)").run();
+    expect(getSettings(db)).toMatchObject({
+      pushySalesBot: true,
+      pssbModelUrl: null,
+      pssbModel: null,
+      supportEmail: null,
+    });
+    saveSettings(db, {
+      ...getSettings(db),
+      pushySalesBot: false,
+      pssbModelUrl: "http://192.168.1.102:11434",
+      pssbModel: "qwen2.5:7b",
+      supportEmail: "complaints@danflashes.local",
+    });
+    expect(
+      sqlite
+        .prepare(
+          "SELECT pushy_sales_bot, pssb_model_url, pssb_model, support_email FROM store_settings",
+        )
+        .get(),
+    ).toEqual({
+      pushy_sales_bot: 0,
+      pssb_model_url: "http://192.168.1.102:11434",
+      pssb_model: "qwen2.5:7b",
+      support_email: "complaints@danflashes.local",
+    });
+  });
+});
+
 describe("store_settings Uniquity Surcharge (007 owner review, migration 0013)", () => {
   it("defaults on at $499.99, and round-trips off at another amount", () => {
     const { db, sqlite } = createTestDb();

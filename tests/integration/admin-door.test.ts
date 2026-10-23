@@ -18,6 +18,7 @@ import {
   saveTuningCore,
   setSwitchCore,
 } from "@/lib/actions/admin/settings";
+import { savePssbCore, saveSupportEmailCore, testPssbCore } from "@/lib/actions/admin/pssb";
 import { removeMediaCore, updateMediaAltCore, uploadMediaCore } from "@/lib/actions/admin/media";
 import {
   createAddOnCore,
@@ -101,6 +102,10 @@ const CORES: [string, Core, Record<string, string>][] = [
   ],
   ["setShirtListed", setShirtListedCore, { id: "1", listed: "0" }],
   ["saveSurcharge", saveSurchargeCore, { amountUsd: "0.00" }],
+  // 012 US5
+  ["savePssb", savePssbCore, { modelUrl: "http://evil.example", model: "evil" }],
+  ["saveSupportEmail", saveSupportEmailCore, { supportEmail: "evil@example.com" }],
+  ["testPssb", testPssbCore, {}],
 ];
 
 /** Every row of every table, so "changes nothing" means nothing. */

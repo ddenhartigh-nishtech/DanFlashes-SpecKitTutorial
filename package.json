@@ -25,6 +25,7 @@
     "catalog:audit": "tsx scripts/catalog-audit.ts",
     "shirts:sweep": "tsx scripts/shirts-sweep.ts",
     "shirts:sweep:delete": "tsx scripts/shirts-sweep.ts --yes",
+    "pssb:eval": "tsx scripts/pssb-eval.ts",
     "admin:grant": "tsx scripts/admin.ts grant",
     "admin:revoke": "tsx scripts/admin.ts revoke",
     "art:generate": "tsx scripts/generate-shirt-art.ts"

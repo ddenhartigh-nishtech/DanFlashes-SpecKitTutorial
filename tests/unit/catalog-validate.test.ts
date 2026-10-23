@@ -136,6 +136,10 @@ describe("validateSettings", () => {
     patternGenerator: true,
     uniquitySurcharge: true,
     uniquitySurchargeUsd: "499.99",
+    pushySalesBot: true,
+    pssbModelUrl: null,
+    pssbModel: null,
+    supportEmail: null,
   };
 
   it("accepts the defaults and an https base URL", () => {
@@ -185,6 +189,13 @@ describe("validateSettings", () => {
     ["uniquitySurcharge", { uniquitySurcharge: "on" }],
     ["uniquitySurchargeUsd", { uniquitySurchargeUsd: "lots" }],
     ["uniquitySurchargeUsd", { uniquitySurchargeUsd: "-1.00" }],
+    ["pushySalesBot", { pushySalesBot: "on" }],
+    ["pssbModelUrl", { pssbModelUrl: "ftp://ollama" }],
+    ["pssbModelUrl", { pssbModelUrl: `http://${"x".repeat(200)}` }],
+    ["pssbModel", { pssbModel: "" }],
+    ["pssbModel", { pssbModel: "bad name!" }],
+    ["supportEmail", { supportEmail: "dan" }],
+    ["supportEmail", { supportEmail: `${"d".repeat(120)}@x.io` }],
   ])("flags an invalid %s", (field, patch) => {
     expect(fields(validateSettings({ ...settings, ...patch } as StoreSettings))).toContain(field);
   });

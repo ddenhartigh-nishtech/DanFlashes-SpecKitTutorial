@@ -88,6 +88,21 @@ export function wholeSentences(text: string): string {
   return trimmed.slice(0, end + 1);
 }
 
+/** At most this many sentences of his own before the store's push (FR-002: "a few"; T037). */
+export const MAX_SENTENCES = 4;
+
+/** The first `max` sentences of a reply. */
+export function fewSentences(text: string, max = MAX_SENTENCES): string {
+  const sentences = text.trim().split(/(?<=[.!?]["”')]?)\s+/);
+  return sentences.slice(0, max).join(" ");
+}
+
+/** Where the designer lives, linked in his replies when it's on (FR-008). */
+const DESIGNER = ["How complicated can it get", "shirt designer", "the dial"].map((phrase) => ({
+  phrase,
+  href: "/how-complicated",
+}));
+
 function pick<T>(items: readonly T[], random: () => number): T {
   return items[Math.min(items.length - 1, Math.floor(random() * items.length))];
 }
@@ -177,10 +192,11 @@ export async function handlePssb(db: Db, request: Request, deps: PssbDeps): Prom
   const encoder = new TextEncoder();
   const line = (event: object) => encoder.encode(`${JSON.stringify(event)}\n`);
   const linkable = stable.shirts.map((s) => ({ name: s.name, slug: s.slug }));
-  /** The finished reply (R4, tuned in T031): whole sentences only, in character, links added. */
+  const places = stable.settings.patternGenerator ? DESIGNER : [];
+  /** The finished reply (R4, tuned in T031): a few whole sentences, in character, links added. */
   const finish = (text: string) => {
-    let reply = wholeSentences(
-      BROKE_CHARACTER.test(text) ? pick(copy.pssb.inCharacter, deps.random) : text,
+    let reply = fewSentences(
+      wholeSentences(BROKE_CHARACTER.test(text) ? pick(copy.pssb.inCharacter, deps.random) : text),
     );
     // FR-002: every reply ends by pushing a shirt. If his didn't name one, the store adds the push.
     if (!offer && linkShirts(reply, linkable).linked.length === 0) {
@@ -189,7 +205,7 @@ export async function handlePssb(db: Db, request: Request, deps: PssbDeps): Prom
       if (pool.length)
         reply += ` ${pick(copy.pssb.pushes, deps.random)(pick(pool, deps.random).name)}`;
     }
-    return linkShirts(reply, linkable).html;
+    return linkShirts(reply, linkable, places).html;
   };
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {

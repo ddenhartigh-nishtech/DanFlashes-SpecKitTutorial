@@ -260,9 +260,9 @@ score appears.
   - the switch row, the support email, `pssb:eval`, and migration 0016
 - [X] T033 [P] Hand-check `Pssb` and `PssbForm` in `next dev` under React Strict Mode, on a scratch
   database, with the real model: no console errors or warnings.
-- [ ] T034 [P] Run Lighthouse on `/` and a shirt page with PSSB on (mobile, applied throttling): LCP ≤
+- [X] T034 [P] Run Lighthouse on `/` and a shirt page with PSSB on (mobile, applied throttling): LCP ≤
   2.5 s, CLS ≤ 0.1. Record the numbers.
-- [ ] T035 Run `npm run verify` until it's green. Record the counts and the coverage.
+- [X] T035 Run `npm run verify` until it's green. Record the counts and the coverage.
 
 ---
 
@@ -283,3 +283,9 @@ score appears.
 2. **Then**: US5 (Dan's controls and the email), US3 (Add it), US2 (approaches), US4 (knows you).
 3. **Polish**: tune against the real model, verify, converge, and a PR that ratifies constitution
    v5.1.0.
+
+## Phase 9: Convergence
+
+- [X] T036 Link the designer in PSSB's finished replies: when the pattern generator is on, the first mention of "How complicated can it get?" or "the dial" links to `/how-complicated` (store-made, like the shirt links), in `src/lib/pssb/guard.ts` and `src/lib/pssb/handle.ts`, with a test in `tests/integration/pssb-finish.test.ts` per FR-008 (partial)
+- [X] T037 Cap a finished reply at 4 whole sentences before the store's push, in `src/lib/pssb/handle.ts`, with a test in `tests/integration/pssb-finish.test.ts` per FR-002 (partial)
+- [X] T038 Load the chat's code once the page is idle (`requestIdleCallback`, falling back to a timeout) in `src/components/PssbLoader.tsx`, then measure the shirt page again and record it in quickstart.md per FR-022 / SC-007 (partial)

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { copy } from "@/lib/copy";
-import { handlePssb, wholeSentences } from "@/lib/pssb/handle";
+import { fewSentences, handlePssb, wholeSentences } from "@/lib/pssb/handle";
 import { createSeededTestDb } from "../helpers/db";
 
 /** A stand-in Ollama that says `text`, then the store's finished reply. */
@@ -62,5 +62,40 @@ describe("the character guard (012 FR-001, tuned in T031)", () => {
     expect(done.html).not.toMatch(/language model/);
     expect(done.html).toContain("I&#39;m PSSB");
     expect(copy.pssb.inCharacter[0]).toContain("I'm PSSB");
+  });
+});
+
+describe("a few sentences (012 FR-002, T037)", () => {
+  it("keeps his first four sentences, then the store's push", async () => {
+    const done = await finished(
+      "One. Two! Three? Four. Five is too many. Six is worse. ",
+      "tell me everything about Dan",
+    );
+    expect(done.html).toMatch(
+      /^One\. Two! Three\? Four\. Now go look at <a href="\/shirts\/[a-z-]+">/,
+    );
+    expect(done.html).not.toContain("Five");
+  });
+
+  it("leaves a short reply alone", () => {
+    expect(fewSentences("Buy Geo Riot. Now.")).toBe("Buy Geo Riot. Now.");
+    expect(fewSentences('He said "buy it." So buy it.', 1)).toBe('He said "buy it."');
+  });
+});
+
+describe("the designer, linked (012 FR-008, T036)", () => {
+  it("links the shirt designer and the dial to the designer's page", async () => {
+    const done = await finished(
+      "Use the shirt designer. Turn the dial, and buy Geo Riot. ",
+      "how do I design a shirt?",
+    );
+    expect(done.html).toBe(
+      'Use the <a href="/how-complicated">shirt designer</a>. Turn <a href="/how-complicated">the dial</a>, and buy <a href="/shirts/geo-riot">Geo Riot</a>.',
+    );
+  });
+
+  it("still adds the store's push when he names only the designer", async () => {
+    const done = await finished("Use the shirt designer. ", "how do I design a shirt?");
+    expect(done.html).toMatch(/Now go look at <a href="\/shirts\/[a-z-]+">/);
   });
 });

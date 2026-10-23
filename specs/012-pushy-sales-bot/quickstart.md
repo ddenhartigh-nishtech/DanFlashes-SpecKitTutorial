@@ -80,3 +80,41 @@ than chased.
 - Settings → PSSB → Test: "PSSB answered in 1.7 s" and "0.6 s"
 
 There were no browser console errors or warnings.
+
+### Lighthouse (T034)
+
+Lighthouse 13.5.0, mobile, applied throttling, on a production build of the scratch store, with
+Ollama and the model on the same laptop. Budgets: LCP ≤ 2.5 s, CLS ≤ 0.1.
+
+| Page | PSSB | Runs | LCP | Median | CLS |
+|---|---|---|---|---|---|
+| `/` | on | 5 | 1.97–2.43 s | 2.04 s | 0–0.064 |
+| `/shirts/geo-riot` | on | 5 | 2.24–2.65 s | 2.37 s | 0 |
+| `/shirts/geo-riot` | off | 3 | 2.30–2.46 s | 2.31 s | 0 |
+
+- **The warm-up:** the first runs warmed the model as the chat mounted, while the page was still
+  painting, and the model shares this laptop's CPU. The warm-up now waits until 2 s after the page
+  loads.
+- **The shirt page:** 2 of 5 runs were up to 0.15 s over the limit. With PSSB off the page measured
+  2.30–2.46 s, so the shirt page itself has little room on this laptop. The benchmark index swung
+  from 1,240 to 2,600 between runs.
+- **After converge (T038):** the chat's code now loads only once the page is idle. Five more runs
+  of each page:
+
+  | Page | PSSB | Runs | LCP | Median | CLS |
+  |---|---|---|---|---|---|
+  | `/` | on | 5 | 2.02–2.27 s | 2.06 s | 0–0.064 |
+  | `/shirts/geo-riot` | on | 5 | 2.14–2.51 s | 2.39 s | 0 |
+
+  One shirt-page run was 0.01 s over. The range is no worse than the page with PSSB off.
+- **The CLS on `/`:** one run in five shifted the featured section by 0.064. PSSB is fixed in the
+  corner and takes no room.
+
+### Verify (T035)
+
+`npm run verify`, after converge (T036–T038): unit and integration 108 files, 1,167 tests, 95.47%
+lines; e2e 168 passed. Earlier runs found two bugs, both fixed:
+- **Add it:** pressed while PSSB was still streaming, his reply overwrote the store's "It's in the
+  cart" note.
+- **The support email:** the field's browser email check stopped a bad address from reaching the
+  server, so the office's message never showed.

@@ -10,6 +10,8 @@ const p = copy.pssb;
 const LIMIT = 500;
 const TURNS = 6;
 const CHECK_MS = 5_000;
+/** The warm-up waits this long after the page loads, so the model never competes with first paint. */
+const WARM_AFTER_LOAD_MS = 2_000;
 
 interface Offer {
   slug: string;
@@ -141,14 +143,24 @@ export function Pssb() {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight });
   }, [messages]);
 
-  // Warm the model as the page loads (analysis U1), and start the approach clock on a first visit.
+  // Warm the model once the page has loaded (analysis U1; T034: a model on the same CPU slows the
+  // page's own first paint), and start the approach clock on a first visit.
   useEffect(() => {
-    void fetch("/api/pssb", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ kind: "warm", page: window.location.pathname, history: [] }),
-    }).catch(() => undefined);
+    const warm = () =>
+      void fetch("/api/pssb", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ kind: "warm", page: window.location.pathname, history: [] }),
+      }).catch(() => undefined);
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const later = () => (timer = setTimeout(warm, WARM_AFTER_LOAD_MS));
+    if (document.readyState === "complete") later();
+    else window.addEventListener("load", later, { once: true });
     if (readLast() === null) touch();
+    return () => {
+      window.removeEventListener("load", later);
+      clearTimeout(timer);
+    };
   }, []);
 
   /** Stream one PSSB turn into `apply`, which places it in the panel or the bubble. */

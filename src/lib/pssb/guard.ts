@@ -57,23 +57,32 @@ const escapeHtml = (text: string) =>
 
 const escapeRegex = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-/** The finished reply as HTML: escaped text, with each whole shirt name linked to its page. */
+/**
+ * The finished reply as HTML: escaped text, with each whole shirt name linked to its page, and each
+ * of the store's `places` (the designer, FR-008) linked to its own. `linked` lists only the shirts.
+ */
 export function linkShirts(
   text: string,
   shirts: readonly { name: string; slug: string }[],
+  places: readonly { phrase: string; href: string }[] = [],
 ): { html: string; linked: string[] } {
-  if (shirts.length === 0) return { html: escapeHtml(text), linked: [] };
-  const byName = new Map(shirts.map((s) => [s.name.toLowerCase(), s.slug]));
-  const names = [...shirts].map((s) => s.name).sort((a, b) => b.length - a.length);
+  const targets = new Map<string, { href: string; slug?: string }>([
+    ...places.map((p) => [p.phrase.toLowerCase(), { href: p.href }] as const),
+    ...shirts.map(
+      (s) => [s.name.toLowerCase(), { href: `/shirts/${s.slug}`, slug: s.slug }] as const,
+    ),
+  ]);
+  if (targets.size === 0) return { html: escapeHtml(text), linked: [] };
+  const names = [...targets.keys()].sort((a, b) => b.length - a.length);
   const pattern = new RegExp(`(?<![\\w'])(${names.map(escapeRegex).join("|")})(?![\\w'])`, "gi");
   const linked: string[] = [];
   let html = "";
   let last = 0;
   for (const match of text.matchAll(pattern)) {
-    const slug = byName.get(match[0].toLowerCase())!;
+    const target = targets.get(match[0].toLowerCase())!;
     html += escapeHtml(text.slice(last, match.index));
-    html += `<a href="/shirts/${slug}">${escapeHtml(match[0])}</a>`;
-    if (!linked.includes(slug)) linked.push(slug);
+    html += `<a href="${target.href}">${escapeHtml(match[0])}</a>`;
+    if (target.slug && !linked.includes(target.slug)) linked.push(target.slug);
     last = match.index + match[0].length;
   }
   return { html: html + escapeHtml(text.slice(last)), linked };

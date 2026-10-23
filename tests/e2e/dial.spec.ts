@@ -85,7 +85,13 @@ test.describe("US1 — how complicated can it get?", () => {
     await visible(page.getByRole("button", { name: d.shuffle })).click();
     await expect(art(page)).not.toHaveAttribute("src", first!);
     await expect(badge(page)).toHaveText(tier);
+    // Let the shuffle settle into the link, then wait for the style to settle over it: the older
+    // link already matches ?r=, so wait for a different one (012's verify found this race on phone).
+    await expect(page).toHaveURL(/\?r=[a-z]+$/);
+    const shuffled = { url: page.url(), src: await art(page).getAttribute("src") };
     await visible(page.getByRole("button", { name: d.styles["button-down"] })).click();
+    await expect(page).not.toHaveURL(shuffled.url);
+    await expect(art(page)).not.toHaveAttribute("src", shuffled.src!);
     await expect(page).toHaveURL(/\?r=[a-z]+$/);
 
     const link = page.url();

@@ -103,16 +103,20 @@ test.describe("012 US2 — he comes to you", () => {
   });
 
   test("two tabs share one clock, so he doesn't double the pitching", async ({ context }) => {
-    const t = new Date("2026-10-21T12:00:00Z");
+    // One clock for the whole context: both tabs' timers fire at the same instant, the hardest
+    // case. The Web Locks claim lets exactly one of them pitch.
+    await context.clock.install({ time: new Date("2026-10-21T12:00:00Z") });
+    await context.addInitScript(() => localStorage.setItem("df-pssb-last", String(Date.now())));
     const [a, b] = [await context.newPage(), await context.newPage()];
-    for (const tab of [a, b]) await freshClock(tab, t);
     await a.goto("/shirts");
     await b.goto("/");
-    await a.clock.fastForward(125_000);
-    await expect(bubble(a)).toBeVisible();
-    await b.clock.fastForward(125_000);
-    await b.waitForTimeout(500);
-    await expect(bubble(b)).toHaveCount(0);
+    await expect(launcher(a)).toBeVisible();
+    await expect(launcher(b)).toBeVisible();
+    await context.clock.fastForward(125_000);
+    const pitches = async () => (await bubble(a).count()) + (await bubble(b).count());
+    await expect.poll(pitches).toBe(1);
+    await a.waitForTimeout(1_000);
+    expect(await pitches()).toBe(1);
   });
 });
 

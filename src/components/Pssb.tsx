@@ -159,16 +159,27 @@ export function Pssb() {
 
   // Approaches every 2 minutes (FR-012–FR-014), on the clock every tab shares.
   useEffect(() => {
-    const timer = setInterval(() => {
-      const now = Date.now();
-      const due = approachDue(now, readLast(), {
+    const due = () =>
+      approachDue(Date.now(), readLast(), {
         typing: state.current.input.trim() !== "",
         streaming: state.current.streaming,
         dialogOpen: document.querySelector("dialog[open]") !== null,
         hidden: document.visibilityState === "hidden",
       });
-      if (!due) return;
-      store.set("local", LAST_KEY, String(now)); // claim it before another tab does
+    /** Claim the approach for this tab: atomically across tabs where the browser has Web Locks. */
+    const claim = async (): Promise<boolean> => {
+      const take = () => {
+        if (!due()) return false; // another tab may have just claimed it
+        store.set("local", LAST_KEY, String(Date.now()));
+        return true;
+      };
+      if (!navigator.locks) return take();
+      return navigator.locks.request("df-pssb-approach", { ifAvailable: true }, (lock) =>
+        lock ? take() : false,
+      );
+    };
+    const timer = setInterval(async () => {
+      if (!due() || !(await claim())) return;
       const closedLast = store.get("local", CLOSED_KEY) === "1";
       store.set("local", CLOSED_KEY, null);
       const body = {

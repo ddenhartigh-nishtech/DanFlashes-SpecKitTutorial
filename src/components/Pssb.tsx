@@ -99,6 +99,15 @@ function savedChat(): Message[] {
   }
 }
 
+/**
+ * Puts a stream's update into PSSB's own reply, the last one he's given. A store note ("It's in the
+ * cart") can land after it mid-stream, and it must not be overwritten.
+ */
+const streamInto = (all: Message[], update: (m: Message) => Message) => {
+  const i = all.findLastIndex((m) => m.role === "pssb");
+  return i < 0 ? all : all.map((m, j) => (j === i ? update(m) : m));
+};
+
 /** The turns the model sees: the shopper's and PSSB's, never the store's own notes. */
 const historyOf = (messages: Message[]) =>
   messages
@@ -190,9 +199,7 @@ export function Pssb() {
       };
       if (state.current.open) {
         setMessages((all) => [...all, { role: "pssb", text: "" }]);
-        void run(body, (update) =>
-          setMessages((all) => [...all.slice(0, -1), update(all.at(-1)!)]),
-        );
+        void run(body, (update) => setMessages((all) => streamInto(all, update)));
       } else {
         setBubble({ role: "pssb", text: "" });
         void run(body, (update) => setBubble((b) => update(b ?? { role: "pssb", text: "" })));
@@ -225,7 +232,7 @@ export function Pssb() {
     setInput("");
     setMessages((all) => [...all, { role: "shopper", text: message }, { role: "pssb", text: "" }]);
     await run({ kind: "reply", message, page: window.location.pathname, history }, (update) =>
-      setMessages((all) => [...all.slice(0, -1), update(all.at(-1)!)]),
+      setMessages((all) => streamInto(all, update)),
     );
   }
 

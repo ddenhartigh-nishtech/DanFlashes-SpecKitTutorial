@@ -17,7 +17,8 @@ async function ask(page: Page, question: string) {
   const before = await replies(page).count();
   await panel(page).getByLabel(p.placeholder).fill(question);
   await panel(page).getByRole("button", { name: p.send }).click();
-  await expect(replies(page)).toHaveCount(before + 1);
+  // A reply shows once its first words arrive; under the full suite's load that can pass 15 s.
+  await expect(replies(page)).toHaveCount(before + 1, { timeout: 30_000 });
   const reply = replies(page).nth(before);
   await expect(panel(page).getByRole("button", { name: p.send })).toBeDisabled(); // empty box
   await expect(page.getByTestId("pssb-judging")).toHaveCount(0);

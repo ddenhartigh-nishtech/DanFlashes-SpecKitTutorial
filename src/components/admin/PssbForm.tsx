@@ -82,7 +82,7 @@ export function PssbForm({
           {t.supportEmail}
           <input
             name="supportEmail"
-            type="email"
+            inputMode="email"
             defaultValue={supportEmail ?? ""}
             aria-describedby="support-email-help"
             className={ui.input}

@@ -8,6 +8,17 @@ const messages = [{ role: "user" as const, content: "hi" }];
 function ollama(lines: { at: number; json: object }[], headersAfter = 0) {
   const calls: { url: string; body: Record<string, unknown> }[] = [];
   const fetchImpl = vi.fn(async (url: string, init: RequestInit) => {
+    if (url.endsWith("/api/version")) {
+      // The reachability probe (T031) waits as long as the headers would.
+      await new Promise<void>((resolve, reject) => {
+        const t = setTimeout(resolve, headersAfter);
+        init.signal?.addEventListener("abort", () => {
+          clearTimeout(t);
+          reject(new DOMException("aborted", "AbortError"));
+        });
+      });
+      return new Response("{}");
+    }
     calls.push({ url, body: JSON.parse(String(init.body)) });
     const signal = init.signal!;
     await new Promise<void>((resolve, reject) => {
@@ -63,7 +74,7 @@ describe("streamChat (012 R6)", () => {
       model: "llama3.2:3b",
       stream: true,
       keep_alive: "2h",
-      options: { num_predict: 90, num_ctx: 4096, temperature: 0.8 },
+      options: { num_predict: 60, num_ctx: 4096, temperature: 0.8 },
     });
   });
 

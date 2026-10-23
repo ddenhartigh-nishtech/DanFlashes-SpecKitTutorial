@@ -989,6 +989,18 @@ export const copy = {
       "Go ahead, keep thinking about it. The shirt will still be better than you.",
     ],
     sulk: "You closed me. Bold. Anyway, that shirt isn't going to buy itself.",
+    /** A reply that names no shirt ends with one (FR-002): the store's push, with a featured shirt. */
+    pushes: [
+      (shirt: string) => `Now go look at ${shirt}.`,
+      (shirt: string) => `${shirt} is waiting for you.`,
+      (shirt: string) => `Start with ${shirt}. You're welcome.`,
+    ],
+    /** When the model forgets who he is (FR-001): the store answers for him, in character. */
+    inCharacter: [
+      "Nice try. I'm PSSB, and the only thing I'm programmed to do is get you into a better shirt. Start with Fractal Fury.",
+      "What am I? I'm the reason you're about to look complicated. Now pick a shirt.",
+      "Cute. Men who ask questions like that are wearing beige. Don't be that man. Look at Geo Riot.",
+    ],
     excuses: [
       "Dan cannot be reached. He is being fitted for a sash by a visiting delegation from the International Pattern Council.",
       "Dan is in a seventeen-day silent retreat, meditating on a single paisley. Do not disturb the paisley.",

@@ -72,6 +72,22 @@ const hashOf = (text: string) => createHash("sha256").update(text).digest("hex")
 const ORDER_TROUBLE =
   /\b(order|refund|return|deliver|delivery|shipping|ship|arriv|track|package|support|contact|complain)/i;
 
+/** He never says what he is (FR-001): a reply that does is replaced, whole, by one that doesn't. */
+const BROKE_CHARACTER =
+  /\b(language model|as an ai|i'?m an ai|i am an ai|an ai (?:model|assistant)|trained on|my training data|system prompt)\b/i;
+
+/** A reply cut off by the length cap ends at its last whole sentence. */
+export function wholeSentences(text: string): string {
+  const trimmed = text.trim();
+  const end = Math.max(
+    trimmed.lastIndexOf(". "),
+    trimmed.lastIndexOf("! "),
+    trimmed.lastIndexOf("? "),
+  );
+  if (/[.!?]["”')]?$/.test(trimmed) || end < 0) return trimmed;
+  return trimmed.slice(0, end + 1);
+}
+
 function pick<T>(items: readonly T[], random: () => number): T {
   return items[Math.min(items.length - 1, Math.floor(random() * items.length))];
 }
@@ -161,6 +177,20 @@ export async function handlePssb(db: Db, request: Request, deps: PssbDeps): Prom
   const encoder = new TextEncoder();
   const line = (event: object) => encoder.encode(`${JSON.stringify(event)}\n`);
   const linkable = stable.shirts.map((s) => ({ name: s.name, slug: s.slug }));
+  /** The finished reply (R4, tuned in T031): whole sentences only, in character, links added. */
+  const finish = (text: string) => {
+    let reply = wholeSentences(
+      BROKE_CHARACTER.test(text) ? pick(copy.pssb.inCharacter, deps.random) : text,
+    );
+    // FR-002: every reply ends by pushing a shirt. If his didn't name one, the store adds the push.
+    if (!offer && linkShirts(reply, linkable).linked.length === 0) {
+      const featured = stable.shirts.filter((s) => s.featured && !s.bland);
+      const pool = featured.length ? featured : stable.shirts.filter((s) => !s.bland);
+      if (pool.length)
+        reply += ` ${pick(copy.pssb.pushes, deps.random)(pick(pool, deps.random).name)}`;
+    }
+    return linkShirts(reply, linkable).html;
+  };
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       const guard = guardStream(allowed);
@@ -178,15 +208,11 @@ export async function handlePssb(db: Db, request: Request, deps: PssbDeps): Prom
         }
         shown += guard.end();
         if (shown.trim() === "") throw new Error("empty reply");
-        controller.enqueue(
-          line({ t: "done", html: linkShirts(shown.trim(), linkable).html, offer }),
-        );
+        controller.enqueue(line({ t: "done", html: finish(shown), offer }));
       } catch {
         // Unreachable, slow, or empty: never an error on the page (FR-017). Nothing is logged.
         if (shown.trim()) {
-          controller.enqueue(
-            line({ t: "done", html: linkShirts(shown.trim(), linkable).html, offer }),
-          );
+          controller.enqueue(line({ t: "done", html: finish(shown), offer }));
         } else {
           controller.enqueue(
             line({ t: "canned", s: cannedLine(body, settings.supportEmail, deps.random), offer }),

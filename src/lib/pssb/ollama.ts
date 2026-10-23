@@ -55,6 +55,15 @@ export async function* streamChat(
   signal?.addEventListener("abort", onAbort);
 
   try {
+    // Is anything there? Ollama answers /api/version at once, but sends no headers for a chat
+    // until it has read the whole prompt (~30 s cold, on this CPU), so reachability is its own
+    // check, and the 20 s first-words deadline covers the reading (T031).
+    try {
+      await fetchImpl(`${endpoint.url}/api/version`, { signal: controller.signal });
+    } catch (error) {
+      throw reason ?? new PssbUnreachable(String(error));
+    }
+    clearTimeout(connect);
     let response: Response;
     try {
       response = await fetchImpl(`${endpoint.url}/api/chat`, {
@@ -65,7 +74,7 @@ export async function* streamChat(
           messages,
           stream: true,
           keep_alive: KEEP_ALIVE,
-          options: { num_predict: 90, num_ctx: CONTEXT, temperature: 0.8 },
+          options: { num_predict: 60, num_ctx: CONTEXT, temperature: 0.8 },
         }),
         signal: controller.signal,
       });

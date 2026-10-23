@@ -18,6 +18,18 @@ interface Sent {
 function model(words: string[] | "refused" | "silent") {
   const sent: Sent[] = [];
   const fetchImpl = vi.fn(async (url: string, init: RequestInit) => {
+    // The reachability probe (T031): answered, refused or ignored like the chat would be.
+    if (url.endsWith("/api/version")) {
+      if (words === "refused") throw new TypeError("fetch failed");
+      if (words === "silent") {
+        return await new Promise<Response>((_resolve, reject) =>
+          init.signal?.addEventListener("abort", () =>
+            reject(new DOMException("aborted", "AbortError")),
+          ),
+        );
+      }
+      return new Response("{}");
+    }
     sent.push({ url, body: JSON.parse(String(init.body)) });
     if (words === "refused") throw new TypeError("fetch failed");
     if (words === "silent") {

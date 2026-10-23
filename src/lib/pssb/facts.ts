@@ -28,6 +28,7 @@ export interface SellableShirt {
   bland: boolean;
   tier: string;
   style: string;
+  featured: boolean;
 }
 
 export interface Shopper {
@@ -58,6 +59,7 @@ export function stableFacts(db: Db): StableFacts {
     bland: s.tier.isBland,
     tier: s.tier.name,
     style: s.style,
+    featured: s.featured,
   }));
   const allowed = new Set(shirts.map((s) => s.priceUsd));
 

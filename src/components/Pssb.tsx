@@ -137,6 +137,11 @@ export function Pssb() {
     state.current = { input, streaming, open, messages };
   }, [input, streaming, open, messages]);
   const listRef = useRef<HTMLDivElement>(null);
+  /**
+   * Where an approach still arriving in the bubble goes: the bubble, the chat (opened from the
+   * bubble mid-stream, so the rest of his line follows it there), or nowhere (dismissed).
+   */
+  const bubbleTo = useRef<"bubble" | "chat" | "gone">("bubble");
 
   useEffect(() => {
     store.set("session", CHAT_KEY, JSON.stringify(messages.slice(-30)));
@@ -213,8 +218,13 @@ export function Pssb() {
         setMessages((all) => [...all, { role: "pssb", text: "" }]);
         void run(body, (update) => setMessages((all) => streamInto(all, update)));
       } else {
+        bubbleTo.current = "bubble";
         setBubble({ role: "pssb", text: "" });
-        void run(body, (update) => setBubble((b) => update(b ?? { role: "pssb", text: "" })));
+        void run(body, (update) => {
+          if (bubbleTo.current === "chat") setMessages((all) => streamInto(all, update));
+          else if (bubbleTo.current === "bubble")
+            setBubble((b) => update(b ?? { role: "pssb", text: "" }));
+        });
       }
     }, CHECK_MS);
     return () => clearInterval(timer);
@@ -226,12 +236,15 @@ export function Pssb() {
   }
 
   function openFromBubble() {
-    if (bubble && bubble.text) setMessages((all) => [...all, bubble]);
+    // Still arriving: the bubble moves into the chat, and the rest of the stream follows it.
+    if (bubble && (bubble.text || streaming)) setMessages((all) => [...all, bubble]);
+    bubbleTo.current = "chat";
     setBubble(null);
     setOpen(true);
   }
 
   function dismissBubble() {
+    bubbleTo.current = "gone";
     setBubble(null);
     store.set("local", CLOSED_KEY, "1");
   }

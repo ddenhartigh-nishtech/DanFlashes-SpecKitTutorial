@@ -92,15 +92,18 @@ test.describe("012 US2 — he comes to you", () => {
     await page.clock.fastForward(125_000);
     await expect(bubble(page)).toContainText("You closed me.");
 
-    // Open, with words in his box: PSSB waits.
+    // Open, perhaps while the sulk is still arriving: it finishes in the chat, linked.
     await bubble(page).getByRole("button").first().click();
+    await expect(replies(page).first().getByRole("link", { name: "Geo Riot" })).toBeVisible();
+    // With words in his box: PSSB waits.
     await panel(page).getByLabel(p.placeholder).fill("hmm");
     const count = await replies(page).count();
     await page.clock.fastForward(130_000);
     await expect(replies(page)).toHaveCount(count);
     await panel(page).getByLabel(p.placeholder).fill("");
     await page.clock.fastForward(10_000);
-    await expect(replies(page)).toHaveCount(count + 1);
+    // Under the full suite's load his reply can pass 15 s (as in ask()).
+    await expect(replies(page)).toHaveCount(count + 1, { timeout: 30_000 });
   });
 
   test("two tabs share one clock, so he doesn't double the pitching", async ({ context }) => {

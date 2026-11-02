@@ -124,6 +124,14 @@ test.describe("US1 — browse and filter by complexity", () => {
     expect(res?.status()).toBe(404);
     await expect(visible(page.getByText("isn't complicated enough to exist"))).toBeVisible();
     await expect(visible(page.getByRole("link", { name: "Back to the shirts" }))).toBeVisible();
+    await expect(page.locator("header.loud-stripes")).toHaveCount(1);
+  });
+
+  test("a missing shirt gets the same 404, with one header", async ({ page }) => {
+    // No status check: notFound() fires after streaming starts, so the response is already a 200.
+    await page.goto("/shirts/no-such-shirt");
+    await expect(visible(page.getByText("isn't complicated enough to exist"))).toBeVisible();
+    await expect(page.locator("header.loud-stripes")).toHaveCount(1);
   });
 
   test("/teapot is a real HTTP 418", async ({ page, request }) => {

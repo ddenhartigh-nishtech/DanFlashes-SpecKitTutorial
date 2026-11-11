@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { copy } from "@/lib/copy";
 import { CART_COOKIE, SESSION_COOKIE } from "@/lib/http/cookies";
 import { handlePssb, type PssbDeps } from "@/lib/pssb/handle";
+import { TELLS } from "@/lib/pssb/persona";
 import { createSeededTestDb, setSwitches } from "../helpers/db";
 import { person } from "../helpers/people";
 
@@ -169,6 +170,36 @@ describe("POST /api/pssb (012 R6, contracts/pssb.md)", () => {
       priceUsd: "999.99",
     });
     expect(sent[0].body.messages.at(-2)!.content).toContain("He wants Fractal Fury in L.");
+  });
+
+  it("offers Add it when the size comes in a follow-up (Q7, R3 amended)", async () => {
+    const { db } = createSeededTestDb();
+    const { fetchImpl, sent } = model(["Magnificent."]);
+    const history = [
+      { role: "shopper", text: "Add geo riot to my cart" },
+      { role: "pssb", text: "Would you like your Geo Riot in S, M, L, XL, or XXL?" },
+    ];
+    const all = await events(
+      await handlePssb(db, request(reply("XXL please", "/", history)), deps(fetchImpl)),
+    );
+    expect(all.at(-1)!.offer).toEqual({
+      slug: "geo-riot",
+      name: "Geo Riot",
+      size: "XXL",
+      priceUsd: "425.00",
+    });
+    expect(sent[0].body.messages.at(-2)!.content).toContain("He wants Geo Riot in XXL.");
+  });
+
+  it("never counts PSSB's own words toward an offer (Q7)", async () => {
+    const { db } = createSeededTestDb();
+    const { fetchImpl, sent } = model(["Splendid."]);
+    const history = [{ role: "pssb", text: "Shall I add Geo Riot in XXL to your cart?" }];
+    const all = await events(
+      await handlePssb(db, request(reply("yes", "/", history)), deps(fetchImpl)),
+    );
+    expect(all.at(-1)!.offer).toBeNull();
+    expect(sent[0].body.messages.at(-2)!.content).toContain(TELLS.noCart);
   });
 
   it("tells PSSB to refuse a BLAND shirt, with no offer", async () => {

@@ -54,24 +54,24 @@ describe("detectOffer (012 FR-010, FR-011, R3)", () => {
     ["add fractal fury small", "/shirts", "S"],
   ])("offers on %j", (message, page, size) => {
     const { db, me } = store();
-    expect(detectOffer(db, message, page, me)).toEqual(
+    expect(detectOffer(db, message, [], page, me)).toEqual(
       offer("fractal-fury", "Fractal Fury", size, "999.99"),
     );
   });
 
   it("takes 'it' or 'this' to mean the shirt on the page", () => {
     const { db, me } = store();
-    expect(detectOffer(db, "I'll take it, large", "/shirts/geo-riot", me)).toEqual(
+    expect(detectOffer(db, "I'll take it, large", [], "/shirts/geo-riot", me)).toEqual(
       offer("geo-riot", "Geo Riot", "L", "425.00"),
     );
-    expect(detectOffer(db, "add this one in M", "/shirts/geo-riot", me)).toEqual(
+    expect(detectOffer(db, "add this one in M", [], "/shirts/geo-riot", me)).toEqual(
       offer("geo-riot", "Geo Riot", "M", "425.00"),
     );
   });
 
   it("asks for a size when he names none", () => {
     const { db, me } = store();
-    expect(detectOffer(db, "put the Geo Riot in my cart", "/", me)).toEqual({
+    expect(detectOffer(db, "put the Geo Riot in my cart", [], "/", me)).toEqual({
       kind: "tell",
       tell: "ask-size",
     });
@@ -79,7 +79,7 @@ describe("detectOffer (012 FR-010, FR-011, R3)", () => {
 
   it("doesn't mistake 'I'm' or 'Dan's' for a size", () => {
     const { db, me } = store();
-    expect(detectOffer(db, "I'm going to buy Geo Riot", "/", me)).toEqual({
+    expect(detectOffer(db, "I'm going to buy Geo Riot", [], "/", me)).toEqual({
       kind: "tell",
       tell: "ask-size",
     });
@@ -87,12 +87,12 @@ describe("detectOffer (012 FR-010, FR-011, R3)", () => {
 
   it("refuses BLAND while bland shaming is on, and offers it when it's off", () => {
     const { db, me } = store();
-    expect(detectOffer(db, "add Beige Regret in M", "/", me)).toEqual({
+    expect(detectOffer(db, "add Beige Regret in M", [], "/", me)).toEqual({
       kind: "tell",
       tell: "refuse-bland",
     });
     setSwitches(db, { blandShaming: false });
-    expect(detectOffer(db, "add Beige Regret in M", "/", me)).toEqual(
+    expect(detectOffer(db, "add Beige Regret in M", [], "/", me)).toEqual(
       offer("beige-regret", "Beige Regret", "M", "125.00"),
     );
   });
@@ -100,18 +100,20 @@ describe("detectOffer (012 FR-010, FR-011, R3)", () => {
   it("refuses a resting shirt, somebody else's one of a kind, and a size that doesn't exist", () => {
     const { db, me, theirs } = store();
     const unavailable = { kind: "tell", tell: "unavailable" };
-    expect(detectOffer(db, "add Retired Riot in L", "/", me)).toEqual(unavailable);
-    expect(detectOffer(db, `add ${theirs.name} in L`, "/", me)).toEqual(unavailable);
-    expect(detectOffer(db, "I'll take it in L", `/shirts/${theirs.slug}`, me)).toEqual(unavailable);
-    expect(detectOffer(db, "add Fractal Fury in XXXL", "/", me)).toEqual(unavailable);
+    expect(detectOffer(db, "add Retired Riot in L", [], "/", me)).toEqual(unavailable);
+    expect(detectOffer(db, `add ${theirs.name} in L`, [], "/", me)).toEqual(unavailable);
+    expect(detectOffer(db, "I'll take it in L", [], `/shirts/${theirs.slug}`, me)).toEqual(
+      unavailable,
+    );
+    expect(detectOffer(db, "add Fractal Fury in XXXL", [], "/", me)).toEqual(unavailable);
   });
 
   it("offers his own one of a kind, at its current price", () => {
     const { db, me, mine } = store();
-    expect(detectOffer(db, `add ${mine.name} in XL`, "/", me)).toEqual(
+    expect(detectOffer(db, `add ${mine.name} in XL`, [], "/", me)).toEqual(
       offer(mine.slug, mine.name, "XL", mine.finalPriceUsd),
     );
-    expect(detectOffer(db, `add ${mine.name} in XL`, "/", null)).toEqual({
+    expect(detectOffer(db, `add ${mine.name} in XL`, [], "/", null)).toEqual({
       kind: "tell",
       tell: "unavailable",
     });
@@ -120,14 +122,107 @@ describe("detectOffer (012 FR-010, FR-011, R3)", () => {
   it("uses the store's current price, Dan's or the MSRP", () => {
     const { db, sqlite, me } = store();
     sqlite.prepare("UPDATE shirts SET final_price_usd = '777.00' WHERE slug = 'geo-riot'").run();
-    expect(detectOffer(db, "add Geo Riot in L", "/", me)).toEqual(
+    expect(detectOffer(db, "add Geo Riot in L", [], "/", me)).toEqual(
       offer("geo-riot", "Geo Riot", "L", "777.00"),
     );
   });
 
   it("offers nothing without buying words, or without a shirt", () => {
     const { db, me } = store();
-    expect(detectOffer(db, "what about Fractal Fury in XL?", "/", me)).toEqual({ kind: "none" });
-    expect(detectOffer(db, "add something nice in L", "/shirts", me)).toEqual({ kind: "none" });
+    expect(detectOffer(db, "what about Fractal Fury in XL?", [], "/", me)).toEqual({
+      kind: "none",
+    });
+    expect(detectOffer(db, "add something nice in L", [], "/shirts", me)).toEqual({ kind: "none" });
+  });
+});
+
+describe("detectOffer across his recent messages (012 Q7, R3 amended 2026-11-11)", () => {
+  const askSize = { kind: "tell", tell: "ask-size" };
+  const none = { kind: "none" };
+
+  it("completes the owner's chat: the size in a follow-up, then a yes", () => {
+    const { db, me } = store();
+    const geoXxl = offer("geo-riot", "Geo Riot", "XXL", "425.00");
+    expect(detectOffer(db, "Add geo riot to my cart", [], "/", me)).toEqual(askSize);
+    expect(detectOffer(db, "XXL please", ["Add geo riot to my cart"], "/", me)).toEqual(geoXxl);
+    expect(detectOffer(db, "yes", ["Add geo riot to my cart", "XXL please"], "/", me)).toEqual(
+      geoXxl,
+    );
+  });
+
+  it("takes the shirt from a follow-up when the buying words came first", () => {
+    const { db, me } = store();
+    expect(detectOffer(db, "Fractal Fury in L", ["I want to buy a shirt"], "/", me)).toEqual(
+      offer("fractal-fury", "Fractal Fury", "L", "999.99"),
+    );
+  });
+
+  it("remembers 'it' on a shirt page", () => {
+    const { db, me } = store();
+    expect(detectOffer(db, "M", ["add it"], "/shirts/geo-riot", me)).toEqual(
+      offer("geo-riot", "Geo Riot", "M", "425.00"),
+    );
+  });
+
+  it("asks again when he switches shirts: the size was for the other one", () => {
+    const { db, me } = store();
+    expect(detectOffer(db, "actually, Fractal Fury", ["add Geo Riot in L"], "/", me)).toEqual(
+      askSize,
+    );
+  });
+
+  it("offers nothing when the new message adds nothing", () => {
+    const { db, me } = store();
+    expect(detectOffer(db, "who's Dan?", ["add Geo Riot in L"], "/", me)).toEqual(none);
+    expect(detectOffer(db, "please tell me about Dan", ["add Geo Riot in L"], "/", me)).toEqual(
+      none,
+    );
+  });
+
+  it("looks back only 2 messages", () => {
+    const { db, me } = store();
+    expect(detectOffer(db, "XXL", ["add Geo Riot", "nice weather", "who's Dan?"], "/", me)).toEqual(
+      none,
+    );
+  });
+
+  it("needs an earlier shirt and size for a yes", () => {
+    const { db, me } = store();
+    expect(detectOffer(db, "yes", [], "/", me)).toEqual(none);
+    expect(detectOffer(db, "yes", ["add Geo Riot"], "/", me)).toEqual(askSize);
+  });
+
+  it("never reads 'do it' as the shirt on the page (analysis U1)", () => {
+    const { db, me } = store();
+    expect(
+      detectOffer(db, "do it", ["I want to buy a shirt in L"], "/shirts/geo-riot", me),
+    ).toEqual(none);
+  });
+
+  it("knows a yes from a filler (analysis U2)", () => {
+    const { db, me } = store();
+    const earlier = ["add Geo Riot", "L"];
+    const geoL = offer("geo-riot", "Geo Riot", "L", "425.00");
+    expect(detectOffer(db, "yes please", earlier, "/", me)).toEqual(geoL);
+    expect(detectOffer(db, "Sure, do it!", earlier, "/", me)).toEqual(geoL);
+    expect(detectOffer(db, "please", earlier, "/", me)).toEqual(none);
+  });
+
+  it("still refuses across messages", () => {
+    const { db, me, theirs } = store();
+    const unavailable = { kind: "tell", tell: "unavailable" };
+    expect(detectOffer(db, "M", ["add Beige Regret"], "/", me)).toEqual({
+      kind: "tell",
+      tell: "refuse-bland",
+    });
+    expect(detectOffer(db, "L", ["add Retired Riot"], "/", me)).toEqual(unavailable);
+    expect(detectOffer(db, "L", [`add ${theirs.name}`], "/", me)).toEqual(unavailable);
+    expect(detectOffer(db, "XXXL", ["add Geo Riot"], "/", me)).toEqual(unavailable);
+  });
+
+  it("never counts PSSB's words: only the shopper's are passed in", () => {
+    const { db, me } = store();
+    // handle.ts passes only his turns; a bare "yes" with nothing of his own offers nothing.
+    expect(detectOffer(db, "yes", [], "/", me)).toEqual(none);
   });
 });

@@ -972,6 +972,10 @@ export const copy = {
     priceGuard: "a price worthy of you",
     addIt: (name: string, size: string, price: string) => `Add it: ${name}, ${size}, ${price}`,
     adding: "Adding…",
+    /** When PSSB claimed an add the store never made (012 Q8): the truth, in his voice. */
+    pressIt: "Only the Add it button makes it official. Press it.",
+    sayTheSize:
+      "Name the shirt and your size, and the store will hand you a button worthy of the moment.",
     supportLead: "Questions about this order? Email Dan at",
     supportTail: "He'll get to it between fittings.",
     openers: [

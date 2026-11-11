@@ -289,3 +289,68 @@ score appears.
 - [X] T036 Link the designer in PSSB's finished replies: when the pattern generator is on, the first mention of "How complicated can it get?" or "the dial" links to `/how-complicated` (store-made, like the shirt links), in `src/lib/pssb/guard.ts` and `src/lib/pssb/handle.ts`, with a test in `tests/integration/pssb-finish.test.ts` per FR-008 (partial)
 - [X] T037 Cap a finished reply at 4 whole sentences before the store's push, in `src/lib/pssb/handle.ts`, with a test in `tests/integration/pssb-finish.test.ts` per FR-002 (partial)
 - [X] T038 Load the chat's code once the page is idle (`requestIdleCallback`, falling back to a timeout) in `src/components/PssbLoader.tsx`, then measure the shirt page again and record it in quickstart.md per FR-022 / SC-007 (partial)
+
+## Phase 10: Amendment 2026-11-11 — "Add it" across messages, and no claimed adds (spec Q7–Q8)
+
+**Branch**: `fix/012-pssb-add-to-cart`. "Add it" reaches the cart, so the tests come first
+(constitution VI) and `/speckit-analyze` runs before implement.
+
+- [X] T039 [US3] Write failing tests in tests/integration/pssb-offer.test.ts for
+  `detectOffer(db, message, earlier, page, userId)`, one per row of the amended table in
+  contracts/pssb.md:
+  - **Across messages**: "Add geo riot to my cart" then "XXL please" → Geo Riot, XXL. Then "yes" →
+    Geo Riot, XXL again. "I want to buy a shirt" then "Fractal Fury in L" → Fractal Fury, L. "add it"
+    on `/shirts/geo-riot`, then "M" → Geo Riot, M.
+  - **What doesn't count**: a size said before the shirt (switching shirts asks for the size again);
+    a new message that adds nothing ("who's Dan?") → none; a request more than 2 messages back →
+    none; "yes" with no earlier shirt and size → none.
+  - **Refusals still apply across messages**: "add Beige Regret" then "M" with shaming on →
+    refuse-bland; a resting shirt or somebody else's one of a kind then a size → unavailable.
+  - **Affirmations** (analysis U1, U2): on `/shirts/geo-riot`, "I want to buy a shirt in L" then "do
+    it" → none ("do it" isn't "this shirt"). "please" alone, and "please tell me about Dan", aren't
+    a yes. "yes please" and "sure, do it" are.
+  - **The existing single-message cases** pass unchanged with `earlier = []`.
+- [X] T040 [US3] Implement the window in src/lib/pssb/offer.ts per research R3 (amended): buying
+  words anywhere in the window, the newest shirt, the newest size from the shirt's message on, the
+  new message must add something, and an `AFFIRM` pattern. Keep R3's fail-safe: anything unclear is
+  `none`. T039 passes.
+- [X] T041 [US3] In src/lib/pssb/handle.ts, pass `earlier` (the text of the shopper's last 2 turns in
+  `body.history`, never PSSB's) to `detectOffer`. Extend tests/integration/pssb-route.test.ts: a reply
+  "XXL please" with history `[shopper: "Add geo riot to my cart", pssb: "…what size?"]` ends with
+  the Geo Riot XXL offer and the `TELLS.offer` note. With the same words only in a PSSB turn, there's
+  no offer.
+- [X] T042 [US3] Write failing tests in tests/unit/pssb-guard.test.ts and
+  tests/integration/pssb-finish.test.ts for the claim guard (Q8, FR-011):
+  - "is now yours", "will be added to your cart", "I've added it", "it's in your cart now" are
+    dropped
+  - "Shall I add it to your cart?" and "Press Add it" stay
+  - without an offer, `copy.pssb.sayTheSize` is added; with one, `copy.pssb.pressIt`
+  - the store's push still follows when no shirt is named
+  - "already in your cart" and "the choice is yours" stay
+  - **The stream** (analysis C1): fed word by word, `guardStream` never emits "yours" in "The Geo Riot
+    polo, in XXL, is now yours for $350.00." or "added" in "…will be added to your cart.", and it
+    releases a held sentence that turns out innocent ("Your cart looks lonely.", "Shall I add it to
+    your cart?"). Its full text (for `done`) still has every sentence.
+
+  Then add `CLAIMED_ADD`, `isClaim` and `dropClaims` to src/lib/pssb/guard.ts, add the trigger hold
+  to `guardStream` with a `text()` for the full guarded reply, build `done` from `text()` in
+  src/lib/pssb/handle.ts, call `dropClaims` in `finish()` before the push, add `pressIt` and
+  `sayTheSize` to `copy.pssb`, and add `TELLS.noCart` to src/lib/pssb/persona.ts. Send it on every
+  reply turn that has no offer.
+- [X] T043 [US3] Extend tests/e2e/pssb.spec.ts and tests/e2e/pssb-stub.ts:
+  - the owner's chat: "add Fractal Fury", then "L" shows Add it for Fractal Fury, L. Pressing it
+    adds exactly that line.
+  - on `/shirts` (not a shirt page, so "it" has no shirt), the stub answers "just add it already"
+    with "Done. Fractal Fury is in your cart now." Check it before the stub's note checks. The
+    finished reply doesn't say so, shows `sayTheSize`, and the cart is unchanged (analysis U5).
+- [X] T044 Add the buying chats to scripts/pssb-eval.ts (SC-009): the owner's 2026-11-11 chat,
+  shirt-then-size, shirt-size-yes, and a switched shirt. The eval sends `history: []` today, so add a
+  chat runner that feeds each finished reply back into `history` (analysis U3). It checks the last
+  turn's `done.offer` against the expected shirt and size (or none), and checks that no finished
+  reply is a claim (`isClaim`). Run `npm run pssb:eval` against `llama3.2:3b` and record the results
+  in quickstart.md.
+- [X] T045 Hand-check quickstart scenario 17 in `next dev`, then run `npm run verify` until it's green.
+  Record the counts.
+
+**Order**: T039 → T040 → T041. T042 can run beside them. T043 needs T041 and T042. T044 needs T040–T042.
+T045 comes last.

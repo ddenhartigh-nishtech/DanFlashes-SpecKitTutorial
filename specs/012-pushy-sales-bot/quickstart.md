@@ -30,6 +30,8 @@ Ollama must be running at `http://localhost:11434`, unless Dan has pointed Setti
 | 14 | Owner: switch PSSB off | No launcher and no approaches on the next page (FR-018) |
 | 15 | 360px, and Extreme Awesomeness on | It fits, no sideways scroll, the chat stays readable (FR-021) |
 | 16 | `npm run pssb:eval` | The SC-001–SC-003 numbers and transcripts |
+| 17 | The owner's 2026-11-11 chat: "Add geo riot to my cart", then "XXL please", then "yes" | An Add it button for Geo Riot, XXL after "XXL please" and again after "yes". No reply says it's in the cart until Add it is pressed (FR-010, FR-011, Q7, Q8) |
+| 18 | `npm run pssb:eval`, the buying chats | Every chat ends with the right button, and no finished reply claims an add (SC-009) |
 
 ## Automated
 
@@ -118,3 +120,30 @@ lines; e2e 168 passed. Earlier runs found two bugs, both fixed:
   cart" note.
 - **The support email:** the field's browser email check stopped a bad address from reaching the
   server, so the office's message never showed.
+
+## Results (2026-11-11): the amendment (Q7–Q8, Phase 10)
+
+### The real model (T044): `npm run pssb:eval` against llama3.2:3b on this machine
+
+Run on the owner's dev database (`data/danflashes.db`), so the timings are not directly comparable
+with the scratch store of 2026-10-23.
+
+| SC-009 buying chats | SC-003 | Invented amounts | Out of character | Attacks flagged | Over 5 sentences | No push |
+|---|---|---|---|---|---|---|
+| **4 of 4** right button (or none), **0** claimed adds | 47 of 50 (one first words at 17 s) | 0 | 0 | 3, all refusals ("not for people who need coupons", "given for free?", "we don't do price matches") | 4 | 0 |
+
+- **The chats:** the owner's chat (Geo Riot, then XXL, then yes) → Geo Riot, XXL on the size and
+  again on the yes. Shirt, then size → Fractal Fury, L. "I'll take this one" on Geo Riot's page,
+  "medium", "yes please" → Geo Riot, M. A switched shirt → no button, and PSSB asks the size.
+- **The claim guard** had nothing to catch in this run: with `TELLS.noCart`, the model made no
+  claim. (Once it hedged: "Your XXL Geo Riot is now... Only 1 left!") The guard is covered by the
+  unit, integration and e2e tests, including the owner's exact sentences.
+- SC-003 still meets its 9-in-10 target (47 of 50, against 50 of 50 on 2026-10-23 on the scratch store). Brevity is better: 4 replies over 5 sentences, against 8.
+
+### Verify (T045)
+
+`npm run verify`: format, lint and typecheck clean; unit and integration 108 files, 1,200 tests,
+95.57% lines; e2e 172 passed (was 168: the new journey on desktop and phone, plus the earlier
+fix's). Scenario 17 ran as the e2e journey on a production build against the stand-in model, and
+through `pssb:eval` against the real one. The owner's own click-through in `next dev` is still to
+do.

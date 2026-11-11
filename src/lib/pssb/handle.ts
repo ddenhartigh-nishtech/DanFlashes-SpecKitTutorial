@@ -12,7 +12,7 @@ import { getSettings } from "@/lib/data/settings";
 import { CART_COOKIE, requestCookie, SESSION_COOKIE } from "@/lib/http/cookies";
 import { pssbEndpoint } from "@/lib/pssb/endpoint";
 import { hintsFor, pageLine, shopperFacts, stableFacts } from "@/lib/pssb/facts";
-import { guardStream, linkShirts } from "@/lib/pssb/guard";
+import { dropClaims, guardStream, linkShirts } from "@/lib/pssb/guard";
 import { streamChat, warm, type ChatMessage } from "@/lib/pssb/ollama";
 import { detectOffer, type Offer } from "@/lib/pssb/offer";
 import { approachInstruction, TELLS } from "@/lib/pssb/persona";
@@ -161,12 +161,15 @@ export async function handlePssb(db: Db, request: Request, deps: PssbDeps): Prom
   const notes = [pageLine(body.page, stable.shirts)];
   if (body.kind === "reply") {
     notes.push(...hintsFor(body.message, stable.shirts));
-    const result = detectOffer(db, body.message, body.page, user?.id ?? null);
+    // His own recent words count with the new message (Q7); PSSB's never do.
+    const earlier = body.history.filter((t) => t.role === "shopper").map((t) => t.text);
+    const result = detectOffer(db, body.message, earlier, body.page, user?.id ?? null);
     if (result.kind === "offer") {
       offer = result.offer;
       notes.push(TELLS.offer(offer.name, offer.size));
-    } else if (result.kind === "tell") {
-      notes.push(TELLS[result.tell]);
+    } else {
+      if (result.kind === "tell") notes.push(TELLS[result.tell]);
+      notes.push(TELLS.noCart); // Q8: helps the model; the claim guard is what's relied on
     }
   } else {
     notes.push(approachInstruction(body.closedLast));
@@ -195,9 +198,13 @@ export async function handlePssb(db: Db, request: Request, deps: PssbDeps): Prom
   const places = stable.settings.patternGenerator ? DESIGNER : [];
   /** The finished reply (R4, tuned in T031): a few whole sentences, in character, links added. */
   const finish = (text: string) => {
-    let reply = fewSentences(
+    // Q8: only pressing Add it adds. A claim that a shirt was added is dropped, and the store says
+    // what actually happens next.
+    const { text: honest, dropped } = dropClaims(
       wholeSentences(BROKE_CHARACTER.test(text) ? pick(copy.pssb.inCharacter, deps.random) : text),
     );
+    let reply = fewSentences(honest);
+    if (dropped) reply = `${reply} ${offer ? copy.pssb.pressIt : copy.pssb.sayTheSize}`.trim();
     // FR-002: every reply ends by pushing a shirt. If his didn't name one, the store adds the push.
     if (!offer && linkShirts(reply, linkable).linked.length === 0) {
       const featured = stable.shirts.filter((s) => s.featured && !s.bland);
@@ -210,25 +217,23 @@ export async function handlePssb(db: Db, request: Request, deps: PssbDeps): Prom
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       const guard = guardStream(allowed);
-      let shown = "";
       try {
         for await (const chunk of streamChat(endpoint, messages, {
           fetchImpl: deps.fetchImpl,
           signal: request.signal,
         })) {
           const out = guard.push(chunk);
-          if (out) {
-            shown += out;
-            controller.enqueue(line({ t: "text", s: out }));
-          }
+          if (out) controller.enqueue(line({ t: "text", s: out }));
         }
-        shown += guard.end();
-        if (shown.trim() === "") throw new Error("empty reply");
-        controller.enqueue(line({ t: "done", html: finish(shown), offer }));
+        guard.end(); // the last word arrives with `done`, as before
+        // The finished reply is built from all he said (claims included, so finish() can drop them
+        // whole), never from what was shown.
+        if (guard.text().trim() === "") throw new Error("empty reply");
+        controller.enqueue(line({ t: "done", html: finish(guard.text()), offer }));
       } catch {
         // Unreachable, slow, or empty: never an error on the page (FR-017). Nothing is logged.
-        if (shown.trim()) {
-          controller.enqueue(line({ t: "done", html: finish(shown), offer }));
+        if (guard.text().trim()) {
+          controller.enqueue(line({ t: "done", html: finish(guard.text()), offer }));
         } else {
           controller.enqueue(
             line({ t: "canned", s: cannedLine(body, settings.supportEmail, deps.random), offer }),

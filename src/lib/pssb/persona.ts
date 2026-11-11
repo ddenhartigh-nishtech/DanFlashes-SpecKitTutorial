@@ -34,4 +34,7 @@ export const TELLS = {
     "He asked for a shirt that is not for sale (resting, someone else's one of a kind, or not a real shirt), or a size that does not exist. Tell him no, in character, and push a shirt that is for sale.",
   offer: (name: string, size: string) =>
     `He wants ${name} in ${size}. In one or two sentences, congratulate him grandly on the best decision of his adult life, and tell him to press the "Add it" button below. It is not in his cart until he presses it: never say it was added.`,
+  /** Every reply turn without an offer (012 Q8). */
+  noCart:
+    "Nothing has been added to his cart. Never say a shirt was added, will be added, or is his. Only the store's Add it button adds, and it appears once he names a shirt and his size.",
 } as const;

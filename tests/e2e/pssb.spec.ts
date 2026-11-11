@@ -154,6 +154,32 @@ test.describe("012 US3 — say the word", () => {
     await expect(bland.getByTestId("pssb-add")).toHaveCount(0);
     await expect(visible(page.getByTestId("cart-count")).first()).toHaveText(String(before + 2));
   });
+
+  test("the size in a follow-up brings the button; a claimed add is never shown (amended 2026-11-11, Q7–Q8)", async ({
+    page,
+  }) => {
+    await page.goto("/shirts");
+    await expect(page.getByTestId("cart-count")).toHaveCount(0);
+
+    // Q8: the stub claims it's done. The store says what's true, and the cart is unchanged.
+    const claimed = await ask(page, "just add it already");
+    await expect(claimed).toContainText(p.sayTheSize);
+    await expect(claimed).not.toContainText("in your cart now");
+    await expect(claimed.getByTestId("pssb-add")).toHaveCount(0);
+    await expect(page.getByTestId("cart-count")).toHaveCount(0);
+
+    // Q7, the owner's chat: the shirt first, the size next.
+    const asked = await ask(page, "add Fractal Fury");
+    await expect(asked.getByTestId("pssb-add")).toHaveCount(0);
+    const sized = await ask(page, "L");
+    const add = sized.getByTestId("pssb-add");
+    await expect(add).toHaveText(p.addIt("Fractal Fury", "L", "$1,350.00"));
+    await add.click();
+    await expect(
+      visible(page.locator('[data-testid="pssb-message"][data-role="store"]')).last(),
+    ).toContainText(copy.product.added);
+    await expect(visible(page.getByTestId("cart-count")).first()).toHaveText("1");
+  });
 });
 
 test.describe("012 US4 — he knows you", () => {

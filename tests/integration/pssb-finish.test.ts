@@ -99,3 +99,42 @@ describe("the designer, linked (012 FR-008, T036)", () => {
     expect(done.html).toMatch(/Now go look at <a href="\/shirts\/[a-z-]+">/);
   });
 });
+
+describe("no claimed adds in the finished reply (012 Q8, FR-011, R3 amended)", () => {
+  it("drops the owner's 'is now yours', asks for the size, and still pushes a shirt", async () => {
+    const done = await finished(
+      "Only 1 left! The Geo Riot polo, in XXL, is now yours for $350.00. Shall I add it to your cart? ",
+      "yes",
+    );
+    expect(done.html).not.toMatch(/yours|price worthy/);
+    expect(done.html).toContain("Only 1 left! Shall I add it to your cart?");
+    expect(done.html).toContain(copy.pssb.sayTheSize);
+    expect(done.html).toMatch(/Now go look at <a href="\/shirts\/[a-z-]+">/);
+  });
+
+  it("drops 'will be added' too", async () => {
+    const done = await finished(
+      "The Geo Riot and Dan's Masterpiece, both in XXL, will be added to your cart. ",
+      "yes",
+    );
+    expect(done.html).not.toMatch(/will be added/);
+    expect(done.html).toContain(copy.pssb.sayTheSize);
+  });
+
+  it("points him to the button when there is one", async () => {
+    const done = await finished(
+      "Fractal Fury is now yours. Press Add it, before you lose your nerve. ",
+      "add Fractal Fury in L",
+    );
+    expect(done.html).not.toMatch(/is now yours/);
+    expect(done.html).toContain("Press Add it, before you lose your nerve.");
+    expect(done.html).toContain(copy.pssb.pressIt);
+  });
+
+  it("leaves an honest reply alone", async () => {
+    const done = await finished("Geo Riot is already in your cart. The choice is yours. ", "hm");
+    expect(done.html).toBe(
+      '<a href="/shirts/geo-riot">Geo Riot</a> is already in your cart. The choice is yours.',
+    );
+  });
+});

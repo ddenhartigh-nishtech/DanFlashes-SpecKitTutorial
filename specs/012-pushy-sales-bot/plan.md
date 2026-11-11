@@ -17,7 +17,9 @@ Ollama on this machine (`llama3.2:3b` at `localhost:11434` by default; R1).
     shown (R4).
   - **Links**: shirt names become links only when they're real shirts (R4).
   - **"Add it"**: offered only when the shopper's own words name a shirt and a size that Add to
-    Cart would accept. Pressing it calls the existing `addToCart` (R3).
+    Cart would accept. Pressing it calls the existing `addToCart` (R3). Since 2026-11-11 his last 3
+    messages count together ("Add Geo Riot" … "XXL"), and a finished reply that claims a cart change
+    has the claim removed (R3 amended).
 - **The shopper's browser**:
   - **The chat**: loads after the page and keeps the conversation for the visit (R8).
   - **The approaches**: every 2 minutes, on a clock shared by the browser's tabs, held while he's
@@ -136,7 +138,7 @@ src/
     │   ├── endpoint.ts                    # DEFAULT_PSSB, pssbEndpoint(settings)
     │   ├── persona.ts                     # the system prompt and the opener instruction
     │   ├── facts.ts                       # buildFacts(db, shopper, page): stable, shopper, page
-    │   ├── offer.ts                       # detectOffer(message, page, catalog)
+    │   ├── offer.ts                       # detectOffer(message, earlier, page, user) (R3, amended 2026-11-11)
     │   ├── guard.ts                       # the price guard and linking
     │   ├── redact.ts                      # card and SSN shapes
     │   └── ollama.ts                      # streamChat(endpoint, messages, deadlines), warm()
@@ -145,8 +147,9 @@ src/
     ├── db/schema.ts, catalog/types.ts, catalog/validate.ts, data/settings.ts
     └── copy.ts                            # copy.pssb (store voice), copy.console.settings.pssb (calm)
 tests/
-├── unit/pssb-*.test.ts                    # offer, redact, guard, facts, endpoint, persona
-├── integration/pssb-route.test.ts, admin-pssb.test.ts, migration-0016.test.ts, support-line.test.ts
+├── unit/pssb-*.test.ts                    # redact, guard, clock, endpoint, ollama
+├── integration/pssb-offer.test.ts, pssb-facts.test.ts, pssb-finish.test.ts, pssb-route.test.ts,
+│   admin-pssb.test.ts, migration-0016.test.ts, support-line.test.ts
 └── e2e/pssb-stub.ts, e2e/pssb.spec.ts, e2e/admin/pssb.spec.ts
 ```
 

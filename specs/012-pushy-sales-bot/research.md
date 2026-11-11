@@ -70,6 +70,54 @@ three parts, ordered so that Ollama's prompt cache keeps the expensive part:
 - **Alternative**: Ollama tool calling. Rejected for the default model's reliability. It can be
   revisited for a bigger model.
 
+### R3, amended 2026-11-11 (spec Q7–Q8, the owner's bug report)
+
+- **His recent words count together.** `detectOffer(db, message, earlier, page, userId)` also takes
+  `earlier`: the text of his own last 2 messages from `history`, oldest first. PSSB's turns are
+  dropped before it is called. The new message and those 2 are the *window*.
+  - **Buying words**: anywhere in the window.
+  - **The shirt**: the newest message in the window that names one (longest name first, as before).
+    If none does, the page's shirt is used for "it" or "this one", and its position is the newest
+    message that says so. An affirmation never counts as "it": "do it" means yes, not "the shirt on
+    this page" (analysis U1).
+  - **The size**: the newest size in the window, from the shirt's message or a later one. A size
+    said before the shirt was named is ignored, so switching shirts asks again.
+  - **The new message must add something**: a size, a shirt name, buying words, or an affirmation.
+    Otherwise the result is `none`, so "who's Dan?" after a button brings no new button.
+  - **An affirmation** (`AFFIRM`, analysis U2) is a whole message of at most 5 words, every one from
+    the list: `yes`, `yeah`, `yep`, `yup`, `sure`, `ok`, `okay`, `alright`, `absolutely`, `definitely`,
+    `certainly`, `of course`, `go ahead`, `do it`, `let's do it`, plus the fillers `please`, `thanks`,
+    `thank you`, `sir` and `pssb`. At least one word must be a real yes, so "please" alone isn't
+    one, and "please tell me about Dan" isn't either.
+  - The refusals (`unavailable`, `refuse-bland`) and `ask-size` work as before, on the window's
+    shirt and size.
+- **Rationale**: US3's own story ("Size?" "L.") spans two messages. The window holds only the
+  shopper's words, so R3's rule stands: the model never decides a cart change. A forged `history` is
+  no worse than typing the same words again, and the press is still required. Three messages covers
+  ask → size → yes without old requests coming back to life.
+- **The claim guard** (Q8, FR-011): `CLAIMED_ADD` in `src/lib/pssb/guard.ts` matches sentences that
+  claim a cart change ("added to your cart", "will be added", "I've added", "is now yours", "in your
+  cart now", "it's yours"…). It does not match questions ("Shall I add it?") or a push to press the
+  button ("Press Add it"). `finish()` drops matching sentences, then adds:
+  - with an offer: `copy.pssb.pressIt` ("Only the Add it button makes it official. Press it.")
+  - without one: `copy.pssb.sayTheSize` ("Name the shirt and your size, and the store will hand you a
+    button worthy of the moment.")
+
+  The store's push (FR-002) still follows as before. Every reply turn without an offer also gets the
+  `TELLS.noCart` note ("Nothing has been added to his cart. Never say a shirt was added or is his.").
+  It helps the model, but the guard is what's relied on.
+  - **What counts as a claim**: a sentence that doesn't end in "?" and says a shirt "was / has been /
+    will be / I've … added", "added … to your cart/bag", "is (now/officially) yours" (not "the
+    choice is yours"), or "now in your cart" / "in your cart now". "Already in your cart" is left
+    alone: PSSB knows his cart (FR-005), and that can be true.
+- **Streaming** (analysis C1): a claim is never shown, not even for a moment. `guardStream` holds a
+  sentence as soon as one of its words is a trigger (`added`, `adding`, `yours`, `cart`, `bag`),
+  until the sentence ends. Then it releases the held words, or drops them if the whole sentence is a
+  claim. Words before the trigger may already be showing ("The Geo Riot polo, in XXL, is now"), and
+  `done` replaces the message with the finished reply. Only sentences with a trigger word wait, so
+  replies still start at once (SC-003). `done` is built from everything the model said, after the
+  price guard, not from what was shown, so `finish()` sees whole sentences.
+
 ## R4 — Links, and prices the store didn't give him
 
 - **Links**: once the reply is complete, every case-insensitive whole match of a shirt name from the

@@ -30,7 +30,9 @@
 
 Never logged: the message, the history, the facts, the reply.
 
-## `detectOffer(message, page, catalog)` (R3)
+## `detectOffer(db, message, earlier, page, userId)` (R3, amended 2026-11-11)
+
+The original table, with `earlier = []`:
 
 | He says (on `/shirts/geo-riot`) | Offer |
 |---|---|
@@ -40,6 +42,27 @@ Never logged: the message, the history, the facts, the reply.
 | "add Beige Regret, M" with bland shaming on | none. PSSB is told to refuse, and shame him |
 | a resting shirt, somebody else's one of a kind, an unknown name, or "XXXL" | none. PSSB is told it's not available |
 | "what about Fractal Fury?" (no buying intent) | none |
+
+**Amended 2026-11-11 (R3 amended):** the signature is `detectOffer(db, message, earlier, page,
+userId)`. `earlier` is the text of his own last 2 messages, oldest first. PSSB's lines are never
+passed.
+
+| He said before (oldest first) | He says now | Offer |
+|---|---|---|
+| "Add geo riot to my cart" | "XXL please" | Geo Riot, XXL |
+| "Add geo riot to my cart", "XXL please" | "yes" | Geo Riot, XXL |
+| "I want to buy a shirt" | "Fractal Fury in L" | Fractal Fury, L |
+| "add Geo Riot in L" | "actually, Fractal Fury" | none. PSSB is told to ask for his size (the L was for Geo Riot) |
+| "add Geo Riot in L" | "who's Dan?" | none (the new message adds nothing) |
+| "add Beige Regret" (bland shaming on) | "M" | none. PSSB is told to refuse, and shame him |
+| (PSSB said "Geo Riot in XXL?") | "yes" | none (PSSB's words never count) |
+| three older messages back: "add Geo Riot" | "XXL" | none (outside the window) |
+| (on `/shirts/geo-riot`) "I want to buy a shirt in L" | "do it" | none ("do it" is a yes, not "this shirt"; analysis U1) |
+| "add Geo Riot in L" | "please tell me about Dan" | none (not an affirmation; analysis U2) |
+
+**The finished reply** never claims a cart change: matching sentences are dropped and the store's
+`pressIt` or `sayTheSize` line is added (R3 amended, FR-011). **The stream** holds any sentence with
+a trigger word until it ends, and drops it if it's a claim, so `text` events never carry one.
 
 **Pressing "Add it"** posts `{ slug, size }` to the existing `addToCart` action and shows its
 `ActionState` message in the chat ("Added. We found another one!").

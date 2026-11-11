@@ -22,6 +22,8 @@ function replyFor(messages: Message[]): string {
   const said = messages.at(-1)?.content ?? "";
 
   if (/Say hello in five words/.test(said)) return "Buy a shirt, you peasant.";
+  // A model that claims a cart change it can't make (012 Q8): the store must never show this.
+  if (/just add it already/i.test(said)) return "Done. Fractal Fury is in your cart now.";
   const wants = /He wants (.+) in (S|M|L|XL|XXL)\./.exec(note);
   if (wants)
     return `Magnificent. ${wants[1]} in ${wants[2]}. Press Add it, before you lose your nerve.`;

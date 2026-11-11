@@ -4,7 +4,8 @@
 
 **Created**: 2026-10-20
 
-**Status**: Draft (Q1–Q6 resolved 2026-10-20)
+**Status**: Draft (Q1–Q6 resolved 2026-10-20; amended after the owner's bug report, Q7–Q8,
+2026-11-11)
 
 **Input**: User description: "Add a chatbot to the storefront called PSSB (Pushy Shirt Sales Bot). It runs on a locally hosted language model (this machine, or the owner's laptop on the home network, the way an Ollama chat endpoint already works there). When I browse, I'm approached by a pushy shirt sales bot who is elitist and condescending, but also somehow encouraging, and who really wants me to buy shirts as my life's highest priority and crowning achievement. PSSB answers questions about inventory, about Dan, about what sets the shirts apart, how to contact Dan about order issues, and how to use the shirt designer (with false assurances of unique, never-mass-produced flair)."
 
@@ -38,6 +39,32 @@
 - Q6: What if Dan hasn't set a support email? → A: **PSSB makes up an incredible, pompous excuse**
   for why Dan can't be reached. Each one is fresh, grander than the last, and ends by steering the
   shopper back to the shirts.
+
+### Session 2026-11-11 (the owner's bug report)
+
+The owner asked PSSB for a shirt, gave the size when asked, and said yes. No "Add it" button ever
+appeared, but PSSB said it was done:
+
+> **He**: Add geo riot to my cart
+> **PSSB**: …Would you like your Geo Riot in S, M, L, XL, or XXL?
+> **He**: XXL please
+> **PSSB**: Only 1 left! The Geo Riot polo, in XXL, is now yours for $350.00. Shall I add it to your
+> cart…?
+> **He**: yes
+> **PSSB**: The Geo Riot and Dan's Masterpiece, both in XXL, will be added to your cart…
+
+The cart was unchanged. The built feature only offered "Add it" when one message held the buying
+words, the shirt and the size together, which never happens in US3's own story ("Size?" "L."). And
+nothing stopped the model from claiming a cart change that the store never made. These answers amend
+US3 before the fix:
+
+- Q7: Does a size he gives in a later message count? → A: **Yes. His recent messages count
+  together.** The buying words and the shirt can be in one message and the size in the next. A plain
+  "yes" after he's given all three brings the button back. Only his own messages count, never
+  PSSB's: the model's words still never decide a cart change (constitution v5.1.0).
+- Q8: What if PSSB says a shirt is in the cart? → A: **He can't.** Only pressing "Add it" adds.
+  The store takes any claim that a shirt was added (or will be, or is now his) out of PSSB's
+  finished reply, and points him to the button, or asks his size.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -145,6 +172,13 @@ character, and the cart is unchanged.
    **When** he asks, **Then** PSSB says no, in character, with no button.
 5. **Given** a one-of-a-kind shirt he made, **When** he asks PSSB to add it, **Then** it's added
    with its Uniquity Surcharge like any other add, and PSSB mentions the surcharge as a privilege.
+6. **Given** he asked PSSB to add a shirt and PSSB asked his size, **When** he answers with just a
+   size ("XXL please"), **Then** the chat shows the "Add it" button for that shirt in that size (Q7).
+7. **Given** he has named the shirt and the size, **When** he says "yes" (or "do it", "sure"),
+   **Then** the "Add it" button for that shirt and size appears again (Q7).
+8. **Given** any reply, **When** PSSB finishes, **Then** it never says a shirt was added to his
+   cart, will be added, or is now his. Only pressing "Add it" adds, and only the store's own note
+   says it's in the cart (Q8).
 
 ---
 
@@ -228,6 +262,17 @@ the test button, which reports whether PSSB answered.
   logged.
 - **PSSB names a shirt that doesn't exist.** The link and the "Add it" button only ever come from
   the store's own data. A name the store doesn't know gets no link and no button.
+- **The size comes later** (Q7). "Add Geo Riot", then "XXL", is one request. His messages count
+  together only when they're recent (his last 3, counting the new one) and the new one adds
+  something: a size, a shirt, buying words, or a "yes". A size he gave before naming the shirt
+  doesn't count, so the button never offers a size he didn't choose for that shirt. "Who's Dan?"
+  after a button gets no new button.
+- **PSSB says it's done** (Q8). A sentence claiming a cart change is never shown, not even while it
+  streams. It's removed from the finished reply, and the store adds a line pointing him to the
+  button or asking his size.
+- **"OK" after an add.** The store's own "It's in the cart" note isn't part of what PSSB sees, so a
+  "yes" or "ok" right after pressing "Add it" can bring the same button back. Pressing it again adds
+  a second one, through Add to Cart's rules. That's allowed ("Two? Timid.").
 - **Prices changed mid-chat.** "Add it" always uses the store's current price, as Add to Cart does.
   Checkout is server-authoritative as always.
 - **Other pop-ups.** PSSB never covers the price, the tier badge or Add to Cart. He shares the
@@ -295,7 +340,9 @@ the test button, which reports whether PSSB answered.
 - **FR-009**: Every shirt PSSB names that the store sells MUST be a link to its page. Links and
   buttons MUST come only from the store's own data, never from the model's text alone.
 - **FR-010**: When the shopper asks PSSB to add a shirt in a size, PSSB MAY offer an "Add it" button
-  naming the shirt, size and current price. Nothing is added until the shopper presses it (Q1).
+  naming the shirt, size and current price. Nothing is added until the shopper presses it (Q1). The
+  request MAY span his recent messages: buying words and a shirt in one, and the size in a later one,
+  or a "yes" after all three (Q7). Only the shopper's own messages count, never PSSB's.
 - **FR-011**: Pressing "Add it" MUST add the line through exactly the same rules as the shirt page's
   Add to Cart:
   - availability, sizes and quantity limits
@@ -303,7 +350,9 @@ the test button, which reports whether PSSB answered.
   - fake-scarcity lines and the Uniquity Surcharge
   - the header's cart count
 
-  PSSB never offers a button for a shirt the shopper couldn't add from its page.
+  PSSB never offers a button for a shirt the shopper couldn't add from its page. His finished reply
+  MUST NEVER say that a shirt was added to the cart, will be added, or is now the shopper's. The store
+  removes any such claim (Q8).
 
 **Approaches (US2)**
 
@@ -380,6 +429,10 @@ the test button, which reports whether PSSB answered.
   nothing scrolls sideways at 360px.
 - **SC-008**: Nothing a shopper types is stored or logged, and card-shaped or SSN-shaped numbers never
   reach the model.
+- **SC-009**: Across a fixed set of buying chats spread over several messages (a shirt, then a size;
+  a shirt, a size, then "yes"; the owner's 2026-11-11 chat), every chat shows an "Add it" button for
+  exactly the shirt and size he gave. Run against the owner's real model, no finished reply says a
+  shirt was added (Q7, Q8).
 
 ## Assumptions
 
@@ -392,9 +445,11 @@ the test button, which reports whether PSSB answered.
   a chatty persona on a small graphics card is the plan's job.
 - **Answers aren't guaranteed by the model.** PSSB's voice comes from the model, but every fact,
   link and button comes from the store. Tests check that plumbing with a stand-in model. SC-001–SC-003
-  are measured against the owner's real model before merge.
+  and SC-009 are measured against the owner's real model before merge.
 - **"Add it" is confirm-by-click.** The model can suggest; only the shopper's press adds. That keeps a
-  chat that someone could steer from ever changing a cart by itself.
+  chat that someone could steer from ever changing a cart by itself. His earlier messages come from
+  his own browser, so counting them is no riskier than him typing them again. PSSB's lines are never
+  counted (Q7).
 - **The approach interval is fixed at 2 minutes** (Q3). It isn't a setting.
 - **No new money path.** "Add it" reuses Add to Cart. Checkout, totals and the surcharge are
   unchanged. Because it touches the cart, `/speckit-analyze` runs before implement (constitution).

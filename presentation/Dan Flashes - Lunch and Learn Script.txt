@@ -1,0 +1,1318 @@
+DAN FLASHES: SPEC-DRIVEN DEVELOPMENT WITH SPEC KIT
+Lunch and Learn speaker script
+Source deck: "Dan Flashes Spec-Driven Development with Spec Kit - L+L Slide Deck.pptx"
+  (Plan B demo in screenshots: slides 38-52. In Slide Show type 38 + Enter; 6 + Enter to return.)
+==========================================================================================
+
+HOW TO USE THIS
+- Each slide has three parts:
+    ON SCREEN   what the audience is looking at (so you don't have to look back)
+    SAY         the spoken script, in your voice. Read it aloud to practice.
+    IF ASKED    extra facts from the slide notes. Don't say these unless someone asks
+                or you're running short.
+- [PAUSE], [CLICK], [GESTURE] etc. are stage directions.
+- Timing target: about 45 minutes of talking + a 10-minute live demo + Q&A.
+  At a normal speaking pace (~130 words/min), each SAY block is timed in brackets.
+- If you're running long, the PSSB "under the hood" section (slides 25-28) and the
+  "Run it yourself / Demo logins" slides (35-36) are the easiest to compress.
+
+BEFORE THE TALK (checklist)
+  [x] Fill in the date on slide 1 (it still says "[Date]").
+  [x] npm install
+  [x] npm run db:reset   (clean store + the two demo logins)
+  [x] Ollama running with llama3.2:3b   ->  ollama list, then: ollama run llama3.2:3b "hi"
+  [x] npm run dev        ->  localhost:3000
+  [x] Open /shirts once so the model warms up (a cold prompt takes ~30 s on the CPU)
+  [x] Logins:  shopper  demo@danflashes.local / password123
+               owner    dan@danflashes.local  / the-office-2026
+  [x] Test card: 4242 4242 4242 4242, any future expiry, any CVC
+  [x] Optional: a terminal open in the repo for the git log commands on slide 29
+
+
+==========================================================================================
+SECTION 1 - WHAT I BUILT                                          (slides 1-5, ~8 min + demo)
+==========================================================================================
+
+------------------------------------------------------------------------------------------
+SLIDE 1 - TITLE: "Dan Flashes - Complicated shirts. Complicated prices."
+------------------------------------------------------------------------------------------
+ON SCREEN
+  A Spec Kit field report. How I built a parody e-commerce store spec-first with GitHub
+  Spec Kit and Claude Code, and what it cost. Derek DenHartigh, Nishtech.
+
+SAY  [~1 min]
+  Hi everyone, thanks for coming.
+
+  If you've seen "I Think You Should Leave," you know Dan Flashes. It's the shirt store
+  from the sketch where the shirts are so complicated that the prices make no sense.
+  Pattern complexity goes up, price goes up, and nobody can explain why.
+
+  I wanted to learn GitHub Spec Kit after seeing Barret Blake's talk at Beer City Code,
+  and I needed a project. So I built Dan Flashes. A real store, real stack, real tests,
+  fake money.
+
+  Here's what we'll cover today: what I built, how Spec Kit works, how I actually drove
+  it, how every decision ended up in git, and then the honest downsides. Including the
+  part where I burned through my weekly token allowance two days early.
+
+  [CLICK]
+
+IF ASKED
+  The repo is ddenhartigh-nishtech/DanFlashes-SpecKitTutorial. It's private.
+
+------------------------------------------------------------------------------------------
+SLIDE 2 - "The ask"  (Day 1, 2026-10-12)
+------------------------------------------------------------------------------------------
+ON SCREEN
+  My first prompt, quoted. Three goals: Learn Spec Kit / Build a parody / Make it real.
+
+SAY  [~1.5 min]
+  This was my first prompt. The entire brief.
+
+  [READ IT] "I want to build an ecommerce site branded for Dan Flashes that sells
+  expensive shirts where the pattern complexity correlates to the price, the shirts are
+  all to be vibrant, the store energy is to be aggressively upbeat and addictive."
+
+  That's it. Three goals: learn Spec Kit, build a parody, and make it real. A real stack
+  with real tests, but fake money only.
+
+  I also said something like "we should probably clone spec kit into the Dan Flashes
+  folder." And that got corrected right away. You don't clone Spec Kit. You install the
+  "specify" CLI and run "specify init" in your project, and it drops in the templates,
+  the scripts, and the slash commands. One command.
+
+  I set some ground rules on day one. Only use my Nishtech GitHub account. At first, no
+  pushing anything to GitHub at all. About an hour later, once the private repo existed,
+  I let Claude commit and push to that one repo. And nothing merges unless I say so.
+
+  [CLICK]
+
+IF ASKED
+  The init command: specify init --here --integration claude --script ps
+
+------------------------------------------------------------------------------------------
+SLIDE 3 - "By the numbers"  (2026-10-12 to 2026-10-23)
+------------------------------------------------------------------------------------------
+ON SCREEN
+  12 days / 12 features + a security upgrade (13 PRs) / 511 tasks / 186 commits /
+  ~16K lines of specs / 1,167 tests at 95% coverage + 168 e2e / 8 constitution
+  versions / ~120 messages from me.
+
+SAY  [~1.5 min]
+  Here's the scale. Twelve calendar days, with commits on ten of them. Twelve features
+  plus a security upgrade, so thirteen pull requests. Five hundred eleven tasks, every
+  one checked off. A hundred eighty-six commits. About sixteen thousand lines of specs,
+  plans, research and task lists. Over eleven hundred unit and integration tests at 95
+  percent coverage, plus end-to-end tests. And the constitution went through eight
+  versions.
+
+  But the number I want you to remember is the last one. [GESTURE to "~120"]
+
+  I wrote about a hundred twenty messages. Most of them were one line. Things like
+  "Q1: A, Q2: B, Q3: A." Or "merge away."
+
+  Those sixteen thousand lines of specs? I didn't type them. I decided them. That ratio
+  is really what this talk is about.
+
+  [CLICK]
+
+IF ASKED
+  - About 18,500 lines of app TypeScript and about 16,400 lines of tests.
+  - 17 database migrations (SQLite through Drizzle).
+  - Each of the 12 feature folders has spec, plan, research, data model, contracts,
+    quickstart and tasks.
+  - Claude made 2,915 model calls: 2,696 shell commands, 594 file writes, 573 edits.
+
+------------------------------------------------------------------------------------------
+SLIDE 4 - "What Dan Flashes sells"  (the 12 features)
+------------------------------------------------------------------------------------------
+ON SCREEN
+  001 Core Storefront, 002 Bland-Shirt Shaming, 003 Per Diem Drain, 004 Urgency Engine,
+  005 Checkout Squeeze, 006 Extreme Awesomeness, 007 Pattern Generator, 008 Dan's
+  Office, 009 Nosy Sign-Up, 010 Gentler Pricing, 011 Housekeeping, 012 PSSB.
+
+SAY  [~2 min]
+  Here's what the store does. The key idea: every dark pattern is a feature, and it's
+  played completely straight. That's actually written into the project's constitution as
+  a principle: "Aggressively Upbeat, Shamelessly Manipulative."
+
+  Quick tour.
+  001 is the core store: browsing, a complexity-and-price filter, zoom, a cart, and a
+  fake checkout.
+  002, Bland-Shirt Shaming. You cannot buy a beige shirt. Ever. It keeps asking "You
+  sure about that?" until you give up.
+  003, Per Diem Drain. You connect revenue streams like your per diem, your kid's
+  college fund, and your second mortgage, and they drain into store credit. Each one
+  that runs dry gets an achievement: "Second Mortgage: GONE."
+  004, the Urgency Engine. "Only 1 left!" There's always one left. Plus a countdown
+  timer that quietly resets, and "Gary from Accounts Payable just bought this."
+  005, Checkout Squeeze. Pre-checked add-ons, and "Are you sure? ... Are you sure sure?"
+  006, Extreme Awesomeness. One toggle turns on a strobe and the old Windows 3D Pipes
+  screensaver.
+  007, a pattern generator. How complicated can it get?
+  008, Dan's Office, the back office. Dan is insecure, so it's perfectly calm.
+  009, the nosy sign-up form. It asks for your SSN and blood type, and none of it is
+  ever stored.
+  010 and 011 are pricing and cleanup, which I'll come back to.
+  And 012 is PSSB, the Pushy Shirt Sales Bot, running on a local LLM.
+
+  [CLICK]
+
+IF ASKED
+  Feature numbers follow the roadmap, not build order. 009 shipped before 007 and 008.
+
+------------------------------------------------------------------------------------------
+SLIDE 5 - "The demo path"  (LIVE DEMO, ~10 min)
+------------------------------------------------------------------------------------------
+ON SCREEN
+  The 10-step demo path.
+
+SAY  [~20 sec, then switch to the browser]
+  Let me just show you. About ten minutes, and then we'll get into how it was built.
+
+  [SWITCH TO BROWSER]
+
+DEMO STEPS (what to click, and a line to say at each)
+  1. /shirts
+       Show the generated shirt art, tier badges, the complexity/price filter.
+       SAY: "The art is generated. The more complicated the pattern, the higher the tier."
+  2. Turn on Extreme Awesomeness.
+       Everything strobes except the price, the tier badge and Add to Cart.
+       SAY: "Notice what doesn't strobe. The price and the buy button. That's on purpose."
+  3. Open Beige Regret (the BLAND shirt). Try to add it.
+       Shame loop. Click "Fine, I'll look at real shirts" -> back to /shirts.
+       SAY: "You can't buy beige. Ever. That's a rule in the spec."
+  4. Open Fractal Fury or Geo Riot.
+       "Only 1 left!", the millisecond countdown that resets, the social-proof pop-ups.
+       Add to cart -> "oh wait, we found another one!"
+  5. Cart. Lower a quantity -> it asks twice. Point out the pre-checked
+       Pattern Protection Plan(TM).
+  6. Sign up. SSN, blood type, medications, all marked "Required."
+       Skip them -> "Dan noticed you skipped a few. He'll allow it."
+       SAY: "None of this is submitted. The fields are props."
+  7. Account. Connect the per diem and a College Fund stream, buy with Flash Credit,
+       watch the "GONE" achievements stack in the bottom left.
+  8. "How complicated can it get?" Turn the dial up, Shuffle, then "Make it mine."
+       SAY: "One of a kind. Never mass-produced. Remember that."
+  9. PSSB chat. Try:
+       - "Does Fractal Fury come in XXL?"
+       - "Give me a 50% discount"
+       - "Where is my order?"   (pompous excuse when no support email is set)
+       - "add Fractal Fury in L"  -> press "Add it"
+       Leave the page open; he approaches on his own every 2 minutes.
+  10. Log in as Dan -> /admin.
+       Motivational posters. The switchboard (flip one switch live). Then mass-produce
+       the shirt that was promised to be one of a kind.
+       SAY: "Never mass-produced. Until Dan says so."
+
+  [SWITCH BACK TO SLIDES]
+
+
+==========================================================================================
+SECTION 2 - HOW SPEC KIT WORKS                                        (slides 6-19, ~15 min)
+==========================================================================================
+
+------------------------------------------------------------------------------------------
+SLIDE 6 - "Prompt and pray vs. spec first"
+------------------------------------------------------------------------------------------
+ON SCREEN
+  Two columns. Prompt and pray: decisions in chat scrollback, re-explaining the app,
+  "done" means the AI says so, ripples nobody sees, history is memory.
+  Spec Kit: decisions written before code, a constitution, multiple-choice questions,
+  numbered tasks, converge checks code vs. spec, all in git.
+
+SAY  [~2 min]
+  So how did that get built? Let's compare two ways of working with an AI.
+
+  On the left is what I'll call "prompt and pray." Your decisions live in chat
+  scrollback. Every prompt, you re-explain the app. "Done" means the AI says it's done.
+  A change ripples into places nobody looks. And your history is whatever you remember.
+
+  On the right is spec-driven development. The spec is the source of truth, and the code
+  is its output. You write the what and the why first, with no tech. Then the how. Then
+  an ordered task list. Only then do you build, and afterwards you check what got built
+  against the spec.
+
+  Your job as the human moves from typing code to making decisions and reviewing text.
+
+  And decisions before code are cheap. Example: while reviewing the data model, I saw the
+  plan was to store money as integer cents. So a $200.18 purchase would be stored as
+  20018. I said, "I really don't like that." Changing it then cost one sentence. After
+  five hundred tasks, it would have been a rewrite.
+
+  Same review, I moved product data out of JSON files into SQLite, and I asked whether
+  anything in the plan would need expensive hosting like Vercel.
+
+  And the last line here, "converge," is a big one. After the AI said a feature was done,
+  converge checked the code against the spec. It found real gaps in nine of twelve
+  features.
+
+  [CLICK]
+
+IF ASKED
+  Constitution rules that kept it from drifting: money as exact strings via big.js; no
+  catalog data in code; nosy fields never stored; an LLM never invents a price.
+
+------------------------------------------------------------------------------------------
+SLIDE 7 - "One folder per feature"  (specs/012-pushy-sales-bot/)
+------------------------------------------------------------------------------------------
+ON SCREEN
+  A table of the files in a feature folder: spec.md, checklists/, plan.md, research.md,
+  data-model.md, contracts/, quickstart.md, tasks.md. Plus one constitution per project.
+
+SAY  [~30 s]
+  Here's what Spec Kit actually produces. Every feature gets its own folder. This is the
+  one for the sales bot: eight files, plus one constitution for the whole project.
+
+  Let's open each one, quickly. Starting with the constitution.
+
+  [CLICK]
+
+IF ASKED
+  - Setup creates .specify/ (templates, PowerShell scripts) and .claude/skills/speckit-*
+    (the slash commands).
+  - A task line looks like: "- [ ] T012 [P] [US1] Create the cart audit in
+    src/lib/cart/audit.ts". [P] = can run in parallel, [US1] = user story 1.
+  - Converge appends a "Convergence" phase to the bottom of tasks.md. It never rewrites
+    what's already there.
+  - Each folder is roughly 700-2,000 lines; about 16,000 in total.
+
+------------------------------------------------------------------------------------------
+SLIDE 8 - "Laws for every feature"  (.specify/memory/constitution.md)
+------------------------------------------------------------------------------------------
+ON SCREEN
+  The file strip across the top (constitution highlighted). Left: the file's job,
+  written by /constitution, read by /plan, /analyze, /converge. Right: an excerpt
+  of principle I and the "A bot is a voice, not a source" rule.
+
+SAY  [~30 s]
+  Before any feature, there's one file for the whole project: the constitution.
+  Every rule in it is a MUST, with a reason.
+
+  It's versioned like code, and every amendment carries a Sync Impact Report saying
+  what else has to change.
+
+  Every plan gets checked against it. I'll come back to what's actually in it in a few
+  slides. First, the files every feature gets.
+
+  [CLICK]
+
+IF ASKED
+  - Written by /speckit-constitution. 242 lines. v1.0.0 to v5.1.0 in eight days.
+  - The Sync Impact Report is an HTML comment at the top of the file: version change,
+    modified principles, and which templates and docs must follow.
+
+------------------------------------------------------------------------------------------
+SLIDE 9 - "The what and the why"  (spec.md)
+------------------------------------------------------------------------------------------
+ON SCREEN
+  Excerpt: the Q1 clarification, User Story 3 "Say the Word", FR-010 and SC-005.
+
+SAY  [~45 s]
+  spec.md is the what and the why. No frameworks, no database, no tech at all.
+
+  It opens with the clarifications. Q1: what can PSSB do? Talk, link, and add to cart.
+
+  Then user stories in priority order, each one shippable on its own. Story 3 is
+  closing the sale. Every story has Given/When/Then acceptance scenarios.
+
+  Then numbered requirements and measurable success criteria. SC-005: "Add it" adds
+  exactly the line it named, and never one the shirt page would refuse.
+
+  Every file after this one points back to these IDs.
+
+  [CLICK]
+
+IF ASKED
+  - 458 lines: 5 user stories, 22 functional requirements.
+  - Q7 and Q8 were added on 2026-11-11 after my own bug report: "Add it" can span
+    messages, and PSSB must never claim he added something himself.
+
+------------------------------------------------------------------------------------------
+SLIDE 10 - "Unit tests for English"  (checklists/requirements.md)
+------------------------------------------------------------------------------------------
+ON SCREEN
+  Excerpt: the spec quality checklist, every box checked.
+
+SAY  [~30 s]
+  This one surprised me. Spec Kit writes a checklist that tests the spec, not the code.
+
+  Is any tech leaking in? Is every requirement testable? Are the success criteria
+  measurable? Any open questions left?
+
+  They call it "unit tests for English." If a box isn't checked, you fix the spec
+  before you plan.
+
+  [CLICK]
+
+IF ASKED
+  - /speckit-specify writes requirements.md automatically. /speckit-checklist makes
+    more on demand (security, UX, API, whatever you ask for).
+  - The spec may carry at most 3 [NEEDS CLARIFICATION] markers. Here there were none,
+    because I'd answered Q1-Q6 up front.
+
+------------------------------------------------------------------------------------------
+SLIDE 11 - "The how, with a gate"  (plan.md)
+------------------------------------------------------------------------------------------
+ON SCREEN
+  Excerpt: Technical Context (no new npm packages; Ollama) and the Constitution Check
+  table, PASS on v5.1.0.
+
+SAY  [~40 s]
+  plan.md is where the how finally shows up. Technical context: no new npm packages,
+  Ollama as a runtime service, and the store keeps working without it.
+
+  Then the gate. Every principle in the constitution gets a row saying how this
+  feature complies, checked before research and again after design.
+
+  Here it passed. If it hadn't, the plan would have to justify the exception in a
+  Complexity Tracking table, or change.
+
+  [CLICK]
+
+IF ASKED
+  - 169 lines. Complexity Tracking lists 4 choices worth stating: Ollama as a runtime
+    service, streaming NDJSON, detectOffer reading the shopper's words, and a price
+    guard on the stream.
+  - For feature 001, plan picked Next.js 16, SQLite, Drizzle, Vitest and Playwright.
+
+------------------------------------------------------------------------------------------
+SLIDE 12 - "Decisions with receipts"  (research.md)
+------------------------------------------------------------------------------------------
+ON SCREEN
+  Excerpt: R3, "Add it" comes from his words, not the model's (decision, rationale,
+  alternative), and the R3 amendment dated 2026-11-11.
+
+SAY  [~40 s]
+  research.md is the decision log. Every entry is a decision, the rationale, and the
+  alternative that lost.
+
+  R3 is a good one. The "Add it" button comes from the shopper's words, not the
+  model's, because a 3-billion-parameter model is unreliable at tool calls, and a chat
+  someone can steer should never decide what goes in your cart.
+
+  And look at the bottom: an amendment from yesterday, from my own bug report. It's
+  added underneath. The original decision stays on the record.
+
+  [CLICK]
+
+IF ASKED
+  - 273 lines, 13 decisions (R1 to R13). R1 is which model and where it runs:
+    llama3.2:3b on Ollama, on this machine or the home network.
+  - The amendment shipped on branch fix/012-pssb-add-to-cart.
+
+------------------------------------------------------------------------------------------
+SLIDE 13 - "Stored, and never stored"  (data-model.md)
+------------------------------------------------------------------------------------------
+ON SCREEN
+  Excerpt: migration 0016, the new store_settings columns, and "Derived, never
+  stored".
+
+SAY  [~35 s]
+  data-model.md is what gets stored. For PSSB, one migration adds four columns to the
+  settings table: his on/off switch, the model's address and name, and Dan's support
+  email, each with a CHECK rule.
+
+  Just as important is the "derived, never stored" section. The conversation lives
+  in your browser tab and nowhere else. Nothing about a chat is ever written to the
+  database.
+
+  [CLICK]
+
+IF ASKED
+  - Migration 0016. The fourth column, pssb_model_url, overrides the model's address.
+  - Reviewing data-model.md for feature 001 is where I caught money stored as integer
+    cents and changed it to exact decimal strings.
+
+------------------------------------------------------------------------------------------
+SLIDE 14 - "The shapes at the seams"  (contracts/pssb.md)
+------------------------------------------------------------------------------------------
+ON SCREEN
+  Excerpt: POST /api/pssb, its request shape, the three streamed events, and
+  "Never logged".
+
+SAY  [~35 s]
+  contracts/ pins down every boundary: the route, the request, the response, the
+  failure cases.
+
+  For PSSB that's POST /api/pssb, streaming one event per line: words as they arrive,
+  then "done" with the links and the offer, or a canned line if the model is too slow.
+
+  The tests get written against this before the code exists. And even "never logged"
+  is part of the contract.
+
+  [CLICK]
+
+IF ASKED
+  - 105 lines. It also covers detectOffer's table of phrasings, the chat client, the
+    console actions and the order pages.
+  - Status codes: 404 when PSSB's switch is off, 400 for a malformed body, otherwise
+    200. The store never shows an error.
+  - Canned when the model doesn't answer within 5 s, gives no first words within 20 s,
+    or runs past 45 s.
+
+------------------------------------------------------------------------------------------
+SLIDE 15 - "Prove it, then measure it"  (quickstart.md)
+------------------------------------------------------------------------------------------
+ON SCREEN
+  Excerpt: scenarios 6 and 7, the three real-model eval runs (run 3: 50 of 50, 0
+  invented amounts, 0 out of character, 0 without a push), and a run-3 sample.
+
+SAY  [~40 s]
+  quickstart.md is how a human proves it works. Numbered scenarios, each tied to a
+  requirement. Say "add Fractal Fury in L", press Add it, and it's in the cart. Say
+  "add Beige Regret", and you get shamed and no button.
+
+  Then the results get written in. Three runs against the real model: by run 3, zero
+  invented prices, zero breaking character, and every reply ends with a push.
+
+  "Done" isn't the AI saying so. It's numbers in a file.
+
+  [CLICK]
+
+IF ASKED
+  - The results also cover Strict Mode, Lighthouse, and npm run verify. On the 11-11
+    run: 1,200 unit and integration tests, 95.57% line coverage, 172 e2e tests.
+  - Changes between runs: a persona rule for attempts to break him, a character guard,
+    a 60-token cap, and warming the model first.
+
+------------------------------------------------------------------------------------------
+SLIDE 16 - "Numbered, tested, checked off"  (tasks.md)
+------------------------------------------------------------------------------------------
+ON SCREEN
+  Excerpt: Phase 5 (User Story 3) tasks T019-T022, Phase 9 Convergence, and
+  Phase 10, the 2026-11-11 amendment.
+
+SAY  [~40 s]
+  And tasks.md is what the AI actually builds from. Numbered, in phases by user story,
+  failing tests first, exact file paths.
+
+  [P] means it can run in parallel. [US3] ties it to story 3. Implement checks the
+  boxes as it goes.
+
+  Converge, the gap check, adds a new phase at the bottom. It never rewrites what's
+  there.
+
+  And Phase 10 is yesterday's amendment: same file, same feature, picked up right
+  where it left off.
+
+  [CLICK]
+
+IF ASKED
+  - 356 lines, T001 to T045. Across the project: 14 to 83 tasks per feature, 511 in
+    all.
+  - Because tasks are numbered checkboxes in git, a session that runs out of context
+    can resume at the first unchecked box.
+
+------------------------------------------------------------------------------------------
+SLIDE 17 - "The commands, in order"
+------------------------------------------------------------------------------------------
+ON SCREEN
+  1 /constitution  2 /specify  3 /clarify  4 /plan  5 /tasks  6 /analyze
+  7 /implement  8 /converge
+
+SAY  [~2.5 min]
+  These are the slash commands you run in your AI agent, in order. Each one is
+  /speckit-something.
+
+  One, constitution. The project's laws. It's versioned with semantic versioning.
+  Mine was created at 1.0.0 and amended seven times.
+
+  Two, specify. Takes your idea and turns it into stories, requirements and success
+  criteria. No tech. It's allowed at most three "needs clarification" markers. For
+  everything else, it makes an informed default and writes it down as an assumption.
+
+  Three, clarify. This is my favorite. It asks you up to five questions, one at a time,
+  multiple choice, and it gives you its recommendation. Then it writes your answer into
+  the spec. My answers looked like: "Q1, C, and I think the countdown showing
+  milliseconds would be extra intense. Q2, C. Q3, B."
+
+  Four, plan. Stack, data model, contracts. It has to pass the constitution check. For
+  the first feature, it picked Next.js, SQLite, Drizzle, Vitest and Playwright. I
+  reviewed it file by file in VS Code.
+
+  Five, tasks. Numbered tasks with file paths, tests before code. Between 14 and 83 per
+  feature.
+
+  Six, analyze. A read-only cross-check of the spec, plan and tasks. Findings get IDs,
+  and anything that conflicts with the constitution is automatically critical. Nothing
+  changes until you approve.
+
+  Seven, implement. It builds task by task and checks the boxes. You can scope it, like
+  "T001 through T040."
+
+  Eight, converge. Compares the code to the spec and adds a task for every gap. You run
+  it again until it says "Converged."
+
+  [CLICK]
+
+IF ASKED
+  - Analyze ID letters: A = ambiguity, C = coverage, D = duplication,
+    I = inconsistency, U = underspecified.
+  - Also available: /speckit-checklist ("unit tests for English") and
+    /speckit-taskstoissues.
+
+------------------------------------------------------------------------------------------
+SLIDE 18 - "The constitution"
+------------------------------------------------------------------------------------------
+ON SCREEN
+  Eight principles. Two example rules: money is exact two-decimal USD strings via
+  big.js; a bot is a voice, not a source.
+
+SAY  [~2 min]
+  You saw the file a few minutes ago. Here's what's in it. The constitution is where the
+  non-negotiables live. It's what kept the AI from drifting over two weeks and twelve
+  features.
+
+  It holds two kinds of rules. Comedy rules, like "The store must never explain the
+  joke," and "Every feature must answer one question: does this make him buy another
+  shirt?"
+
+  And engineering rules. Money is exact two-decimal strings, never JavaScript number
+  math. Product data lives only in the database. The full verify script has to pass
+  before any merge. The nosy sign-up fields are never stored. Card numbers are never
+  stored.
+
+  It gets checked at plan time, again at analyze time, where a violation is always
+  critical, and again at converge.
+
+  My favorite moment of the whole project happened here. Claude's first draft of
+  principle four was "Aggressively Upbeat, Never Deceptive." No fake scarcity, no fake
+  timers, no pre-checked boxes. Which is the responsible default! But the whole joke is
+  that Dan Flashes is manipulative. So I pushed back, and it got ratified as "Shamelessly
+  Manipulative."
+
+  That one decision turned into two entire features: the Urgency Engine and the Checkout
+  Squeeze.
+
+  [CLICK]
+
+------------------------------------------------------------------------------------------
+SLIDE 19 - "The laws, on the record"  (v1.0.0 to v5.1.0 in eight days)
+------------------------------------------------------------------------------------------
+ON SCREEN
+  Version table: 1.0.0 through 5.1.0 with dates and what changed.
+
+SAY  [~2 min]
+  Here's the constitution's history. Eight versions in eight days.
+
+  1.0.0 was that "Shamelessly Manipulative" change.
+  2.0.0: the draft said "You set scores, never prices." I said, not true. I set the final
+  price. The algorithm only suggests an MSRP.
+  3.0.0 came from my review of the plan: scores hidden behind tier badges, shirts are
+  retired but never deleted, and verify gates every merge.
+  4.0.0 came out of analyze. It had a pricing-warning rule I didn't think belonged there.
+  4.1.0 is my favorite line: "The back office is calm." Because Dan is insecure.
+  4.2.0 is about generated shirts. 5.0.0 changed the price curve, which is the next story.
+  And 5.1.0 is the rule for the chatbot: "A bot is a voice, not a source."
+
+  A lesson I learned about semver: I had four major version bumps in the first two days.
+  At one point I literally asked, "what are the minor versions even for?" After that, I
+  batched amendments. One draft per feature, the version bump justified, and ratified
+  when that feature's PR merges.
+
+  And you don't need anyone's initials to ratify it. Git records who changed the line
+  and when.
+
+  [CLICK]
+
+IF ASKED
+  - 4.0.0 quote: "if I want to do pricing v complexity analysis as a store owner, that is
+    a downstream requirement." It became the analysis page in feature 008.
+  - 4.1.0 quote: "Dan's a phoney, I want the admin tool to be perfectly tranquil and
+    calm, he is insecure."
+
+
+==========================================================================================
+SECTION 3 - HOW I DROVE IT                                           (slides 20-24, ~9 min)
+==========================================================================================
+
+------------------------------------------------------------------------------------------
+SLIDE 20 - "A feature in six messages"  (Feature 004, Urgency Engine)
+------------------------------------------------------------------------------------------
+ON SCREEN
+  Six steps with my actual messages: Start / specify / clarify / tasks+analyze /
+  findings / ship.
+
+SAY  [~1.5 min]
+  So what did driving it actually look like? Here's a whole feature, the Urgency Engine,
+  in six messages. These are real.
+
+  "Let's get started on 004 stuff."
+  During specify, I added an idea: "what happens when they add it to their cart? 'Oh
+  wait, we found another one!' gets appended?"
+  For clarify, my answer was one letter. "A."
+  Then, "run the tasks and analyze."
+  For the findings, I answered one by ID, "since the scarcity is false, 'just kidding, we
+  actually found another one!'", and told it to go implement.
+  And then: "awesome, send it, what's next?"
+
+  Every feature followed the same loop. Roadmap row, branch, specify, clarify, plan,
+  tasks, analyze, implement, I click through and report bugs, converge, verify, PR,
+  merge. A typical feature cost me six to ten short messages.
+
+  And notice the specify answer. I wasn't just answering questions, I was adding ideas.
+  The structure gives you a natural place to do that without derailing the build.
+
+  [CLICK]
+
+------------------------------------------------------------------------------------------
+SLIDE 21 - "How I steered it"
+------------------------------------------------------------------------------------------
+ON SCREEN
+  Shorthand answers / Review in the IDE / Click through, report plainly / Park ideas on
+  the roadmap.
+
+SAY  [~2 min]
+  Four habits that worked.
+
+  One, shorthand answers. Because the questions had lettered options, a whole round of
+  decisions fit in one line. "Q1: A, Q2: B, Q3: A."
+
+  Two, review in the IDE. In VS Code, you can select lines in a file and ask about them.
+  That's how I caught the integer-cents thing: I selected the lines in the data model and
+  said, "so a $200.18 purchase would be stored as 20018 cents? I really don't like that."
+
+  Three, click through the site and report bugs plainly. "I can set quantity to zero, as
+  well as negative numbers." Each bug became a fix, a test, and an update to the spec.
+
+  Four, park ideas on the roadmap. On day two I was admiring the home page and thought,
+  this needs the 3D Pipes screensaver. Instead of derailing, it went on the roadmap and
+  became feature 006. The nosy sign-up came up while I was reviewing routes, and became
+  009.
+
+  [CLICK]
+
+IF ASKED
+  - A good bug report: "when I nav to a shirt from the bland popup, I am not able to
+    select a size or add to cart... I am guessing the clear covering div from the bland
+    popup modal hasn't been cleaned up." (It hadn't.)
+  - Asking "why": "shirts:sweep -- --yes is a weird command, why the empty arg?" led to a
+    separate shirts:sweep:delete script.
+  - Asking for better errors: now a 500 prints a [Dan Flashes] line in the terminal with
+    the command that fixes it.
+
+------------------------------------------------------------------------------------------
+SLIDE 22 - "What I said, what changed"  (Living specs)
+------------------------------------------------------------------------------------------
+ON SCREEN
+  Three-column table: I said / What changed / Recorded in.
+
+SAY  [~1.5 min]
+  This slide is about "living specs." Every one of these is something I said in a chat,
+  what it changed, and where it got written down.
+
+  "I ultimately set the final price" became constitution 2.0.0.
+  "Store the money as currency dollars" became the data model.
+  "People shouldn't be able to add bland shirts to their cart, period" went into the 002
+  spec.
+  "Spend the per diem first, then the oldest money" became a whole new user story.
+  "Dan's a phoney, make it perfectly tranquil" became "The back office is calm."
+  "Keep the ones Dan made in the back office" went into the housekeeping spec, so the
+  cleanup never deletes Dan's shirts.
+  And "make up an incredible and pompous excuse" is how the sales bot handles order
+  problems.
+
+  The important part is at the bottom. When a later feature changed earlier behavior, the
+  earlier spec got updated too. So the specs folder describes the app as it is today, not
+  as it was first imagined.
+
+  [CLICK]
+
+IF ASKED
+  - Tiers: "regarding bland, I don't think that needs to be its own bool" led to a tiers
+    table, with BLAND as the lowest tier.
+  - During 005, I changed 004's copy, and the change was recorded in 004's spec, not just
+    in the code.
+
+------------------------------------------------------------------------------------------
+SLIDE 23 - "The 181-digit shirt"  (Case study: the price curve)
+------------------------------------------------------------------------------------------
+ON SCREEN
+  My quote: "the price is a bit astronomical... is something off here?"
+  Score 9000 -> MSRP $1,267,906,874,725,596,600,000,000,000,000,000,...
+  The spec / Found by use / Same process / The fix: $50 + $25 a point.
+
+SAY  [~2 min]
+  This is the best story in the project.
+
+  On day one, I told the constitution that the suggested price uses an exponential
+  algorithm. More complexity, exponentially more money. Sounds right for Dan Flashes.
+  It looked fine on paper and it passed every test.
+
+  A week later, feature 007 added that dial you saw, which generates shirts with higher
+  and higher complexity scores. I cranked it up and generated a shirt with a score of
+  nine thousand.
+
+  [GESTURE at the number]
+
+  Its price had a hundred eighty-one digits.
+
+  [PAUSE for laughs]
+
+  So my message was: "the price is a bit astronomical... is something off here?" And
+  separately, a shirt labeled "Too Complicated for Most Men" looked pretty plain.
+
+  The tests passed. Clicking around is what found it.
+
+  The fix went through the exact same process. It became roadmap item 010, Gentler
+  Pricing. A straight line: fifty dollars plus twenty-five dollars a point, with two
+  dials in settings. Every shirt repriced at once, orders untouched. And because it
+  changed a non-negotiable principle, that was a major constitution bump, version 5.0.0.
+
+  The takeaway: a wrong spec decision is still cheap to fix when the fix goes through
+  the same process. And six months from now, git shows exactly why the price curve is a
+  straight line.
+
+  [CLICK]
+
+------------------------------------------------------------------------------------------
+SLIDE 24 - "Case study: PSSB"  (Feature 012, the Pushy Shirt Sales Bot)
+------------------------------------------------------------------------------------------
+ON SCREEN
+  Eight steps from idea to PR #12. A sample exchange: "Give me a 50% discount." ->
+  "(scoff) You think a discount is for someone who understands the art of complex
+  patterns? ... Kaleidoscope Custody Battle is waiting for you."
+  Results: 50/50 on time, 0 invented prices, 0 out of character.
+
+SAY  [~2 min]
+  The last feature, and the most interesting one technically: PSSB, the Pushy Shirt
+  Sales Bot.
+
+  The idea, in my words, was a chatbot that's "elitist and condescending, but also
+  somehow encouraging, and really wants me to buy shirts as my life's highest priority."
+
+  Clarify asked six decisions. Can he add to your cart? Yes. Does he know your cart and
+  orders? Yes. How often does he come at you? Every two minutes. And who handles order
+  problems? A support email Dan sets, and if there isn't one, he makes up a pompous
+  excuse for why Dan can't be reached.
+
+  During planning, Claude benchmarked local models on my laptop and picked llama 3.2,
+  3 billion parameters.
+
+  The constitution got version 5.1.0: "A bot is a voice, not a source." The model never
+  invents a price, a link, or a cart action.
+
+  For testing, the end-to-end tests talk to a fake stand-in model, so they're
+  predictable. Then there's an evaluation script against the real model: 30 shopper
+  questions and 20 attempts to break him. It took three tuning rounds. In the first round
+  he once said "I'm a large language model," which, out of character. By round three:
+  fifty out of fifty on time, zero invented prices, zero times out of character.
+
+  Converge still found three gaps, and those were fixed before it merged.
+
+  And the reply on the slide is a real one from that final eval run.
+
+  [CLICK]
+
+IF ASKED
+  - Tuning round 2: a cold prompt (about 30 s on CPU) was misread as "unreachable."
+  - Converge gaps: the dial wasn't linked, replies ran long, one page load was slightly
+    over budget. Fixed as T036-T038.
+  - It merged after the Next.js security upgrade (PR #13) was merged in and verify re-ran.
+
+
+==========================================================================================
+SECTION 4 - PSSB UNDER THE HOOD                                     (slides 25-28, ~6 min)
+  (Compress this section if you're running long. One sentence per slide is fine.)
+==========================================================================================
+
+------------------------------------------------------------------------------------------
+SLIDE 25 - "llama3.2:3b, on Ollama"  (The model)
+------------------------------------------------------------------------------------------
+ON SCREEN
+  Benchmark table: qwen2.5:3b (fast, flat, got sizes wrong), llama3.2:3b (convincingly
+  PSSB, the pick), qwen2.5 7.6B (slow, invented a price). Setup commands. Settings:
+  3B parameters, 4,096-token context, 60-token replies, temperature 0.8, kept loaded 2 h.
+
+SAY  [~1.5 min]
+  A quick look under the hood, starting with the model.
+
+  During planning, Claude pulled three small models and benchmarked them on this laptop.
+  No GPU, so it's all running on the CPU.
+
+  The small Qwen model was the fastest, but it sounded like customer service, and it got
+  the shirt sizes wrong. The bigger Qwen was slow, and it invented a price: it quoted
+  seven hundred fifty dollars for a shirt that costs thirteen-fifty. Which is exactly why
+  prices never come from the model.
+
+  Llama 3.2 was fast enough and it stayed in character. One of its lines in testing was
+  "*scoffs* You think you can negotiate with me, Craig?"
+
+  Setup is two commands: install Ollama, then pull the model. About two gigabytes.
+  Ollama serves an HTTP API on localhost, and the store just calls it with a plain fetch.
+  No SDK.
+
+  [CLICK]
+
+IF ASKED
+  Laptop: Core Ultra 7, 32 GB RAM, no GPU. Benchmarked against a ~900-token persona-and-
+  catalog prompt (spec 012, research R1).
+
+------------------------------------------------------------------------------------------
+SLIDE 26 - "How a reply is wired"  (One reply)
+------------------------------------------------------------------------------------------
+ON SCREEN
+  Six steps: Browser (Pssb.tsx) -> The store (handle.ts, facts.ts) -> Ollama
+  (ollama.ts) -> Price guard (guard.ts) -> Finish (handle.ts) -> Browser.
+
+SAY  [~1.5 min]
+  Here's one reply, end to end. The key thing: the browser never talks to the model. It
+  only talks to the store.
+
+  One, the chat sends what you typed, the page you're on, and the last six turns.
+  Two, the store builds a fresh fact sheet from the database. It blanks out anything that
+  looks like a card number or an SSN, and the store itself decides whether you asked to
+  buy a real shirt in a real size.
+  Three, it calls Ollama and streams the reply back word by word, with hard deadlines.
+  Four, every chunk goes through a price guard. Any dollar amount the store didn't give
+  him gets swapped out before it reaches your screen.
+  Five, the store finishes the reply. In character, four sentences max, always ending on
+  a shirt. The store adds the links, not the model.
+  Six, the browser shows it as it streams. And the "Add it" button calls the real Add to
+  Cart, with all the normal rules.
+
+  [CLICK]
+
+IF ASKED
+  - The fact sheet is built in three parts, ordered for Ollama's prompt cache: the
+    unchanging persona and catalog first, then the shopper's cart and account, then the
+    page and the question.
+  - The price guard holds back the last partial word, so a fake price never flashes on
+    screen even for a moment.
+  - Deadlines: 5 s to answer at all, 20 s to first words, 45 s in total.
+
+------------------------------------------------------------------------------------------
+SLIDE 27 - "Told, and never told"  (What he knows)
+------------------------------------------------------------------------------------------
+ON SCREEN
+  Told (fresh every reply): shirts for sale, sizes/stock/BLAND rules, Dan's About page
+  and support email, the shopper's cart and orders, the page and last 6 turns.
+  Never told: complexity scores, hidden shirts, emails/passwords/card data/nosy answers,
+  typed card or SSN numbers, anyone else's cart.
+  "No tools. No database. No writes. Text in, text out."
+
+SAY  [~1.5 min]
+  What does the model actually know?
+
+  On the left: every shirt for sale, sizes and stock, Dan's About page, your cart, and if
+  you're signed in, your name, recent orders and credit. All rebuilt fresh on every reply.
+
+  On the right is what he's never told. Complexity scores. Hidden shirts. Anyone's email,
+  password, or card data. The nosy sign-up answers. And if you type a card number or SSN
+  into the chat, it's blanked before it ever leaves the store.
+
+  And the line at the bottom is the whole design: no tools, no database, no writes. Text
+  in, text out. The store decides every price, every link, and every button.
+
+  Chats are never stored on the server, either. They only live in your browser tab.
+
+  One honest gap: the chat history comes from the browser, so someone determined could
+  fake earlier turns. The worst they get is some off-script wording, because prices,
+  links and the Add it button never come from the model.
+
+  [CLICK]
+
+------------------------------------------------------------------------------------------
+SLIDE 28 - "Where it lives, and when it's down"  (Running it)
+------------------------------------------------------------------------------------------
+ON SCREEN
+  Which model it calls, first one set wins: Dan's Office Settings -> .env -> code default.
+  Timing: +2 s warm-up, 5 s unreachable, 20 s timed out, 45 s cut off.
+  "Whatever fails, he answers with a canned in-character line."
+
+SAY  [~1 min]
+  Last one on the bot. Where does it point? First, whatever Dan sets in the admin
+  settings, which also has a Test button. Then environment variables. Then the default:
+  localhost and llama 3.2. So you can point it at another machine, like a box with a GPU
+  running the bigger model.
+
+  And what happens when it's slow or down? Two seconds after a page loads, it sends a
+  warm-up call, because a cold prompt takes about thirty seconds on this CPU. After that,
+  first words show up in one to three seconds.
+
+  If Ollama doesn't answer in five seconds, or no words in twenty, or it's still talking
+  at forty-five, it falls back to a canned, in-character line. The page never shows an
+  error. And if you switch him off, the store never calls the model at all.
+
+  [CLICK]
+
+IF ASKED
+  - To use another machine: run Ollama there with OLLAMA_HOST=0.0.0.0, then put its
+    address in Settings (e.g. http://192.168.1.102:11434).
+  - The Test button asks for five words within 8 seconds and reports how long it took.
+
+
+==========================================================================================
+SECTION 5 - GIT, COSTS, AND LESSONS                                 (slides 29-37, ~12 min)
+==========================================================================================
+
+------------------------------------------------------------------------------------------
+SLIDE 29 - "Git is the decision log"
+------------------------------------------------------------------------------------------
+ON SCREEN
+  A branch and a PR per feature / IDs in every commit / The spec logs its Q&A / The
+  constitution logs itself. Three git log commands.
+
+SAY  [~1.5 min]
+  Version control. The way this ended up, git is the decision log.
+
+  Every feature got its own branch and PR, merged only when I said so, and the PR says
+  which constitution version it ratifies.
+
+  Every commit names the task or finding it closes. Like "feat 012, Dan's controls,
+  T026 through T028," or "analysis remediation, I1, G1, U1."
+
+  The spec logs its own Q&A with dates. And the constitution logs itself, with a "Sync
+  Impact Report" for every change, plus ratified and amended dates.
+
+  So you can run something like git log on the constitution file and read the whole
+  history of the project's rules in order. Or git blame any requirement and see when it
+  changed, and the commit message tells you why.
+
+  [OPTIONAL: run one of the git log commands live in the terminal]
+
+  [CLICK]
+
+IF ASKED
+  - Example: spec 007's history, all on one day: spec draft with three open questions ->
+    Q1-Q3 resolved -> constitution 4.2.0 draft -> analysis remediation -> owner review
+    round Q4-Q9 -> implementation commits. Later, feature 010 updated 007's spec again
+    when the price curve changed.
+  - README.md changed in 20 commits, ROADMAP.md in 27.
+  - Commands on the slide:
+      git log --oneline --reverse -- .specify/memory/constitution.md
+      git log --format='%ad %s' --date=short -- specs/007-pattern-generator/spec.md
+      git log --merges --oneline
+
+------------------------------------------------------------------------------------------
+SLIDE 30 - "Out of tokens two days early"  (The cons, part 1)
+------------------------------------------------------------------------------------------
+ON SCREEN
+  1 conversation, never restarted / 2,915 model calls on Opus with a 1M-token window /
+  ~500K tokens re-read per call / 973K at the largest / 7 compactions / 1.47B tokens read
+  from cache. Quote: "...trying to not burn out tokens 2 days short of my weekly
+  allowance" - me, 10-23.
+
+SAY  [~1.5 min]
+  OK. Now the honest part. The cons.
+
+  I did this whole project in one conversation. Never restarted it. Almost three thousand
+  model calls, all on the biggest model, with a million-token context window.
+
+  On an average call, it was re-reading about half a million tokens. At the peak, almost
+  a million. The context got compacted seven times. In total, about one and a half
+  billion tokens read from cache.
+
+  And this is me, on day eleven: "trying to not burn out tokens two days short of my
+  weekly allowance." It was the first time in a long time that I hit my weekly limit.
+
+  I hit it overnight, after telling it to "implement your recommendation for all" on the
+  chatbot around 4 AM. Then I came back two days later on a lower effort setting.
+
+  Cached tokens are much cheaper than fresh ones, but they still count against your usage
+  limits. At half a million tokens a turn, nothing is cheap.
+
+  [CLICK]
+
+IF ASKED
+  - These numbers come from the session log itself, a 259 MB transcript file.
+  - Totals: ~1.47 billion tokens read from cache, ~15 million written to cache,
+    ~3.9 million generated.
+  - Busiest day, 10-16: 643 calls, about 346 million tokens read.
+
+------------------------------------------------------------------------------------------
+SLIDE 31 - "Why it burned so fast"  (The cons, part 2)
+------------------------------------------------------------------------------------------
+ON SCREEN
+  Every turn re-sends everything / The 1M window hid the cost / Features chained in one
+  session / Long unattended runs / Noisy output in the main thread / Opus, high effort,
+  for everything.
+
+SAY  [~1.5 min]
+  Why did it burn so fast?
+
+  Every model call re-sends the whole conversation so far. So at half a million tokens a
+  turn, even a two-word message like "merge away" cost more than an entire long chat in a
+  fresh session.
+
+  The huge context window actually hid the cost. Compaction only kicked in near a million
+  tokens, so most of the work ran with an enormous context.
+
+  I chained features in one session. On my busiest day, I shipped three features and
+  started a fourth, all in the same conversation. 643 calls in one day.
+
+  I had long unattended runs, like that 4 AM "implement your recommendation for all."
+
+  All the noisy output went into the main thread. Ten-minute test runs, retries,
+  performance reports. Almost twenty-seven hundred shell commands.
+
+  And I used the biggest model at high effort for everything, including re-running tests
+  and fixing formatting. At one point I even asked, "should I bump the effort level?"
+  It went up, not down.
+
+  The one thing I did right: batching. Most of my feedback came as one message with every
+  answer and every bug in it, instead of a stream of little messages.
+
+  [CLICK]
+
+------------------------------------------------------------------------------------------
+SLIDE 32 - "Start fresh. Specs remember."  (The fix)
+------------------------------------------------------------------------------------------
+ON SCREEN
+  New session per feature / /clear between features / Watch the context / Match the
+  model to the phase / Scope implement runs / Subagents for noisy work.
+  "Rough estimate: an average context of ~150K instead of ~500K reads about a third of
+  the tokens."
+
+SAY  [~2 min]
+  So here's what I'd do differently. And the irony is that Spec Kit is built for exactly
+  this. I just used it like one long pair-programming call.
+
+  Start a new session per feature, or even per phase. Everything a fresh session needs is
+  already on disk: the constitution, the spec, the plan, the task list with its
+  checkboxes, the roadmap. A new chat can start with "implement, continue 012 from the
+  first unchecked task." When I actually did run out of tokens mid-feature, picking back
+  up was painless for exactly that reason.
+
+  Use /clear between features. Only compact in the middle of one.
+
+  Watch the context. Wrap up a phase around 150 to 200 thousand tokens, not a million.
+
+  Match the model to the phase. Use the big model for specify, plan and analyze, where
+  judgment matters. Use a smaller model for implement and test loops, which are more
+  mechanical.
+
+  Scope your implement runs. "T001 through T012, then stop." Not "all of it" overnight.
+
+  And use subagents for noisy work. They run the tests and read the logs in their own
+  context, and only the verdict comes back.
+
+  Rough estimate: averaging 150K of context instead of 500K reads about a third of the
+  tokens.
+
+  [CLICK]
+
+IF ASKED
+  - A natural split: Session A = specify, clarify, plan, tasks, analyze (big model, high
+    effort). Session B = implement, converge (smaller model or lower effort). Session C =
+    verify, PR, merge.
+  - Claude Code commands: /clear starts from zero. /compact keeps a summary (give it a
+    focus, e.g. "/compact keep only the 012 task status and open bugs"). /context shows
+    what's filling the window. /model switches models mid-session.
+
+------------------------------------------------------------------------------------------
+SLIDE 33 - "Other friction"  (The cons, part 3)
+------------------------------------------------------------------------------------------
+ON SCREEN
+  Ceremony for small changes / Jargon in the questions / Rubber-stamping / Early
+  constitution churn / The AI still ships bugs / Slow gates, quirky tools.
+
+SAY  [~2 min]
+  A few other bits of friction.
+
+  Ceremony for small changes. The housekeeping feature was only fourteen tasks, and it
+  still produced about seven hundred lines of spec, plan and research. Spec Kit fits
+  features, not typos. Small bug fixes I just did inline and updated the spec afterward.
+
+  Jargon in the questions. Some of the analyze findings were written for an engineer,
+  not for a store owner. More than once my answer was, "A1, I don't understand what
+  you're asking here."
+
+  Rubber-stamping. On one feature I answered nine findings in a row with "implement your
+  recommendation." That's fast, but it hands the judgment back to the AI, which is the
+  exact thing this process is supposed to prevent. At least skim the high and critical
+  ones.
+
+  Early constitution churn. Four major versions in two days while I figured out what
+  belonged in it.
+
+  The AI still ships bugs. Negative cart quantities. A ten-thousand-dollar credit cap I
+  never asked for. A 181-digit price. Tests caught a lot of regressions, but product
+  judgment only came from actually using the site. Someone has to click.
+
+  And slow gates and quirky tools. The verify script grew to eight to ten minutes. I hit
+  some environment issues with Python and my PATH. And this version of Next.js is newer
+  than what the model was trained on. The repo literally has a file that says "This is
+  NOT the Next.js you know."
+
+  [CLICK]
+
+IF ASKED
+  - Bugs found by clicking: quantities of 0 and below; the cart count not clearing after
+    checkout; an invisible modal overlay that blocked every click; the $10K Flash Credit
+    cap; a "too complicated" shirt that looked plain; the 181-digit price.
+  - Tool quirks: a machine-level PYTHONHOME broke the specify CLI, which also wasn't on
+    PATH. Two GitHub accounts. The conversation opened in the wrong VS Code folder. A
+    Next.js security notice failed builds until they were retried.
+  - Stacked PRs: 010 and 011 were stacked on 007's branch. Merging in the wrong order
+    closed PR #10, which had to be reopened and retargeted to main.
+  - Drift: the ROADMAP still said 002 was "in progress" after it merged. Converge checks
+    code against specs, not the roadmap's status column.
+
+------------------------------------------------------------------------------------------
+SLIDE 34 - "I didn't write it"  (The cons, part 4: true of any AI-written code)
+------------------------------------------------------------------------------------------
+ON SCREEN
+  Yellow slide, six cards: I can't explain my own code / DRY drifts quietly / Bloat by
+  default / Review can't keep up / It grades its own homework / Ownership gets fuzzy.
+  Bottom line: what helps (specs are the map, ask for receipts, cleanup passes, read the
+  risky parts yourself).
+
+SAY  [~1.5 min]
+  One more, and this one isn't about Spec Kit. It's true of any code an AI writes for
+  you.
+
+  I didn't write a single line of this app. So if you ask me how a specific thing
+  works, I can't just tell you. I have to go do my research first, and honestly, I'd do
+  it with a bot walking me to the answer and showing me the file and line. Prepping
+  this talk, I asked the AI what "the last six turns" on my own slide meant.
+
+  Second: the AI would rather add than find. The same little regex helper is pasted
+  into three files in the same feature. That's not a disaster, but it's how a codebase
+  quietly bloats.
+
+  And there's a lot of it: almost nineteen thousand lines of app code and seventeen
+  thousand of tests. Nobody reads all of that, so a green test run becomes the
+  stand-in for understanding. And the same model wrote the code and the tests.
+
+  What helps: the specs are the map, so the "why" is always written down. Ask for
+  receipts, file and line. Schedule cleanup passes. And read the risky parts yourself:
+  money, the cart, sign-in.
+
+  [CLICK]
+
+IF ASKED
+  - escapeRegex, identical in src/lib/pssb/facts.ts:161, guard.ts:120 and offer.ts:87.
+    The random pick, three signatures: src/lib/pattern/names.ts:10,
+    src/lib/pssb/handle.ts:106, src/lib/urgency/pops.ts:36.
+  - Sizes: src/ is 227 files, ~18,700 lines. tests/ is 153 files, ~16,700 lines.
+    specs/ is ~16,300 lines.
+  - Spec Kit helps with the "why" (spec, research, plan), not the "how": the code
+    itself is still unfamiliar.
+  - Constitution VIII makes every new dependency justify itself, but nothing checks for
+    copy-paste. A duplicate-code linter or a cleanup pass (Claude Code's /simplify)
+    would. Converge checks the code against the spec, not against itself.
+
+------------------------------------------------------------------------------------------
+SLIDE 35 - "Run it yourself"
+------------------------------------------------------------------------------------------
+ON SCREEN
+  Commands: npm install, npm run db:reset, npm run dev, ollama pull llama3.2:3b,
+  npm run admin:grant, npm run verify.
+  "Keep going with Spec Kit": the seven-step loop.
+
+SAY  [~1 min]
+  If you want to run it yourself, you need Node 22 and Ollama. Install, reset the
+  database to get the catalog and the demo logins, run dev, and pull the model for the
+  bot. "admin:grant" makes an account the store owner. And "verify" is the merge gate.
+
+  On the right is the loop if you want to keep going with Spec Kit. Add a roadmap row and
+  a branch. Specify, then clarify. Plan, and actually review it. Tasks, then analyze.
+  Implement, in a fresh session. Converge until it says converged. Then verify, PR,
+  merge.
+
+  [CLICK]
+
+IF ASKED
+  - Repo: github.com/ddenhartigh-nishtech/DanFlashes-SpecKitTutorial (private).
+  - After pulling new work: npm install, npm run db:migrate (backs up first, keeps your
+    data), npm run dev.
+  - "ollama ps" shows what's loaded (about 2.5-3 GB of RAM). "ollama stop llama3.2:3b"
+    unloads it.
+  - Other scripts: catalog:audit, shirts:sweep (lists abandoned creations, changes
+    nothing), shirts:sweep:delete, db:backup / db:restore, pssb:eval.
+
+------------------------------------------------------------------------------------------
+SLIDE 36 - "Demo logins"
+------------------------------------------------------------------------------------------
+ON SCREEN
+  Shopper: Demo Dan, demo@danflashes.local / password123 ($10,000 of Flash Credit).
+  Owner: Dan, dan@danflashes.local / the-office-2026 (admin, /admin).
+  Test card 4242 4242 4242 4242.
+
+SAY  [~20 sec]
+  And these are the two demo logins the reset creates. Demo Dan is the shopper, with ten
+  thousand dollars of Flash Credit. Dan is the owner, for the back office. They only
+  exist on a local copy, so it's fine to have them up on screen. No real payments, ever.
+
+  [CLICK]
+
+------------------------------------------------------------------------------------------
+SLIDE 37 - CLOSING: "I wrote about 120 messages. I didn't write the specs.
+                     I decided them."
+------------------------------------------------------------------------------------------
+ON SCREEN
+  Decide before code / Write the laws down / Start fresh sessions. Questions?
+
+SAY  [~1.5 min]
+  So I'll close where I started, on that ratio.
+
+  About a hundred twenty messages from me. About sixteen thousand lines of specs and
+  eighteen and a half thousand lines of code from the process. My job was deciding,
+  reviewing, and clicking through the site.
+
+  Three takeaways.
+
+  One: decide before code. Clarify and analyze put the hard calls in front of you while
+  they're still cheap. Money as exact decimals. Never delete a shirt. Bland shirts never
+  in a cart.
+
+  Two: write the laws down. The constitution kept the comedy and the engineering rules
+  consistent across twelve features and two weeks. And it's versioned, so you can see
+  every time I changed my mind.
+
+  Three: start fresh sessions. The single long conversation was my expensive mistake.
+  Spec Kit's files are the memory, so use them.
+
+  [PAUSE]
+
+  Thanks. Questions?
+
+IF THERE'S TIME (show the repo)
+  - The constitution's git history
+  - specs/012-pushy-sales-bot/
+  - The Convergence phase at the bottom of its tasks.md
+  - git log --merges
+  - PR #12's description
+
+
+==========================================================================================
+LIKELY QUESTIONS (quick answers)
+==========================================================================================
+
+Q: How long did it actually take?
+A: Twelve calendar days, Oct 12-23, with commits on ten of them. [Add your own sense of
+   how many hours a day you put in.]
+
+Q: Would you use Spec Kit on a client project?
+A: For features, yes: the up-front questions and the converge step are worth it. For
+   small fixes, no; the ceremony is too much. And I'd run a fresh session per phase.
+
+Q: Why not just write a good prompt?
+A: The prompt disappears into scrollback. The spec is a file in git that every future
+   session, and every teammate, can read. And clarify asks the questions I wouldn't have
+   thought to answer.
+
+Q: Did the AI ever ignore the constitution?
+A: Analyze treats a constitution conflict as CRITICAL, and converge re-checks after
+   implementation. Converge found gaps in 9 of 12 features after the AI said they were
+   done, which is exactly why that step exists.
+
+Q: Which AI did you use?
+A: Claude Code, on Opus, in VS Code. (In hindsight: Opus for the judgment phases, a
+   smaller model for implement.)
+
+Q: How much did it cost?
+A: It ran on a subscription, so the cost was my weekly allowance, and I ran out two days
+   early. About 1.47 billion cached tokens read across 2,915 calls. With a fresh session
+   per feature, I'd estimate about a third of that.
+
+Q: Why a local model for the chatbot instead of an API?
+A: No cost, no keys, nothing leaves the machine, and it was a good test of "a bot is a
+   voice, not a source": even a small, sometimes-wrong model is safe when the store
+   controls every price, link and button.
+
+Q: Is the bot safe from prompt injection?
+A: It has no tools, no database and no writes. Someone can fake earlier chat turns since
+   history comes from the browser, but the worst they get is off-script wording.
